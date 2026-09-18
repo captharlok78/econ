@@ -25,4 +25,9 @@ public class PreventiviActivity extends EConTabActivity {
 		System.out.println("EConTab: PreventiviActivity refresh EXIT");
 	}
 
+	@Override
+	protected void aggiornaDopoCancellazione() {
+		refresh();
+	}
+
 }

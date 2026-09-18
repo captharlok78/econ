@@ -9,18 +9,12 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,435 +22,334 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import pfa.app.econtab.CantiereSplitActivity;
-import pfa.app.econtab.PreventiviActivity;
 import pfa.app.econtab.PreventiviDettaglioModActivity;
 import pfa.app.econtab.R;
+import pfa.app.econtab.adapters.EConTabListViewAdapter;
 import pfa.app.econtab.adapters.PreventiviAdapter;
 import pfa.app.econtab.db.DbInterno;
-import pfa.app.econtab.db.Join;
 import pfa.app.econtab.db.table.Anagrafica;
 import pfa.app.econtab.db.table.Cantieri;
 import pfa.app.econtab.db.table.ElementiCantiere;
 import pfa.app.econtab.db.table.Preventivi;
+import pfa.app.econtab.lista.EConTabListaStandardController;
+import pfa.app.econtab.lista.EConTabListaStandardDefinition;
+import pfa.app.econtab.lista.EConTabListaStandardFragment;
+import pfa.app.econtab.lista.FiltriHelper;
+import pfa.app.econtab.lista.QueryPagina;
 import pfa.app.econtab.utils.EConTabAutoCompleteContentValue;
 import pfa.app.econtab.utils.Sessione;
 import pfa.app.econtab.utils.Utility;
 import pfa.app.econtab.views.EConTabSpinner;
 
-public class PreventiviListaFragment extends EConTabFragment implements OnItemClickListener, OnClickListener, TextWatcher {
-	private int cantiere = 0;
-	private ListView lista = null;
-
-	private AutoCompleteTextView filtro = null;
-	private int codiceClienteFiltro = 0;
-	private EConTabSpinner spinnerFiltroStato = null;
-	private EConTabSpinner spinnerFiltroAnno = null;
-
-	private ArrayAdapter<Object> adapter_filtro = null;
-	private PreventiviAdapter adapter = null;
-
-	private ArrayList<Object> dati = null;
-
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
-		View v = super.onCreateView(inflater, container, savedInstanceState);
-		v = inflater.inflate(R.layout.fragment_preventivi_lista, container, false);
-		if (getArguments() != null) {
-			cantiere = getArguments().getInt(Cantieri.ID_CANTIERE);
-		}
-
-		lista = (ListView) v.findViewById(R.id.lista);
-		lista.setOnItemClickListener(this);
-		lista.setEmptyView(v.findViewById(R.id.textViewNessunDato));
-		registerForContextMenu(lista);
-
-		v.findViewById(R.id.buttonnuovo).setOnClickListener(this);
-		v.findViewById(R.id.buttonCerca).setOnClickListener(this);
-		filtro = (AutoCompleteTextView) v.findViewById(R.id.autoComplete_filtroCliente);
-		filtro.setOnItemClickListener(this);
-		filtro.addTextChangedListener(this);
-		filtro.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-			@Override
-			public boolean onEditorAction(TextView v, int actionId, android.view.KeyEvent event) {
-				if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-					eseguiRicercaLibera();
-					return true;
-				}
-				return false;
-			}
-		});
-
-		spinnerFiltroAnno = (EConTabSpinner) v.findViewById(R.id.econtabSpinner_filtroAnno);
-
-		spinnerFiltroAnno.addTextChangeListener(new TextWatcher() {
-
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				// TODO Auto-generated method stub
-				ricerca();
-			}
-		});
-
-
-		spinnerFiltroStato = (EConTabSpinner)v.findViewById(R.id.econtabSpinner_filtroStato);
-		spinnerFiltroStato.addTextChangeListener(new TextWatcher() {
-			@Override
-			public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-			}
-
-			@Override
-			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-			}
-
-			@Override
-			public void afterTextChanged(Editable editable) {
-				ricerca();
-			}
-		});
-
-		return v;
-
-	}
-
-	public void ricerca() {
-		// TODO Auto-generated method stub
-		System.out.println("EConTab: PreventiviListaFragment ricerca ENTER");
-		String anno = spinnerFiltroAnno.getValue();
-		if (anno.equals("")) {
-			Calendar cal = Calendar.getInstance();
-			anno = "" + cal.get(Calendar.YEAR);
-
-		}
-		lista.invalidate();
-		if (dati == null) {
-			dati = new ArrayList<Object>();
-		}
-		dati.clear();
-
-		DbInterno db = new DbInterno(getActivity());
-		Anagrafica ana = new Anagrafica();
-		Cantieri cant = new Cantieri();
-		Preventivi prev = new Preventivi();
-
-		String filtroCliente = "";
-		String[] parametriRicercaLibera = null;
-
-		if (codiceClienteFiltro != 0) {
-			// Cliente scelto puntualmente dai suggerimenti dell'autocomplete
-			filtroCliente = " and " + ana.getNomeCampoTabella(Anagrafica.ID_ANAGRAFICA) + "=" + codiceClienteFiltro;
-		} else if (filtro.getText().length() > 0) {
-			// Testo libero (nessun suggerimento selezionato): ricerca "contiene" sulla ragione sociale
-			filtroCliente = " and " + ana.getNomeCampoTabella(Anagrafica.RAGIONE_SOCIALE) + " like ?";
-			parametriRicercaLibera = new String[]{"%" + filtro.getText().toString() + "%"};
-		}
-
-		String stato = spinnerFiltroStato.getValue();
-		String filtroStato = "";
-		if (!stato.equals("")){
-			if (stato.equals("AO")){
-				filtroStato = " and " + Preventivi.STATO +" in ('" + Preventivi.STATO_APERTO +"','" + Preventivi.STATO_ACCETTATO+"') ";
-			}
-			else{
-				filtroStato = " and " + Preventivi.STATO +"='" + stato +"' " ;
-			}
-		}
-
-		Join join1 = new Join(Preventivi.NOME_TABELLA, Cantieri.NOME_TABELLA);
-		join1.addCampiDiJoin(Preventivi.ID_CANTIERE, Cantieri.ID_CANTIERE);
-
-		Join join2 = new Join(Cantieri.NOME_TABELLA, Anagrafica.NOME_TABELLA);
-		join2.addCampiDiJoin(Cantieri.ID_ANAGRAFICA, Anagrafica.ID_ANAGRAFICA);
-
-		String SQL = "Select " + prev.getNomeCampoTabella("*") + "," + ana.getNomeCampoTabella(Anagrafica.RAGIONE_SOCIALE) + ","
-				+ cant.getNomeCampoTabella(Cantieri.NOME) + " from " + " " + prev.getNomeTabella() + join1.getSQLJoin()
-				+ join2.getSQLJoin() + " where " + Preventivi.ANNO + "=" + anno + filtroCliente + filtroStato +  " and " + Preventivi.TIPO + "='"
-				+ Preventivi.TIPO_PREVENTIVO + "' and " + cant.getNomeCampoTabella(Cantieri.ID_DITTA) + "="
-				+ Sessione.getDittaSelezionata() + " order by " + Preventivi.NUMERO + " desc";
-
-		System.out.println("EConTab: PreventiviListaFragment ricerca SQL " + SQL);
-
-		ArrayList<Object> elems = db.eseguiSelect(SQL, parametriRicercaLibera);
-		System.out.println("EConTab: PreventiviListaFragment ricerca elems " + elems.toString());
-		dati.addAll(elems);
-
-		db.close();
-
-		if (adapter == null) {
-			adapter = new PreventiviAdapter(getActivity(), dati, R.layout.list_item_preventivo);
-			adapter.setPreventiviFragment(this);
-			lista.setAdapter(adapter);
-			lista.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
-			// registerForContextMenu(lista);
-		} else {
-			adapter.notifyDataSetChanged();
-
-		}
-		System.out.println("EConTab: PreventiviListaFragment ricerca EXIT");
-	}
-
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		// TODO Auto-generated method stub
-		super.onCreateContextMenu(menu, v, menuInfo);
-		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-		ContentValues item = (ContentValues) lista.getItemAtPosition(info.position);
-		menu.setHeaderTitle(item.getAsString(Preventivi.NUMERO) + " - " + Utility.numberToData(item.getAsLong(Preventivi.DATA)));
-		// menu.add(Menu.NONE, 1, Menu.NONE, getString(R.string.visualizza_nel_cantiere));
-		menu.add(Menu.NONE, 1, Menu.NONE, getString(R.string.modifica));
-		if (item.getAsString(Preventivi.STATO).equals(Preventivi.STATO_APERTO)) {
-			menu.add(Menu.NONE, 2, Menu.NONE, getString(R.string.trasforma_in_ordine));
-		}
-		menu.add(Menu.NONE, 3, Menu.NONE, getString(R.string.elimina));
-	}
-
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		// TODO Auto-generated method stub
-
-		if (getUserVisibleHint()) {
-			AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-			ContentValues preventivo = (ContentValues) lista.getItemAtPosition(info.position);
-			// if (item.getItemId() == 1) {
-
-			// Intent intent = new Intent(getActivity(), CantiereSplitActivity.class);
-			// intent.putExtra(Cantieri.ID_CANTIERE, preventivo.getAsInteger(Preventivi.ID_CANTIERE));
-			// intent.putExtra(Preventivi.ID_PREVENTIVO, preventivo.getAsInteger(Preventivi.ID_PREVENTIVO));
-			// intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-			// startActivity(intent);
-			// }
-			if (item.getItemId() == 1) {
-				apriModifica(preventivo);
-			}
-			if (item.getItemId() == 2) {
-				trasformaInOrdine(preventivo);
-			}
-			if (item.getItemId() == 3) {
-				getEConTabActivity().confermaCancellazione(new Preventivi(), preventivo, true);
-			}
-			return true;
-		}
-
-		return false;
-	}
-
-	public void apriModifica(ContentValues val){
-		if (getUserVisibleHint()) {
-			Intent intent = new Intent(getActivity(), PreventiviDettaglioModActivity.class);
-			intent.putExtra("ID", val.getAsInteger(Preventivi.ID_PREVENTIVO));
-			getEConTabActivity().apriFinestraModifica(intent, 2);
-		}
-
-	}
-
-	@Override
-	public void onResume() {
-		// TODO Auto-generated method stub
-		super.onResume();
-
-		DbInterno db = new DbInterno(getActivity());
-		ArrayList<Object> valori = db.eseguiSelect("Select distinct " + Preventivi.ANNO + " from " + Preventivi.NOME_TABELLA + " order by "
-				+ Preventivi.ANNO + " desc", null);
-
-		db.close();
-
-		ArrayList<Object> anni = new ArrayList<Object>();
-		if (valori.size() > 0) {
-			for (int i = 0; i < valori.size(); i++) {
-				ContentValues valCurr = (ContentValues) valori.get(i);
-				ContentValues annoCorrente = new ContentValues();
-				annoCorrente.put(EConTabSpinner.VALORE, valCurr.getAsString(Preventivi.ANNO));
-				annoCorrente.put(EConTabSpinner.DESCRIZIONE, valCurr.getAsString(Preventivi.ANNO));
-				anni.add(annoCorrente);
-				if (spinnerFiltroAnno.getValue().equals("")) {
-					spinnerFiltroAnno.setValue(valCurr.getAsString(Preventivi.ANNO));
-				}
-
-			}
-		} else {
-			ContentValues annoCorrente = new ContentValues();
-			annoCorrente.put(EConTabSpinner.VALORE, "" + Calendar.getInstance().get(Calendar.YEAR));
-			annoCorrente.put(EConTabSpinner.DESCRIZIONE, "" + Calendar.getInstance().get(Calendar.YEAR));
-			anni.add(annoCorrente);
-			spinnerFiltroAnno.setValue("" + Calendar.getInstance().get(Calendar.YEAR));
-		}
-
-		spinnerFiltroAnno.setValoriSpinnerLibero(anni);
-
-		adapter_filtro = Utility.getArrayAdapterTabella(getActivity(), "Select * from " + Anagrafica.NOME_TABELLA,
-				Anagrafica.RAGIONE_SOCIALE);
-		filtro.setAdapter(adapter_filtro);
-
-		ArrayList<Object> stati = new Preventivi().getStatiPreventivo(getActivity());
-		ContentValues valTutti = new ContentValues();
-		valTutti.put("VAL", "");
-		valTutti.put("DESC", "");
-
-		stati.add(0, valTutti);
-
-
-		ContentValues valApertiAccettati= new ContentValues();
-		valApertiAccettati.put("VAL", "AO");
-		valApertiAccettati.put("DESC", getString(R.string.stato_aperto_accettato));
-		stati.add(1, valApertiAccettati);
-		spinnerFiltroStato.setValue("AO");
-		spinnerFiltroStato.setValoriSpinnerLibero(stati);
-		ricerca();
-
-	}
-
-	@Override
-	public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-		// TODO Auto-generated method stub
-		if (arg0 == lista) {
-			ContentValues preventivo = (ContentValues) lista.getItemAtPosition(position);
-			// if (preventivo.getAsString(Preventivi.STATO).equals(Preventivi.STATO_APERTO)) {
-			Intent intent = new Intent(getActivity(), CantiereSplitActivity.class);
-			intent.putExtra(Cantieri.ID_CANTIERE, preventivo.getAsInteger(Preventivi.ID_CANTIERE));
-			intent.putExtra(Preventivi.ID_PREVENTIVO, preventivo.getAsInteger(Preventivi.ID_PREVENTIVO));
-			intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-			startActivity(intent);
-			// }
-
-		}
-		// Evento sulla selezione del cliente
-		else {
-			if (filtro.hasFocus()) {
-				ContentValues val = ((EConTabAutoCompleteContentValue) arg0.getItemAtPosition(position)).getContentValue();
-				codiceClienteFiltro = val.getAsInteger(Anagrafica.ID_ANAGRAFICA);
-				ricerca();
-			}
-		}
-
-	}
-
-	@Override
-	public void onClick(View v) {
-		// TODO Auto-generated method stub
-		if (v.getId() == R.id.buttonnuovo) {
-			Intent intent = new Intent(getActivity(), PreventiviDettaglioModActivity.class);
-			intent.putExtra(Preventivi.TIPO, Preventivi.TIPO_PREVENTIVO);
-			getEConTabActivity().apriFinestraInserimento(intent, 1, new Preventivi());
-		}
-		if (v.getId() == R.id.buttonCerca) {
-			eseguiRicercaLibera();
-		}
-	}
-
-	/**
-	 * Avvia la ricerca dal pulsante/tasto invio: nasconde la tastiera e lancia la query
-	 * con il testo digitato, anche se il cliente non è stato scelto dai suggerimenti.
-	 */
-	private void eseguiRicercaLibera() {
-		android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager)
-				getActivity().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
-		if (imm != null) {
-			imm.hideSoftInputFromWindow(filtro.getWindowToken(), 0);
-		}
-		ricerca();
-	}
-
-	@Override
-	public void afterTextChanged(Editable arg0) {
-		// TODO Auto-generated method stub
-		if (filtro.getText().toString().length() == 0) {
-			ricerca();
-		}
-	}
-
-	@Override
-	public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
-		// TODO Auto-generated method stub
-		codiceClienteFiltro = 0;
-
-	}
-
-	@Override
-	public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void trasformaInOrdine(final ContentValues val) {
-		// TODO Auto-generated method stub
-		Utility.mostraConfermaDialog(getString(R.string.attenzione), getString(R.string.messaggio_trasformazione_preventivi),
-				getActivity(), getString(R.string.conferma), getString(R.string.annulla), new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						// TODO Auto-generated method stub
-						if (which == DialogInterface.BUTTON_POSITIVE) {
-							ArrayList<Object> elementiModificatiCantiere = _getElementiModificatiCantiere(val.getAsInteger(Preventivi.ID_PREVENTIVO));
-							if (elementiModificatiCantiere.size()>0){
-								String messaggio = "I seguenti elementi del cantiere verranno sostituiti se confermi la trasformazione del preventivo in ordine. Se gli elementi appartenevano ad un ordine aperto, saranno tolti dall'ordine e conteggiati nel nuovo ordine derivante dal preventivo trasformato:\n";
-								for (int i=0;i<elementiModificatiCantiere.size();i++){
-									ContentValues valMod = (ContentValues)elementiModificatiCantiere.get(i);
-									messaggio = messaggio + valMod.getAsString(ElementiCantiere.NUMERO_IDENTIFICATIVO)+" - " +valMod.getAsString(ElementiCantiere.NOME_ELEMENTO_CANT)+"\n";
-								}
-								Utility.mostraConfermaDialog(getString(R.string.attenzione), messaggio, getActivity(), "Ok", getString(R.string.annulla), new DialogInterface.OnClickListener() {
-									@Override
-									public void onClick(DialogInterface dialogInterface, int i) {
-										if (i==DialogInterface.BUTTON_POSITIVE){
-											_eseguiTrasformazione(val);
-										}
-									}
-								});
-							}
-							else {
-								_eseguiTrasformazione(val);
-							}
-
-						}
-
-					}
-				});
-	}
-
-	private void _eseguiTrasformazione(ContentValues val) {
-		DbInterno db = new DbInterno(getActivity());
-		try {
-			db.getReadableDatabase().beginTransaction();
-			Preventivi tabPreventivi = new Preventivi();
-			tabPreventivi.trasformaPreventivoInOrdine(db, val.getAsInteger(Preventivi.ID_PREVENTIVO));
-			db.getReadableDatabase().setTransactionSuccessful();
-
-		} catch (Exception e) {
-			Toast.makeText(getActivity(), Log.getStackTraceString(e), Toast.LENGTH_LONG).show();
-		} finally {
-			db.getReadableDatabase().endTransaction();
-			db.close();
-			if (getEConTabActivity() instanceof PreventiviActivity) {
-				((PreventiviActivity) getEConTabActivity()).refresh();
-			}
-		}
-	}
-
-	/**
-	 * Prendo tutti gli elementi che sono stati copiati dal cantiere nel preventivo per apportare delle modifiche
-	 * @param idPreventivo
-	 * @return
-     */
-	private ArrayList<Object> _getElementiModificatiCantiere(int idPreventivo) {
-		DbInterno db = new DbInterno(getActivity());
-
-
-		ArrayList<Object> modificati = db.eseguiSelect("Select * from elementi_cantiere where id_preventivo="+idPreventivo+" and id_elemento_cant_origine is not null and id_elemento_cant_origine<>0 order by numero_identificativo",null);
-		db.close();
-		return modificati;
-	}
-
+/**
+ * Modulo Preventivi sullo standard di ricerca/lista condiviso (vedi pfa.app.econtab.lista).
+ * Le righe hanno un pulsante "Azioni" con logica di business per riga (cambia stato,
+ * trasforma in ordine), troppo custom per il modello dichiarativo a colonne: usa il proprio
+ * PreventiviAdapter (via creaAdapterPersonalizzato) e non mostra la testata ordinabile
+ * (isTabellare()=false), pur restando sullo standard comune per form filtri/paginazione/
+ * righe alternate.
+ *
+ * OrdiniListaFragment estende questa classe sovrascrivendo solo cio' che cambia fra
+ * preventivo e ordine (tipo, opzioni stato, valore di default) - stessa tabella, query e
+ * adapter, per non duplicare la stessa logica due volte come accadeva prima.
+ */
+public class PreventiviListaFragment extends EConTabListaStandardFragment {
+
+    private int cantiere = 0;
+    private int codiceClienteFiltro = 0;
+    private EConTabSpinner spinnerFiltroAnno;
+    private EConTabSpinner spinnerFiltroStato;
+    private ArrayAdapter<Object> adapterFiltroCliente;
+
+    @Override
+    protected int getLayoutId() {
+        return R.layout.fragment_preventivi_lista;
+    }
+
+    @Override
+    protected EConTabListaStandardDefinition creaDefinizione() {
+        if (getArguments() != null) {
+            cantiere = getArguments().getInt(Cantieri.ID_CANTIERE);
+        }
+        return new PreventiviDefinition();
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        findViewById(R.id.buttonnuovo).setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), PreventiviDettaglioModActivity.class);
+            intent.putExtra(Preventivi.TIPO, getTipo());
+            getEConTabActivity().apriFinestraInserimento(intent, 1, new Preventivi());
+        });
+
+        AutoCompleteTextView filtro = findViewById(R.id.editText_filtra);
+        filtro.setOnItemClickListener((parent, v, position, id) -> {
+            ContentValues val = ((EConTabAutoCompleteContentValue) parent.getItemAtPosition(position)).getContentValue();
+            codiceClienteFiltro = val.getAsInteger(Anagrafica.ID_ANAGRAFICA);
+        });
+        filtro.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                codiceClienteFiltro = 0;
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        spinnerFiltroAnno = findViewById(R.id.econtabSpinner_filtroAnno);
+        spinnerFiltroStato = findViewById(R.id.econtabSpinner_filtroStato);
+    }
+
+    /** Tipo di documento gestito da questo modulo (sovrascritto da OrdiniListaFragment). */
+    protected String getTipo() {
+        return Preventivi.TIPO_PREVENTIVO;
+    }
+
+    /** Opzioni della spinner di stato, con l'eventuale valore "tutti" in testa (sovrascritto da OrdiniListaFragment). */
+    protected ArrayList<Object> getOpzioniStato() {
+        ArrayList<Object> stati = new Preventivi().getStatiPreventivo(getActivity());
+        ContentValues valTutti = new ContentValues();
+        valTutti.put("VAL", "");
+        valTutti.put("DESC", "");
+        stati.add(0, valTutti);
+
+        ContentValues valApertiAccettati = new ContentValues();
+        valApertiAccettati.put("VAL", "AO");
+        valApertiAccettati.put("DESC", getString(R.string.stato_aperto_accettato));
+        stati.add(1, valApertiAccettati);
+        return stati;
+    }
+
+    /** Valore di default della spinner stato all'apertura del modulo (sovrascritto da OrdiniListaFragment). */
+    protected String getStatoDefault() {
+        return "AO";
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        DbInterno db = new DbInterno(getActivity());
+        ArrayList<Object> valori = db.eseguiSelect("Select distinct " + Preventivi.ANNO + " from " + Preventivi.NOME_TABELLA
+                + " order by " + Preventivi.ANNO + " desc", null);
+        db.close();
+
+        ArrayList<Object> anni = new ArrayList<>();
+        if (valori.size() > 0) {
+            for (Object o : valori) {
+                ContentValues valCurr = (ContentValues) o;
+                ContentValues annoCorrente = new ContentValues();
+                annoCorrente.put(EConTabSpinner.VALORE, valCurr.getAsString(Preventivi.ANNO));
+                annoCorrente.put(EConTabSpinner.DESCRIZIONE, valCurr.getAsString(Preventivi.ANNO));
+                anni.add(annoCorrente);
+                if (spinnerFiltroAnno.getValue().equals("")) {
+                    spinnerFiltroAnno.setValue(valCurr.getAsString(Preventivi.ANNO));
+                }
+            }
+        } else {
+            String annoCorrenteTesto = "" + Calendar.getInstance().get(Calendar.YEAR);
+            ContentValues annoCorrente = new ContentValues();
+            annoCorrente.put(EConTabSpinner.VALORE, annoCorrenteTesto);
+            annoCorrente.put(EConTabSpinner.DESCRIZIONE, annoCorrenteTesto);
+            anni.add(annoCorrente);
+            spinnerFiltroAnno.setValue(annoCorrenteTesto);
+        }
+        spinnerFiltroAnno.setValoriSpinnerLibero(anni);
+
+        if (spinnerFiltroStato.getValue().equals("")) {
+            spinnerFiltroStato.setValue(getStatoDefault());
+        }
+        spinnerFiltroStato.setValoriSpinnerLibero(getOpzioniStato());
+
+        adapterFiltroCliente = Utility.getArrayAdapterTabella(getActivity(), "Select * from " + Anagrafica.NOME_TABELLA,
+                Anagrafica.RAGIONE_SOCIALE);
+        ((AutoCompleteTextView) findViewById(R.id.editText_filtra)).setAdapter(adapterFiltroCliente);
+    }
+
+    /** Compat: chiamato da PreventiviActivity.refresh() e da PreventiviAdapter dopo cambio stato/trasformazione. */
+    public void ricerca() {
+        ricaricaSeAttiva();
+    }
+
+    public void apriModifica(ContentValues val) {
+        Intent intent = new Intent(getActivity(), PreventiviDettaglioModActivity.class);
+        intent.putExtra("ID", val.getAsInteger(Preventivi.ID_PREVENTIVO));
+        getEConTabActivity().apriFinestraModifica(intent, 2);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        ContentValues item = (ContentValues) getController().getElementoAllaPosizione(info.position);
+        menu.setHeaderTitle(item.getAsString(Preventivi.NUMERO) + " - " + Utility.numberToData(item.getAsLong(Preventivi.DATA)));
+        menu.add(Menu.NONE, 1, Menu.NONE, getString(R.string.modifica));
+        if (item.getAsString(Preventivi.STATO).equals(Preventivi.STATO_APERTO)) {
+            menu.add(Menu.NONE, 2, Menu.NONE, getString(R.string.trasforma_in_ordine));
+        }
+        menu.add(Menu.NONE, 3, Menu.NONE, getString(R.string.elimina));
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        ContentValues preventivo = (ContentValues) getController().getElementoAllaPosizione(info.position);
+        if (item.getItemId() == 1) {
+            apriModifica(preventivo);
+        }
+        if (item.getItemId() == 2) {
+            trasformaInOrdine(preventivo);
+        }
+        if (item.getItemId() == 3) {
+            getEConTabActivity().confermaCancellazione(new Preventivi(), preventivo, true);
+        }
+        return super.onContextItemSelected(item);
+    }
+
+    public void trasformaInOrdine(final ContentValues val) {
+        Utility.mostraConfermaDialog(getString(R.string.attenzione), getString(R.string.messaggio_trasformazione_preventivi),
+                getActivity(), getString(R.string.conferma), getString(R.string.annulla), (dialog, which) -> {
+                    if (which == DialogInterface.BUTTON_POSITIVE) {
+                        ArrayList<Object> elementiModificatiCantiere = _getElementiModificatiCantiere(val.getAsInteger(Preventivi.ID_PREVENTIVO));
+                        if (elementiModificatiCantiere.size() > 0) {
+                            StringBuilder messaggio = new StringBuilder("I seguenti elementi del cantiere verranno sostituiti se confermi la "
+                                    + "trasformazione del preventivo in ordine. Se gli elementi appartenevano ad un ordine aperto, saranno "
+                                    + "tolti dall'ordine e conteggiati nel nuovo ordine derivante dal preventivo trasformato:\n");
+                            for (Object o : elementiModificatiCantiere) {
+                                ContentValues valMod = (ContentValues) o;
+                                messaggio.append(valMod.getAsString(ElementiCantiere.NUMERO_IDENTIFICATIVO)).append(" - ")
+                                        .append(valMod.getAsString(ElementiCantiere.NOME_ELEMENTO_CANT)).append("\n");
+                            }
+                            Utility.mostraConfermaDialog(getString(R.string.attenzione), messaggio.toString(), getActivity(), "Ok",
+                                    getString(R.string.annulla), (dialogInterface, i) -> {
+                                        if (i == DialogInterface.BUTTON_POSITIVE) {
+                                            _eseguiTrasformazione(val);
+                                        }
+                                    });
+                        } else {
+                            _eseguiTrasformazione(val);
+                        }
+                    }
+                });
+    }
+
+    private void _eseguiTrasformazione(ContentValues val) {
+        DbInterno db = new DbInterno(getActivity());
+        try {
+            db.getReadableDatabase().beginTransaction();
+            new Preventivi().trasformaPreventivoInOrdine(db, val.getAsInteger(Preventivi.ID_PREVENTIVO));
+            db.getReadableDatabase().setTransactionSuccessful();
+        } catch (Exception e) {
+            Toast.makeText(getActivity(), Log.getStackTraceString(e), Toast.LENGTH_LONG).show();
+        } finally {
+            db.getReadableDatabase().endTransaction();
+            db.close();
+            ricaricaSeAttiva();
+        }
+    }
+
+    private ArrayList<Object> _getElementiModificatiCantiere(int idPreventivo) {
+        DbInterno db = new DbInterno(getActivity());
+        ArrayList<Object> modificati = db.eseguiSelect(
+                "Select * from elementi_cantiere where id_preventivo=" + idPreventivo
+                        + " and id_elemento_cant_origine is not null and id_elemento_cant_origine<>0 order by numero_identificativo", null);
+        db.close();
+        return modificati;
+    }
+
+    /** Query, adapter e azione di click riga specifiche del modulo Preventivi/Ordini. */
+    private class PreventiviDefinition extends EConTabListaStandardDefinition {
+
+        // Preventivi/Cantieri/Anagrafica condividono campi di audit e alcuni nomi (es.
+        // Cantieri.NOME e' selezionato esplicitamente come colonna propria per evitare
+        // ambiguita' col resto della select se in futuro servisse ordinare per nome cantiere).
+        private static final String SELECT = Preventivi.NOME_TABELLA + ".*, "
+                + Anagrafica.NOME_TABELLA + "." + Anagrafica.RAGIONE_SOCIALE + ", "
+                + Cantieri.NOME_TABELLA + "." + Cantieri.NOME;
+
+        @Override
+        public QueryPagina costruisciQuery(String testoFiltroNonUsato, boolean ordinaPerRecenti) {
+            String fromJoin = Preventivi.NOME_TABELLA
+                    + " inner join " + Cantieri.NOME_TABELLA + " on " + Preventivi.NOME_TABELLA + "." + Preventivi.ID_CANTIERE
+                    + "=" + Cantieri.NOME_TABELLA + "." + Cantieri.ID_CANTIERE
+                    + " inner join " + Anagrafica.NOME_TABELLA + " on " + Cantieri.NOME_TABELLA + "." + Cantieri.ID_ANAGRAFICA
+                    + "=" + Anagrafica.NOME_TABELLA + "." + Anagrafica.ID_ANAGRAFICA;
+
+            String anno = spinnerFiltroAnno.getValue();
+            if (anno.equals("")) {
+                anno = "" + Calendar.getInstance().get(Calendar.YEAR);
+            }
+
+            String where = Preventivi.NOME_TABELLA + "." + Preventivi.ANNO + "=" + anno;
+            String[] args = new String[0];
+
+            if (codiceClienteFiltro != 0) {
+                where += " and " + Anagrafica.NOME_TABELLA + "." + Anagrafica.ID_ANAGRAFICA + "=" + codiceClienteFiltro;
+            } else {
+                AutoCompleteTextView filtro = findViewById(R.id.editText_filtra);
+                if (filtro.getText().length() > 0) {
+                    QueryPagina like = FiltriHelper.likeMultiCampo(fromJoin, filtro.getText().toString(),
+                            Anagrafica.NOME_TABELLA + "." + Anagrafica.RAGIONE_SOCIALE);
+                    where += " and (" + like.whereSql + ")";
+                    args = like.whereArgs;
+                }
+            }
+
+            String stato = spinnerFiltroStato.getValue();
+            if (!stato.equals("")) {
+                if (stato.equals("AO")) {
+                    where += " and " + Preventivi.STATO + " in ('" + Preventivi.STATO_APERTO + "','" + Preventivi.STATO_ACCETTATO + "')";
+                } else {
+                    where += " and " + Preventivi.STATO + "='" + stato + "'";
+                }
+            }
+
+            where += " and " + Preventivi.TIPO + "='" + getTipo() + "'";
+            where += " and " + Cantieri.NOME_TABELLA + "." + Cantieri.ID_DITTA + "=" + Sessione.getDittaSelezionata();
+            if (cantiere != 0) {
+                where += " and " + Preventivi.NOME_TABELLA + "." + Preventivi.ID_CANTIERE + "=" + cantiere;
+            }
+
+            return new QueryPagina(SELECT, fromJoin, where, args);
+        }
+
+        @Override
+        public boolean isTabellare() {
+            return false;
+        }
+
+        @Override
+        public EConTabListViewAdapter creaAdapterPersonalizzato(android.content.Context context, ArrayList<Object> dati) {
+            PreventiviAdapter adapter = new PreventiviAdapter(context, dati, R.layout.list_item_preventivo);
+            adapter.setPreventiviFragment(PreventiviListaFragment.this);
+            return adapter;
+        }
+
+        @Override
+        public void onRigaClick(EConTabListaStandardController.Host host, ContentValues riga) {
+            Intent intent = new Intent(host.getContext(), CantiereSplitActivity.class);
+            intent.putExtra(Cantieri.ID_CANTIERE, riga.getAsInteger(Preventivi.ID_CANTIERE));
+            intent.putExtra(Preventivi.ID_PREVENTIVO, riga.getAsInteger(Preventivi.ID_PREVENTIVO));
+            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            host.startActivity(intent);
+        }
+
+        @Override
+        public String getColonnaOrdinamentoDefault() {
+            return Preventivi.NUMERO;
+        }
+
+        @Override
+        public boolean isOrdinamentoDefaultDiscendente() {
+            return true;
+        }
+    }
 }

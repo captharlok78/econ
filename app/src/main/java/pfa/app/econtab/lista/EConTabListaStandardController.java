@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import pfa.app.econtab.R;
+import pfa.app.econtab.adapters.EConTabListViewAdapter;
 import pfa.app.econtab.db.DbInterno;
 
 /**
@@ -62,7 +63,7 @@ public class EConTabListaStandardController {
     private final Map<String, TextView[]> frecceOrdinamento = new HashMap<>();
 
     private final ArrayList<Object> dati = new ArrayList<>();
-    private EConTabListaStandardAdapter adapter;
+    private EConTabListViewAdapter adapter;
 
     private boolean ricercaAttiva = false;
     private boolean ordinaPerRecenti = false;
@@ -78,6 +79,7 @@ public class EConTabListaStandardController {
         this.definizione = definizione;
         this.risultatiPerPagina = definizione.getRisultatiPerPaginaDefault();
         this.colonnaOrdinamento = definizione.getColonnaOrdinamentoDefault();
+        this.ordineDiscendente = definizione.isOrdinamentoDefaultDiscendente();
     }
 
     /** Da chiamare in onCreate/onCreateView, dopo che il layout e' stato impostato. */
@@ -150,7 +152,9 @@ public class EConTabListaStandardController {
             buttonPaginaSucc.setOnClickListener(v -> paginaSuccessiva());
         }
 
-        costruisciTestata();
+        if (definizione.isTabellare()) {
+            costruisciTestata();
+        }
         mostraSoloForm();
     }
 
@@ -319,9 +323,11 @@ public class EConTabListaStandardController {
 
         popolaLista(paginaRisultati.righe);
         textViewNessunDato.setVisibility(paginaRisultati.righe.isEmpty() ? View.VISIBLE : View.GONE);
-        headerTabella.setVisibility(View.VISIBLE);
-        headerBorder.setVisibility(View.VISIBLE);
-        aggiornaFrecceOrdinamento();
+        if (definizione.isTabellare()) {
+            headerTabella.setVisibility(View.VISIBLE);
+            headerBorder.setVisibility(View.VISIBLE);
+            aggiornaFrecceOrdinamento();
+        }
         aggiornaBarraPaginazione();
     }
 
@@ -330,7 +336,10 @@ public class EConTabListaStandardController {
         dati.addAll(elems);
 
         if (adapter == null) {
-            adapter = new EConTabListaStandardAdapter(host.getContext(), dati, definizione.getColonne());
+            EConTabListViewAdapter adapterPersonalizzato = definizione.creaAdapterPersonalizzato(host.getContext(), dati);
+            adapter = adapterPersonalizzato != null
+                    ? adapterPersonalizzato
+                    : new EConTabListaStandardAdapter(host.getContext(), dati, definizione.getColonne());
             lista.setAdapter(adapter);
             lista.setOnItemClickListener((parent, view, position, id) ->
                     definizione.onRigaClick(host, (ContentValues) dati.get(position)));

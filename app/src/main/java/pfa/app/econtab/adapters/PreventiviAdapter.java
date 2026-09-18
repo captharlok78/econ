@@ -9,10 +9,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Observable;
 
 import pfa.app.econtab.EConTabActivity;
-import pfa.app.econtab.PreventiviActivity;
 import pfa.app.econtab.PreventiviDettaglioModActivity;
 import pfa.app.econtab.R;
 import pfa.app.econtab.db.DbInterno;
@@ -24,9 +22,13 @@ import pfa.app.econtab.utils.Utility;
 
 public class PreventiviAdapter extends EConTabListViewAdapter {
 
+	private static final int COLORE_RIGA_PARI = 0xFFFFFFFF;
+	private static final int COLORE_RIGA_DISPARI = 0xFFF2F2F2;
+
 	private PreventiviListaFragment fragmentPreventivi = null;
 
 	private class PreventiviViewHolder extends EConTabViewHolder {
+		View radice = null;
 		TextView numero = null;
 		TextView data = null;
 		TextView cliente = null;
@@ -46,6 +48,7 @@ public class PreventiviAdapter extends EConTabListViewAdapter {
 	protected EConTabViewHolder impostaViewHolder(View convertView, int position) {
 		// TODO Auto-generated method stub
 		PreventiviViewHolder holder = new PreventiviViewHolder();
+		holder.radice = convertView;
 		holder.numero = (TextView) convertView.findViewById(R.id.numero);
 		holder.data = (TextView) convertView.findViewById(R.id.data);
 		holder.cliente = (TextView) convertView.findViewById(R.id.ragione_sociale);
@@ -62,6 +65,7 @@ public class PreventiviAdapter extends EConTabListViewAdapter {
 
 		// TODO Auto-generated method stub
 		final ContentValues val = (ContentValues) dati.get(position);
+		((PreventiviViewHolder) viewholder).radice.setBackgroundColor(position % 2 == 0 ? COLORE_RIGA_PARI : COLORE_RIGA_DISPARI);
 		((PreventiviViewHolder) viewholder).numero.setText("N. " + val.getAsString(Preventivi.NUMERO) + "/"
 				+ val.getAsString(Preventivi.ANNO));
 		((PreventiviViewHolder) viewholder).numero.setTag(position);
@@ -203,8 +207,8 @@ public class PreventiviAdapter extends EConTabListViewAdapter {
 		Preventivi tabPrev = new Preventivi();
 		tabPrev.aggiornaRecord(db, upd, where);
 		db.close();
-		if (context instanceof PreventiviActivity) {
-			((PreventiviActivity) context).refresh();
+		if (fragmentPreventivi != null) {
+			fragmentPreventivi.ricerca();
 		}
 	}
 

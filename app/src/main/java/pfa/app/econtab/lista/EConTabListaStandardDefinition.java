@@ -1,8 +1,13 @@
 package pfa.app.econtab.lista;
 
 import android.content.ContentValues;
+import android.content.Context;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import pfa.app.econtab.adapters.EConTabListViewAdapter;
 
 /**
  * Personalizzazione di un modulo lista standard: query (filtri/join), colonne visualizzate
@@ -20,9 +25,35 @@ public abstract class EConTabListaStandardDefinition {
      */
     public abstract QueryPagina costruisciQuery(String testoFiltro, boolean ordinaPerRecenti);
 
-    public abstract List<ColonnaLista> getColonne();
-
     public abstract void onRigaClick(EConTabListaStandardController.Host host, ContentValues riga);
+
+    /**
+     * Colonne della testata/righe generiche (EConTabListaStandardAdapter). Non serve
+     * sovrascriverlo per un modulo che fornisce un adapter personalizzato tramite
+     * creaAdapterPersonalizzato() e ha isTabellare()=false (righe non semplici colonne
+     * di testo, es. Preventivi/Ordini/Rapportini con azioni inline per riga).
+     */
+    public List<ColonnaLista> getColonne() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * false per i moduli le cui righe non sono semplici colonne di testo (contenuti multi
+     * riga, pulsanti di azione inline): la testata ordinabile non viene costruita/mostrata,
+     * ma paginazione/form filtri/righe alternate restano comunque gestite dal controller.
+     */
+    public boolean isTabellare() {
+        return true;
+    }
+
+    /**
+     * Adapter da usare al posto di quello generico a colonne (EConTabListaStandardAdapter),
+     * per i moduli con righe troppo custom per il modello dichiarativo. Default null = usa
+     * quello generico.
+     */
+    public EConTabListViewAdapter creaAdapterPersonalizzato(Context context, ArrayList<Object> dati) {
+        return null;
+    }
 
     /** Order by SQL usato quando e' attivo "ultimi N". Null = disabilita quel pulsante. */
     public String getOrdineRecenti() {
@@ -32,6 +63,10 @@ public abstract class EConTabListaStandardDefinition {
     public String getColonnaOrdinamentoDefault() {
         List<ColonnaLista> colonne = getColonne();
         return colonne.isEmpty() ? null : colonne.get(0).campo;
+    }
+
+    public boolean isOrdinamentoDefaultDiscendente() {
+        return false;
     }
 
     public int getRisultatiPerPaginaDefault() {
