@@ -272,6 +272,7 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
                         } else {
                             String msg;
                             if (response.code() == 401) msg = "Email o password errata.";
+                            else if (response.code() == 403) msg = "Licenza scaduta o non abilitata.";
                             else if (response.code() >= 500) msg = "Errore server (HTTP " + response.code() + ").";
                             else msg = "Accesso fallito (HTTP " + response.code() + ").";
                             Utility.mostraDialog("Accesso Mercury", msg, LoginActivity.this, "OK");
