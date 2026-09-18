@@ -2,66 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <LinearLayout
-        android:id="@+id/header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_alignParentTop="true">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingStart="4dp"
-            android:paddingEnd="8dp"
-            android:background="#1565C0"
-            android:elevation="4dp">
-
-            <ImageButton
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="@android:color/transparent"
-                android:src="@android:drawable/ic_media_previous"
-                android:tint="#FFFFFF"
-                android:onClick="indietro"
-                android:contentDescription="Indietro" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/clienti"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginStart="4dp" />
-
-            <ImageButton
-                android:id="@+id/buttonnuovo"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:background="@android:color/transparent"
-                android:src="@drawable/nuovo"
-                android:scaleType="fitCenter"
-                android:tint="#FFFFFF"
-                android:onClick="nuovoCliente" />
-        </LinearLayout>
-
-        <EditText
-            android:id="@+id/editText_filtra"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:background="#F5F5F5"
-            android:hint="@string/cerca_cliente"
-            android:singleLine="true"
-            android:textSize="14sp" />
-    </LinearLayout>
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
 
     <include
         android:id="@+id/footerview"
@@ -70,17 +12,182 @@
         android:layout_alignParentBottom="true"
         layout="@layout/footer" />
 
-    <RelativeLayout
-        android:id="@+id/wrapper_lista"
+    <!--
+        Tutta la schermata (header, lista, barra paginazione) sta in un'unica colonna
+        verticale ancorata sopra il footer: evita di dover incrociare i vincoli di
+        RelativeLayout con una view nascosta (footerview è visibility=gone).
+    -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
         android:layout_above="@+id/footerview"
-        android:layout_below="@+id/header">
+        android:orientation="vertical">
 
-        <ListView
-            android:id="@+id/lista"
+        <LinearLayout
+            android:id="@+id/header"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </RelativeLayout>
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Barra standard: indietro | titolo | filtro | nuovo -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="4dp"
+                android:paddingEnd="8dp"
+                android:background="#1565C0"
+                android:elevation="4dp">
+
+                <ImageButton
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_back"
+                    android:onClick="indietro"
+                    android:contentDescription="Indietro" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/clienti"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginStart="4dp" />
+
+                <ImageButton
+                    android:id="@+id/buttonToggleFiltri"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_filter"
+                    android:scaleType="center"
+                    android:onClick="toggleFiltri"
+                    android:contentDescription="Filtra" />
+
+                <ImageButton
+                    android:id="@+id/buttonnuovo"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/nuovo"
+                    android:scaleType="fitCenter"
+                    android:tint="#FFFFFF"
+                    android:onClick="nuovoCliente"
+                    android:contentDescription="@string/nuovo" />
+            </LinearLayout>
+
+            <!-- Form filtri: visibile all'apertura, si nasconde dopo la ricerca -->
+            <LinearLayout
+                android:id="@+id/cardFiltri"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_card_filtri"
+                android:layout_margin="8dp"
+                android:padding="10dp">
+
+                <EditText
+                    android:id="@+id/editText_filtra"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:hint="@string/cerca_cliente"
+                    android:imeOptions="actionSearch"
+                    android:singleLine="true" />
+
+                <ImageButton
+                    android:id="@+id/buttonCerca"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:padding="8dp"
+                    android:scaleType="fitCenter"
+                    android:background="@drawable/bg_bottone_ricerca"
+                    android:src="@drawable/ic_search"
+                    android:contentDescription="@string/cerca" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/wrapper_lista"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <ListView
+                android:id="@+id/lista"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false" />
+
+            <TextView
+                android:id="@+id/textViewNessunDato"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="32dp"
+                android:text="@string/nessun_dato_trovato"
+                android:textColor="#999999"
+                android:textSize="14sp"
+                android:visibility="gone" />
+        </RelativeLayout>
+
+        <!-- Barra di paginazione: pagina/risultati/pagine + prec/succ -->
+        <LinearLayout
+            android:id="@+id/barraPaginazione"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="4dp"
+            android:background="#FFFFFF">
+
+            <TextView
+                android:id="@+id/textViewPaginazione"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="#666666"
+                android:text="" />
+
+            <ImageButton
+                android:id="@+id/buttonPaginaPrec"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="8dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_back"
+                android:tint="#1565C0"
+                android:onClick="paginaPrecedente"
+                android:contentDescription="Pagina precedente" />
+
+            <ImageButton
+                android:id="@+id/buttonPaginaSucc"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="8dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_forward"
+                android:tint="#1565C0"
+                android:onClick="paginaSuccessiva"
+                android:contentDescription="Pagina successiva" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </RelativeLayout>
