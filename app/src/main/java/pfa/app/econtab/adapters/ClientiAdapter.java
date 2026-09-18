@@ -12,7 +12,11 @@ import pfa.app.econtab.db.table.Anagrafica;
 
 public class ClientiAdapter extends EConTabListViewAdapter {
 
+	private static final int COLORE_RIGA_PARI = 0xFFFFFFFF;
+	private static final int COLORE_RIGA_DISPARI = 0xFFF2F2F2;
+
 	private class ClientiViewHolder extends EConTabViewHolder{
+		View radice = null;
 		TextView ragionesociale = null;
 		TextView indirizzo = null;
 		TextView citta = null;
@@ -29,6 +33,7 @@ public class ClientiAdapter extends EConTabListViewAdapter {
 	protected EConTabViewHolder impostaViewHolder(View convertView, int position) {
 		// TODO Auto-generated method stub
 		ClientiViewHolder holder = new ClientiViewHolder();
+		holder.radice = convertView;
 		holder.ragionesociale = (TextView)convertView.findViewById(R.id.ragione_sociale);
 		holder.indirizzo = (TextView)convertView.findViewById(R.id.indirizzo);
 		holder.citta = (TextView)convertView.findViewById(R.id.citta);
@@ -42,6 +47,8 @@ public class ClientiAdapter extends EConTabListViewAdapter {
 	protected void personalizzaView(int position, EConTabViewHolder viewholder) {
 		// TODO Auto-generated method stub
 		ContentValues val = (ContentValues)dati.get(position);
+		((ClientiViewHolder)viewholder).radice.setBackgroundColor(position % 2 == 0 ? COLORE_RIGA_PARI : COLORE_RIGA_DISPARI);
+
 		((ClientiViewHolder)viewholder).ragionesociale.setText(val.getAsString(Anagrafica.RAGIONE_SOCIALE));
 		((ClientiViewHolder)viewholder).ragionesociale.setTag(position);
 

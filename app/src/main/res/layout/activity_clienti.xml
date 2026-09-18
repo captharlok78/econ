@@ -190,22 +190,11 @@
                 android:tag="codice_esterno"
                 android:onClick="ordinaPerColonna">
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="Cod."
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:textColor="#444444"
-                    android:singleLine="true"
-                    android:ellipsize="end" />
-
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginStart="2dp">
+                    android:layout_marginEnd="6dp">
 
                     <TextView
                         android:id="@+id/arrowUpCodice"
@@ -223,6 +212,17 @@
                         android:textSize="7sp"
                         android:textColor="#BBBBBB" />
                 </LinearLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Cod."
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="#444444"
+                    android:singleLine="true"
+                    android:ellipsize="end" />
             </LinearLayout>
 
             <LinearLayout
@@ -238,22 +238,11 @@
                 android:tag="ragione_sociale"
                 android:onClick="ordinaPerColonna">
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="Ragione sociale"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:textColor="#444444"
-                    android:singleLine="true"
-                    android:ellipsize="end" />
-
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginStart="2dp">
+                    android:layout_marginEnd="6dp">
 
                     <TextView
                         android:id="@+id/arrowUpRagione"
@@ -271,6 +260,17 @@
                         android:textSize="7sp"
                         android:textColor="#BBBBBB" />
                 </LinearLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Ragione sociale"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="#444444"
+                    android:singleLine="true"
+                    android:ellipsize="end" />
             </LinearLayout>
 
             <LinearLayout
@@ -286,22 +286,11 @@
                 android:tag="indirizzo"
                 android:onClick="ordinaPerColonna">
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="Via"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:textColor="#444444"
-                    android:singleLine="true"
-                    android:ellipsize="end" />
-
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginStart="2dp">
+                    android:layout_marginEnd="6dp">
 
                     <TextView
                         android:id="@+id/arrowUpVia"
@@ -319,6 +308,17 @@
                         android:textSize="7sp"
                         android:textColor="#BBBBBB" />
                 </LinearLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Via"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="#444444"
+                    android:singleLine="true"
+                    android:ellipsize="end" />
             </LinearLayout>
 
             <LinearLayout
@@ -334,22 +334,11 @@
                 android:tag="citta"
                 android:onClick="ordinaPerColonna">
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="Città"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:textColor="#444444"
-                    android:singleLine="true"
-                    android:ellipsize="end" />
-
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginStart="2dp">
+                    android:layout_marginEnd="6dp">
 
                     <TextView
                         android:id="@+id/arrowUpCitta"
@@ -367,6 +356,17 @@
                         android:textSize="7sp"
                         android:textColor="#BBBBBB" />
                 </LinearLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Città"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="#444444"
+                    android:singleLine="true"
+                    android:ellipsize="end" />
             </LinearLayout>
 
             <LinearLayout
@@ -382,22 +382,11 @@
                 android:tag="provincia"
                 android:onClick="ordinaPerColonna">
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="Prov."
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:textColor="#444444"
-                    android:singleLine="true"
-                    android:ellipsize="end" />
-
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginStart="2dp">
+                    android:layout_marginEnd="6dp">
 
                     <TextView
                         android:id="@+id/arrowUpProvincia"
@@ -415,9 +404,29 @@
                         android:textSize="7sp"
                         android:textColor="#BBBBBB" />
                 </LinearLayout>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Prov."
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="#444444"
+                    android:singleLine="true"
+                    android:ellipsize="end" />
             </LinearLayout>
 
         </LinearLayout>
+
+        <!-- Bordo nero 1px sotto la testata + spazio prima dell'inizio dei risultati. -->
+        <View
+            android:id="@+id/headerBorder"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginBottom="8dp"
+            android:background="#000000"
+            android:visibility="gone" />
 
         <RelativeLayout
             android:id="@+id/wrapper_lista"

@@ -40,6 +40,7 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 
 	private View cardFiltri = null;
 	private View headerTabella = null;
+	private View headerBorder = null;
 	private View barraPaginazione = null;
 	private TextView textViewPaginaInfo = null;
 	private TextView textViewPaginaInfo2 = null;
@@ -71,6 +72,7 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 
 		cardFiltri = findViewById(R.id.cardFiltri);
 		headerTabella = findViewById(R.id.headerTabella);
+		headerBorder = findViewById(R.id.headerBorder);
 		registraColonnaOrdinabile(Anagrafica.CODICE_ESTERNO, R.id.arrowUpCodice, R.id.arrowDownCodice);
 		registraColonnaOrdinabile(Anagrafica.RAGIONE_SOCIALE, R.id.arrowUpRagione, R.id.arrowDownRagione);
 		registraColonnaOrdinabile(Anagrafica.INDIRIZZO, R.id.arrowUpVia, R.id.arrowDownVia);
@@ -169,6 +171,7 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 		ricercaAttiva = false;
 		cardFiltri.setVisibility(View.VISIBLE);
 		headerTabella.setVisibility(View.GONE);
+		headerBorder.setVisibility(View.GONE);
 		barraPaginazione.setVisibility(View.GONE);
 		textViewNessunDato.setVisibility(View.GONE);
 		popolaLista(new ArrayList<>());
@@ -253,6 +256,7 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 		popolaLista(elems);
 		textViewNessunDato.setVisibility(elems.isEmpty() ? View.VISIBLE : View.GONE);
 		headerTabella.setVisibility(View.VISIBLE);
+		headerBorder.setVisibility(View.VISIBLE);
 		aggiornaFrecceOrdinamento();
 		aggiornaBarraPaginazione();
 	}
