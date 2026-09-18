@@ -439,6 +439,8 @@ public class DbInterno extends SQLiteOpenHelper {
 	 * Esegue una query paginata (count totale + pagina corrente) su una selezione libera, anche con join.
 	 * Sostituisce la costruzione manuale di stringhe SQL con LIMIT/OFFSET fatta finora nei singoli moduli.
 	 *
+	 * @param selectSql la lista di colonne selezionate (es. "*" o "cantieri.*, anagrafica.ragione_sociale" -
+	 *            va qualificata esplicitamente se fromJoinSql unisce tabelle con campi omonimi)
 	 * @param fromJoinSql la parte "from ... [join ...]" (senza la parola "from")
 	 * @param whereSql la parte where (senza la parola "where"), pu� essere vuota o null
 	 * @param whereArgs argomenti per i placeholder "?" in whereSql (usati sia per il count che per la pagina)
@@ -446,7 +448,7 @@ public class DbInterno extends SQLiteOpenHelper {
 	 * @param limit numero massimo di righe per pagina
 	 * @param offset offset della pagina (paginaCorrente * limit)
 	 */
-	public PaginaRisultati eseguiSelectPaginato(String fromJoinSql, String whereSql, String[] whereArgs,
+	public PaginaRisultati eseguiSelectPaginato(String selectSql, String fromJoinSql, String whereSql, String[] whereArgs,
 			String orderBySql, int limit, int offset) {
 		PaginaRisultati risultato = new PaginaRisultati();
 		String whereClause = (whereSql != null && whereSql.length() > 0) ? " where " + whereSql : "";
@@ -455,7 +457,7 @@ public class DbInterno extends SQLiteOpenHelper {
 				"Select count(*) as n from " + fromJoinSql + whereClause, whereArgs);
 		risultato.totaleRisultati = conteggio.isEmpty() ? 0 : ((ContentValues) conteggio.get(0)).getAsInteger("n");
 
-		String sql = "Select * from " + fromJoinSql + whereClause
+		String sql = "Select " + selectSql + " from " + fromJoinSql + whereClause
 				+ " order by " + orderBySql
 				+ " limit " + limit + " offset " + offset;
 		risultato.righe = eseguiSelect(sql, whereArgs);

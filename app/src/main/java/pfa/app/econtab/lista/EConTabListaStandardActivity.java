@@ -2,7 +2,6 @@ package pfa.app.econtab.lista;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.view.View;
 
 import pfa.app.econtab.EConTabActivity;
 
@@ -36,19 +35,6 @@ public abstract class EConTabListaStandardActivity extends EConTabActivity
     @Override
     public Context getContext() {
         return this;
-    }
-
-    /** Icona filtro nella barra in alto: riapre la form se era stata nascosta dopo una ricerca. */
-    public void toggleFiltri(View v) {
-        controller.toggleFiltri();
-    }
-
-    public void paginaPrecedente(View v) {
-        controller.paginaPrecedente();
-    }
-
-    public void paginaSuccessiva(View v) {
-        controller.paginaSuccessiva();
     }
 
     @Override

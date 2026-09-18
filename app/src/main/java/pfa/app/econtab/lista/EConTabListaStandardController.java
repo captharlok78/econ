@@ -137,6 +137,19 @@ public class EConTabListaStandardController {
             });
         }
 
+        View buttonToggleFiltri = host.findViewById(R.id.buttonToggleFiltri);
+        if (buttonToggleFiltri != null) {
+            buttonToggleFiltri.setOnClickListener(v -> toggleFiltri());
+        }
+        View buttonPaginaPrec = host.findViewById(R.id.buttonPaginaPrec);
+        if (buttonPaginaPrec != null) {
+            buttonPaginaPrec.setOnClickListener(v -> paginaPrecedente());
+        }
+        View buttonPaginaSucc = host.findViewById(R.id.buttonPaginaSucc);
+        if (buttonPaginaSucc != null) {
+            buttonPaginaSucc.setOnClickListener(v -> paginaSuccessiva());
+        }
+
         costruisciTestata();
         mostraSoloForm();
     }
@@ -271,6 +284,16 @@ public class EConTabListaStandardController {
         caricaPagina();
     }
 
+    /** Riferimento SQL da usare nell'ORDER BY per la colonna indicata (vedi ColonnaLista.ordinamentoSql). */
+    private String ordinamentoSqlPerCampo(String campo) {
+        for (ColonnaLista colonna : definizione.getColonne()) {
+            if (colonna.campo.equals(campo)) {
+                return colonna.ordinamentoSql;
+            }
+        }
+        return campo;
+    }
+
     /** Query paginata (risultatiPerPagina) con il filtro e l'ordinamento correnti. */
     public void caricaPagina() {
         String testoFiltro = filtro.getText().toString().trim();
@@ -278,11 +301,11 @@ public class EConTabListaStandardController {
 
         String ordineSql = (ordinaPerRecenti && definizione.getOrdineRecenti() != null)
                 ? definizione.getOrdineRecenti()
-                : colonnaOrdinamento + (ordineDiscendente ? " desc" : " asc");
+                : ordinamentoSqlPerCampo(colonnaOrdinamento) + (ordineDiscendente ? " desc" : " asc");
 
         DbInterno db = new DbInterno(host.getContext());
         DbInterno.PaginaRisultati paginaRisultati = db.eseguiSelectPaginato(
-                query.fromJoinSql, query.whereSql, query.whereArgs, ordineSql,
+                query.selectSql, query.fromJoinSql, query.whereSql, query.whereArgs, ordineSql,
                 risultatiPerPagina, paginaCorrente * risultatiPerPagina);
         db.close();
 

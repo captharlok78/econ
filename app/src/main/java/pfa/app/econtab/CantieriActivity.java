@@ -6,6 +6,7 @@ import android.view.View;
 
 import pfa.app.econtab.db.DbInterno;
 import pfa.app.econtab.db.table.Cantieri;
+import pfa.app.econtab.fragments.CantieriListaFragment;
 
 public class CantieriActivity extends EConTabActivity {
 
@@ -14,6 +15,14 @@ public class CantieriActivity extends EConTabActivity {
 		System.out.println("EConTab: CantieriActivity onCreate");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_cantieri);
+	}
+
+	@Override
+	protected void aggiornaDopoCancellazione() {
+		CantieriListaFragment fragment = (CantieriListaFragment) getSupportFragmentManager().findFragmentById(R.id.fragment1);
+		if (fragment != null) {
+			fragment.ricerca();
+		}
 	}
 
 	public void nuovoCantiere(View v){
