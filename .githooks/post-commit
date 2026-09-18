@@ -1,0 +1,29 @@
+#!/bin/sh
+# Registra automaticamente il commit appena creato come nuovo rilascio "app" su Mercury
+# (versione "umana" auto-incrementata). A differenza del repo server, qui non c'è una
+# console Symfony a disposizione: si chiama l'endpoint pubblico protetto da token
+# condiviso (POST /api/version/app/registra).
+#
+# Attivazione (una volta per checkout):
+#   git config core.hooksPath .githooks
+#   git config mercury.version-url   "http://<host-mercury>:8000"
+#   git config mercury.version-token "<token da .env.local VERSION_REGISTER_TOKEN>"
+#
+# Se url/token non sono configurati non fa nulla: non blocca mai il commit.
+
+URL=$(git config --get mercury.version-url)
+TOKEN=$(git config --get mercury.version-token)
+
+if [ -z "$URL" ] || [ -z "$TOKEN" ]; then
+    exit 0
+fi
+
+COMMIT=$(git rev-parse HEAD)
+
+curl -s -X POST "$URL/api/version/app/registra" \
+    -H "Content-Type: application/json" \
+    -H "X-Version-Token: $TOKEN" \
+    -d "{\"commit\":\"$COMMIT\"}" \
+    | sed 's/^/[versione] /'
+
+exit 0
