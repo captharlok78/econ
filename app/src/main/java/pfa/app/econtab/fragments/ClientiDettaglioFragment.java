@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import pfa.app.econtab.R;
 import pfa.app.econtab.db.DbInterno;
@@ -39,7 +40,10 @@ public class ClientiDettaglioFragment extends EConTabFragment {
 		});
 
 		if (val != null) {
-			getActivity().setTitle(val.getAsString(Anagrafica.RAGIONE_SOCIALE));
+			TextView headerTitolo = getActivity().findViewById(R.id.headerTitolo);
+			if (headerTitolo != null) {
+				headerTitolo.setText(val.getAsString(Anagrafica.RAGIONE_SOCIALE));
+			}
 
 			setText(R.id.editText_ragionesociale, val.getAsString(Anagrafica.RAGIONE_SOCIALE), v);
 			setText(R.id.editText_codice, val.getAsString(Anagrafica.CODICE_ESTERNO), v);

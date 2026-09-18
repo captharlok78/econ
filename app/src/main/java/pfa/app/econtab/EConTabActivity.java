@@ -818,6 +818,16 @@ public abstract class EConTabActivity extends FragmentActivity {
         finish();
     }
 
+    /**
+     * Alias di indietro(), usato dal pulsante indietro di header_dettaglio_standard (che ha
+     * onClick="annulla" per essere compatibile anche con le pagine di modifica, dove
+     * EConTabDettaglioActivity sovrascrive questo metodo per impostare RESULT_CANCELED). Nelle
+     * pagine di sola visualizzazione (non EConTabDettaglioActivity) equivale a indietro().
+     */
+    public void annulla(View v) {
+        indietro(v);
+    }
+
     /** Apre il dialog per configurare l'URL del server Mercury (icona impostazioni). */
     public void apriImpostazioniServer(View v) {
         android.content.SharedPreferences pref = getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE);

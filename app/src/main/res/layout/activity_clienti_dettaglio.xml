@@ -5,13 +5,20 @@
     android:layout_height="fill_parent"
     tools:context=".ClientiDettaglioActivity" >
 
+    <include
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        layout="@layout/header_dettaglio_standard" />
+
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/footerview"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" >
+        android:layout_below="@+id/header" >
 
         <pfa.app.econtab.views.EConTabPagerTabStrip
         android:id="@+id/pager_title_strip"
