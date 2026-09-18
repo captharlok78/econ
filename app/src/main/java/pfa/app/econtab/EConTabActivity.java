@@ -569,19 +569,15 @@ public abstract class EConTabActivity extends FragmentActivity {
         db.close();
     }
 
+    /**
+     * Non c'è più una view generica per ditta/operatore nel footer condiviso (rimossa:
+     * si vedono solo nella barra in alto della home, vedi MenuActivity). Il metodo resta
+     * come hook per le sottoclassi che vogliono mostrarli altrove.
+     */
     protected void impostaTestoAzienda(String azienda) {
-        //System.out.println("EConTab: EConTabActivity impostaTestoAzienda");
-        TextView viewazienda = (TextView) findViewById(R.id.testoFooter);
-        if (viewazienda != null) {
-            viewazienda.setText(azienda);
-        }
     }
 
     protected void impostaTestoOperatore(String operatore) {
-        TextView viewoperatore = (TextView) findViewById(R.id.testoFooterOperatore);
-        if (viewoperatore != null) {
-            viewoperatore.setText(operatore == null ? "" : operatore);
-        }
     }
 
     /** Pulsante di logout nella barra in basso. */

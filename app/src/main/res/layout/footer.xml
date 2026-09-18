@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Footer condiviso dalle schermate dei moduli (Cantieri, Clienti, Preventivi,
+    Ordini, ecc.). Per ora non mostra nulla: né utente/ditta (si vedono nella barra
+    in alto della home) né logout (visibile solo in home, activity_menu.xml).
+    Tenuto come contenitore vuoto/nascosto invece di essere rimosso dai singoli
+    layout, così le Activity che lo includono restano invariate se in futuro ci
+    si mette di nuovo qualcosa.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/footer"
     android:layout_width="match_parent"
-    android:layout_height="52dp"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
-    android:paddingStart="16dp"
-    android:paddingEnd="12dp"
-    android:background="#1565C0"
-    android:elevation="4dp">
+    android:layout_height="0dp"
+    android:visibility="gone">
 
     <!-- Nascosto: richiesto da EConTabActivity per indietro() -->
     <TextView
@@ -17,60 +20,5 @@
         android:layout_height="0dp"
         android:visibility="gone"
         android:onClick="indietro" />
-
-    <View
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_weight="1" />
-
-    <TextView
-        android:id="@+id/testoFooterOperatore"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:text=""
-        android:textColor="#CCFFFFFF"
-        android:textSize="12sp"
-        android:singleLine="true"
-        android:ellipsize="end"
-        android:maxWidth="130dp" />
-
-    <View
-        android:layout_width="1dp"
-        android:layout_height="20dp"
-        android:layout_marginEnd="8dp"
-        android:background="#55FFFFFF" />
-
-    <!-- Ditta: sola lettura, non si cambia da app -->
-    <TextView
-        android:id="@+id/testoFooter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        android:text=""
-        android:textColor="#FFFFFF"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:singleLine="true"
-        android:ellipsize="end"
-        android:maxWidth="180dp" />
-
-    <View
-        android:layout_width="1dp"
-        android:layout_height="20dp"
-        android:layout_marginStart="12dp"
-        android:background="#55FFFFFF" />
-
-    <ImageButton
-        android:id="@+id/buttonLogoutFooter"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_marginStart="4dp"
-        android:padding="7dp"
-        android:scaleType="fitCenter"
-        android:background="@android:color/transparent"
-        android:src="@drawable/ic_logout"
-        android:contentDescription="@string/logout"
-        android:onClick="logoutFooter" />
 
 </LinearLayout>

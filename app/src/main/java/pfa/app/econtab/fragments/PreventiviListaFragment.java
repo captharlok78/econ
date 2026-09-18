@@ -68,6 +68,7 @@ public class PreventiviListaFragment extends EConTabFragment implements OnItemCl
 
 		lista = (ListView) v.findViewById(R.id.lista);
 		lista.setOnItemClickListener(this);
+		lista.setEmptyView(v.findViewById(R.id.textViewNessunDato));
 		registerForContextMenu(lista);
 
 		v.findViewById(R.id.buttonnuovo).setOnClickListener(this);

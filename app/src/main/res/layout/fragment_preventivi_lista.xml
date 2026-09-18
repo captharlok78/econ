@@ -84,6 +84,18 @@
         android:paddingBottom="72dp" >
     </ListView>
 
+    <TextView
+        android:id="@+id/textViewNessunDato"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/header"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:text="@string/nessun_dato_trovato"
+        android:textColor="#999999"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
     <ImageButton
         android:id="@+id/buttonnuovo"
         android:layout_width="56dp"
