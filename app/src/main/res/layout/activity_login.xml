@@ -28,9 +28,20 @@
             android:background="@android:drawable/editbox_background_normal"
             android:layout_gravity="center_vertical"
             android:orientation="vertical"
-            android:layout_marginLeft="@dimen/margine_tablet"
-            android:layout_marginRight="@dimen/margine_tablet"
+            android:layout_marginLeft="@dimen/margine_login"
+            android:layout_marginRight="@dimen/margine_login"
             android:padding="@dimen/margine" >
+
+            <!-- Logo Econ -->
+            <ImageView
+                android:id="@+id/imageLogoEcon"
+                android:layout_width="wrap_content"
+                android:layout_height="96dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="@dimen/margine"
+                android:contentDescription="Econ"
+                android:scaleType="fitCenter"
+                android:src="@drawable/logo_econ" />
 
             <!-- Indicatore stato connessione Mercury -->
             <LinearLayout
@@ -61,6 +72,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Accesso Mercury" />
+
+            <TextView
+                android:id="@+id/testoVersioneApp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine"
+                android:textColor="#9E9E9E"
+                android:textSize="12sp" />
 
             <EditText
                 android:id="@+id/editTextEmail"

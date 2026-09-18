@@ -93,6 +93,7 @@
 
     <dimen name="margine">10dp</dimen>
     <dimen name="margine_tablet">40dp</dimen>
+    <dimen name="margine_login">88dp</dimen>
     <dimen name="bordo_piantina">3dp</dimen>
     <dimen name="larghezza_splitter">7dp</dimen>
     <dimen name="altezza_item">50dp</dimen>

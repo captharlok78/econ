@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -46,6 +47,7 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
     private EditText editPassword = null;
     private View indicatoreConnessione = null;
     private TextView testoStatoConnessione = null;
+    private TextView testoVersioneApp = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +60,11 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
         spinnerutenti = (EConTabSpinner) findViewById(R.id.econtabSpinnerUtenti);
         indicatoreConnessione = findViewById(R.id.indicatoreConnessione);
         testoStatoConnessione = (TextView) findViewById(R.id.testoStatoConnessione);
+        testoVersioneApp = (TextView) findViewById(R.id.testoVersioneApp);
 
         spinnerutenti.addTextChangeListener(this);
+
+        caricaVersioneApp();
 
         // Ripristina l'email usata nell'ultimo login Mercury
         String emailSalvata = getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE)
@@ -124,6 +129,47 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
         verificaConnessione();
 
         System.out.println("EConTab: LoginActivity onResume EXIT");
+    }
+
+    /**
+     * Recupera la versione "umana" dell'app risolta da Mercury a partire dal commit
+     * HEAD della build (BuildConfig.GIT_COMMIT) e la mostra in testoVersioneApp.
+     * Se la chiamata fallisce (server non configurato/raggiungibile), ricade sul
+     * versionName locale del pacchetto, così il testo non resta mai vuoto.
+     */
+    private void caricaVersioneApp() {
+        mostraVersioneLocale();
+
+        SharedPreferences pref = getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE);
+        if (pref.getString("URL", "").isEmpty()) {
+            return;
+        }
+
+        MercuryApiService api = MercuryApiClient.getInstance(this).getService();
+        api.getVersioneApp(pfa.app.econtab.BuildConfig.GIT_COMMIT).enqueue(new Callback<MercuryApiService.VersionResponse>() {
+            @Override
+            public void onResponse(Call<MercuryApiService.VersionResponse> call,
+                                   retrofit2.Response<MercuryApiService.VersionResponse> response) {
+                if (isFinishing() || isDestroyed()) return;
+                if (response.isSuccessful() && response.body() != null && response.body().versione != null) {
+                    testoVersioneApp.setText("v" + response.body().versione);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MercuryApiService.VersionResponse> call, Throwable t) {
+                // Nessuna azione: resta il fallback locale già impostato
+            }
+        });
+    }
+
+    private void mostraVersioneLocale() {
+        try {
+            PackageInfo pinfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            testoVersioneApp.setText("v" + pinfo.versionName);
+        } catch (Exception ignored) {
+            testoVersioneApp.setText("");
+        }
     }
 
     private void verificaConnessione() {

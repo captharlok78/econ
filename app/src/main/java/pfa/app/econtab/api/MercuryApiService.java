@@ -85,9 +85,13 @@ public interface MercuryApiService {
 
     // ── Versione app ──────────────────────────────────────────────────────
 
-    /** Controlla se è disponibile una versione più recente dell'app */
-    @GET("api/mobile/version")
-    Call<VersionResponse> checkVersion();
+    /**
+     * Risolve il commit HEAD della build (BuildConfig.GIT_COMMIT) nella versione
+     * "umana" registrata su Mercury (tabella Rilasci). Pubblico, nessun JWT richiesto:
+     * va chiamato anche dalla schermata di login, prima di autenticarsi.
+     */
+    @GET("api/version/app")
+    Call<VersionResponse> getVersioneApp(@Query("commit") String commit);
 
     // ── DTO inline ────────────────────────────────────────────────────────
 
@@ -97,12 +101,15 @@ public interface MercuryApiService {
         public Integer idDitta;   // null = usa la prima disponibile
         @SerializedName("device_serial")
         public String deviceSerial;
+        /** Commit HEAD della build (BuildConfig.GIT_COMMIT): Mercury lo risolve in versione umana su Terminale. */
+        public String appCommit;
 
         public LoginRequest(String email, String password, Integer idDitta, String deviceSerial) {
             this.email        = email;
             this.password     = password;
             this.idDitta      = idDitta;
             this.deviceSerial = deviceSerial;
+            this.appCommit    = pfa.app.econtab.BuildConfig.GIT_COMMIT;
         }
     }
 
@@ -110,10 +117,12 @@ public interface MercuryApiService {
         public int idDitta;
         @SerializedName("device_serial")
         public String deviceSerial;
+        public String appCommit;
 
         public SwitchDittaRequest(int idDitta, String deviceSerial) {
             this.idDitta      = idDitta;
             this.deviceSerial = deviceSerial;
+            this.appCommit    = pfa.app.econtab.BuildConfig.GIT_COMMIT;
         }
     }
 
@@ -194,9 +203,12 @@ public interface MercuryApiService {
     }
 
     class VersionResponse {
-        public int    versionCode;
-        public String versionName;
-        public String downloadUrl;
+        public String progetto;
+        /** Versione "umana" (es. "1.0.2"), null se nessun rilascio è ancora registrato per questo progetto. */
+        public String versione;
+        public String commit;
+        /** true se il commit inviato corrisponde esattamente a un rilascio registrato. */
+        public boolean esatta;
     }
 
     class ForgotPasswordRequest {

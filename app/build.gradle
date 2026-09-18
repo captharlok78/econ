@@ -1,5 +1,21 @@
 apply plugin: 'com.android.application'
 
+// Commit HEAD del repo (usato per risolvere la versione "umana" via /api/version/app,
+// vedi VersionResolver lato server). "unknown" se il progetto non è un checkout git
+// (es. build da un archivio sorgenti senza .git).
+static String gitCommitHash(File rootDir) {
+    try {
+        def process = ['git', 'rev-parse', 'HEAD'].execute(null, rootDir)
+        process.waitFor()
+        if (process.exitValue() != 0) {
+            return "unknown"
+        }
+        return process.text.trim()
+    } catch (Exception ignored) {
+        return "unknown"
+    }
+}
+
 android {
     compileSdk 36
     buildToolsVersion '35.0.0'
@@ -13,6 +29,10 @@ android {
         buildConfigField "int",    "CONNECT_TIMEOUT_SEC", "30"
         buildConfigField "int",    "READ_TIMEOUT_SEC",    "60"
         buildConfigField "String", "API_BASE_URL",        '""'  // Override in release
+
+        // Commit HEAD al momento della build: risolto lato server in versione "umana"
+        // tramite GET /api/version/app?commit=... (vedi VersionResolver).
+        buildConfigField "String", "GIT_COMMIT", "\"${gitCommitHash(rootDir)}\""
     }
 
     namespace 'pfa.app.econtab'
