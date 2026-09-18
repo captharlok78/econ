@@ -429,9 +429,43 @@ public class DbInterno extends SQLiteOpenHelper {
 		return result;
 	}
 
+	/** Righe di una pagina + numero totale di risultati (senza paginazione), per {@link #eseguiSelectPaginato}. */
+	public static class PaginaRisultati {
+		public ArrayList<Object> righe;
+		public int totaleRisultati;
+	}
+
+	/**
+	 * Esegue una query paginata (count totale + pagina corrente) su una selezione libera, anche con join.
+	 * Sostituisce la costruzione manuale di stringhe SQL con LIMIT/OFFSET fatta finora nei singoli moduli.
+	 *
+	 * @param fromJoinSql la parte "from ... [join ...]" (senza la parola "from")
+	 * @param whereSql la parte where (senza la parola "where"), pu� essere vuota o null
+	 * @param whereArgs argomenti per i placeholder "?" in whereSql (usati sia per il count che per la pagina)
+	 * @param orderBySql la parte order by (senza la parola "order by")
+	 * @param limit numero massimo di righe per pagina
+	 * @param offset offset della pagina (paginaCorrente * limit)
+	 */
+	public PaginaRisultati eseguiSelectPaginato(String fromJoinSql, String whereSql, String[] whereArgs,
+			String orderBySql, int limit, int offset) {
+		PaginaRisultati risultato = new PaginaRisultati();
+		String whereClause = (whereSql != null && whereSql.length() > 0) ? " where " + whereSql : "";
+
+		ArrayList<Object> conteggio = eseguiSelect(
+				"Select count(*) as n from " + fromJoinSql + whereClause, whereArgs);
+		risultato.totaleRisultati = conteggio.isEmpty() ? 0 : ((ContentValues) conteggio.get(0)).getAsInteger("n");
+
+		String sql = "Select * from " + fromJoinSql + whereClause
+				+ " order by " + orderBySql
+				+ " limit " + limit + " offset " + offset;
+		risultato.righe = eseguiSelect(sql, whereArgs);
+
+		return risultato;
+	}
+
 	/**
 	 * Esegue una query libera su pi� tabelle in join
-	 * 
+	 *
 	 * @param sql
 	 * @return
 	 */
