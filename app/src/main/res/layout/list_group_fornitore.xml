@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="13sp"
+    android:paddingRight="@dimen/margine"
+    android:paddingTop="13sp" >
+
+    <TextView
+        android:id="@+id/fornitore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/buttonNuovo"
+        android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
+        android:text="Fornitore" />
+
+    <TextView
+        android:id="@+id/siglametel"
+        style="@style/TestoIntestazioneNoPadding"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/fornitore"
+        android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
+        android:text="@string/siglametel" />
+
+    <Button
+        android:id="@+id/buttonNuovo"
+        style="@style/bottoneListaGrande"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/nuovo_selector"
+        android:focusable="false" />
+
+</RelativeLayout>

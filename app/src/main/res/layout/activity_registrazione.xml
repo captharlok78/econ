@@ -1,0 +1,81 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/margine">
+
+    <!-- Pulsante impostazioni server in alto a destra, sempre visibile -->
+    <ImageButton
+        android:id="@+id/buttonImpostazioniServer"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="8dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="Impostazioni server"
+        android:onClick="apriImpostazioniServer"
+        android:src="@android:drawable/ic_menu_preferences"
+        android:tint="#1784c5" />
+
+    <RelativeLayout
+        android:id="@+id/contenitore"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <ProgressBar
+            android:id="@+id/progressBar1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/linear_registrazione"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@android:drawable/editbox_background_normal"
+            android:padding="@dimen/margine"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textViewAccount"
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/seleziona_account" />
+
+            <pfa.app.econtab.views.EConTabSpinner
+                android:id="@+id/econtabSpinnerAccount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine" >
+            </pfa.app.econtab.views.EConTabSpinner>
+
+            <Button
+                android:id="@+id/button_registra"
+                style="@style/TestoNeroGrande"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margine"
+                android:padding="@dimen/margine"
+                android:text="@string/registra_econtab"
+                android:onClick="registra"
+                android:textColor="#1784c5" />
+
+            <TextView
+                android:id="@+id/textViewMessaggio"
+                style="@style/TestoPiccolo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/altezza_campo_doppia"
+                android:gravity="center_horizontal"
+                android:text="@string/messaggio_registrazione"
+                android:textSize="@dimen/testo_immagine_medio" />
+
+        </LinearLayout>
+        
+    </RelativeLayout>
+
+</FrameLayout>

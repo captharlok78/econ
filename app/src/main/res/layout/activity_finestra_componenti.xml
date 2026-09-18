@@ -1,0 +1,77 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_econtab_popup"
+    android:padding="@dimen/margine" >
+
+    <RelativeLayout
+        android:id="@+id/contenitore"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+        <TextView
+            android:layout_width="wrap_content"
+            style="@style/TestoIntestazione"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/scroll_categorie"
+            android:text="@string/categorie_componenti"
+            android:layout_centerHorizontal="true"
+            android:textAllCaps="true"
+            android:id="@+id/textView2" />
+        <HorizontalScrollView
+            android:id="@+id/scroll_categorie"
+            android:layout_centerHorizontal="true"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/altezza_menu_categorie"
+            android:layout_alignParentBottom="true"
+            android:scrollbars="none"
+            android:background="#cceeeded"
+            >
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:id="@+id/categorie"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:divider="@drawable/divider_tab"
+                android:showDividers="middle" >
+
+
+
+
+
+            </LinearLayout>
+        </HorizontalScrollView>
+         <ImageButton
+            android:id="@+id/imageButton_chiudi"
+            style="@style/bottoneLista"
+            android:layout_alignParentRight="true"
+            android:onClick="chiudi"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/bg_bottone_grigio_arrotondato"
+            android:scaleType="fitXY"
+            android:src="@android:drawable/ic_delete" />
+         <TextView
+            android:id="@+id/textViewTitolo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:textAllCaps="true"
+            android:text="CATEGORIA"
+            style="@style/TestoIntestazioneNoPadding" />
+        <androidx.viewpager.widget.ViewPager
+            android:layout_above="@+id/textView2"
+            android:layout_below="@id/imageButton_chiudi"
+            android:id="@+id/pager"
+
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+
+
+
+
+    </RelativeLayout>
+
+</FrameLayout>

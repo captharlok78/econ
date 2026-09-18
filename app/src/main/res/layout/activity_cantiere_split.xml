@@ -1,0 +1,184 @@
+<RelativeLayout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    tools:context=".CantiereSplitActivity" >
+
+    <TextView
+        android:id="@+id/textView_titolo_cantiere"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="#cceeeded"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:singleLine="true"
+        android:ellipsize="end"
+        style="@style/Titolo" />
+
+    <pfa.app.econtab.views.EConTabSplitPaneLayout
+        xmlns:spl="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/split"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/nuovo_figlio"
+        android:layout_below="@+id/preventivo_attivo"
+        spl:orientation="horizontal"
+        spl:splitterBackground="@drawable/divisore"
+        spl:splitterMaxPosition="75%"
+        spl:splitterPosition="40%"
+        spl:splitterSize="@dimen/larghezza_splitter" >
+  <FrameLayout
+            android:id="@+id/destra"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+        </FrameLayout>
+        <FrameLayout
+            android:id="@+id/sinistra"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#ee5b5b5b" >
+
+            <ListView
+                android:id="@+id/lista"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:divider="@drawable/divider_light" >
+            </ListView>
+        </FrameLayout>
+
+    </pfa.app.econtab.views.EConTabSplitPaneLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:id="@+id/nuovo_figlio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/footerview"
+        android:background="#cceeeded"
+        android:clickable="true"
+        android:gravity="center_horizontal"
+        android:onClick="nuovoElemento" >
+
+        <LinearLayout
+            android:id="@+id/button_nuovo_elem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_econtab_semitrasparente"
+            android:gravity="center_horizontal" >
+
+            <ImageView
+                style="@style/bottoneListaGrande"
+                android:layout_gravity="center_vertical"
+                android:layout_marginRight="@dimen/margine"
+                android:clickable="false"
+                android:contentDescription="+"
+                android:src="@drawable/nuovo" />
+
+            <TextView
+                android:id="@+id/nuovo_elemento"
+                style="@style/TestoNeroGrandeSingolaLinea"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|center_vertical"
+                android:clickable="false"
+                android:text="@string/nuova_unita"
+                android:textAllCaps="true"
+                android:textColor="#757374"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/menuinferiore"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/altezza_menu_categorie_piu_testo"
+            android:visibility="gone"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                style="@style/TestoIntestazione"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/scroll_categorie"
+                android:text="@string/categorie_elementi"
+                android:textAllCaps="true"
+                android:id="@+id/textView2" />
+            <HorizontalScrollView
+                android:id="@+id/scroll_categorie"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:scrollbars="none" >
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:id="@+id/categorie"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:divider="@drawable/divider_tab"
+                    android:showDividers="middle" >
+                </LinearLayout>
+            </HorizontalScrollView>
+        </RelativeLayout>
+    </LinearLayout>
+
+    <include
+        android:id="@+id/footerview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        layout="@layout/footer" />
+
+    <RelativeLayout
+        android:id="@+id/preventivo_attivo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView_titolo_cantiere"
+        android:background="@drawable/bg_bottone_grigio_semitrasparente"
+        android:padding="4dp" >
+
+        <LinearLayout
+            android:id="@+id/linear_preventivo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/imageView1"
+                android:layout_width="@dimen/altezza_campo"
+                android:layout_height="@dimen/altezza_campo"
+               
+                android:layout_margin="@dimen/bordo_piantina"
+                android:scaleType="fitXY"
+                android:src="@drawable/ordini_preventivi_small" />
+
+            <TextView
+                android:id="@+id/textView_preventivo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:singleLine="true"
+               
+                android:textAllCaps="true"
+                android:text="@string/preventivo_num_del"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/button_cambiapreventivo"
+            android:layout_width="@dimen/altezza_campo"
+            android:layout_height="@dimen/altezza_campo"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/bg_bottone_grigio_arrotondato"
+            android:scaleType="fitXY"
+            android:src="@drawable/freccia_giu" />
+    </RelativeLayout>
+
+</RelativeLayout>

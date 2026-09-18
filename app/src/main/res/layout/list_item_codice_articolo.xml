@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="5sp" >
+
+    <TextView
+        android:id="@+id/codice_articolo"
+        style="@style/TestoIntestazioneNoPadding"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/fornitore_linea"
+        android:text="Codice" />
+
+    <TextView
+        android:id="@+id/fornitore_linea"
+        style="@style/TestoPiccolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:text="BTI - living" />
+
+    <TextView
+        android:id="@+id/descrizione"
+        style="@style/TestoNeroPiccolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/codice_articolo"
+        android:text="Descrizione" />
+
+    <LinearLayout
+        android:id="@+id/linear_prezzi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/descrizione" >
+
+        <TextView
+            android:id="@+id/prz_acq"
+            style="@style/TestoPiccolo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:text="Prz acq"
+            android:textSize="@dimen/testo_immagine" />
+
+        <TextView
+            android:id="@+id/prz_ven"
+            style="@style/TestoPiccolo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:text="Prz ven"
+            android:textSize="@dimen/testo_immagine" />
+
+        <TextView
+            android:id="@+id/sconto"
+            style="@style/TestoPiccolo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:text="Sconto"
+            android:textSize="@dimen/testo_immagine" />
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="14dp"
+            android:src="@drawable/associa"
+            android:id="@+id/imgass"
+            android:layout_weight="0.1"/>
+    </LinearLayout>
+
+</RelativeLayout>

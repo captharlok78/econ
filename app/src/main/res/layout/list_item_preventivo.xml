@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="5sp" >
+
+    <RelativeLayout
+        android:id="@+id/relative_prev"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/numero"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Num . 1234" />
+
+        <TextView
+            android:id="@+id/nome"
+            style="@style/TestoNeroPiccolo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/numero"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/data"
+            android:singleLine="true"
+            android:text="descrizione" />
+
+        <TextView
+            android:id="@+id/data"
+            style="@style/TestoNeroPiccolo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margine"
+            android:text="11/04/2014"
+            android:layout_alignParentRight="true"/>
+
+
+
+        <TextView
+            android:id="@+id/stato"
+            style="@style/TestoPiccolo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/data"
+            android:text="Aperto"
+            android:textStyle="italic" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/seconda_linea"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/ragione_sociale"
+            style="@style/TestoIntestazioneNoPadding"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:text="Ragione sociale" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/terza_linea"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <LinearLayout
+            android:id="@+id/linear_cantiere"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/buttonAzioni" >
+
+            <TextView
+                android:id="@+id/label_cantiere"
+                style="@style/TestoIntestazioneNoPadding"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cantiere"
+                android:textAllCaps="true" />
+
+            <TextView
+                android:id="@+id/cantiere"
+                style="@style/TestoIntestazioneNoPadding"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margine"
+                android:singleLine="true"
+                android:text="cantiere" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/buttonAzioni"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_econtab_semitrasparente"
+            android:focusable="false"
+            android:text="@string/opzioni"
+            android:textAllCaps="true"
+            android:textSize="@dimen/testo_immagine"
+           android:layout_alignParentRight="true" />
+
+
+    </RelativeLayout>
+
+</LinearLayout>

@@ -1,0 +1,427 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <RelativeLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <ScrollView
+            android:id="@+id/scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/footer_dettaglio"
+            android:layout_alignParentTop="true" >
+
+            <LinearLayout
+                android:id="@+id/campi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/margine" >
+
+                <TextView
+                    android:id="@+id/textView_categoria"
+                    style="@style/Titolo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                   android:layout_gravity="center_horizontal"
+                    android:text="Categoria"
+                    android:layout_marginBottom="@dimen/margine"
+                    android:textAllCaps="true" />
+
+                <LinearLayout
+                    android:id="@+id/linear_icona_nome"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <LinearLayout
+                        android:id="@+id/linear_icona"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_icona"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margine"
+                            android:text="@string/icona"
+                            android:visibility="gone" />
+
+                        <ImageButton
+                            android:id="@+id/imageButtonIcona"
+                            android:layout_width="@dimen/larghezza_icona_con_padding"
+                            android:layout_height="@dimen/larghezza_icona_con_padding"
+                            android:background="@drawable/button_econtab_bianco"
+
+                            android:onClick="azioniIcona"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/no_image" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/linear_nome"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/margine"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_nome"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/elemento" />
+
+                        <EditText
+                            android:id="@+id/editText_nome"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ems="10"
+                            android:maxLength="50" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/linear_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <LinearLayout
+                        android:id="@+id/linear_preferito"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_preferito"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margine"
+                            android:text="@string/preferito_sn" />
+
+                        <Switch
+                            android:id="@+id/switch_preferito"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textOff="O"
+                            android:textOn="I"
+                            android:thumbTextPadding="@dimen/altezza_campo" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/linear_placca"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_placca"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margine"
+                            android:text="@string/placca_sn" />
+
+                        <Switch
+                            android:id="@+id/switch_placca"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textOff="O"
+                            android:textOn="I"
+                            android:thumbTextPadding="@dimen/altezza_campo" />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:id="@+id/linear_usa_linea_locale"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_usa_linea_locale"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margine"
+                            android:text="@string/usa_linea_placca_predef" />
+
+                        <Switch
+                            android:id="@+id/switch_usa_linea_locale"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textOff="O"
+                            android:textOn="I"
+                            android:thumbTextPadding="@dimen/altezza_campo" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:id="@+id/linear_linea_placca"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+                <LinearLayout
+                    android:id="@+id/linear_linea"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/textView_linea"
+                        style="@style/TestoIntestazione"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margine"
+                        android:text="@string/linea" />
+
+                    <pfa.app.econtab.views.EConTabSpinner
+                        android:id="@+id/econtabSpinner_linea"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+                    </pfa.app.econtab.views.EConTabSpinner>
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/linear_placca_sel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/textView_placca_sel"
+                        style="@style/TestoIntestazione"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margine"
+                        android:text="@string/placca" />
+
+                    <pfa.app.econtab.views.EConTabSpinner
+                        android:id="@+id/econtabSpinner_placca"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+                    </pfa.app.econtab.views.EConTabSpinner>
+                </LinearLayout>
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/linear_udm_altezza"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <LinearLayout
+                        android:id="@+id/linear_udm"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.65"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_udm"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margine"
+                            android:text="@string/unita_misura" />
+
+                        <pfa.app.econtab.views.EConTabSpinner
+                            android:id="@+id/econtabSpinner_udm"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" >
+                        </pfa.app.econtab.views.EConTabSpinner>
+                    </LinearLayout>
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.05" />
+
+                    <LinearLayout
+                        android:id="@+id/linear_altezza"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_altezza"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margine"
+                            android:text="@string/altezza" />
+
+                        <EditText
+                            android:id="@+id/editText_altezza"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ems="4"
+                            android:inputType="number"
+                            android:maxLength="6" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/linear_tubo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <LinearLayout
+                        android:id="@+id/linear_tipotubo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.65"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_tipotubo"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margine"
+                            android:text="@string/tubo" />
+
+                        <pfa.app.econtab.views.EConTabSpinner
+                            android:id="@+id/econtabSpinner_tubo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" >
+                        </pfa.app.econtab.views.EConTabSpinner>
+                    </LinearLayout>
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.05" />
+
+                    <LinearLayout
+                        android:id="@+id/linear_metritubo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_metritubo"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margine"
+                            android:text="@string/metritubo" />
+
+                        <EditText
+                            android:id="@+id/editText_metritubo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ems="4"
+                            android:inputType="numberDecimal"
+                            android:maxLength="6" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/linear_cavo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <LinearLayout
+                        android:id="@+id/linear_tipocavo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.65"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_tipocavo"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margine"
+                            android:text="@string/cavo" />
+
+                        <pfa.app.econtab.views.EConTabSpinner
+                            android:id="@+id/econtabSpinner_cavo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" >
+                        </pfa.app.econtab.views.EConTabSpinner>
+                    </LinearLayout>
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.05" />
+
+                    <LinearLayout
+                        android:id="@+id/linear_metricavo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.3"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_metricavo"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margine"
+                            android:text="@string/metricavo" />
+
+                        <EditText
+                            android:id="@+id/editText_metricavo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ems="4"
+                            android:inputType="numberDecimal"
+                            android:maxLength="6" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/linear_icona_composizione"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <LinearLayout
+                        android:id="@+id/linear_composizione"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_composizione"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margine"
+                            android:text="@string/composizione" />
+
+                        <ImageButton
+                            android:id="@+id/imageButtonComposizione"
+                            android:layout_width="@dimen/larghezza_componente"
+                            android:layout_height="@dimen/larghezza_componente"
+                            android:layout_marginTop="@dimen/margine"
+                            android:background="@drawable/bg_bottone_rotondo"
+                            android:onClick="apriComposizione"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/composizione" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <include
+            android:id="@+id/footer_dettaglio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            layout="@layout/footer_dett" />
+    </RelativeLayout>
+
+</FrameLayout>

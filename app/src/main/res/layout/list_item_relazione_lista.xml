@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_econtab_bordo_bianco"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/padding_bottone"
+    android:layout_marginBottom="@dimen/padding_bottone"
+    android:paddingTop="@dimen/padding_bottone" >
+
+
+    <TextView
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="NOME LOCALE"
+        android:textAllCaps="true"
+        android:paddingLeft="@dimen/margine"
+        android:paddingRight="@dimen/margine"
+        android:background="@drawable/bg_titolo_arrotondato"
+        style="@style/TestoIntestazioneNoPadding"
+        android:layout_marginTop="@dimen/margine"
+        android:id="@+id/titolo_locale" />
+
+    <LinearLayout
+                android:id="@+id/linear_relazione"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/altezza_campo_doppia"
+                android:orientation="horizontal"
+
+                android:padding="@dimen/padding_bottone"
+                >
+
+
+                <LinearLayout
+
+                    android:id="@+id/linearSinistra"
+                    android:padding="@dimen/padding_bottone"
+                    android:orientation="horizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="0.5">
+
+                    <FrameLayout
+                        android:id="@+id/coloreElementoComandato"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/altezza_campo"
+                        android:background="#DDDDDD"
+                        android:minWidth="@dimen/altezza_campo"
+
+                        android:paddingLeft="1dp"
+                        android:paddingRight="1dp" >
+
+                        <TextView
+                            android:id="@+id/numElementoComandato"
+                            style="@style/TestoNeroPiccolo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+
+                            android:text="99" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:id="@+id/localeElemComandato"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="@dimen/margine"
+                            android:text="Locale B"
+                            android:textAllCaps="true"
+                            android:textSize="@dimen/testo_immagine" />
+                        <TextView
+                            android:id="@+id/elementoComandato"
+                            style="@style/TestoNeroPiccolo"
+
+                            android:layout_marginLeft="@dimen/margine"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Elemento B"
+                            android:maxLines="2"
+                            android:textColor="@android:color/black" />
+                        <TextView
+                            android:id="@+id/componenteComandato"
+                            style="@style/TestoNeroPiccolo"
+                            android:layout_marginLeft="@dimen/margine"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Componente B"
+                            android:maxLines="2"
+                            android:textColor="@android:color/black" />
+                    </LinearLayout>
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/linearDestra"
+                    android:padding="@dimen/padding_bottone"
+                    android:orientation="horizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="0.5">
+
+                    <FrameLayout
+                        android:id="@+id/coloreElementoDiComando"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/altezza_campo"
+                        android:background="#DDDDDD"
+                        android:minWidth="@dimen/altezza_campo"
+
+                        android:paddingLeft="1dp"
+                        android:paddingRight="1dp" >
+
+                        <TextView
+                            android:id="@+id/numElementoDiComando"
+                            style="@style/TestoNeroPiccolo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+
+                            android:text="99" />
+                    </FrameLayout>
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:id="@+id/localeElemDiComando"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="@dimen/margine"
+                            android:text="Locale B"
+                            android:textAllCaps="true"
+                            android:textSize="@dimen/testo_immagine" />
+                        <TextView
+                            android:id="@+id/elementoDiComando"
+                            style="@style/TestoNeroPiccolo"
+
+                            android:layout_marginLeft="@dimen/margine"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Elemento B"
+                            android:maxLines="2"
+                            android:textColor="@android:color/black" />
+                        <TextView
+                            android:id="@+id/componenteDiComando"
+                            style="@style/TestoNeroPiccolo"
+                            android:layout_marginLeft="@dimen/margine"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Componente B"
+                            android:maxLines="2"
+                            android:textColor="@android:color/black" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+
+</LinearLayout>

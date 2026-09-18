@@ -1,0 +1,91 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <RelativeLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <ScrollView
+            android:id="@+id/scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/footer_dettaglio"
+            android:layout_alignParentTop="true" >
+
+            <LinearLayout
+                android:id="@+id/campi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/margine" >
+
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:id="@+id/textView_nome"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/manodopera"
+                    />
+
+                <EditText
+                    android:id="@+id/editText_manodopera"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="20"
+                    android:maxLength="100" />
+
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:id="@+id/textView_numero_op"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="@string/numero_operatori"
+                    />
+
+                <EditText
+                    android:id="@+id/editText_numero_op"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="3"
+                    android:maxLength="3"
+                    android:inputType="number"
+                    
+                     />
+
+                 <TextView
+                    style="@style/TestoIntestazione"
+                    android:id="@+id/textView_costo_orario"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="@string/costo_orario"
+                    />
+
+                <EditText
+                    android:id="@+id/editText_costo_orario"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="5"
+                    android:maxLength="5"
+                    android:inputType="numberDecimal"
+                    
+                     />
+               
+
+               
+            </LinearLayout>
+        </ScrollView>
+
+        <include
+            android:id="@+id/footer_dettaglio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            layout="@layout/footer_dett" />
+    </RelativeLayout>
+
+</FrameLayout>

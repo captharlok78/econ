@@ -1,0 +1,41 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_econtab_popup"
+    android:padding="@dimen/margine" >
+
+    <RelativeLayout
+        android:id="@+id/contenitore"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <TextView
+            android:id="@+id/textView_titolo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/padding_bottone"
+            android:text="@string/collegamenti"
+            android:textAllCaps="true" />
+
+        <ImageButton
+            android:id="@+id/imageButton_chiudi"
+            style="@style/bottoneLista"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/bg_bottone_grigio_arrotondato"
+            android:onClick="chiudi"
+            android:scaleType="fitXY"
+            android:src="@android:drawable/ic_delete" />
+
+        <ListView
+            android:id="@+id/lista"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/textView_titolo" >
+        </ListView>
+
+    </RelativeLayout>
+
+</FrameLayout>

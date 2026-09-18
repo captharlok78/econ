@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" 
+    android:padding="@dimen/margine"
+    android:minHeight="@dimen/altezza_item"
+    >
+
+    <TextView
+        android:id="@+id/tipo"
+        style="@style/TestoPiccolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/icona"
+        android:layout_marginLeft="@dimen/margine"
+        android:layout_alignRight="@+id/nome"
+        android:layout_toRightOf="@+id/icona"
+        android:text="tipo"
+        android:textColor="#b9b9b9"
+        android:singleLine="true"
+        android:textAllCaps="true" />
+
+      <ImageView
+          android:id="@+id/icona"
+          
+          android:layout_width="@dimen/altezza_campo"
+          android:layout_height="@dimen/altezza_campo"
+          android:layout_alignParentLeft="true"
+          android:layout_alignParentTop="true"
+          android:src="@drawable/icona_cantiere" />
+
+      <TextView
+          android:id="@+id/nome"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_alignParentLeft="true"
+          android:layout_alignParentRight="true"
+          android:layout_below="@+id/icona"
+          android:maxLines="2"
+          android:ellipsize="end"
+          style="@style/TestoNeroPiccolo"
+		  android:textColor="#ebe8e8"
+		  android:text="Nome"
+         
+          />
+
+</RelativeLayout>

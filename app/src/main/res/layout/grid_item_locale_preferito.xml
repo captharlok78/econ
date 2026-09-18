@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/elemento"
+    android:layout_width="@dimen/larghezza_elemento"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_elemento_griglia"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/relative_0"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="3dp"
+        android:background="#EEEEEE"
+         >
+
+        <ImageView
+            android:id="@+id/icona"
+
+            android:layout_centerHorizontal="true"
+            android:layout_width="@dimen/altezza_menu_categorie"
+            android:layout_height="@dimen/altezza_menu_categorie"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_launcher" />
+
+        <Button
+            android:id="@+id/button_modifica_item"
+            style="@style/bottoneLista"
+
+            android:focusable="false"
+            android:background="@android:drawable/ic_menu_edit"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+             />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/nome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:ellipsize="end"
+        android:gravity="center_horizontal"
+        android:lines="3"
+        android:text="Interruttore + deviatore"
+        android:textAllCaps="true"
+        android:textSize="@dimen/testo_immagine" />
+
+</LinearLayout>

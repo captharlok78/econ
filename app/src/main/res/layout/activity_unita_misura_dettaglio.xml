@@ -1,0 +1,72 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <RelativeLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <ScrollView
+            android:id="@+id/scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/footer_dettaglio"
+            android:layout_alignParentTop="true" >
+
+            <LinearLayout
+                android:id="@+id/campi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/margine" >
+
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:id="@+id/textView_udm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/unita_misura"
+                    />
+
+                <EditText
+                    android:id="@+id/editText_udm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:maxLength="10" />
+
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:id="@+id/textView_nome"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="@string/descrizione"
+                    />
+
+                <EditText
+                    android:id="@+id/editText_nome"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:maxLength="20"
+                    
+                     />
+
+               
+
+               
+            </LinearLayout>
+        </ScrollView>
+
+        <include
+            android:id="@+id/footer_dettaglio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            layout="@layout/footer_dett" />
+    </RelativeLayout>
+
+</FrameLayout>

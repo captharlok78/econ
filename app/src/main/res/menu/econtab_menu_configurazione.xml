@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
+     >
+    <item android:id="@+id/item_menu"
+        android:titleCondensed="@string/menu"
+        android:title="@string/menu"
+        android:icon="@drawable/menu"
+        android:showAsAction="always"></item>
+     <item android:id="@+id/item_backup"
+        android:titleCondensed="@string/gestione_db"
+        android:title="@string/gestione_db"
+
+        android:showAsAction="never"></item>
+    <item android:id="@+id/item_about"
+        android:titleCondensed="Info"
+        android:title="Info"
+        android:showAsAction="never"></item>
+    <item android:id="@+id/item_feedback"
+        android:titleCondensed="Info"
+        android:title="Feedback"
+        android:showAsAction="never"></item>
+        <!--
+    <item android:id="@+id/item_sitoweb"
+        android:titleCondensed="econtab.mobi"
+        android:title="econtab.mobi"
+        android:showAsAction="never"></item>
+    -->
+
+</menu>

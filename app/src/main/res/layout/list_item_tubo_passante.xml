@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    
+    android:padding="5sp" >
+
+    <TextView
+        android:id="@+id/nome"
+        style="@style/TestoNeroPiccolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/checkBoxSeleziona"
+        android:text="descrizione" />
+
+    <TextView
+        android:id="@+id/metri"
+        style="@style/TestoPiccolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/nome"
+        android:text="Mt. 5,00" />
+
+    <TextView
+        android:id="@+id/textViewCavi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/metri"
+        android:layout_toLeftOf="@+id/imgSeleziona"
+        style="@style/TestoPiccolo"
+        android:text="Totale cavi passati 6 (2 collegamenti) " />
+
+    <ImageView
+        android:id="@+id/imgSeleziona"
+        android:layout_width="@dimen/altezza_campo"
+        android:layout_height="@dimen/altezza_campo"
+        
+       android:src="@android:drawable/checkbox_off_background"
+        android:layout_alignParentRight="true"
+       android:scaleType="fitXY"
+       android:layout_centerVertical="true"
+        />
+
+</RelativeLayout>

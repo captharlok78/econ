@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
+
+    <!-- Barra superiore con logo -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:background="#1565C0"
+        android:elevation="4dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:src="@drawable/logo_econtab"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:text="ECON"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.08" />
+
+    </LinearLayout>
+
+    <!-- Griglia menu (costruita dinamicamente in MenuActivity) -->
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:background="#F5F5F5" />
+
+    <!-- Footer: LED server + nome ditta -->
+    <LinearLayout
+        android:id="@+id/footer"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="12dp"
+        android:background="#1565C0"
+        android:elevation="4dp">
+
+        <View
+            android:id="@+id/led_server"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/ic_led_gray" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:text="Mercury"
+            android:textColor="#AAFFFFFF"
+            android:textSize="12sp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/testoFooterOperatore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text=""
+            android:textColor="#CCFFFFFF"
+            android:textSize="12sp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:maxWidth="110dp" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="8dp"
+            android:background="#55FFFFFF" />
+
+        <TextView
+            android:id="@+id/testoFooter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:text="Azienda"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:maxWidth="130dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="selezionaAzienda" />
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@android:drawable/arrow_down_float"
+            android:tint="#FFFFFF"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="selezionaAzienda" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="10dp"
+            android:background="#55FFFFFF" />
+
+        <ImageButton
+            android:id="@+id/buttonLogoutFooter"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="4dp"
+            android:padding="7dp"
+            android:scaleType="fitCenter"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_logout"
+            android:contentDescription="@string/logout"
+            android:onClick="logoutFooter" />
+
+        <TextView
+            android:id="@+id/textViewIndietro"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            android:onClick="indietro" />
+
+    </LinearLayout>
+
+</LinearLayout>

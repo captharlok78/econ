@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout_prevdett"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="5sp" >
+
+    <TextView
+        android:id="@+id/textView_inModifica"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/in_modifica"
+        android:textColor="@android:color/holo_red_light"
+        android:textSize="@dimen/testo_immagine"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/linear_descrizione"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_econtab_titolo"
+        android:clickable="true" >
+
+        <TextView
+            android:id="@+id/descrizione_riga"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.7"
+            android:text="Descrizione" />
+
+        <RelativeLayout
+            android:id="@+id/relative_codice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margine"
+            android:layout_weight="0.3" >
+
+            <TextView
+                android:id="@+id/codice_articolo"
+                style="@style/TestoGrigioPiccolo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:text="@string/codice" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_campi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <LinearLayout
+            android:id="@+id/linear_importo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true" >
+
+            <LinearLayout
+                android:id="@+id/relative_qta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/udm"
+                    style="@style/TestoGrigioPiccolo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="PZ"
+                    android:textSize="@dimen/testo_immagine" />
+
+                <LinearLayout
+                    android:id="@+id/linearQta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <Button
+                        android:id="@+id/buttonMeno"
+                        android:layout_width="@dimen/altezza_campo"
+                        android:layout_height="@dimen/altezza_campo"
+                        android:layout_marginRight="@dimen/padding_bottone"
+                        android:background="@drawable/bg_bottone_rotondo"
+                        android:text="-"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="@dimen/testo_immagine_grande" />
+
+                    <TextView
+                        android:id="@+id/txt_qta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/padding_bottone"
+                        android:layout_marginRight="@dimen/padding_bottone"
+                        android:gravity="right"
+                        android:text="9"
+                        android:textSize="@dimen/testo_immagine_grande" />
+
+                    <Button
+                        android:id="@+id/buttonPiu"
+                        android:layout_width="@dimen/altezza_campo"
+                        android:layout_height="@dimen/altezza_campo"
+                        android:layout_marginLeft="@dimen/padding_bottone"
+                        android:background="@drawable/bg_bottone_rotondo"
+                        android:text="+"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="@dimen/testo_immagine_grande" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/relative_prz"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margine"
+                android:layout_marginRight="@dimen/margine"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/label_prezzo"
+                    style="@style/TestoGrigioPiccolo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:text="@string/prezzo"
+                    android:textAllCaps="true"
+                    android:textSize="@dimen/testo_immagine" />
+
+                <TextView
+                    android:id="@+id/text_prezzo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:gravity="right"
+                    android:minEms="2"
+                    android:text="159,00"
+                    android:textSize="@dimen/testo_immagine_grande" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/relative_importo1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/label_importo"
+                    style="@style/TestoGrigioPiccolo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:text="@string/importo"
+                    android:textAllCaps="true"
+                    android:textSize="@dimen/testo_immagine" />
+
+                <TextView
+                    android:id="@+id/text_importo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:gravity="right"
+                    android:minEms="3"
+                    android:text="152,25"
+                    android:textSize="@dimen/testo_immagine_grande" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_rapportini"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/padding_bottone"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/bg_econtab_titolo_verde"
+            android:layout_below="@+id/linear_importo">
+
+            <LinearLayout
+                android:id="@+id/linearLayout2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <TextView
+                    style="@style/TestoIntestazioneNoPadding"
+                    android:id="@+id/textViewRapp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/ore_rapportini"
+                    android:textSize="@dimen/testo_immagine" />
+
+                <TextView
+                    android:id="@+id/oreRapportini"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:layout_gravity="right"
+                    android:text="9"
+                    android:textSize="@dimen/testo_immagine_grande" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayout4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margine"
+                android:orientation="vertical" >
+
+                <TextView
+                    style="@style/TestoIntestazioneNoPadding"
+                    android:id="@+id/textViewImportoRapp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:text="@string/importo_rapportini"
+
+                    android:textSize="@dimen/testo_immagine" />
+
+                <TextView
+                    android:id="@+id/importoRapportini"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:gravity="right"
+                    android:minEms="3"
+                    android:text="152,25"
+                    android:textSize="@dimen/testo_immagine_grande" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:id="@+id/scroll_campi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/linear_importo" >
+
+            <LinearLayout
+                android:id="@+id/linear_qta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <LinearLayout
+                    android:id="@+id/relative_przacq"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/label_przacq"
+                        style="@style/TestoGrigioPiccolo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/prezzo_acquisto"
+                         android:layout_gravity="right"
+                        android:textAllCaps="true"
+                        android:textSize="@dimen/testo_immagine" />
+
+                    <TextView
+                        android:id="@+id/text_prxacq"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                         android:layout_gravity="right"
+                         android:gravity="right"
+                        android:text="12,50"
+                        android:textSize="@dimen/testo_immagine_grande" />
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/relative_ricarico"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/margine"
+                    android:visibility="gone" >
+
+                    <TextView
+                        android:id="@+id/label_przric"
+                        style="@style/TestoGrigioPiccolo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentTop="true"
+                        android:text="@string/ricar"
+                        android:textAllCaps="true"
+                        android:textSize="@dimen/testo_immagine" />
+
+                    <TextView
+                        android:id="@+id/text_ricarico"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignRight="@id/label_przric"
+                        android:layout_below="@id/label_przric"
+                        android:text="12"
+                        android:textSize="@dimen/testo_immagine_grande" />
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:id="@+id/relative_przlis"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/margine"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/label_przlis"
+                        style="@style/TestoGrigioPiccolo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/prezzo_listino"
+                         android:layout_gravity="right"
+                        android:textAllCaps="true"
+                        android:textSize="@dimen/testo_immagine" />
+
+                    <TextView
+                        android:id="@+id/text_prxLis"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:layout_gravity="right"
+                        android:text="12,5"
+                        android:textSize="@dimen/testo_immagine_grande" />
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/relative_sconto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/margine"
+                    android:visibility="gone" >
+
+                    <TextView
+                        android:id="@+id/label_sconto"
+                        style="@style/TestoGrigioPiccolo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentTop="true"
+                        android:text="@string/sconto"
+                        android:textAllCaps="true"
+                        android:textSize="@dimen/testo_immagine" />
+
+                    <TextView
+                        android:id="@+id/text_sconto"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignRight="@id/label_sconto"
+                        android:layout_below="@id/label_sconto"
+                        android:text="15"
+                        android:textSize="@dimen/testo_immagine_grande" />
+                </RelativeLayout>
+            </LinearLayout>
+        </HorizontalScrollView>
+    </RelativeLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margine"
+        android:background="@drawable/divider_grigiochiaro" />
+
+</LinearLayout>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_econtab_bordo_bianco"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/padding_bottone"
+    android:layout_marginBottom="@dimen/padding_bottone"
+    android:paddingTop="@dimen/padding_bottone" >
+
+        <LinearLayout
+            android:id="@+id/linearElementoA"
+            android:paddingLeft="@dimen/margine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/metri"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:id="@+id/linear_elemento"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <FrameLayout
+                    android:id="@+id/colore_elemento"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/testo_immagine_grande"
+                    android:layout_marginRight="@dimen/margine"
+                    android:background="#DDDDDD"
+                    android:minWidth="@dimen/testo_immagine_grande"
+                    android:paddingLeft="1dp"
+                    android:paddingRight="1dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/textViewNumElementoB"
+                        style="@style/TestoNeroPiccolo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="99"
+                        android:textSize="@dimen/testo_immagine" />
+
+                </FrameLayout>
+
+                <LinearLayout
+                    android:id="@+id/linearElementoComponente"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textViewElementoB"
+                        style="@style/TestoPiccolo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Elemento B"
+                        android:textSize="@dimen/testo_immagine"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/textViewComponenteB"
+                        style="@style/TestoPiccolo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+
+                        android:text="Componente B"
+
+                        android:textSize="@dimen/testo_immagine" />
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+                <TextView
+                    android:id="@+id/tipo"
+                    style="@style/TestoNeroGrande"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginTop="@dimen/padding_bottone"
+                    android:text="TUBO"
+                    android:textAllCaps="true"
+                    android:textSize="@dimen/testo_immagine"
+                    android:layout_marginRight="@dimen/padding_bottone" />
+
+                <TextView
+                    android:id="@+id/metri"
+                    style="@style/TestoNeroGrande"
+                    android:layout_marginTop="@dimen/padding_bottone"
+                    android:layout_marginLeft="@dimen/margine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:text="Q.tà 3"
+                    android:textSize="@dimen/testo_immagine" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textViewLocaleB"
+                style="@style/TestoPiccolo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/padding_bottone"
+                android:text="Locale B"
+                android:textAllCaps="true"
+                android:textSize="@dimen/testo_immagine"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
+
+
+</LinearLayout>

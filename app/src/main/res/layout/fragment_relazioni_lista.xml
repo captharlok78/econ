@@ -1,0 +1,45 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/linear_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:padding="@dimen/margine"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textViewPuntiComandati"
+            style="@style/TestoIntestazioneNoPadding"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:text="@string/punti_comandati"
+            android:textAllCaps="true" />
+
+        <TextView
+            android:id="@+id/textViewPuntiDiComando"
+            style="@style/TestoIntestazioneNoPadding"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:text="@string/punti_di_comando"
+            android:textAllCaps="true" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/lista"
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/linear_header">
+
+    </ListView>
+
+
+</RelativeLayout>

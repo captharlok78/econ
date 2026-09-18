@@ -1,0 +1,59 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/margine"
+    tools:context=".CrashActivity" >
+
+    <LinearLayout
+        android:id="@+id/linearBottom"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/button1"
+
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:layout_height="wrap_content"
+
+            android:onClick="chiudi"
+            android:text="@string/chiudi" />
+        <Button
+            android:id="@+id/button2"
+
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:layout_height="wrap_content"
+
+            android:onClick="invia_mail"
+            android:text="@string/invia_mail_support" />
+
+        </LinearLayout>
+
+
+
+    <ScrollView
+        android:id="@+id/scrollerrore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/linearBottom"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true" >
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            
+            android:text="Errore" />
+
+           
+        
+    </ScrollView>
+
+</RelativeLayout>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" 
+    android:padding="5sp"
+    >
+
+    <LinearLayout
+        android:id="@+id/linear_rapp"
+        android:orientation="horizontal"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/data_rapportino"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+
+            android:text="10/02/2015" />
+        <TextView
+            android:id="@+id/operatore"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.65"
+
+            android:text="Caio Sempronio" />
+
+
+        <TextView
+            android:id="@+id/ore"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.15"
+            android:textStyle="bold"
+            android:gravity="right"
+            android:text="Ore: 15" />
+
+        </LinearLayout>
+    <Button
+        android:id="@+id/buttonDuplica"
+        android:layout_width="@dimen/larghezza_elemento"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_econtab_semitrasparente"
+        android:focusable="false"
+        android:text="@string/duplica"
+        android:textAllCaps="true"
+        android:textSize="@dimen/testo_immagine"
+        android:layout_below="@+id/linear_rapp"
+        android:layout_marginTop="@dimen/padding_bottone"
+        android:layout_marginBottom="@dimen/padding_bottone"
+        android:layout_alignParentRight="true" />
+
+    <TextView
+        android:id="@+id/ragione_sociale"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+
+        android:layout_below="@+id/linear_rapp"
+android:layout_toLeftOf="@id/buttonDuplica"
+        style="@style/TestoIntestazioneNoPadding"
+        android:text="Ragione sociale" />
+
+    <TextView
+        android:id="@+id/ordine"
+        style="@style/TestoPiccolo"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/altezza_campo"
+        android:layout_alignLeft="@+id/ragione_sociale"
+
+        android:layout_below="@+id/ragione_sociale"
+
+        android:layout_toLeftOf="@+id/buttonDuplica"
+        android:text="Ordine" />
+    <RelativeLayout
+        android:layout_below="@+id/ordine"
+        android:layout_width="match_parent"
+        android:layout_alignLeft="@+id/ragione_sociale"
+        android:layout_height="wrap_content"
+
+        android:layout_alignParentRight="true">
+        <TextView
+            android:id="@+id/note"
+            style="@style/TestoPiccolo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+
+            android:text="Note:"
+            android:layout_toLeftOf="@+id/buttonAzioni"
+            android:layout_alignParentLeft="true" />
+
+        <Button
+            android:id="@+id/buttonAzioni"
+            android:layout_width="@dimen/larghezza_elemento"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+
+            android:background="@drawable/button_econtab_semitrasparente"
+            android:focusable="false"
+            android:text="@string/opzioni"
+
+
+            android:textAllCaps="true"
+            android:textSize="@dimen/testo_immagine" />
+    </RelativeLayout>
+
+
+</RelativeLayout>

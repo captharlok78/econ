@@ -1,0 +1,83 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_econtab_popup"
+    android:padding="@dimen/margine" >
+
+    <RelativeLayout
+        android:id="@+id/contenitore"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageButton
+            android:id="@+id/imageButton_chiudi"
+            style="@style/bottoneLista"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/bg_bottone_grigio_arrotondato"
+            android:onClick="chiudi"
+            android:scaleType="fitXY"
+            android:src="@android:drawable/ic_delete" />
+
+        <LinearLayout
+            android:id="@+id/linera_ricerca"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/imageButton_chiudi"
+            android:orientation="horizontal" >
+
+            <EditText
+                android:id="@+id/editText_filtra"
+                android:layout_width="wrap_content"
+                
+                android:layout_height="wrap_content"
+               
+                android:ems="15"
+                android:hint="@string/nome_file_import"
+                android:singleLine="true" >
+
+                <requestFocus />
+            </EditText>
+
+            <ImageButton
+                android:id="@+id/imageButtonCerca"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/bg_bottone_lista"
+                android:scaleType="centerInside"
+                android:onClick="ricercaClick"
+                android:src="@android:drawable/ic_menu_search" />
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/listView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textViewCurrentDir" >
+        </ListView>
+
+        <TextView
+            android:id="@+id/textViewCurrentDir"
+            style="@style/TestoPiccolo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/linera_ricerca"
+            android:layout_marginBottom="@dimen/margine"
+            android:text="CurrentDir" />
+
+        <ProgressBar
+            android:id="@+id/progressBar1"
+            
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textViewCurrentDir"
+            android:layout_centerHorizontal="true" />
+
+    </RelativeLayout>
+
+</FrameLayout>

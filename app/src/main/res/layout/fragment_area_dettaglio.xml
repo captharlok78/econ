@@ -1,0 +1,127 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        
+        android:layout_alignParentTop="true" >
+
+        <LinearLayout
+            android:id="@+id/campi"
+            style="@style/EConTabLinearLayoutMaster"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:id="@+id/prima_riga"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine" >
+
+                <LinearLayout
+                    android:id="@+id/riga_0"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/button_edit_area"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/textView_area"
+                        style="@style/TestoIntestazioneNoPadding"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/area" />
+
+                    <TextView
+                        android:id="@+id/editText_area"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/button_edit_area"
+                    style="@style/bottoneListaGrande"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/modifica"
+                    android:background="@drawable/bg_bottone_rotondo"
+                    android:scaleType="fitXY"
+                    android:onClick="modifica" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/riga_9"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine"
+                android:layout_marginTop="@dimen/margine"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/textView_linea"
+                    style="@style/TestoIntestazioneNoPadding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/linea_standard" />
+
+                <TextView
+                    android:id="@+id/editText_linea"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/riga_10"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine"
+                android:layout_marginTop="@dimen/margine"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/textView_placca"
+                    style="@style/TestoIntestazioneNoPadding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/placca_standard" />
+
+                <TextView
+                    android:id="@+id/editText_placca"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/riga_11"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine"
+                android:layout_marginTop="@dimen/margine"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/textView_note"
+                    style="@style/TestoIntestazioneNoPadding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/note" />
+
+                <TextView
+                    android:id="@+id/editText_note"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    
+
+</RelativeLayout>

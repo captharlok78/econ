@@ -1,0 +1,207 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/campi"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/altezza_campo"
+    android:orientation="vertical"
+    android:padding="@dimen/margine" >
+
+    <LinearLayout
+        android:id="@+id/linearFornitore"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/textView_fornitore"
+            style="@style/TestoIntestazione"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/fornitore" />
+
+        <pfa.app.econtab.views.EConTabSpinner
+            android:id="@+id/econtabSpinnerFornitore"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+        </pfa.app.econtab.views.EConTabSpinner>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLinea"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/textView_linea"
+            style="@style/TestoIntestazione"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/linea" />
+
+        <pfa.app.econtab.views.EConTabSpinner
+            android:id="@+id/econtabSpinnerLinea"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+        </pfa.app.econtab.views.EConTabSpinner>
+    </LinearLayout>
+    <TextView
+        android:id="@+id/textView_linea_originale"
+        style="@style/TestoNeroPiccolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Linea originale: " />
+    <LinearLayout
+        android:id="@+id/linearCodice"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/textView_codice"
+            style="@style/TestoIntestazione"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/codice_articolo" />
+
+        <AutoCompleteTextView
+            android:id="@+id/editText_codice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:dropDownHeight="@dimen/altezza_dropdownlist"
+            android:ems="10"
+            android:inputType="textVisiblePassword"
+            android:hint="@string/messaggio_seleziona_inserisci_codice" >
+
+            <requestFocus />
+        </AutoCompleteTextView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearDescrizione"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/textView_descrizione"
+            style="@style/TestoIntestazione"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/descrizione" />
+
+        <EditText
+            android:id="@+id/editText_descrizione"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="255"
+            android:maxLines="3" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textViewNotaBene"
+        style="@style/TestoIntestazione"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margine"
+        android:text="@string/prezzi_listino"
+        android:textAllCaps="true"
+        android:textSize="@dimen/testo_immagine_grande"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:id="@+id/linearPrezzo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <LinearLayout
+            android:id="@+id/linearPrzAcq"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView_przacq"
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/prezzo_acquisto" />
+
+            <EditText
+                android:id="@+id/editText_przAcq"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="5"
+                android:inputType="numberDecimal"
+                android:maxLength="8"
+                android:textSize="@dimen/testo_immagine_grande" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearPrzLis"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/margine"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView_przLis"
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/prezzo_listino" />
+
+            <EditText
+                android:id="@+id/editText_przLis"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="5"
+                android:inputType="numberDecimal"
+                android:maxLength="8"
+                android:textSize="@dimen/testo_immagine_grande" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearSconto"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/margine"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView_sconto"
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sconto" />
+
+            <EditText
+                android:id="@+id/editText_sconto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="3"
+                android:inputType="numberDecimal"
+                android:maxLength="6"
+                android:textSize="@dimen/testo_immagine_grande" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearAggiorna"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margine" >
+ <TextView
+                android:id="@+id/textView_Aggiorna"
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/aggiorna_prezzi_preventivo" />
+        <CheckBox
+            android:id="@+id/checkBoxAggiorna"
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="@dimen/margine"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+</LinearLayout>

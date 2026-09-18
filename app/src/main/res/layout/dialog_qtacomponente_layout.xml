@@ -1,0 +1,38 @@
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linear_0"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/altezza_campo"
+    android:orientation="vertical"
+    android:padding="@dimen/margine"
+   >
+
+    <TextView
+        android:id="@+id/textView_qta"
+        style="@style/TestoIntestazione"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/quantita" />
+
+    <EditText
+        android:id="@+id/editText_qta"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/altezza_campo_doppia"
+        android:ems="4"
+        android:inputType="numberDecimal"
+        android:maxLength="10"
+        android:textSize="@dimen/altezza_campo"
+        android:selectAllOnFocus="true"
+         />
+
+    <TextView
+        android:id="@+id/textView_componenti"
+        style="@style/TestoPiccolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margine"
+        android:text="@string/componente"
+        android:textSize="@dimen/testo_immagine" />
+
+</LinearLayout>

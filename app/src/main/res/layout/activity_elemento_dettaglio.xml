@@ -1,0 +1,233 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_econtab_popup"
+    android:padding="@dimen/margine" >
+
+    <RelativeLayout
+        android:id="@+id/contenitore"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:id="@+id/linear_titolo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="center_horizontal"
+            android:layout_toLeftOf="@+id/imageButton_chiudi" >
+
+            <ImageView
+                android:id="@+id/imageView_iconaElemento"
+                android:layout_width="@dimen/altezza_menu_categorie"
+                android:layout_height="@dimen/altezza_menu_categorie"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_launcher" />
+
+            <TextView
+                android:id="@+id/textView_titolo"
+                style="@style/Titolo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="@dimen/margine"
+                android:text="Elemento"
+                android:textAllCaps="true" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/imageButton_chiudi"
+            style="@style/bottoneLista"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/bg_bottone_grigio_arrotondato"
+            android:onClick="chiudi"
+            android:scaleType="fitXY"
+            android:src="@android:drawable/ic_delete" />
+
+        <LinearLayout
+            android:id="@+id/linearCampi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/linear_titolo" >
+
+            <LinearLayout
+                android:id="@+id/linearNumero"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/textView_etichetta"
+                    style="@style/TestoIntestazioneNoPadding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/etichetta" />
+
+                <EditText
+                    android:id="@+id/editText_etichetta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_econtab_edit"
+                    android:ems="3"
+                    android:inputType="number"
+                    android:maxLength="6" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearAltezza"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margine"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/textView_altezza"
+                    style="@style/TestoIntestazioneNoPadding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/altezza" />
+
+                <EditText
+                    android:id="@+id/editText_altezza"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_econtab_edit"
+                    android:ems="3"
+                    android:inputType="number"
+                    android:maxLength="6" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/button_salva_mod"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="@dimen/margine"
+                android:layout_marginRight="@dimen/margine"
+                android:onClick="salvaDatiGenerali"
+                android:text="@string/salva"
+                android:textColor="#1784c5"
+                android:textSize="@dimen/testo_immagine_grande" />
+
+            <LinearLayout
+                android:id="@+id/linear_pulsanti"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="@dimen/altezza_campo"
+                android:gravity="right"
+                android:orientation="horizontal" >
+
+                <ImageButton
+                    android:id="@+id/button_non_conteggiare"
+                    style="@style/bottoneListaGrande"
+                    android:background="@drawable/bg_bottone_rotondo_giallo"
+                    android:onClick="nonConteggiare"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/conteggia_in_ordine" />
+                <ImageButton
+                    android:layout_marginLeft="@dimen/margine"
+                    android:id="@+id/button_edit_elemento"
+                    style="@style/bottoneListaGrande"
+                    android:background="@drawable/bg_bottone_rotondo"
+                    android:onClick="apriModifica"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/modifica" />
+				<ImageButton
+                    android:id="@+id/button_nota"
+                    style="@style/bottoneListaGrande"
+                    android:layout_marginLeft="@dimen/margine"
+                    android:background="@drawable/bg_bottone_rotondo"
+                    android:scaleType="fitXY"
+                    android:onClick="apriNota"
+                    android:src="@drawable/note" />
+                <ImageButton
+                    android:id="@+id/button_relazioni"
+                    style="@style/bottoneListaGrande"
+                    android:layout_marginLeft="@dimen/margine"
+                    android:background="@drawable/bg_bottone_rotondo"
+                    android:onClick="nuovoCollegamento"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/nuova_relazione" />
+            </LinearLayout>
+        </LinearLayout>
+<TextView
+                android:id="@+id/nota"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nota"
+                 android:layout_below="@+id/linearCampi"
+                android:textColor="@android:color/darker_gray"
+                android:layout_marginTop="@dimen/margine"
+                android:textSize="@dimen/testo_immagine_grande" />
+        <ScrollView
+            android:id="@+id/scroll_relazioni"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/nota"
+            android:layout_marginTop="@dimen/margine">
+        <LinearLayout
+            android:id="@+id/linear_collegamenti"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:orientation="vertical" >
+
+            <FrameLayout
+                android:id="@+id/separatore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine"
+                android:background="@drawable/divider" />
+
+            <TextView
+                android:id="@+id/textView_relazioni"
+                style="@style/TestoIntestazioneNoPadding"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/punti_di_comando"
+                android:textAllCaps="true" />
+            <LinearLayout
+                android:id="@+id/lista_relazioni_logiche"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/altezza_campo"
+                android:orientation="vertical" >
+                <Button
+                    android:id="@+id/descrizione"
+                    style="@style/TestoNeroPiccolo"
+                    android:layout_width="match_parent"
+                    android:gravity="left"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="@dimen/padding_drag"
+                    android:paddingBottom="@dimen/padding_drag"
+                    android:background="@drawable/bg_bottone_bianco"
+                    android:onClick="nuovaRelazione"
+                    android:text="@string/aggiungi_punto_comando" />
+            </LinearLayout>
+            <TextView
+                android:id="@+id/textView_collegamenti"
+                style="@style/TestoIntestazioneNoPadding"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/collegamenti"
+                android:textAllCaps="true" />
+
+
+
+                <LinearLayout
+                    android:id="@+id/lista_relazioni"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+                    android:orientation="vertical" >
+                </LinearLayout>
+        </LinearLayout>
+            </ScrollView>
+
+    </RelativeLayout>
+
+</FrameLayout>

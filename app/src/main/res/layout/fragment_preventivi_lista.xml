@@ -1,0 +1,102 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#F5F5F5">
+
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:orientation="vertical"
+        android:background="@drawable/bg_card_filtri"
+        android:layout_margin="8dp"
+        android:padding="10dp">
+
+        <!-- Riga 1: ricerca cliente (testo libero) + pulsante per avviare la ricerca -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <AutoCompleteTextView
+                android:id="@+id/autoComplete_filtroCliente"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:minHeight="40dp"
+                android:background="@drawable/bg_input_outline"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:hint="@string/cerca_cliente_2"
+                android:imeOptions="actionSearch"
+                android:singleLine="true" >
+
+                <requestFocus />
+            </AutoCompleteTextView>
+
+            <ImageButton
+                android:id="@+id/buttonCerca"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:background="@drawable/bg_bottone_ricerca"
+                android:src="@drawable/ic_search"
+                android:contentDescription="@string/cerca" />
+
+        </LinearLayout>
+
+        <!-- Riga 2: filtri anno e stato, allineati e della stessa larghezza -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <pfa.app.econtab.views.EConTabSpinner
+                android:id="@+id/econtabSpinner_filtroAnno"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:layout_height="wrap_content" />
+
+            <pfa.app.econtab.views.EConTabSpinner
+                android:id="@+id/econtabSpinner_filtroStato"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/lista"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/header"
+        android:clipToPadding="false"
+        android:paddingBottom="72dp" >
+    </ListView>
+
+    <ImageButton
+        android:id="@+id/buttonnuovo"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        android:elevation="4dp"
+        android:padding="16dp"
+        android:scaleType="fitCenter"
+        android:background="@drawable/bg_bottone_ricerca"
+        android:src="@drawable/ic_add_fab"
+        android:contentDescription="@string/nuovo"
+        android:onClick="nuovoCantiere" />
+
+</RelativeLayout>

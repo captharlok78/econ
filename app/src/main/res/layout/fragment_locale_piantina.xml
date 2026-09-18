@@ -1,0 +1,199 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linear_contenitore"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+            <pfa.app.econtab.views.EConTabPiantinaFrameLayout
+                android:id="@+id/root"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true" >
+
+                <RelativeLayout
+                    android:id="@+id/relative_root"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+
+                    <ImageButton
+
+                        android:id="@+id/button_lista_elementi"
+                        android:layout_width="@dimen/altezza_campo_doppia"
+                        android:layout_height="@dimen/altezza_campo_doppia"
+                        android:layout_alignParentTop="true"
+                        android:background="@drawable/button_econtab_trasparente"
+                        android:src="@drawable/lista_elementi"
+                        android:layout_toLeftOf="@+id/button_cestino"
+                        android:scaleType="fitXY"
+
+                        />
+                    <ImageButton
+                        android:id="@+id/button_cestino"
+                        android:layout_width="@dimen/altezza_campo_doppia"
+                        android:layout_height="@dimen/altezza_campo_doppia"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentTop="true"
+                        android:background="@android:color/transparent"
+                        
+                        android:scaleType="centerInside"
+                        android:src="@drawable/cestino" />
+
+                    <FrameLayout
+                        android:id="@+id/wrapper_piantina"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentLeft="true"
+                        android:layout_below="@+id/button_cestino"
+                        android:layout_marginBottom="@dimen/altezza_campo"
+                        android:layout_marginLeft="@dimen/altezza_campo"
+                        android:layout_marginRight="@dimen/altezza_campo"
+                        android:layout_marginTop="@dimen/altezza_campo"
+                         >
+
+                        <pfa.app.econtab.views.EConTabPiantinaGridView
+                            android:id="@+id/gridView_piantina"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_horizontal"
+                            android:background="@android:color/transparent"
+                            android:numColumns="10" >
+                        </pfa.app.econtab.views.EConTabPiantinaGridView>
+                    </FrameLayout>
+
+                    
+                </RelativeLayout>
+            </pfa.app.econtab.views.EConTabPiantinaFrameLayout>
+      
+             <RelativeLayout
+        android:id="@+id/tasti"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+       
+        android:layout_alignParentTop="true"
+        android:background="@drawable/bg_econtab_biancosfumato">
+
+        <HorizontalScrollView
+            android:id="@+id/scroll_tasti"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/altezza_campo_doppia"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" >
+
+            <LinearLayout
+                android:id="@+id/linear_tasti"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:divider="@drawable/divider_tab"
+                android:showDividers="middle" >
+ 				<ImageButton
+                    android:id="@+id/button_preferiti"
+                    android:layout_width="@dimen/altezza_campo_doppia"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_bottone_lista"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/preferiti" />
+                <ImageButton
+                    android:id="@+id/button_edit"
+                    android:layout_width="@dimen/altezza_campo_doppia"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_bottone_lista"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/righello" />
+
+                <ImageButton
+                    android:id="@+id/button_porta"
+                    android:layout_width="@dimen/altezza_campo_doppia"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_bottone_lista"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/porta" />
+
+                <ImageButton
+                    android:id="@+id/button_finestra"
+                    android:layout_width="@dimen/altezza_campo_doppia"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_bottone_lista"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/finestra" />
+
+                
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <ImageView
+            android:id="@+id/divider_piantina"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/scroll_tasti"
+            android:layout_marginTop="@dimen/padding_bottone"
+            android:src="@drawable/divider" />
+    </RelativeLayout>
+
+            
+
+             <ImageButton
+                 android:layout_centerHorizontal="true"
+                 android:layout_below="@+id/tasti"
+                 android:background="@android:color/transparent"
+                 android:id="@+id/imageButton_mostra"
+                 android:scaleType="fitXY"
+                 
+                 android:layout_width="@dimen/altezza_campo_doppia"
+                 android:layout_height="@dimen/altezza_campo"
+                 android:src="@drawable/slide_down" />
+              <ImageButton
+        android:id="@+id/button_drag_si_no"
+        android:layout_width="@dimen/altezza_campo_doppia"
+        android:layout_height="@dimen/altezza_campo_doppia"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:background="@android:color/transparent"
+        android:layout_marginBottom="@dimen/padding_bottone"
+        android:layout_marginRight="@dimen/padding_bottone"
+        android:scaleType="centerInside"
+        android:src="@drawable/drag_no" />  
+
+
+    <RelativeLayout
+        android:id="@+id/popup_lista_elementi"
+        android:background="@drawable/bg_econtab_popup_trasparente"
+        android:layout_width="match_parent"
+        android:layout_centerInParent="true"
+        android:layout_margin="@dimen/altezza_campo_doppia"
+        android:paddingTop="@dimen/margine"
+        android:paddingLeft="@dimen/margine"
+        android:paddingRight="@dimen/margine"
+        android:paddingBottom="@dimen/altezza_campo"
+        android:layout_height="wrap_content">
+        <ImageButton
+            android:id="@+id/imageButton_chiudi_lista"
+            style="@style/bottoneLista"
+            
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/bg_bottone_grigio_arrotondato"
+            android:scaleType="fitXY"
+            android:src="@android:drawable/ic_delete" />
+        <TextView
+            android:id="@+id/titolo_lista"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:text="@string/lista_elementi"
+            android:textAllCaps="true"
+            style="@style/TestoIntestazioneNoPadding"
+            />
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/lista_elementi"
+            android:layout_below="@id/titolo_lista"
+
+
+            android:layout_marginTop="@dimen/altezza_campo"
+            android:background="@android:color/transparent"
+            ></ListView>
+        </RelativeLayout>
+
+</RelativeLayout>

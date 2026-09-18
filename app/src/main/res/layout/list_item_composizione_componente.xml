@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/riga"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/margine"
+     android:paddingTop="@dimen/margine"
+     >
+
+    <ImageView
+        android:id="@+id/imageView_icona"
+        android:layout_width="@dimen/altezza_campo_doppia"
+        android:layout_height="@dimen/altezza_campo_doppia"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="@dimen/padding_bottone"
+        android:layout_marginRight="@dimen/padding_bottone"
+
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_launcher" />
+
+    <TextView
+        android:id="@+id/descrizione"
+        style="@style/TestoNeroPiccolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/margine"
+        android:layout_toRightOf="@+id/imageView_icona"
+        android:text="Componente" />
+
+</RelativeLayout>

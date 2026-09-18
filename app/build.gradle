@@ -1,0 +1,84 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdk 36
+    buildToolsVersion '35.0.0'
+
+    defaultConfig {
+        applicationId "pfa.app.econtab"
+        minSdkVersion 26
+        targetSdkVersion 34
+
+        // Timeout di rete configurabili a compile-time
+        buildConfigField "int",    "CONNECT_TIMEOUT_SEC", "30"
+        buildConfigField "int",    "READ_TIMEOUT_SEC",    "60"
+        buildConfigField "String", "API_BASE_URL",        '""'  // Override in release
+    }
+
+    namespace 'pfa.app.econtab'
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+        }
+        release {
+            debuggable false   // ERA true — corretto per sicurezza
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    useLibrary 'org.apache.http.legacy'
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/LICENSE.txt', 'META-INF/license.txt', 'META-INF/NOTICE', 'META-INF/NOTICE.txt', 'META-INF/notice.txt', 'META-INF/ASL2.0', 'META-INF/*.kotlin_module']
+        }
+    }
+    compileSdkMinor 1
+
+}
+
+dependencies {
+    // ── UI / AndroidX ──────────────────────────────────────────────────────
+    implementation 'com.google.android.material:material:1.14.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.core:core:1.18.0'
+
+    // ── Billing (Google Play) ──────────────────────────────────────────────
+    implementation 'com.android.billingclient:billing:9.0.0'
+
+    // ── HTTP moderno: Retrofit2 + OkHttp + Gson ────────────────────────────
+    // Sostituisce: ksoap2, Apache HttpClient legacy, HttpURLConnection manuale
+    implementation 'com.squareup.retrofit2:retrofit:3.0.0'
+    implementation 'com.squareup.retrofit2:converter-gson:3.0.0'
+    implementation 'com.squareup.okhttp3:okhttp:5.3.2'
+    implementation 'com.squareup.okhttp3:logging-interceptor:5.3.2'
+    implementation 'com.google.code.gson:gson:2.14.0'
+
+    // ── Background sync: WorkManager ───────────────────────────────────────
+    // Sostituisce: android.app.Service manuale (EConTabService)
+    implementation 'androidx.work:work-runtime:2.11.2'
+
+    // ── Sicurezza token JWT in SharedPreferences ───────────────────────────
+    implementation 'androidx.security:security-crypto:1.1.0'
+
+    // ── Export Excel ───────────────────────────────────────────────────────
+    // POI 3.7 già nelle libs/ — rimane invariato finché non si migra
+
+    // ── Librerie locali (POI + legacy) ────────────────────────────────────
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    // ── Annotazioni ────────────────────────────────────────────────────────
+    implementation 'org.jetbrains:annotations:26.1.0'
+}

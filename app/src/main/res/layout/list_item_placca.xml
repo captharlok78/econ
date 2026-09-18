@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="5sp" >
+
+    <TextView
+        android:id="@+id/nome_linea"
+        style="@style/TestoIntestazioneNoPadding"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/descrizione"
+        android:text="Linea" />
+
+    <TextView
+        android:id="@+id/nome_placca"
+        style="@style/TestoNeroPiccolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/nome_linea"
+        android:text="Placca" />
+
+</RelativeLayout>

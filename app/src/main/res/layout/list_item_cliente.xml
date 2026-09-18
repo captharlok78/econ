@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" 
+    android:padding="5sp"
+    >
+
+    <TextView
+        android:id="@+id/ragione_sociale"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        
+        android:text="Ragione sociale"
+        android:layout_toRightOf="@+id/codice_esterno" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cod."
+        style="@style/TestoPiccolo"
+        android:id="@+id/codice_esterno"
+        android:layout_alignParentRight="true" />
+
+    <TextView
+        android:id="@+id/indirizzo"
+        style="@style/TestoPiccolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/ragione_sociale"
+        android:layout_alignRight="@+id/ragione_sociale"
+        android:layout_below="@+id/ragione_sociale"
+        android:text="Indirizzo" />
+
+     <TextView
+         android:id="@+id/cap_citta"
+         style="@style/TestoPiccolo"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_alignLeft="@+id/indirizzo"
+         android:layout_alignRight="@+id/indirizzo"
+         android:layout_below="@+id/indirizzo"
+         android:text="Cap" />
+
+</RelativeLayout>

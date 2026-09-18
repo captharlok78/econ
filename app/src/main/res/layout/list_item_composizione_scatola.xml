@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linear_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    android:orientation="vertical" >
+<LinearLayout
+                android:id="@+id/lista_relazioni_tubi_libere"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+            </LinearLayout>
+    <RelativeLayout
+        android:id="@+id/riga"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+         android:layout_marginBottom="@dimen/margine"
+        android:descendantFocusability="blocksDescendants"
+        android:paddingBottom="@dimen/padding_bottone" >
+
+        <RelativeLayout
+            android:id="@+id/relative_main"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="@dimen/margine"
+            android:layout_toRightOf="@+id/imageView_icona" >
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/linearLayout">
+
+                <ImageButton
+                    android:id="@+id/button_non_conteggiare"
+                    style="@style/bottoneListaGrande"
+                    android:background="@drawable/bg_bottone_rotondo_giallo"
+
+                    android:scaleType="fitXY"
+                    android:layout_toLeftOf="@+id/button_relazioni"
+                    android:src="@drawable/conteggia_in_ordine" />
+
+                <ImageButton
+                    android:id="@+id/button_relazioni"
+                    style="@style/bottoneListaGrande"
+                    android:layout_marginLeft="@dimen/margine"
+
+                    android:background="@drawable/bg_bottone_rotondo"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/nuova_relazione" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/LinearLayout1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_toLeftOf="@+id/linearLayout">
+
+                <TextView
+                    android:id="@+id/tipo"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SCATOLA"
+                    android:textAllCaps="true" />
+
+                <TextView
+                    android:id="@+id/descrizione"
+                    style="@style/TestoNeroPiccolo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Scatola 3 moduli" />
+
+                <TextView
+                    android:id="@+id/nota"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nota"
+                    android:textColor="@android:color/darker_gray"
+                    android:textSize="@dimen/testo_immagine" />
+            </LinearLayout>
+        </RelativeLayout>
+        <LinearLayout
+            android:id="@+id/linear_relazioni"
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/relative_main"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/relative_main"
+            android:orientation="vertical"
+            android:paddingTop="@dimen/padding_bottone" >
+            <RelativeLayout
+                android:id="@+id/relative_titolo_relazioni"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/textView_relazioni"
+                    style="@style/TestoIntestazioneNoPadding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/relazioni"
+                    android:textAllCaps="true"
+                    android:textSize="@dimen/testo_immagine" />
+
+                <ImageView
+                    android:id="@+id/imageViewSeparatoreRelazioni"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/padding_bottone"
+                    android:layout_toRightOf="@+id/textView_relazioni"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/divider_grigiochiaro" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/lista_relazioni_logiche"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+            </LinearLayout>
+
+
+
+
+            </LinearLayout>
+        <LinearLayout
+            android:id="@+id/linear_collegamenti"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/relative_main"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/linear_relazioni"
+            android:orientation="vertical"
+            android:paddingTop="@dimen/padding_bottone" >
+
+            <RelativeLayout
+                android:id="@+id/relative_titolo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <TextView
+                    android:id="@+id/textView_collegamenti"
+                    style="@style/TestoIntestazioneNoPadding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/collegamenti"
+                    android:textAllCaps="true"
+                    android:textSize="@dimen/testo_immagine" />
+
+                <ImageView
+                    android:id="@+id/imageViewSeparatore"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="@dimen/padding_bottone"
+                    android:layout_toRightOf="@+id/textView_collegamenti"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/divider_grigiochiaro" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/lista_relazioni"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+            </LinearLayout>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/imageView_icona"
+            android:layout_width="@dimen/altezza_campo_doppia"
+            android:layout_height="@dimen/altezza_campo_doppia"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="@dimen/padding_bottone"
+            android:layout_marginRight="@dimen/padding_bottone"
+            android:layout_marginTop="@dimen/margine"
+            android:layout_toRightOf="@+id/linear_posizione"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_launcher" />
+
+        <LinearLayout
+            android:id="@+id/linear_posizione"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:orientation="vertical" >
+
+            <ImageButton
+                android:id="@+id/button_up"
+                style="@style/bottoneListaGrande"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/bg_bottone_grigio_arrotondato"
+                android:scaleType="centerInside"
+                android:src="@drawable/up" />
+
+            <TextView
+                android:id="@+id/textView_posizione"
+                style="@style/TestoNeroPiccolo"
+                android:layout_width="@dimen/altezza_campo_doppia"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:gravity="center"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:text="12"
+                android:textColor="@android:color/darker_gray" />
+
+            <ImageButton
+                android:id="@+id/button_down"
+                style="@style/bottoneListaGrande"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/bg_bottone_grigio_arrotondato"
+                android:scaleType="centerInside"
+                android:src="@drawable/down" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</LinearLayout>

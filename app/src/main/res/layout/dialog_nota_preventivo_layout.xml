@@ -1,0 +1,44 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/campi"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/altezza_campo"
+    android:orientation="vertical"
+    android:padding="@dimen/margine" >
+
+    <TextView
+        android:id="@+id/textView_nota"
+        style="@style/TestoIntestazione"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/nota" />
+
+    <EditText
+        android:id="@+id/editText_nota"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        
+         android:maxLines="4"
+        android:maxLength="255"
+        android:inputType="textMultiLine"
+        android:textSize="@dimen/altezza_campo" />
+
+    <TextView
+        android:id="@+id/textView_importo"
+        style="@style/TestoIntestazione"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/importo" />
+
+    <EditText
+        android:id="@+id/editText_importo"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/altezza_campo_doppia"
+        android:ems="4"
+        android:inputType="numberDecimal"
+        android:maxLength="6"
+        android:textSize="@dimen/altezza_campo" />
+
+   
+
+</LinearLayout>

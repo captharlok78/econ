@@ -1,0 +1,164 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/margine">
+
+    <!-- Pulsante impostazioni server in alto a destra, sempre visibile -->
+    <ImageButton
+        android:id="@+id/buttonImpostazioniServer"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="8dp"
+        android:background="@android:color/transparent"
+        android:contentDescription="Impostazioni server"
+        android:onClick="apriImpostazioniServer"
+        android:src="@android:drawable/ic_menu_preferences"
+        android:tint="#1784c5" />
+
+    <ScrollView
+        android:id="@+id/contenitore"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:id="@+id/linear_registrazione"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/editbox_background_normal"
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical"
+            android:layout_marginLeft="@dimen/margine_tablet"
+            android:layout_marginRight="@dimen/margine_tablet"
+            android:padding="@dimen/margine" >
+
+            <!-- Indicatore stato connessione Mercury -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="@dimen/margine">
+
+                <View
+                    android:id="@+id/indicatoreConnessione"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:background="#9E9E9E"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:id="@+id/testoStatoConnessione"
+                    style="@style/TestoNeroPiccolo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Server non configurato" />
+            </LinearLayout>
+
+            <!-- Sezione login Mercury (email + password JWT) -->
+            <TextView
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Accesso Mercury" />
+
+            <EditText
+                android:id="@+id/editTextEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Email"
+                android:inputType="textEmailAddress"
+                android:layout_marginBottom="@dimen/margine" />
+
+            <EditText
+                android:id="@+id/editTextPasswordMercury"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:layout_marginBottom="@dimen/margine" />
+
+            <Button
+                android:id="@+id/button_login_mercury"
+                style="@style/TestoNeroGrande"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine"
+                android:onClick="accediMercury"
+                android:padding="@dimen/margine"
+                android:text="Accedi con Mercury"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#1784c5" />
+
+            <TextView
+                android:id="@+id/tvPasswordDimenticata"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="Password dimenticata?"
+                android:textColor="#1784c5"
+                android:textSize="13sp"
+                android:paddingTop="4dp"
+                android:paddingBottom="8dp"
+                android:layout_marginBottom="@dimen/margine"
+                android:onClick="recuperoPasswordMercury"/>
+
+            <!-- Separatore -->
+            <View
+                android:id="@+id/separatoreLogin"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#CCCCCC"
+                android:layout_marginTop="@dimen/margine"
+                android:layout_marginBottom="@dimen/margine" />
+
+            <!-- Sezione login locale (vecchio sistema, solo se ci sono utenti nel DB) -->
+            <TextView
+                android:id="@+id/textViewAccount"
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Accesso locale" />
+
+            <pfa.app.econtab.views.EConTabSpinner
+                android:id="@+id/econtabSpinnerUtenti"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine" >
+            </pfa.app.econtab.views.EConTabSpinner>
+
+            <EditText
+                android:id="@+id/editTextPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="15"
+                android:inputType="textPassword"
+                android:maxLength="10" >
+                <requestFocus />
+            </EditText>
+
+            <CheckBox
+                android:id="@+id/checkBoxRicordaPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine"
+                style="@style/TestoIntestazioneNoPadding"
+                android:layout_marginTop="@dimen/margine"
+                android:text="@string/ricorda_password" />
+
+            <Button
+                android:id="@+id/button_login"
+                style="@style/TestoNeroGrande"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="@dimen/margine"
+                android:onClick="accedi"
+                android:padding="@dimen/margine"
+                android:text="@string/accedi"
+                android:textColor="#1784c5" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</FrameLayout>

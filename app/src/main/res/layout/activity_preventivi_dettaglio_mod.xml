@@ -1,0 +1,219 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <RelativeLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <ScrollView
+            android:id="@+id/scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/footer_dettaglio"
+            android:layout_alignParentTop="true" >
+
+            <LinearLayout
+                android:id="@+id/campi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/margine" >
+<TextView
+                    android:id="@+id/textView_tipo"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                   
+                    android:text="@string/tipo" />
+
+                <pfa.app.econtab.views.EConTabSpinner
+                    android:id="@+id/econtabSpinner_tipo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+                </pfa.app.econtab.views.EConTabSpinner>
+                <LinearLayout
+                    android:id="@+id/linear_numero_data"
+                    android:layout_width="match_parent"
+                    
+                    android:layout_height="wrap_content"
+                     android:layout_marginTop="@dimen/margine"
+                     >
+
+                    <LinearLayout
+                        android:id="@+id/linear_numero"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_numero"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margine"
+                            android:text="@string/numero" />
+
+                        <TextView
+                            android:id="@+id/editText_numero"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/linear_data"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_data"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margine"
+                            android:text="@string/data" />
+
+                        <pfa.app.econtab.views.EConTabCalendario
+                            android:id="@+id/econtabCaledanrio_data"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" >
+                        </pfa.app.econtab.views.EConTabCalendario>
+                    </LinearLayout>
+                </LinearLayout>
+                
+                <TextView
+                    android:id="@+id/textView_cliente"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cliente" />
+
+                <RelativeLayout
+                    android:id="@+id/relative_editcliente"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <AutoCompleteTextView
+                        android:id="@+id/editText_cliente"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toLeftOf="@+id/button_nuovo"
+                        android:hint="@string/seleziona_cliente"
+                        android:ems="10" >
+
+                        <requestFocus />
+                    </AutoCompleteTextView>
+
+                    <ImageButton
+                        android:id="@+id/button_nuovo"
+                        style="@style/bottoneLista"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="@dimen/margine"
+                        android:background="@drawable/bg_bottone_rotondo"
+                        android:src="@drawable/nuovo"
+                        android:scaleType="fitXY"
+                        android:onClick="nuovoCliente" />
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/textView_cantiere"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="@string/cantiere" />
+
+                <pfa.app.econtab.views.EConTabSpinner
+                    android:id="@+id/econtabSpinner_cantiere"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+                </pfa.app.econtab.views.EConTabSpinner>
+
+                <TextView
+                    android:id="@+id/textView_indirizzo"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="@string/descrizione" />
+
+                <EditText
+                    android:id="@+id/editText_descrizione"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:maxLength="100" />
+
+                <TextView
+                    android:id="@+id/textView_note"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="@string/note" />
+
+                <EditText
+                    android:id="@+id/editText_note"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:gravity="top"
+                    android:maxLength="255"
+                    android:minLines="2" />
+
+                <LinearLayout
+                    android:id="@+id/linear_stato_wrapper"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <LinearLayout
+                        android:id="@+id/linear_stato"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="0.5" >
+
+                        <TextView
+                            android:id="@+id/textView_satato"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margine"
+                            android:text="@string/stato" />
+
+                        <pfa.app.econtab.views.EConTabSpinner
+                            android:id="@+id/econtabSpinner_stato"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" >
+                        </pfa.app.econtab.views.EConTabSpinner>
+                    </LinearLayout>
+                    
+                    <LinearLayout
+                        android:id="@+id/linear_spazio"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="0.5" >
+
+                        
+                    </LinearLayout>
+                    
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <include
+            android:id="@+id/footer_dettaglio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            layout="@layout/footer_dett" />
+    </RelativeLayout>
+
+</FrameLayout>

@@ -1,0 +1,107 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <GridView
+        android:id="@+id/griglia_elementi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:numColumns="auto_fit"
+        android:columnWidth="@dimen/larghezza_elemento"
+       
+        android:horizontalSpacing="@dimen/padding_drag"
+        android:verticalSpacing="@dimen/padding_drag"
+        android:layout_marginTop="@dimen/margine"
+        android:layout_marginBottom="@dimen/margine"
+        android:layout_below="@+id/header" >
+      
+    </GridView>
+
+    <RelativeLayout
+        android:id="@+id/header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/linear_preferiti" >
+
+        <ImageButton
+            android:id="@+id/buttonnuovo"
+            android:scaleType="fitXY"
+            style="@style/bottoneListaGrande"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/margine"
+             android:background="@drawable/bg_bottone_rotondo"
+                        android:src="@drawable/nuovo"/>
+
+        <EditText
+            android:id="@+id/editText_filtra"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/buttonnuovo"
+            android:ems="15"
+            android:hint="@string/cerca"
+            android:singleLine="true" >
+
+            <requestFocus />
+        </EditText>
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_preferiti"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="@dimen/margine"
+        android:layout_marginTop="@dimen/padding_bottone"
+        android:background="@drawable/bg_bottone_grigio_arrotondato"
+        android:clickable="true"
+        android:orientation="horizontal" >
+
+        <ImageView
+            android:id="@+id/image_Preferiti"
+            android:layout_width="@dimen/altezza_campo"
+            android:layout_height="@dimen/altezza_campo"
+            android:layout_margin="@dimen/padding_bottone"
+            android:background="@android:color/transparent"
+            android:scaleType="fitXY"
+            android:src="@android:drawable/star_big_on" />
+
+        <TextView
+            android:id="@+id/textView_preferiti"
+            style="@style/TestoGrigioPiccolo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/articoli_preferiti"
+            android:textAllCaps="true"
+            android:textColor="@android:color/holo_blue_dark" />
+
+        <TextView
+            android:id="@+id/textView_barra"
+            style="@style/TestoGrigioPiccolo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text=" / "
+            android:textAllCaps="true"
+            android:textColor="@android:color/holo_blue_dark" />
+
+        <TextView
+            android:id="@+id/textView_tutti"
+            style="@style/TestoGrigioPiccolo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/tutti"
+            android:textAllCaps="true"
+            android:textColor="#CCCCCC" />
+    </LinearLayout>
+
+    
+
+</RelativeLayout>

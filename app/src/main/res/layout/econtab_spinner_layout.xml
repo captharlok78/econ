@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <RelativeLayout
+        android:id="@+id/econtab_spinner"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="40dp"
+        android:background="@drawable/bg_input_outline"
+
+         >
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/button1"
+            android:ellipsize="marquee"
+            android:singleLine="true"
+            android:background="@android:color/transparent"
+            android:text=""
+            android:textColor="@android:color/black"
+            android:clickable="true" />
+
+        <ImageButton
+            android:id="@+id/button1"
+            android:layout_width="@dimen/altezza_campo"
+            android:layout_height="@dimen/altezza_campo"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/freccia_giu"
+            android:scaleType="fitXY"
+            android:background="@android:color/transparent" />
+
+    </RelativeLayout>

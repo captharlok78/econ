@@ -1,0 +1,500 @@
+-- Merging decision tree log ---
+manifest
+ADDED from AndroidManifest.xml:2:1
+	xmlns:android
+		ADDED from AndroidManifest.xml:2:11
+	package
+		ADDED from AndroidManifest.xml:3:5
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+	android:versionName
+		ADDED from AndroidManifest.xml:5:5
+	android:versionCode
+		ADDED from AndroidManifest.xml:4:5
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+uses-permission#android.permission.INTERNET
+ADDED from AndroidManifest.xml:7:5
+	android:name
+		ADDED from AndroidManifest.xml:7:22
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from AndroidManifest.xml:8:5
+	android:name
+		ADDED from AndroidManifest.xml:8:22
+uses-permission#android.permission.ACCESS_WIFI_STATE
+ADDED from AndroidManifest.xml:9:5
+	android:name
+		ADDED from AndroidManifest.xml:9:22
+uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
+ADDED from AndroidManifest.xml:10:5
+	android:name
+		ADDED from AndroidManifest.xml:10:22
+uses-permission#android.permission.READ_PHONE_STATE
+ADDED from AndroidManifest.xml:11:5
+	android:name
+		ADDED from AndroidManifest.xml:11:22
+uses-permission#android.permission.GET_ACCOUNTS
+ADDED from AndroidManifest.xml:12:5
+	android:name
+		ADDED from AndroidManifest.xml:12:22
+uses-permission#com.android.vending.BILLING
+ADDED from AndroidManifest.xml:13:5
+	android:name
+		ADDED from AndroidManifest.xml:13:22
+application
+ADDED from AndroidManifest.xml:16:5
+	android:label
+		ADDED from AndroidManifest.xml:20:9
+	android:allowBackup
+		ADDED from AndroidManifest.xml:18:9
+	android:icon
+		ADDED from AndroidManifest.xml:19:9
+	android:theme
+		ADDED from AndroidManifest.xml:22:9
+	android:largeHeap
+		ADDED from AndroidManifest.xml:21:9
+	android:name
+		ADDED from AndroidManifest.xml:17:9
+activity#pfa.app.econtab.StartActivity
+ADDED from AndroidManifest.xml:27:10
+	android:label
+		ADDED from AndroidManifest.xml:30:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:29:14
+	android:name
+		ADDED from AndroidManifest.xml:28:14
+intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
+ADDED from AndroidManifest.xml:31:14
+action#android.intent.action.MAIN
+ADDED from AndroidManifest.xml:32:18
+	android:name
+		ADDED from AndroidManifest.xml:32:26
+category#android.intent.category.LAUNCHER
+ADDED from AndroidManifest.xml:34:18
+	android:name
+		ADDED from AndroidManifest.xml:34:28
+activity#pfa.app.econtab.ConfigurazioneActivity
+ADDED from AndroidManifest.xml:37:10
+	android:label
+		ADDED from AndroidManifest.xml:40:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:39:14
+	android:name
+		ADDED from AndroidManifest.xml:38:14
+activity#pfa.app.econtab.MenuActivity
+ADDED from AndroidManifest.xml:42:10
+	android:label
+		ADDED from AndroidManifest.xml:45:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:44:14
+	android:name
+		ADDED from AndroidManifest.xml:43:14
+activity#pfa.app.econtab.AziendaDettaglioActivity
+ADDED from AndroidManifest.xml:48:10
+	android:label
+		ADDED from AndroidManifest.xml:51:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:50:14
+	android:name
+		ADDED from AndroidManifest.xml:49:14
+activity#pfa.app.econtab.CostruttoriDettaglioActivity
+ADDED from AndroidManifest.xml:53:10
+	android:label
+		ADDED from AndroidManifest.xml:56:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:55:14
+	android:name
+		ADDED from AndroidManifest.xml:54:14
+activity#pfa.app.econtab.ClientiActivity
+ADDED from AndroidManifest.xml:58:10
+	android:label
+		ADDED from AndroidManifest.xml:61:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:60:14
+	android:name
+		ADDED from AndroidManifest.xml:59:14
+activity#pfa.app.econtab.ClientiDettaglioActivity
+ADDED from AndroidManifest.xml:63:10
+	android:label
+		ADDED from AndroidManifest.xml:66:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:65:14
+	android:name
+		ADDED from AndroidManifest.xml:64:14
+activity#pfa.app.econtab.CrashActivity
+ADDED from AndroidManifest.xml:68:10
+	android:label
+		ADDED from AndroidManifest.xml:70:14
+	android:name
+		ADDED from AndroidManifest.xml:69:14
+activity#pfa.app.econtab.ClientiDettaglioModActivity
+ADDED from AndroidManifest.xml:72:10
+	android:label
+		ADDED from AndroidManifest.xml:75:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:74:14
+	android:name
+		ADDED from AndroidManifest.xml:73:14
+activity#pfa.app.econtab.IvaDettaglioActivity
+ADDED from AndroidManifest.xml:77:10
+	android:label
+		ADDED from AndroidManifest.xml:80:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:79:14
+	android:name
+		ADDED from AndroidManifest.xml:78:14
+activity#pfa.app.econtab.CantieriDettaglioModActivity
+ADDED from AndroidManifest.xml:82:10
+	android:label
+		ADDED from AndroidManifest.xml:85:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:84:14
+	android:name
+		ADDED from AndroidManifest.xml:83:14
+activity#pfa.app.econtab.LineeDettaglioModActivity
+ADDED from AndroidManifest.xml:87:10
+	android:label
+		ADDED from AndroidManifest.xml:90:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:89:14
+	android:name
+		ADDED from AndroidManifest.xml:88:14
+activity#pfa.app.econtab.FornitoriLineeActivity
+ADDED from AndroidManifest.xml:92:10
+	android:label
+		ADDED from AndroidManifest.xml:95:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:94:14
+	android:name
+		ADDED from AndroidManifest.xml:93:14
+activity#pfa.app.econtab.PlaccheDettaglioModActivity
+ADDED from AndroidManifest.xml:97:10
+	android:label
+		ADDED from AndroidManifest.xml:100:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:99:14
+	android:name
+		ADDED from AndroidManifest.xml:98:14
+activity#pfa.app.econtab.CantieriActivity
+ADDED from AndroidManifest.xml:102:10
+	android:label
+		ADDED from AndroidManifest.xml:105:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:104:14
+	android:name
+		ADDED from AndroidManifest.xml:103:14
+activity#pfa.app.econtab.CantiereSplitActivity
+ADDED from AndroidManifest.xml:107:10
+	android:label
+		ADDED from AndroidManifest.xml:110:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:109:14
+	android:name
+		ADDED from AndroidManifest.xml:108:14
+activity#pfa.app.econtab.UnitaDettaglioModActivity
+ADDED from AndroidManifest.xml:112:10
+	android:label
+		ADDED from AndroidManifest.xml:115:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:114:14
+	android:name
+		ADDED from AndroidManifest.xml:113:14
+activity#pfa.app.econtab.AreaDettaglioModActivity
+ADDED from AndroidManifest.xml:117:10
+	android:label
+		ADDED from AndroidManifest.xml:120:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:119:14
+	android:name
+		ADDED from AndroidManifest.xml:118:14
+activity#pfa.app.econtab.LocaleDettaglioModActivity
+ADDED from AndroidManifest.xml:122:10
+	android:label
+		ADDED from AndroidManifest.xml:125:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:124:14
+	android:name
+		ADDED from AndroidManifest.xml:123:14
+activity#pfa.app.econtab.PiantinaLocaleModActivity
+ADDED from AndroidManifest.xml:127:10
+	android:label
+		ADDED from AndroidManifest.xml:130:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:129:14
+	android:name
+		ADDED from AndroidManifest.xml:128:14
+activity#pfa.app.econtab.FinestraElementiActivity
+ADDED from AndroidManifest.xml:132:10
+	android:label
+		ADDED from AndroidManifest.xml:135:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:134:14
+	android:theme
+		ADDED from AndroidManifest.xml:136:14
+	android:name
+		ADDED from AndroidManifest.xml:133:14
+activity#pfa.app.econtab.UnitaMisuraDettaglioActivity
+ADDED from AndroidManifest.xml:138:10
+	android:label
+		ADDED from AndroidManifest.xml:141:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:140:14
+	android:name
+		ADDED from AndroidManifest.xml:139:14
+activity#pfa.app.econtab.ManodoperaDettaglioActivity
+ADDED from AndroidManifest.xml:143:10
+	android:label
+		ADDED from AndroidManifest.xml:146:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:145:14
+	android:name
+		ADDED from AndroidManifest.xml:144:14
+activity#pfa.app.econtab.PreventiviActivity
+ADDED from AndroidManifest.xml:148:10
+	android:label
+		ADDED from AndroidManifest.xml:151:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:150:14
+	android:name
+		ADDED from AndroidManifest.xml:149:14
+activity#pfa.app.econtab.PreventiviDettaglioModActivity
+ADDED from AndroidManifest.xml:153:10
+	android:label
+		ADDED from AndroidManifest.xml:156:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:155:14
+	android:name
+		ADDED from AndroidManifest.xml:154:14
+activity#pfa.app.econtab.ElementoModActivity
+ADDED from AndroidManifest.xml:158:10
+	android:label
+		ADDED from AndroidManifest.xml:161:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:160:14
+	android:name
+		ADDED from AndroidManifest.xml:159:14
+activity#pfa.app.econtab.ImmagineActivity
+ADDED from AndroidManifest.xml:163:10
+	android:label
+		ADDED from AndroidManifest.xml:166:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:165:14
+	android:theme
+		ADDED from AndroidManifest.xml:167:14
+	android:name
+		ADDED from AndroidManifest.xml:164:14
+activity#pfa.app.econtab.ComposizioneActivity
+ADDED from AndroidManifest.xml:169:10
+	android:label
+		ADDED from AndroidManifest.xml:172:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:171:14
+	android:theme
+		ADDED from AndroidManifest.xml:173:14
+	android:name
+		ADDED from AndroidManifest.xml:170:14
+activity#pfa.app.econtab.FinestraComponentiActivity
+ADDED from AndroidManifest.xml:175:10
+	android:label
+		ADDED from AndroidManifest.xml:178:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:177:14
+	android:theme
+		ADDED from AndroidManifest.xml:179:14
+	android:name
+		ADDED from AndroidManifest.xml:176:14
+activity#pfa.app.econtab.ComponenteModActivity
+ADDED from AndroidManifest.xml:181:10
+	android:label
+		ADDED from AndroidManifest.xml:184:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:183:14
+	android:name
+		ADDED from AndroidManifest.xml:182:14
+activity#pfa.app.econtab.FinestraListinoBaseActivity
+ADDED from AndroidManifest.xml:186:10
+	android:label
+		ADDED from AndroidManifest.xml:189:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:188:14
+	android:theme
+		ADDED from AndroidManifest.xml:190:14
+	android:name
+		ADDED from AndroidManifest.xml:187:14
+activity#pfa.app.econtab.ComposizioneQuadroActivity
+ADDED from AndroidManifest.xml:192:10
+	android:label
+		ADDED from AndroidManifest.xml:195:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:194:14
+	android:theme
+		ADDED from AndroidManifest.xml:196:14
+	android:name
+		ADDED from AndroidManifest.xml:193:14
+activity#pfa.app.econtab.CodiciArticoliActivity
+ADDED from AndroidManifest.xml:198:10
+	android:label
+		ADDED from AndroidManifest.xml:201:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:200:14
+	android:name
+		ADDED from AndroidManifest.xml:199:14
+activity#pfa.app.econtab.CodiceArticoloModActivity
+ADDED from AndroidManifest.xml:203:10
+	android:label
+		ADDED from AndroidManifest.xml:206:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:205:14
+	android:name
+		ADDED from AndroidManifest.xml:204:14
+activity#pfa.app.econtab.PlaccheActivity
+ADDED from AndroidManifest.xml:208:10
+	android:label
+		ADDED from AndroidManifest.xml:211:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:210:14
+	android:theme
+		ADDED from AndroidManifest.xml:212:14
+	android:name
+		ADDED from AndroidManifest.xml:209:14
+activity#pfa.app.econtab.CollegamentoActivity
+ADDED from AndroidManifest.xml:214:10
+	android:label
+		ADDED from AndroidManifest.xml:217:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:216:14
+	android:theme
+		ADDED from AndroidManifest.xml:218:14
+	android:name
+		ADDED from AndroidManifest.xml:215:14
+activity#pfa.app.econtab.RelazioneActivity
+ADDED from AndroidManifest.xml:220:9
+	android:label
+		ADDED from AndroidManifest.xml:223:13
+	android:configChanges
+		ADDED from AndroidManifest.xml:222:13
+	android:theme
+		ADDED from AndroidManifest.xml:224:13
+	android:name
+		ADDED from AndroidManifest.xml:221:13
+activity#pfa.app.econtab.CollegamentiElementoActivity
+ADDED from AndroidManifest.xml:226:10
+	android:label
+		ADDED from AndroidManifest.xml:229:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:228:14
+	android:theme
+		ADDED from AndroidManifest.xml:230:14
+	android:name
+		ADDED from AndroidManifest.xml:227:14
+activity#pfa.app.econtab.FinestraLocaliPreferitiActivity
+ADDED from AndroidManifest.xml:232:10
+	android:label
+		ADDED from AndroidManifest.xml:235:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:234:14
+	android:theme
+		ADDED from AndroidManifest.xml:236:14
+	android:name
+		ADDED from AndroidManifest.xml:233:14
+activity#pfa.app.econtab.ElementoDettaglioActivity
+ADDED from AndroidManifest.xml:238:10
+	android:label
+		ADDED from AndroidManifest.xml:241:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:240:14
+	android:theme
+		ADDED from AndroidManifest.xml:242:14
+	android:name
+		ADDED from AndroidManifest.xml:239:14
+activity#pfa.app.econtab.EConTabFileChooserActivity
+ADDED from AndroidManifest.xml:244:10
+	android:label
+		ADDED from AndroidManifest.xml:247:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:246:14
+	android:theme
+		ADDED from AndroidManifest.xml:248:14
+	android:name
+		ADDED from AndroidManifest.xml:245:14
+activity#pfa.app.econtab.server.ConfigurazioneGenActivity
+ADDED from AndroidManifest.xml:250:10
+	android:label
+		ADDED from AndroidManifest.xml:253:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:252:14
+	android:theme
+		ADDED from AndroidManifest.xml:254:14
+	android:name
+		ADDED from AndroidManifest.xml:251:14
+activity#pfa.app.econtab.RegistrazioneActivity
+ADDED from AndroidManifest.xml:256:10
+	android:label
+		ADDED from AndroidManifest.xml:259:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:258:14
+	android:name
+		ADDED from AndroidManifest.xml:257:14
+activity#pfa.app.econtab.LoginActivity
+ADDED from AndroidManifest.xml:261:11
+	android:label
+		ADDED from AndroidManifest.xml:264:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:263:15
+	android:name
+		ADDED from AndroidManifest.xml:262:14
+activity#pfa.app.econtab.ComposizioneLiberaActivity
+ADDED from AndroidManifest.xml:266:11
+	android:label
+		ADDED from AndroidManifest.xml:269:14
+	android:configChanges
+		ADDED from AndroidManifest.xml:268:15
+	android:theme
+		ADDED from AndroidManifest.xml:270:14
+	android:name
+		ADDED from AndroidManifest.xml:267:14
+activity#pfa.app.general.simplecropimage.CropImage
+ADDED from AndroidManifest.xml:272:9
+	android:label
+		ADDED from AndroidManifest.xml:275:13
+	android:configChanges
+		ADDED from AndroidManifest.xml:274:13
+	android:name
+		ADDED from AndroidManifest.xml:273:13
+activity#pfa.app.econtab.RapportiniActivity
+ADDED from AndroidManifest.xml:277:9
+	android:label
+		ADDED from AndroidManifest.xml:280:13
+	android:configChanges
+		ADDED from AndroidManifest.xml:279:13
+	android:name
+		ADDED from AndroidManifest.xml:278:13
+activity#pfa.app.econtab.RapportinoDettaglioModActivity
+ADDED from AndroidManifest.xml:282:9
+	android:label
+		ADDED from AndroidManifest.xml:285:13
+	android:configChanges
+		ADDED from AndroidManifest.xml:284:13
+	android:name
+		ADDED from AndroidManifest.xml:283:13
+activity#pfa.app.econtab.GestAbbonamentoActivity
+ADDED from AndroidManifest.xml:287:9
+	android:label
+		ADDED from AndroidManifest.xml:290:13
+	android:configChanges
+		ADDED from AndroidManifest.xml:289:13
+	android:name
+		ADDED from AndroidManifest.xml:288:13
+service#pfa.app.econtab.servizi.EConTabService
+ADDED from AndroidManifest.xml:293:10
+	android:exported
+		ADDED from AndroidManifest.xml:296:14
+	android:enabled
+		ADDED from AndroidManifest.xml:295:14
+	android:name
+		ADDED from AndroidManifest.xml:294:14
+uses-sdk
+INJECTED from AndroidManifest.xml:0:0 reason: use-sdk injection requested
+	android:minSdkVersion
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0

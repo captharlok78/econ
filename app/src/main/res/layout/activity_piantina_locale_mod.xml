@@ -1,0 +1,126 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <RelativeLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:id="@+id/linear_piantina"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/footer_dettaglio"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:orientation="vertical" >
+
+            <FrameLayout
+                android:id="@+id/wrapper_griglia"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.85"
+                android:padding="@dimen/margine" >
+
+                <pfa.app.econtab.views.EConTabPiantinaGridView
+                    android:id="@+id/gridView_piantina"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent"
+                    android:numColumns="10" >
+                </pfa.app.econtab.views.EConTabPiantinaGridView>
+            </FrameLayout>
+
+            <HorizontalScrollView
+                android:id="@+id/horizontalScrollView1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.15"
+                android:background="#5b5b5b" >
+
+                <LinearLayout
+                    android:id="@+id/forme"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="#5b5b5b"
+                    android:divider="@drawable/divider_tab"
+                    android:orientation="horizontal"
+                    android:showDividers="middle" >
+
+                    <Button
+                        android:id="@+id/button_pianta_1111"
+                        android:layout_width="@dimen/altezza_item"
+                        android:layout_height="@dimen/altezza_item"
+                        android:layout_gravity="center"
+                        android:layout_margin="@dimen/altezza_campo"
+                        android:background="@drawable/pianta_1111"
+                        android:onClick="impostaPianta" />
+
+                    <Button
+                        android:id="@+id/button_pianta_rectvert"
+                        android:layout_width="@dimen/altezza_item"
+                        android:layout_height="@dimen/altezza_item"
+                        android:layout_gravity="center"
+                        android:layout_margin="@dimen/altezza_campo"
+                        android:background="@drawable/pianta_rect_vert"
+                        android:onClick="impostaPianta" />
+
+                    <Button
+                        android:id="@+id/button_pianta_rectoriz"
+                        android:layout_width="@dimen/altezza_item"
+                        android:layout_height="@dimen/altezza_item"
+                        android:layout_gravity="center"
+                        android:layout_margin="@dimen/altezza_campo"
+                        android:background="@drawable/pianta_rect_oriz"
+                        android:onClick="impostaPianta" />
+
+                    <Button
+                        android:id="@+id/button_pianta_1110"
+                        android:layout_width="@dimen/altezza_item"
+                        android:layout_height="@dimen/altezza_item"
+                        android:layout_gravity="center"
+                        android:layout_margin="@dimen/altezza_campo"
+                        android:background="@drawable/pianta_1110"
+                        android:onClick="impostaPianta" />
+
+                    <Button
+                        android:id="@+id/button_pianta_1101"
+                        android:layout_width="@dimen/altezza_item"
+                        android:layout_height="@dimen/altezza_item"
+                        android:layout_gravity="center"
+                        android:layout_margin="@dimen/altezza_campo"
+                        android:background="@drawable/pianta_1101"
+                        android:onClick="impostaPianta" />
+
+                    <Button
+                        android:id="@+id/button_pianta_1011"
+                        android:layout_width="@dimen/altezza_item"
+                        android:layout_height="@dimen/altezza_item"
+                        android:layout_gravity="center"
+                        android:layout_margin="@dimen/altezza_campo"
+                        android:background="@drawable/pianta_1011"
+                        android:onClick="impostaPianta" />
+
+                    <Button
+                        android:id="@+id/button_pianta_0111"
+                        android:layout_width="@dimen/altezza_item"
+                        android:layout_height="@dimen/altezza_item"
+                        android:layout_gravity="center"
+                        android:layout_margin="@dimen/altezza_campo"
+                        android:background="@drawable/pianta_0111"
+                        android:onClick="impostaPianta" />
+                </LinearLayout>
+            </HorizontalScrollView>
+        </LinearLayout>
+
+        <include
+            android:id="@+id/footer_dettaglio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            layout="@layout/footer_dett" />
+    </RelativeLayout>
+
+</FrameLayout>

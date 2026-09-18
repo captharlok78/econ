@@ -1,0 +1,25 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/campi"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/margine" >
+
+    <EditText
+        android:id="@+id/editText_titolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:background="@android:color/transparent"
+       	android:textSize="@dimen/testo_immagine_grande"
+       	android:textColor="@android:color/holo_blue_dark"
+       	android:maxLines="5"
+       	android:maxLength="255"
+      	android:text="titolo"
+        >
+
+        <requestFocus />
+    </EditText>
+  
+</RelativeLayout>

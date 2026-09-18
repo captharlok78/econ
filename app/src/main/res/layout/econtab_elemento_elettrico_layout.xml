@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/frame_elemento"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" >
+
+    <FrameLayout
+        android:id="@+id/frameBordo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+         android:layout_margin="2px"
+        android:background="@drawable/bg_elemento_elettrico"
+        >
+
+        <RelativeLayout
+            android:id="@+id/sfondo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            
+            android:background="@android:color/transparent" >
+
+            <TextView
+                android:id="@+id/textView_testo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+               android:layout_centerHorizontal="true"
+              
+                android:includeFontPadding="false"
+                android:text="222"
+                
+                android:textColor="#444444"
+                android:textSize="@dimen/testo_immagine" />
+        </RelativeLayout>
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/textView_collegamenti"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|right"
+        android:background="@drawable/bg_notifica_rotondo_blu"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:text="5"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/testo_immagine" />
+    <TextView
+        android:id="@+id/textView_collegamenti_tubi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|left"
+        android:background="@drawable/bg_notifica_rotondo_nero"
+        android:gravity="center"
+        android:includeFontPadding="false"
+        android:text="5"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/testo_immagine" />
+
+</FrameLayout>

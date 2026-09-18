@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
+
+    <!-- Barra superiore -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="4dp"
+        android:background="#1565C0"
+        android:elevation="4dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Configurazione"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/imageButton_chiudi"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:tint="#FFFFFF"
+            android:onClick="chiudi"
+            android:contentDescription="Chiudi" />
+    </LinearLayout>
+
+    <!-- Contenuto scrollabile -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Sezione Server -->
+            <TextView
+                android:id="@+id/textView_urlserver"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/url_server"
+                android:textColor="#757575"
+                android:textSize="12sp"
+                android:textAllCaps="true"
+                android:layout_marginBottom="6dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/editTextUrlServer"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:inputType="textUri" />
+
+                <Button
+                    android:id="@+id/button_cerca_server"
+                    android:layout_width="wrap_content"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/cerca"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:backgroundTint="#1565C0"
+                    android:onClick="cercaServerMercury" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/button_ping"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="8dp"
+                android:text="Verifica connessione"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:backgroundTint="#1565C0"
+                android:onClick="pingServer" />
+
+            <!-- Separatore -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="14dp" />
+
+            <!-- Sezione Sincronizzazione -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/data_time_syncing_images"
+                android:textColor="#757575"
+                android:textSize="12sp"
+                android:layout_marginBottom="6dp" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center_vertical">
+
+                <EditText
+                    android:id="@+id/editTextDataGiorno"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="01"
+                    android:inputType="number" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="/"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:textColor="#212121"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/editTextDataMese"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="01"
+                    android:inputType="number" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="/"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:textColor="#212121"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/editTextDataAnno"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:text="1970"
+                    android:inputType="number" />
+
+                <View
+                    android:layout_width="12dp"
+                    android:layout_height="match_parent" />
+
+                <EditText
+                    android:id="@+id/editTextDataOra"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="00"
+                    android:inputType="number" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=":"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:textColor="#212121"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/editTextDataMinuti"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="00"
+                    android:inputType="number" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/year_syncing_site_quotes"
+                android:textColor="#757575"
+                android:textSize="12sp"
+                android:layout_marginTop="14dp"
+                android:layout_marginBottom="6dp" />
+
+            <EditText
+                android:id="@+id/year_syncing_site_quotes_edit"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:text="2023"
+                android:inputType="number" />
+
+            <CheckBox
+                android:id="@+id/checkbox_force_download_all_images"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/force_download_all_images"
+                android:textColor="#212121"
+                android:textSize="14sp"
+                android:layout_marginTop="12dp" />
+
+            <!-- Separatore -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#E0E0E0"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="14dp" />
+
+            <!-- Sezione Attivazione (condizionale) -->
+            <LinearLayout
+                android:id="@+id/linear_attivazione"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textView_codiceAttivazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ACCESSO MERCURY"
+                    android:textColor="#757575"
+                    android:textSize="12sp"
+                    android:textAllCaps="true"
+                    android:layout_marginBottom="6dp" />
+
+                <EditText
+                    android:id="@+id/editTextAttivazioneEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:hint="Email"
+                    android:inputType="textEmailAddress" />
+
+                <EditText
+                    android:id="@+id/editTextAttivazionePassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:hint="Password"
+                    android:inputType="textPassword" />
+
+                <Button
+                    android:id="@+id/button_attiva"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Accedi"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:backgroundTint="#1565C0"
+                    android:onClick="attiva" />
+
+                <ProgressBar
+                    android:id="@+id/progressBar1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <!-- Bottone legacy nascosto -->
+            <Button
+                android:id="@+id/button_sincronizza"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone"
+                android:onClick="apriDownload" />
+
+            <!-- Sezione azioni Mercury (dopo attivazione) -->
+            <LinearLayout
+                android:id="@+id/linear_sinc_mercury"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <Button
+                    android:id="@+id/button_download"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="↓  Download"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:backgroundTint="#1565C0"
+                    android:onClick="apriDownload" />
+
+                <Button
+                    android:id="@+id/button_upload"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:text="↑  Upload"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:backgroundTint="#1565C0"
+                    android:onClick="apriUpload" />
+
+                <Button
+                    android:id="@+id/button_test_mercury"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Test API"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:backgroundTint="#1565C0"
+                    android:onClick="testMercury" />
+
+                <Button
+                    android:id="@+id/buttonReset"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Reset DB"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:backgroundTint="#1565C0"
+                    android:onClick="reset" />
+
+        </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Footer Annulla/Salva (visibile solo dopo attivazione) -->
+    <LinearLayout
+        android:id="@+id/footer_dett"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:background="#F5F5F5"
+        android:elevation="4dp"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/button_annulla"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:text="@string/annulla"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:backgroundTint="#1565C0"
+            android:onClick="chiudi" />
+
+        <Button
+            android:id="@+id/button_salva"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:text="@string/salva"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:backgroundTint="#1565C0"
+            android:onClick="salvaConfigurazioneGenerale" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="buttonClienti"      type="id" />
+    <item name="buttonCantieri"     type="id" />
+    <item name="buttonListini"      type="id" />
+    <item name="buttonPreventivi"   type="id" />
+    <item name="buttonOrdini"       type="id" />
+    <item name="buttonRapportini"   type="id" />
+    <item name="buttonStatoSistema" type="id" />
+    <item name="buttonImpostazioni" type="id" />
+    <item name="buttonGuida"        type="id" />
+    <item name="buttonSync"         type="id" />
+    <item name="menu_9"             type="id" />
+    <item name="testoSincronizza"   type="id" />
+</resources>

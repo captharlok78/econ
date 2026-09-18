@@ -1,0 +1,44 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:gesture-image="http://schemas.polites.com/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#66000000"
+    android:padding="@dimen/margine" >
+
+    <RelativeLayout
+        android:id="@+id/contenitore"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:id="@+id/linear_image"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            
+            android:gravity="center" >
+
+            <com.polites.android.GestureImageView
+                android:id="@+id/imageView1"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" 
+    			android:scaleType="center"
+                gesture-image:max-scale="10.0"
+                gesture-image:min-scale="1.0"
+                />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textViewChiudi"
+            style="@style/TestoIntestazione"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/margine"
+            android:clickable="true"
+            android:onClick="chiudi"
+            android:text="@string/chiudi"
+            android:textAllCaps="true" />
+    </RelativeLayout>
+
+</FrameLayout>

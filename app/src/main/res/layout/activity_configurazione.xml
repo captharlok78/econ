@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Header blu con tasto indietro -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="4dp"
+        android:paddingEnd="16dp"
+        android:background="#1565C0"
+        android:elevation="4dp">
+
+        <ImageButton
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:src="@android:drawable/ic_media_previous"
+            android:tint="#FFFFFF"
+            android:onClick="indietro"
+            android:contentDescription="Indietro" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/impostazioni"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginStart="4dp" />
+    </LinearLayout>
+
+    <!-- Lista impostazioni -->
+    <ExpandableListView
+        android:id="@+id/lista"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Footer versione + ditta -->
+    <RelativeLayout
+        android:id="@+id/relative_footer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#F5F5F5"
+        android:padding="8dp">
+
+        <LinearLayout
+            android:id="@+id/linear_bottone_conf"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/buttonConfigurazioniGenerali"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:backgroundTint="#1565C0"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:onClick="apriConfigurazioni"
+                android:text="@string/action_settings" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textViewVersione"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:onClick="apriSqlManager"
+            android:text="Versione"
+            android:textSize="12sp"
+            android:textColor="#757575" />
+    </RelativeLayout>
+
+    <include layout="@layout/footer" />
+
+</LinearLayout>

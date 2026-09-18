@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:background="#FFFFFF"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:id="@+id/layout_versione"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight=".80"
+            android:layout_height="wrap_content"
+            android:text="sql manager"
+            android:layout_margin="@dimen/margine"
+            android:id="@+id/textViewVersione"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true" />
+
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageButton"
+            android:layout_alignParentRight="true"
+            android:src="@android:drawable/ic_delete"
+
+            android:scaleType="fitXY"
+            android:onClick="chiudi"/>
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:background="@drawable/divisore"
+        android:id="@+id/separatore3"
+        android:layout_marginLeft="@dimen/margine"
+        android:layout_marginBottom="@dimen/margine"
+        android:layout_marginRight="@dimen/margine"
+        android:layout_width="match_parent"
+        android:layout_height="1px">
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_margin="@dimen/margine"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/selTabella"
+            android:maxLines="1"
+            android:ellipsize="marquee"
+            android:hint="tabella"
+            android:background="@android:drawable/editbox_background_normal"
+            android:drawableRight="@android:drawable/arrow_down_float"
+            android:clickable="true"
+            android:onClick="selezionaTabella"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/selCampi"
+            android:maxLines="1"
+            android:ellipsize="marquee"
+            android:hint="campi"
+            android:background="@android:drawable/editbox_background_normal"
+            android:drawableRight="@android:drawable/arrow_down_float"
+            android:clickable="true"
+            android:onClick="selezionaCampi"
+            />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="aggiungi campo"
+            android:id="@+id/buttonAggiungi"
+            android:onClick="aggiungiCampo"
+            android:layout_marginTop="@dimen/margine"
+            android:paddingLeft="@dimen/margine"
+            android:paddingRight="@dimen/margine"
+            android:layout_marginLeft="@dimen/margine"
+            android:layout_gravity="center_horizontal" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_marginRight="@dimen/margine"
+        android:layout_marginLeft="@dimen/margine"
+        android:layout_marginTop="@dimen/margine"
+        android:layout_height="wrap_content">
+        <EditText
+            android:layout_width="match_parent"
+            android:minLines="5"
+            android:textSize="16dp"
+            android:id="@+id/editQuery"
+            android:gravity="top"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:layout_marginTop="@dimen/margine"
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="esegui"
+            android:id="@+id/buttonEsegui"
+            android:onClick="esegui"
+            android:layout_marginTop="@dimen/margine"
+            android:padding="@dimen/margine"
+            android:layout_gravity="center_horizontal" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="reset"
+            android:id="@+id/buttonReset"
+            android:onClick="reset"
+            android:layout_marginTop="@dimen/margine"
+            android:padding="@dimen/margine"
+            android:layout_marginLeft="@dimen/margine"
+            android:layout_gravity="center_horizontal" />
+
+
+    </LinearLayout>
+
+    <ListView android:id="@+id/listaSQL"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fastScrollEnabled="true"
+        android:background="@null" />
+
+</LinearLayout>

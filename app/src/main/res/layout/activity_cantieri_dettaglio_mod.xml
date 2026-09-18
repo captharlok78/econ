@@ -1,0 +1,217 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <RelativeLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <ScrollView
+            android:id="@+id/scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/footer_dettaglio"
+            android:layout_alignParentTop="true" >
+
+            <LinearLayout
+                android:id="@+id/campi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/margine" >
+
+                <TextView
+                    android:id="@+id/textView_cliente"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cliente" />
+
+                <RelativeLayout
+                    android:id="@+id/relative_editcliente"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <AutoCompleteTextView
+                        android:id="@+id/editText_cliente"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toLeftOf="@+id/button_nuovo"
+                        android:hint="@string/seleziona_cliente"
+                        android:ems="10" >
+
+                        <requestFocus />
+                    </AutoCompleteTextView>
+
+                    <ImageButton
+                        android:id="@+id/button_nuovo"
+                        style="@style/bottoneLista"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginLeft="@dimen/margine"
+                        android:background="@drawable/bg_bottone_rotondo"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/nuovo"
+                        android:onClick="nuovoCliente" />
+
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/textView_cantiere"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="@string/cantiere" />
+
+                <EditText
+                    android:id="@+id/editText_cantiere"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:maxLength="100"
+                    android:nextFocusRight="@+id/editText_indirizzo"
+                    />
+
+                <TextView
+                    android:id="@+id/textView_indirizzo"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="@string/indirizzo" />
+
+                <EditText
+                    android:id="@+id/editText_indirizzo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:maxLength="255"
+                    android:nextFocusRight="@+id/editText_cap"/>
+
+                <TextView
+                    android:id="@+id/textView_capcittaprov"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="@string/cap_citta_provincia" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <EditText
+                        android:id="@+id/editText_cap"
+                        android:layout_width="0sp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.25"
+                        android:ems="10"
+                        android:inputType="number"
+                        android:maxLength="5"
+                        android:singleLine="true"
+                        android:nextFocusDown="@+id/editText_citta"
+                        android:nextFocusRight="@+id/editText_citta"/>
+
+                    <EditText
+                        android:id="@+id/editText_citta"
+                        android:layout_width="0sp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.6"
+                        android:ems="10"
+                        android:maxLength="70"
+                        android:singleLine="true"
+                        android:nextFocusRight="@+id/editText_provincia"/>
+
+                    <EditText
+                        android:id="@+id/editText_provincia"
+                        android:layout_width="0sp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.15"
+                        android:ems="10"
+                        android:maxLength="2"
+                        android:singleLine="true"
+                        android:nextFocusRight="@+id/editText_note"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/linear_linea_placca"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <LinearLayout
+                        android:id="@+id/linear_linea"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_linea"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margine"
+                            android:text="@string/linea_standard" />
+
+                        <pfa.app.econtab.views.EConTabSpinner
+                            android:id="@+id/econtabSpinner_linea"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" >
+                        </pfa.app.econtab.views.EConTabSpinner>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/linear_placca"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_placca"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/margine"
+                            android:text="@string/placca_standard" />
+
+                        <pfa.app.econtab.views.EConTabSpinner
+                            android:id="@+id/econtabSpinner_placca"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" >
+                        </pfa.app.econtab.views.EConTabSpinner>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/textView_note"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="@string/note" />
+
+                <EditText
+                    android:id="@+id/editText_note"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:gravity="top"
+                    android:maxLength="255"
+                    android:minLines="2"
+                    android:nextFocusRight="@+id/editText_cantiere"/>
+            </LinearLayout>
+        </ScrollView>
+
+        <include
+            android:id="@+id/footer_dettaglio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            layout="@layout/footer_dett" />
+    </RelativeLayout>
+
+</FrameLayout>

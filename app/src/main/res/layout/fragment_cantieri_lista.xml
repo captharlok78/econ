@@ -1,0 +1,48 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+        <ListView
+            android:id="@+id/lista"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/header" >
+
+        </ListView>
+   
+  
+
+    <RelativeLayout
+        android:id="@+id/header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margine"
+        android:layout_marginBottom="@dimen/margine"
+        android:layout_marginRight="@dimen/margine" >
+
+        <ImageButton
+            android:id="@+id/buttonnuovo"
+            style="@style/bottoneListaGrande"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/margine"
+            android:background="@drawable/bg_bottone_rotondo"
+                        android:src="@drawable/nuovo"
+                        android:scaleType="fitXY"
+            android:onClick="nuovoCantiere" />
+
+        <EditText
+            android:id="@+id/editText_filtra"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/buttonnuovo"
+            android:ems="15"
+            android:hint="@string/cerca"
+            android:singleLine="true" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

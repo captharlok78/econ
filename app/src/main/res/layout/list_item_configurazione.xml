@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" 
+     android:paddingTop="@dimen/margine"
+    android:paddingBottom="@dimen/margine"
+ 	android:paddingRight="@dimen/margine"
+ 	android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
+ 	android:minHeight="@dimen/altezza_item"
+ 	   >
+
+    <TextView
+        
+        android:id="@+id/nomefiglio"
+        style="@style/TestoGrigio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/checkBoxSeleziona"
+         
+        android:text="Figlio" />
+
+    <Button
+        android:id="@+id/buttonModifica"
+        style="@style/bottoneLista"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/modifica"
+        android:focusable="false"
+        android:visibility="gone"
+        />
+
+    <CheckBox
+        android:id="@+id/checkBoxSeleziona"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:focusable="false" />
+
+    <TextView
+        android:id="@+id/nomefiglio2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/TestoGrigioPiccolo"
+        android:textSize="@dimen/testo_immagine_grande"
+        android:layout_below="@+id/nomefiglio"
+        android:layout_alignLeft="@+id/nomefiglio"
+        android:text="Costo orario"
+        android:textAllCaps="true"
+         />
+
+</RelativeLayout>

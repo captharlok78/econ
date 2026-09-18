@@ -1,0 +1,190 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <RelativeLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <ScrollView
+            android:id="@+id/scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/footer_dettaglio"
+            android:layout_alignParentTop="true" >
+
+            <LinearLayout
+                android:id="@+id/campi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/margine" >
+
+                <TextView
+                    android:id="@+id/textView_ragionesociale"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ragione_sociale" />
+
+                <EditText
+                    android:id="@+id/editText_ragionesociale"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:maxLength="100" />
+
+                <TextView
+                    android:id="@+id/textView_indirizzo"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="@string/indirizzo" />
+
+                <EditText
+                    android:id="@+id/editText_indirizzo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:maxLength="255" />
+
+                <TextView
+                    android:id="@+id/textView_capcittaprov"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="@string/cap_citta_provincia" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <EditText
+                        android:id="@+id/editText_cap"
+                        android:layout_width="0sp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.25"
+                        android:ems="10"
+                        android:inputType="number"
+                        android:maxLength="5"
+                        android:singleLine="true" />
+
+                    <EditText
+                        android:id="@+id/editText_citta"
+                        android:layout_width="0sp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.6"
+                        android:ems="10"
+                        android:maxLength="70"
+                        android:singleLine="true" />
+
+                    <EditText
+                        android:id="@+id/editText_provincia"
+                        android:layout_width="0sp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.15"
+                        android:ems="10"
+                        android:maxLength="2"
+                        android:singleLine="true" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/textView_cf"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="@string/codice_fiscale" />
+
+                <EditText
+                    android:id="@+id/editText_cf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:maxLength="16"
+                    android:singleLine="true" />
+
+                <TextView
+                    android:id="@+id/textView_partitaiva"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="@string/partita_iva" />
+
+                <EditText
+                    android:id="@+id/editText_partitaiva"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:maxLength="50"
+                    android:singleLine="true" />
+
+                <LinearLayout
+                    android:id="@+id/linear_code"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:orientation="horizontal" >
+
+                    <LinearLayout
+                        android:id="@+id/linear_codescatole"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.5"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_codascatole"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/centimetri_coda_scatole" />
+
+                        <EditText
+                            android:id="@+id/editText_codascatole"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ems="4"
+                            android:inputType="number"
+                            android:singleLine="true" />
+                    </LinearLayout>
+                     <LinearLayout
+                        android:id="@+id/linear_codeutilizzatori"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.5"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_codautilizzatori"
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/centimetri_coda_utilizzatori" />
+
+                        <EditText
+                            android:id="@+id/editText_codautilizzatori"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ems="4"
+                            android:inputType="number"
+                            android:singleLine="true" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <include
+            android:id="@+id/footer_dettaglio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            layout="@layout/footer_dett" />
+    </RelativeLayout>
+
+</FrameLayout>

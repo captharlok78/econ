@@ -1,0 +1,67 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_econtab_popup"
+    android:padding="@dimen/margine" >
+
+    <RelativeLayout
+        android:id="@+id/contenitore"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+       
+        <ImageButton
+            android:id="@+id/imageButton_chiudi"
+            style="@style/bottoneLista"
+            android:layout_alignParentRight="true"
+            android:onClick="chiudi"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/bg_bottone_grigio_arrotondato"
+            android:scaleType="fitXY"
+            android:src="@android:drawable/ic_delete" />
+        
+      
+
+        <TextView
+            android:id="@+id/textViewTitolo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:textAllCaps="true"
+            android:text="@string/locali_preferiti"
+            style="@style/TestoIntestazioneNoPadding" />
+
+        <EditText
+            android:id="@+id/editText_filtra"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/textViewTitolo"
+            android:layout_marginTop="@dimen/margine"
+            android:ems="10"
+            android:hint="@string/cerca"
+            android:singleLine="true" >
+
+            <requestFocus />
+        </EditText>
+        
+        <GridView
+        android:id="@+id/griglia_locali"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:numColumns="auto_fit"
+        android:columnWidth="@dimen/larghezza_elemento"
+       
+        android:horizontalSpacing="@dimen/padding_drag"
+        android:verticalSpacing="@dimen/padding_drag"
+        android:layout_marginTop="@dimen/margine"
+        android:layout_marginBottom="@dimen/margine"
+        android:layout_below="@+id/editText_filtra" >
+      
+    </GridView>
+        
+    </RelativeLayout>
+
+</FrameLayout>

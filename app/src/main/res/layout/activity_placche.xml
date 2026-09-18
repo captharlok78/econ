@@ -1,0 +1,88 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:background="@drawable/bg_econtab_popup"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="@dimen/margine">
+
+    
+    <ImageButton
+            android:id="@+id/imageButton_chiudi"
+            style="@style/bottoneLista"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/bg_bottone_grigio_arrotondato"
+            android:onClick="chiudi"
+            android:scaleType="fitXY"
+            android:src="@android:drawable/ic_delete" />
+    
+    <RelativeLayout
+        android:id="@+id/wrapper_lista"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+       
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/linear_header" >
+
+        <ListView
+            android:id="@+id/lista"
+            android:background="@android:color/white"
+            
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+        </ListView>
+    </RelativeLayout>
+
+   
+
+    <LinearLayout
+        android:id="@+id/linear_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/margine"
+        android:layout_marginRight="@dimen/margine"
+        android:layout_marginTop="@dimen/margine"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/textViewTitolo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            style="@style/TestoIntestazioneNoPadding"
+            android:textAllCaps="true"
+            android:layout_marginBottom="@dimen/margine"
+            android:text="@string/placche" />
+
+  
+
+        <RelativeLayout
+            android:id="@+id/header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margine" >
+
+            <ImageButton
+                android:id="@+id/buttonnuovo"
+                style="@style/bottoneListaGrande"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/margine"
+                android:background="@drawable/bg_bottone_rotondo"
+                android:onClick="nuovaPlacca"
+                android:scaleType="fitXY"
+                android:src="@drawable/nuovo" />
+
+             <pfa.app.econtab.views.EConTabSpinner
+                            android:id="@+id/spinner_linea"
+                            android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/buttonnuovo"
+                            />
+          
+        </RelativeLayout>
+    </LinearLayout>
+
+</RelativeLayout>

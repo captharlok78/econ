@@ -1,0 +1,145 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/margine">
+
+    <RelativeLayout
+        android:id="@+id/contenitore"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:id="@+id/linear_abbonamento"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@android:drawable/editbox_background_normal"
+            android:padding="@dimen/altezza_campo"
+            android:orientation="vertical" >
+
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:hint="@string/inserisci_codice_attivazione"
+                    android:layout_height="@dimen/altezza_campo_doppia"
+
+                    android:id="@+id/editTextCodiceAttivazione" />
+
+                <Button
+                    android:id="@+id/button_abbona"
+                    style="@style/TestoNeroGrande"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/margine"
+                    android:layout_marginLeft="@dimen/margine"
+                    android:text="@string/attiva"
+                    android:onClick="abbona"
+                    android:textColor="#1784c5" />
+
+                <!--
+                <Button
+                    android:id="@+id/button_abbona"
+                    style="@style/TestoNeroGrande"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/margine"
+                    android:layout_marginLeft="@dimen/margine"
+                    android:text="@string/attiva"
+                    android:onClick="attivaServer"
+                    android:textColor="#1784c5" />
+                  -->
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textViewRichiediCodice"
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/altezza_campo"
+                android:gravity="left"
+                android:clickable="true"
+                android:onClick="richiediCodice"
+                android:background="@drawable/bg_bottone_grigio_arrotondato"
+                android:text="@string/richiedi_codice"
+                />
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/progressBar"
+                android:layout_gravity="center"/>
+
+            <TextView
+                android:id="@+id/textViewMessaggioProva"
+                style="@style/TitoloBlu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/altezza_campo"
+                android:gravity="center_horizontal"
+                android:textAllCaps="true"
+                android:text="@string/abbonati_periodo_prova"
+                />
+
+            <TextView
+                android:id="@+id/textViewMessaggio"
+                style="@style/TestoPiccolo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/altezza_campo"
+                android:gravity="left"
+                android:text="@string/messaggio_abbonamento"
+                android:textSize="@dimen/testo_immagine_grande" />
+
+            <Button
+                android:id="@+id/button_server"
+                style="@style/TestoNeroGrande"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/altezza_campo_doppia"
+                android:padding="@dimen/altezza_campo"
+
+                android:text="@string/attiva_versione_business"
+                android:onClick="attivaServer"
+                android:textColor="#1784c5" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_econtab_titolo"
+                android:clickable="true"
+                android:onClick="apriSitoEConTab"
+                android:layout_marginTop="@dimen/altezza_campo_doppia">
+
+                <ImageView
+                    android:layout_width="@dimen/altezza_campo_doppia"
+                    android:layout_height="@dimen/altezza_campo_doppia"
+                    android:layout_centerHorizontal="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginTop="@dimen/margine"
+                    android:src="@drawable/ic_launcher"
+                    android:scaleType="fitXY"
+                    android:id="@+id/imageView" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/TestoIntestazione"
+                    android:text="@string/messaggio_vai_al_sito"
+                    android:layout_below="@+id/imageView"
+                    android:layout_marginTop="@dimen/margine"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:id="@+id/textView" />
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</FrameLayout>

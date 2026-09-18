@@ -1,0 +1,204 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Base application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+
+    -->
+    <style name="AppBaseTheme" parent="@android:style/Theme.Holo.Light.DarkActionBar">
+        <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+
+        -->
+
+    </style>
+
+    <!-- Application theme. -->
+    <style name="AppTheme" parent="AppBaseTheme">
+
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+
+
+        <item name="android:buttonStyle">@style/EConTabButton</item>
+        <item name="android:editTextStyle">@style/EditTextStyle</item>
+        <item name="android:textViewStyle">@style/Testo</item>
+        <!--
+      	<item name="@android:attr/actionBarStyle">@style/EConTabActionBarStyle</item>
+        <item name="@android:attr/actionBarTabTextStyle">@style/EConTabActionBarTabTextStyle</item>
+        <item name="@android:attr/listViewStyle">@style/EConTabBackgroundLista</item>
+        <item name="@android:attr/expandableListViewStyle">@style/EConTabBackgroundListaEspandibile</item>
+        <item name="@android:attr/scrollViewStyle">@style/EConTabScrollView</item>
+        <item name="@android:attr/windowBackground">@drawable/sfondo_app</item>
+        <item name="@android:attr/autoCompleteTextViewStyle">@style/AutocompleteEditTextStyle</item>
+        <item name="@android:attr/actionBarTabBarStyle">@style/EConTabActionBarTabBarStyle</item>
+        -->
+    </style>
+
+    <style name="Testo" parent="AppTheme">
+
+        <item name="android:textSize">14sp</item>
+    </style>
+
+     <style name="TestoGrigio" parent="AppTheme">
+        <item name="android:textColor">#6e7376</item>
+    </style>
+
+    <style name="TestoPiccolo" parent="AppTheme">
+        <item name="android:textColor">#6e7376</item>
+        <item name="android:textSize">11sp</item>
+    </style>
+
+    <style name="TestoIntestazione" parent="TestoPiccolo">
+        <item name="android:textColor">@android:color/holo_blue_dark</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:paddingLeft">2sp</item>
+    </style>
+    <style name="TestoIntestazioneNoPadding" parent="TestoPiccolo">
+        <item name="android:textColor">@android:color/holo_blue_dark</item>
+        <item name="android:ellipsize">marquee</item>
+
+    </style>
+
+    <style name="TestoNeroPiccolo" parent="@android:style/TextAppearance.Large">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+      <style name="TestoGrigioPiccolo" parent="TestoNeroPiccolo">
+        <item name="android:textColor">#b9b9b9</item>
+
+    </style>
+
+    <style name="TestoNeroGrande" parent="@android:style/TextAppearance.Large">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="TestoNeroGrandeSingolaLinea" parent="TestoNeroGrande">
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="Titolo" parent="TestoNeroGrande">
+        <item name="android:textStyle">bold</item>
+        <item name="android:ellipsize">marquee</item>
+    </style>
+
+    <style name="TitoloBlu" parent="Titolo">
+        <item name="android:textColor">@android:color/holo_blue_dark</item>
+    </style>
+
+    <style name="EConTabButton" parent="@android:style/Widget.Button">
+        <item name="android:textSize">13sp</item>
+        <item name="android:layout_height">80px</item>
+        <item name="android:background">@drawable/button_econtab</item>
+    </style>
+
+    <style name="bottoneLista">
+        <item name="android:layout_height">20sp</item>
+        <item name="android:layout_width">20sp</item>
+    </style>
+
+    <style name="bottoneListaGrande">
+        <item name="android:layout_height">30sp</item>
+        <item name="android:layout_width">30sp</item>
+    </style>
+
+    <style name="EditTextStyle" parent="@android:style/Widget.EditText">
+        <item name="android:background">@android:drawable/editbox_background_normal</item>
+        <item name="android:textSize">14sp</item>
+         <item name="android:inputType">textMultiLine|textCapSentences</item>
+    </style>
+
+    <style name="AutocompleteEditTextStyle" parent="@android:style/Widget.Holo.Light.AutoCompleteTextView">
+        <item name="android:background">@android:drawable/editbox_background_normal</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="EConTabActionBarStyle" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <!--
+        <item name="@android:attr/backgroundStacked">#cceeeded</item>
+        -->
+    </style>
+
+    <style name="EConTabActionBarTabTextStyle" parent="@android:style/Widget.Holo.Light.ActionBar.TabText.Inverse">
+        <item name="android:textSize">12sp</item>
+         <item name="android:textColor">@android:color/holo_blue_dark</item>
+    </style>
+
+    <style name="EConTabActionBarTabBarStyle" parent="@android:style/Widget.Holo.Light.ActionBar.TabBar">
+       <item name="android:divider">@drawable/divider_tab</item>
+        <item name="android:showDividers">middle</item>
+
+        <item name="android:gravity">center_horizontal</item>
+
+    </style>
+
+	<style name="EConTabBackgroundLista" parent="@android:style/Widget.Holo.Light.ListView">
+	    <item name="android:background">@android:drawable/editbox_background_normal</item>
+	    <item name="android:scrollbarStyle">outsideOverlay</item>
+	    <item name="android:fastScrollEnabled">true</item>
+	    </style>
+
+	<style name="EConTabBackgroundListaEspandibile" parent="@android:style/Widget.Holo.Light.ExpandableListView">
+	    <item name="android:background">@android:drawable/editbox_background_normal</item>
+	    <item name="android:scrollbarStyle">outsideOverlay</item>
+	</style>
+
+	<style name="EConTabLinearLayoutMaster">
+	     <item name="android:divider">@android:drawable/divider_horizontal_bright</item>
+           <item name="android:padding">@dimen/margine</item>
+           <item name="android:showDividers">middle</item>
+	</style>
+
+	<style name="EConTabScrollView" parent="@android:style/Widget.Holo.Light.ScrollView">
+	    <item name="android:scrollbarStyle">outsideOverlay</item>
+	</style>
+
+	<style name="TitoloBold">
+	    <item name="android:textStyle">bold</item>
+	</style>
+
+	<style name="EConTabPopup" parent="AppTheme">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowIsTranslucent">false</item>
+	</style>
+
+	<style name="EConTabPopupNoAnimation" parent="EConTabPopup">
+	</style>
+
+    <style name="animationnormal">
+
+    </style>
+    <style name="animationpopup">
+        <item name="android:windowEnterAnimation">@anim/fadein</item>
+        <item name="android:windowExitAnimation">@anim/fadeout</item>
+    </style>
+
+	<dimen name="bordo_piantina">2dp</dimen>
+	 <dimen name="altezza_item">40dp</dimen>
+	 <dimen name="altezza_menu_categorie">54dp</dimen>
+    <dimen name="larghezza_menu_categorie">60dp</dimen>
+    <dimen name="altezza_menu_categorie_piu_testo">70dp</dimen>
+	  <dimen name="larghezza_elemento">80dp</dimen>
+	 <dimen name="larghezza_icona">70dp</dimen>
+    <dimen name="larghezza_icona_con_padding">74dp</dimen>
+     <dimen name="margine">5dp</dimen>
+     <dimen name="margine_tablet">1dp</dimen>
+     <dimen name="larghezza_splitter">5dp</dimen>
+     <dimen name="altezza_campo">18dp</dimen>
+     <dimen name="altezza_campo_doppia">36dp</dimen>
+     <dimen name="padding_bottone">2dp</dimen>
+     <dimen name="padding_drag">8dp</dimen>
+     <dimen name="testo_immagine">9sp</dimen>
+     <dimen name="testo_immagine_medio">12sp</dimen>
+     <dimen name="testo_immagine_grande">14sp</dimen>
+     <dimen name="altezza_componente">100dp</dimen>
+     <dimen name="altezza_scatola">80dp</dimen>
+     <dimen name="larghezza_componente">45dp</dimen>
+    <dimen name="altezza_dropdownlist">120dp</dimen>
+
+</resources>

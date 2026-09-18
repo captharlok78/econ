@@ -1,0 +1,329 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true" >
+
+        <LinearLayout
+            android:id="@+id/campi"
+            style="@style/EConTabLinearLayoutMaster"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:id="@+id/prima_riga"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine" >
+
+                <LinearLayout
+                    android:id="@+id/riga_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/button_edit"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/textView_ragionesociale"
+                        style="@style/TestoIntestazioneNoPadding"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ragione_sociale" />
+
+                    <TextView
+                        android:id="@+id/editText_ragionesociale"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/button_edit"
+                    style="@style/bottoneListaGrande"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/bg_bottone_rotondo"
+                    android:onClick="modifica"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/modifica" />
+            </RelativeLayout>
+            <LinearLayout
+                android:id="@+id/riga_cod"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine"
+                android:layout_marginTop="@dimen/margine"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/textView_codice"
+                    style="@style/TestoIntestazioneNoPadding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/codice" />
+
+                <TextView
+                    android:id="@+id/editText_codice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/riga_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine"
+                android:layout_marginTop="@dimen/margine"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:id="@+id/linear_inidirizzo_mappa"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/textView_indirizzo"
+                        style="@style/TestoIntestazioneNoPadding"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/indirizzo" />
+                    <Button
+                        android:id="@+id/buttonMappa"
+                        style="@style/bottoneLista"
+                        
+                        android:layout_marginLeft="@dimen/margine"
+                        android:background="@drawable/mappa" />
+                </LinearLayout>
+
+                
+
+                    <TextView
+                        android:id="@+id/editText_indirizzo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                         />
+
+                    
+                
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/riga_3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine"
+                android:layout_marginTop="@dimen/margine"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/textView_capcittaprov"
+                    style="@style/TestoIntestazioneNoPadding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cap_citta_provincia" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/editText_cap"
+                        android:layout_width="0sp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.25" />
+
+                    <TextView
+                        android:id="@+id/editText_citta"
+                        android:layout_width="0sp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.6" />
+
+                    <TextView
+                        android:id="@+id/editText_provincia"
+                        android:layout_width="0sp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.15" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/riga_4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine"
+                android:layout_marginTop="@dimen/margine"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/textView_cf"
+                    style="@style/TestoIntestazioneNoPadding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/codice_fiscale" />
+
+                <TextView
+                    android:id="@+id/editText_cf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/riga_5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine"
+                android:layout_marginTop="@dimen/margine"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/textView_partitaiva"
+                    style="@style/TestoIntestazioneNoPadding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/partita_iva" />
+
+                <TextView
+                    android:id="@+id/editText_partitaiva"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/riga_6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine"
+                android:layout_marginTop="@dimen/margine"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/textView_cellulari"
+                    style="@style/TestoIntestazioneNoPadding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cellulari" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <pfa.app.econtab.views.EConTabTelefonoLayout
+                        android:id="@+id/editText_cellulare1"
+                        android:layout_width="0sp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5" />
+
+                    <pfa.app.econtab.views.EConTabTelefonoLayout
+                        android:id="@+id/editText_cellulare2"
+                        android:layout_width="0sp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/riga_7"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine"
+                android:layout_marginTop="@dimen/margine"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:id="@+id/lineartelefonomail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <LinearLayout
+                        android:id="@+id/lineartelefono"
+                        android:layout_width="0sp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_telefono"
+                            style="@style/TestoIntestazioneNoPadding"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/telefono" />
+
+                        <pfa.app.econtab.views.EConTabTelefonoLayout
+                            android:id="@+id/editText_telefono"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/linearmail"
+                        android:layout_width="0sp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:orientation="vertical" >
+
+                        <TextView
+                            android:id="@+id/textView_iva"
+                            style="@style/TestoIntestazioneNoPadding"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/iva" />
+
+                        <TextView
+                            android:id="@+id/spinner_iva"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/riga_8"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine"
+                android:layout_marginTop="@dimen/margine"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/textView_mail"
+                    style="@style/TestoIntestazioneNoPadding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/mail" />
+
+                <pfa.app.econtab.views.EConTabMailLayout
+                    android:id="@+id/editText_mail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/riga_9"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margine"
+                android:layout_marginTop="@dimen/margine"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/textView_note"
+                    style="@style/TestoIntestazioneNoPadding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/note" />
+
+                <TextView
+                    android:id="@+id/editText_note"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="5sp" >
+
+    <RelativeLayout
+        android:id="@+id/relative_prev"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/tipo"
+            style="@style/TestoIntestazioneNoPadding"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TUBO"
+            android:textAllCaps="true" />
+
+        <TextView
+            android:id="@+id/nome"
+            style="@style/TestoNeroPiccolo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/tipo"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/metri"
+            android:text="descrizione" />
+
+        <TextView
+            android:id="@+id/metri"
+            style="@style/TestoPiccolo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/tipo"
+            android:text="Mt. 5,00" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_elementi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/padding_bottone"
+        android:layout_weight="100"
+        android:layout_marginBottom="@dimen/padding_bottone"
+        android:orientation="horizontal" >
+
+        <LinearLayout
+            android:id="@+id/linearElementoDa"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="47"
+            android:background="@drawable/bg_econtab_bordo_blu"
+            android:orientation="vertical"
+           android:paddingTop="@dimen/padding_bottone"
+            android:paddingLeft="@dimen/margine"
+            android:paddingRight="@dimen/margine"
+            >
+
+            <TextView
+                android:id="@+id/textViewDa"
+                style="@style/TestoIntestazioneNoPadding"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/elemento_partenza"
+                android:layout_gravity="center_horizontal"
+                android:textSize="@dimen/testo_immagine"
+                 />
+
+            <TextView
+                android:id="@+id/textViewLocaleA"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAllCaps="true"
+                android:textSize="@dimen/testo_immagine"
+                android:layout_marginTop="@dimen/padding_bottone"
+                android:text="Locale A" />
+             <TextView
+                android:id="@+id/textViewElementoA"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+               
+                style="@style/TestoNeroPiccolo"
+                android:text="Elemento A" />
+             <TextView
+                android:id="@+id/textViewComponenteA"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+               
+                style="@style/TestoPiccolo"
+                android:text="Componente A" />
+
+        </LinearLayout>
+
+       
+            <ImageView
+                android:id="@+id/imageViewCollegamenti"
+                android:layout_width="0dp"
+                android:layout_weight="6"
+                android:layout_height="wrap_content"
+                android:scaleType="fitXY"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/divider" />
+       
+
+        <LinearLayout
+            android:id="@+id/linearElementoA"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="47"
+            android:background="@drawable/bg_econtab_bordo_blu"
+            android:orientation="vertical"
+            android:paddingTop="@dimen/padding_bottone"
+            android:paddingLeft="@dimen/margine"
+            android:paddingRight="@dimen/margine"
+             >
+
+            <TextView
+                android:id="@+id/textViewA"
+                style="@style/TestoIntestazioneNoPadding"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/elemento_destinazione"
+                android:layout_gravity="center_horizontal"
+                android:textSize="@dimen/testo_immagine" />
+            <TextView
+                android:id="@+id/textViewLocaleB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                 android:textAllCaps="true"
+                android:textSize="@dimen/testo_immagine"
+                android:layout_marginTop="@dimen/padding_bottone"
+                
+                android:text="Locale B" />
+             <TextView
+                android:id="@+id/textViewElementoB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+               
+                style="@style/TestoNeroPiccolo"
+                android:text="Elemento B" />
+             <TextView
+                android:id="@+id/textViewComponenteB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+               
+               style="@style/TestoPiccolo"
+                android:text="Componente B" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

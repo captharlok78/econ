@@ -1,0 +1,547 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_econtab_popup"
+    android:padding="@dimen/margine"
+    tools:context=".CollegamentoActivity" >
+
+    <RelativeLayout
+        android:id="@+id/contenitore"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <TextView
+            android:id="@+id/textView_titolo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/padding_bottone"
+            android:text="Collegamento"
+            android:textAllCaps="true"
+            android:visibility="invisible" />
+
+        <ImageButton
+            android:id="@+id/imageButton_chiudi"
+            style="@style/bottoneLista"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/bg_bottone_grigio_arrotondato"
+            android:onClick="chiudi"
+            android:scaleType="fitXY"
+            android:src="@android:drawable/ic_delete" />
+
+        <ScrollView
+            android:id="@+id/scrollCampi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/footer_dett"
+            android:layout_below="@id/textView_titolo" >
+
+            <RelativeLayout
+                android:id="@+id/relativeCampi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <LinearLayout
+                    android:id="@+id/linear_tipi_collegamento"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/altezza_campo_doppia"
+                    android:layout_marginBottom="@dimen/margine"
+                    android:layout_marginTop="@dimen/margine"
+                    android:orientation="horizontal" >
+
+                    <Button
+                        android:id="@+id/buttonTubo"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.33"
+                        android:background="@drawable/bg_bottone_bianco_con_bordo"
+                        android:onClick="selezionaTipo"
+                        android:text="@string/tubo" />
+
+                    <Button
+                        android:id="@+id/buttonCavo"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.33"
+                        android:background="@drawable/bg_bottone_bianco_con_bordo"
+                        android:onClick="selezionaTipo"
+                        android:text="@string/cavo" />
+
+                    <Button
+                        android:id="@+id/buttonTuboCavo"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.33"
+                        android:background="@drawable/bg_bottone_bianco_con_bordo"
+                        android:onClick="selezionaTipo"
+                        android:text="@string/tubo_cavo" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/linearElementoA"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/linear_tipi_collegamento"
+                    android:layout_marginTop="@dimen/padding_bottone"
+                    android:background="@drawable/bg_econtab_bordo_blu"
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/padding_drag"
+                    android:paddingLeft="@dimen/padding_drag"
+                    android:paddingRight="@dimen/padding_drag"
+                    android:visibility="visible" >
+
+                    <TextView
+                        android:id="@+id/textView_partenza"
+                        style="@style/TestoIntestazioneNoPadding"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="@dimen/margine"
+                        android:text="@string/elemento_partenza"
+                        android:textAllCaps="true" />
+<LinearLayout
+    android:orientation="vertical"
+    android:id="@+id/linearElementoADett"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+                    <TextView
+                        android:id="@+id/textView_localeA"
+                        style="@style/TestoIntestazione"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/locale" />
+
+                    <pfa.app.econtab.views.EConTabSpinner
+                        android:id="@+id/spinnerLocaleA"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+                    </pfa.app.econtab.views.EConTabSpinner>
+
+                    <TextView
+                        android:id="@+id/textView_elementoA"
+                        style="@style/TestoIntestazione"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/elemento" />
+
+                    <pfa.app.econtab.views.EConTabSpinner
+                        android:id="@+id/spinnerElementoA"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+                    </pfa.app.econtab.views.EConTabSpinner>
+
+                    <TextView
+                        android:id="@+id/textView_componenteA"
+                        style="@style/TestoIntestazione"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/componente" />
+
+                    <pfa.app.econtab.views.EConTabSpinner
+                        android:id="@+id/spinnerComponenteA"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+                    </pfa.app.econtab.views.EConTabSpinner>
+                </LinearLayout>
+                    <TextView
+                        android:id="@+id/textView_partenzaDesc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/linearElementoB"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/linearElementoA"
+                    android:layout_marginTop="@dimen/margine"
+                    android:background="@drawable/bg_econtab_bordo_blu"
+                    android:orientation="vertical"
+                    android:paddingBottom="@dimen/padding_drag"
+                    android:paddingLeft="@dimen/padding_drag"
+                    android:paddingRight="@dimen/padding_drag" >
+
+                    <TextView
+                        android:id="@+id/textView_arrivo"
+                        style="@style/TestoIntestazioneNoPadding"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="@dimen/margine"
+                        android:text="@string/elemento_destinazione"
+                        android:textAllCaps="true" />
+
+                    <TextView
+                        android:id="@+id/textView_localeB"
+                        style="@style/TestoIntestazione"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/locale" />
+
+                    <pfa.app.econtab.views.EConTabSpinner
+                        android:id="@+id/spinnerLocaleB"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+                    </pfa.app.econtab.views.EConTabSpinner>
+
+                    <TextView
+                        android:id="@+id/textView_elementoB"
+                        style="@style/TestoIntestazione"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/elemento" />
+
+                    <pfa.app.econtab.views.EConTabSpinner
+                        android:id="@+id/spinnerElementoB"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+                    </pfa.app.econtab.views.EConTabSpinner>
+
+                    <TextView
+                        android:id="@+id/textView_componenteB"
+                        style="@style/TestoIntestazione"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/componente" />
+
+                    <pfa.app.econtab.views.EConTabSpinner
+                        android:id="@+id/spinnerComponenteB"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+                    </pfa.app.econtab.views.EConTabSpinner>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/linearTuboCavo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/linearElementoB"
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_drag" >
+
+                    <LinearLayout
+                        android:id="@+id/linearTuboMetri"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" >
+
+                        <LinearLayout
+                            android:id="@+id/linearTubo"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.8"
+                            android:orientation="vertical" >
+
+                            <TextView
+                                android:id="@+id/textView_tubo"
+                                style="@style/TestoIntestazione"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/tubo" />
+
+                            <pfa.app.econtab.views.EConTabSpinner
+                                android:id="@+id/spinnerTubo"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" >
+                            </pfa.app.econtab.views.EConTabSpinner>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/linearMetri"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.2"
+                            android:orientation="vertical" >
+
+                            <TextView
+                                android:id="@+id/textView_metriTubo"
+                                style="@style/TestoIntestazione"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:singleLine="true"
+                                android:text="@string/metritubo" />
+
+                            <EditText
+                                android:id="@+id/editTextMetriTubo"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:ems="4"
+                                android:inputType="numberDecimal" >
+                            </EditText>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/linearCavoMetri"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" >
+
+                        <LinearLayout
+                            android:id="@+id/linearCavo"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.8"
+                            android:orientation="vertical" >
+
+                            <TextView
+                                android:id="@+id/textView_cavo"
+                                style="@style/TestoIntestazione"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/cavo" />
+
+                            <pfa.app.econtab.views.EConTabSpinner
+                                android:id="@+id/spinnerCavo"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" >
+                            </pfa.app.econtab.views.EConTabSpinner>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/linearMetriCavo"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0.2"
+                            android:orientation="vertical" >
+
+                            <TextView
+                                android:id="@+id/textView_cmCodaCavo"
+                                style="@style/TestoIntestazione"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:singleLine="true"
+                                android:text="@string/centimetri_coda_tot" />
+
+                            <EditText
+                                android:id="@+id/editTextCmCodaCavo"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:ems="4"
+                                android:inputType="number" >
+                            </EditText>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/linear_codaqta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
+
+                        <LinearLayout
+                            android:id="@+id/linear_qtavertical"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical" >
+
+                            <TextView
+                                android:id="@+id/textView_qtacavo"
+                                style="@style/TestoIntestazione"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/qta_cavo" />
+
+                            <LinearLayout
+                                android:id="@+id/linearQta"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" >
+
+                                <Button
+                                    android:id="@+id/buttonMeno"
+                                    android:layout_width="@dimen/altezza_campo"
+                                    android:layout_height="@dimen/altezza_campo"
+                                    android:background="@drawable/bg_bottone_rotondo"
+                                    android:onClick="cambiaQta"
+                                    android:text="-"
+                                    android:textColor="@android:color/darker_gray"
+                                    android:textSize="@dimen/testo_immagine_grande" />
+
+                                <EditText
+                                    android:id="@+id/text_qta"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:ems="1"
+                                    android:gravity="center"
+                                    android:inputType="number"
+                                    android:text="3" />
+
+                                <Button
+                                    android:id="@+id/buttonPiu"
+                                    android:layout_width="@dimen/altezza_campo"
+                                    android:layout_height="@dimen/altezza_campo"
+                                    android:background="@drawable/bg_bottone_rotondo"
+                                    android:onClick="cambiaQta"
+                                    android:text="+"
+                                    android:textColor="@android:color/darker_gray"
+                                    android:textSize="@dimen/testo_immagine_grande" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/textViewPer"
+                            style="@style/TestoIntestazioneNoPadding"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="x" />
+
+                        <LinearLayout
+                            android:id="@+id/linearMetriCavoUni"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="@dimen/margine"
+                            android:layout_marginRight="@dimen/margine"
+                            android:orientation="vertical" >
+
+                            <TextView
+                                android:id="@+id/textView_metriCavoUni"
+                                style="@style/TestoIntestazione"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/metricavo" />
+
+                            <EditText
+                                android:id="@+id/editTextMetriCavoUni"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:ems="3"
+                                android:inputType="numberDecimal" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/textViewUguale"
+                            style="@style/TestoIntestazioneNoPadding"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="top"
+                            android:text="=" />
+
+                        <LinearLayout
+                            android:id="@+id/linear_metricavotot"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="@dimen/margine"
+                            android:orientation="vertical" >
+
+                            <TextView
+                                android:id="@+id/textView_metriCavo"
+                                style="@style/TestoIntestazioneNoPadding"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:singleLine="true"
+                                android:text="@string/metri_tot" />
+
+                            <TextView
+                                android:id="@+id/editTextMetriCavo"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="3dp"
+                                android:text="0" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/linearCollTuboUsato"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_below="@+id/linearTuboCavo"
+                    android:layout_marginTop="@dimen/margine"
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_drag" >
+
+                    <TextView
+                        android:id="@+id/textView_collegamentoCtubo"
+                        style="@style/TestoIntestazione"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/collegamento_tubo_da_usare"
+                        android:textAllCaps="true" />
+
+                    <TextView
+                        android:id="@+id/textView_nessunTubo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/nessun_tubo_collega_i_due_elementi" />
+
+                    <ListView
+                        android:background="@android:color/transparent"
+                        android:id="@+id/listViewTubiPassanti"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" >
+                    </ListView>
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/linearCollCaviPassati"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_below="@+id/linearCollTuboUsato"
+                    android:layout_marginTop="@dimen/margine"
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_drag" >
+
+                    
+
+                    <TextView
+                        android:id="@+id/textView_caviPassanti"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Per questo tubo passano in totale 5 cavi (2 collegamenti)" />
+
+                  
+                </LinearLayout>
+            </RelativeLayout>
+        </ScrollView>
+
+        <LinearLayout
+            android:id="@+id/footer_dett"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"></LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <Button
+                    android:id="@+id/button_annulla"
+                    style="@style/TestoNeroGrande"
+                    android:layout_width="0sp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:onClick="chiudi"
+                    android:paddingBottom="@dimen/altezza_campo"
+                    android:paddingTop="@dimen/altezza_campo"
+                    android:text="@string/annulla"
+                    android:textColor="#1784c5" />
+
+                <Button
+                    android:id="@+id/button_salva"
+                    style="@style/TestoNeroGrande"
+                    android:layout_width="0sp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:onClick="salva"
+                    android:paddingBottom="@dimen/altezza_campo"
+                    android:paddingTop="@dimen/altezza_campo"
+                    android:text="@string/salva"
+                    android:textColor="#1784c5"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+</FrameLayout>

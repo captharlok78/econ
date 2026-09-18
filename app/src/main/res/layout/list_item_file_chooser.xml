@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" 
+
+    >
+
+    <TextView
+        android:id="@+id/nome_file"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/icona"
+        android:singleLine="true"
+        android:ellipsize="start"
+        android:layout_marginLeft="@dimen/margine"
+        android:text="Nome file" />
+
+    <TextView
+        android:id="@+id/data_ultima_modifica"
+        style="@style/TestoPiccolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/nome_file"
+        android:layout_marginLeft="@dimen/margine"
+        android:layout_toRightOf="@+id/icona"
+        android:text="01/01/2014" />
+
+    <ImageView
+        android:id="@+id/icona"
+        android:layout_width="@dimen/altezza_campo"
+        android:layout_height="@dimen/altezza_campo"
+        android:src="@drawable/cartella"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true" />
+
+</RelativeLayout>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:id="@+id/root_view"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/larghezza_menu_categorie"
+    android:layout_height="@dimen/altezza_menu_categorie"
+    android:paddingTop="@dimen/margine"
+   android:paddingBottom="@dimen/padding_bottone"
+    android:background="@drawable/bg_bottone_lista"
+    >
+
+    <ImageView
+        android:id="@+id/icona"
+        style="@style/bottoneListaGrande"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/bg_econtab" />
+
+    <TextView
+        android:id="@+id/testo"
+        android:layout_width="@dimen/larghezza_menu_categorie"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/icona"
+        android:layout_centerHorizontal="true"
+        android:text=""
+        android:maxLines="1"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:scrollHorizontally="true"
+
+        android:paddingTop="@dimen/padding_bottone"
+        android:textSize="@dimen/testo_immagine" />
+
+</RelativeLayout>

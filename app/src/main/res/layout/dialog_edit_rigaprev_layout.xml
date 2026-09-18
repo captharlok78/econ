@@ -1,0 +1,253 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/campi"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/altezza_campo"
+    android:orientation="vertical"
+    android:padding="@dimen/margine" >
+
+    <LinearLayout
+        android:id="@+id/linearCampi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/altezza_campo" >
+
+        <LinearLayout
+            android:id="@+id/linearQta"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:gravity="center_horizontal"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView_qta"
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/quantita" />
+
+            <EditText
+                android:id="@+id/editText_qta"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/altezza_campo_doppia"
+                android:ems="4"
+                android:inputType="numberDecimal"
+                android:maxLength="6"
+                android:nextFocusDown="@+id/editText_prezzo"
+                android:textSize="@dimen/altezza_campo" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearPrezzo"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:gravity="center_horizontal"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView_prezzo"
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/prezzo" />
+
+            <EditText
+                android:id="@+id/editText_prezzo"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/altezza_campo_doppia"
+                android:ems="5"
+                android:inputType="numberDecimal"
+                android:maxLength="8"
+                android:nextFocusDown="@+id/editText_przAcq"
+                android:textSize="@dimen/altezza_campo" >
+
+               
+            </EditText>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearCampi0"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+         >
+
+        <LinearLayout
+            android:id="@+id/linearNumOp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+          
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView_numop"
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/numero_operatori" />
+
+            <EditText
+                android:id="@+id/editText_numop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="5"
+                android:inputType="number"
+                android:maxLength="8"
+                android:nextFocusDown="@+id/editText_przAcq"
+                android:textSize="@dimen/testo_immagine_grande" />
+        </LinearLayout>
+
+       
+    </LinearLayout>
+    
+    
+    <LinearLayout
+        android:id="@+id/linearCampi1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        
+         >
+
+        <LinearLayout
+            android:id="@+id/linearPrzAcq"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+          
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView_przacq"
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/prezzo_acquisto" />
+
+            <EditText
+                android:id="@+id/editText_przAcq"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="5"
+                android:inputType="numberDecimal"
+                android:maxLength="8"
+                android:nextFocusDown="@+id/editText_ric"
+                android:textSize="@dimen/testo_immagine_grande" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearRicarico"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+           android:layout_marginLeft="@dimen/margine"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView_ric"
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/ricarico" />
+
+            <LinearLayout
+                android:id="@+id/linear_ric"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <EditText
+                    android:id="@+id/editText_ric"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="3"
+                    android:inputType="numberDecimal"
+                    android:maxLength="6"
+                    android:nextFocusDown="@+id/editText_przlis"
+                    android:textSize="@dimen/testo_immagine_grande" />
+
+                <Button
+                    android:id="@+id/buttonRicalcola"
+                    style="@style/bottoneLista"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ricalcola_prezzo"
+                    android:layout_marginLeft="@dimen/margine"
+                    android:textSize="@dimen/testo_immagine" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearCampi2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+         >
+
+        <LinearLayout
+            android:id="@+id/linearPrzLis"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+           
+           
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView_przlis"
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/prezzo_listino" />
+
+            <EditText
+                android:id="@+id/editText_przlis"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="5"
+                android:inputType="numberDecimal"
+                android:maxLength="8"
+                android:nextFocusDown="@+id/editText_sco"
+                android:textSize="@dimen/testo_immagine_grande" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearSconto"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/margine"
+           
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView_sco"
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sconto" />
+
+            <LinearLayout
+                android:id="@+id/linear_sco"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <EditText
+                    android:id="@+id/editText_sco"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="3"
+                    android:inputType="numberDecimal"
+                    android:maxLength="6"
+                    android:textSize="@dimen/testo_immagine_grande" />
+
+                <Button
+                    android:id="@+id/buttonRicalcola1"
+                    style="@style/bottoneLista"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ricalcola_prezzo"
+                    android:layout_marginLeft="@dimen/margine"
+                    android:textSize="@dimen/testo_immagine" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
