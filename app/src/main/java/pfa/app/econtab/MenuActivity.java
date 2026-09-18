@@ -355,6 +355,18 @@ public class MenuActivity extends EConTabActivity {
         if (tv != null) tv.setText(testo);
     }
 
+    /**
+     * L'operatore nel menu principale si mostra nella barra in alto (accanto
+     * all'iconcina account), non più nel footer: qui non c'è più spazio dopo
+     * aver tolto nome utente e ditta dal footer.
+     */
+    @Override
+    protected void impostaTestoOperatore(String operatore) {
+        super.impostaTestoOperatore(operatore);
+        TextView tv = findViewById(R.id.textViewUtenteTopBar);
+        if (tv != null) tv.setText(operatore == null ? "" : operatore);
+    }
+
     // ── Modale info account ───────────────────────────────────────────────────
 
     /** Icona utente nella barra in basso: mostra utente/ditta/versioni/licenza in sola lettura. */

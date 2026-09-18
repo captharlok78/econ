@@ -6,15 +6,45 @@
     android:orientation="vertical"
     android:background="#FFFFFF">
 
-    <!-- Barra superiore con logo -->
+    <!-- Barra superiore: utente (sinistra) + logo -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingStart="16dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="16dp"
         android:background="#1565C0"
         android:elevation="4dp">
+
+        <ImageButton
+            android:id="@+id/buttonInfoUtente"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:scaleType="fitCenter"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_account"
+            android:contentDescription="Informazioni account"
+            android:onClick="apriInfoUtente" />
+
+        <TextView
+            android:id="@+id/textViewUtenteTopBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text=""
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:maxWidth="150dp"
+            android:onClick="apriInfoUtente" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
 
         <ImageView
             android:layout_width="wrap_content"
@@ -27,7 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
-            android:text="ECON"
+            android:text="Econ"
             android:textColor="#FFFFFF"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -45,7 +75,7 @@
         android:padding="8dp"
         android:background="#F5F5F5" />
 
-    <!-- Footer: LED server + nome ditta -->
+    <!-- Footer: stato connessione server + logout -->
     <LinearLayout
         android:id="@+id/footer"
         android:layout_width="match_parent"
@@ -77,55 +107,11 @@
             android:layout_height="1dp"
             android:layout_weight="1" />
 
-        <TextView
-            android:id="@+id/testoFooterOperatore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:text=""
-            android:textColor="#CCFFFFFF"
-            android:textSize="12sp"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:maxWidth="110dp" />
-
         <View
             android:layout_width="1dp"
             android:layout_height="20dp"
             android:layout_marginEnd="8dp"
             android:background="#55FFFFFF" />
-
-        <!-- Ditta: sola lettura, non si cambia da app -->
-        <TextView
-            android:id="@+id/testoFooter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="4dp"
-            android:text="Azienda"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:maxWidth="130dp" />
-
-        <View
-            android:layout_width="1dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="10dp"
-            android:background="#55FFFFFF" />
-
-        <ImageButton
-            android:id="@+id/buttonInfoUtente"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_marginStart="4dp"
-            android:padding="7dp"
-            android:scaleType="fitCenter"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_account"
-            android:contentDescription="Informazioni account"
-            android:onClick="apriInfoUtente" />
 
         <ImageButton
             android:id="@+id/buttonLogoutFooter"
