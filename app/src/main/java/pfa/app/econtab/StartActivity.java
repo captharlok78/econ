@@ -7,8 +7,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.content.pm.PackageInfo;
 import android.util.Base64;
 import android.view.MotionEvent;
+import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
@@ -27,6 +29,8 @@ public class StartActivity extends EConTabActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
+        mostraVersioneReale();
+
         if (hasRequiredPermissions()) {
             scheduleStart();
         } else {
@@ -34,6 +38,14 @@ public class StartActivity extends EConTabActivity {
                     Manifest.permission.READ_EXTERNAL_STORAGE,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
             }, REQUEST_PERMISSIONS);
+        }
+    }
+
+    private void mostraVersioneReale() {
+        try {
+            PackageInfo pinfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            ((TextView) findViewById(R.id.textViewVersione)).setText("v " + pinfo.versionName);
+        } catch (Exception ignored) {
         }
     }
 

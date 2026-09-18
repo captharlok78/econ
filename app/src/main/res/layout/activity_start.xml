@@ -19,6 +19,14 @@
         android:gravity="center"
         android:paddingBottom="64dp">
 
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="72dp"
+            android:layout_marginBottom="12dp"
+            android:contentDescription="Econ"
+            android:scaleType="fitCenter"
+            android:src="@drawable/logo_econ" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
