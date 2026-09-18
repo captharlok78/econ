@@ -93,6 +93,10 @@ public interface MercuryApiService {
     @GET("api/version/app")
     Call<VersionResponse> getVersioneApp(@Query("commit") String commit);
 
+    /** Versione "umana" di Mercury stesso (nessun parametro: il server risolve il proprio commit). */
+    @GET("api/version/mercury")
+    Call<VersionResponse> getVersioneMercury();
+
     // ── DTO inline ────────────────────────────────────────────────────────
 
     class LoginRequest {

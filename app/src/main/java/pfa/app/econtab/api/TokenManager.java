@@ -28,6 +28,8 @@ public class TokenManager {
     private static final String KEY_COGNOME    = "user_cognome";
     private static final String KEY_MODULI     = "moduli_abilitati";
     private static final String KEY_DITTE      = "ditte_abilitate";
+    private static final String KEY_RICORDA_EMAIL    = "ricorda_email";
+    private static final String KEY_RICORDA_PASSWORD  = "ricorda_password";
 
     private static TokenManager instance;
     private final SharedPreferences prefs;
@@ -219,5 +221,37 @@ public class TokenManager {
                 .remove(KEY_MODULI)
                 .remove(KEY_DITTE)
                 .apply();
+        clearCredenzialiRicordami();
+    }
+
+    /**
+     * "Ricordami" del login Mercury: email+password restano precompilate tra un avvio
+     * e l'altro finché non si fa logout (clearToken() le cancella insieme al resto).
+     * Storage cifrato (stessa istanza EncryptedSharedPreferences del JWT).
+     */
+    public void saveCredenzialiRicordami(String email, String password) {
+        prefs.edit()
+                .putString(KEY_RICORDA_EMAIL, email)
+                .putString(KEY_RICORDA_PASSWORD, password)
+                .apply();
+    }
+
+    public void clearCredenzialiRicordami() {
+        prefs.edit()
+                .remove(KEY_RICORDA_EMAIL)
+                .remove(KEY_RICORDA_PASSWORD)
+                .apply();
+    }
+
+    public String getEmailRicordami() {
+        return prefs.getString(KEY_RICORDA_EMAIL, "");
+    }
+
+    public String getPasswordRicordami() {
+        return prefs.getString(KEY_RICORDA_PASSWORD, "");
+    }
+
+    public boolean hasCredenzialiRicordami() {
+        return prefs.contains(KEY_RICORDA_PASSWORD);
     }
 }

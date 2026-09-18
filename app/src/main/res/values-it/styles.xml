@@ -189,6 +189,7 @@
      <dimen name="margine">5dp</dimen>
      <dimen name="margine_tablet">1dp</dimen>
      <dimen name="margine_login">32dp</dimen>
+     <dimen name="padding_login_h">16dp</dimen>
      <dimen name="larghezza_splitter">5dp</dimen>
      <dimen name="altezza_campo">18dp</dimen>
      <dimen name="altezza_campo_doppia">36dp</dimen>

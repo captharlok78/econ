@@ -48,6 +48,9 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
     private View indicatoreConnessione = null;
     private TextView testoStatoConnessione = null;
     private TextView testoVersioneApp = null;
+    private CheckBox checkBoxRicordamiMercury = null;
+    private String versioneAppTesto = "";
+    private String versioneMercuryTesto = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,16 +64,26 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
         indicatoreConnessione = findViewById(R.id.indicatoreConnessione);
         testoStatoConnessione = (TextView) findViewById(R.id.testoStatoConnessione);
         testoVersioneApp = (TextView) findViewById(R.id.testoVersioneApp);
+        checkBoxRicordamiMercury = (CheckBox) findViewById(R.id.checkBoxRicordamiMercury);
 
         spinnerutenti.addTextChangeListener(this);
 
-        caricaVersioneApp();
+        caricaVersioni();
 
-        // Ripristina l'email usata nell'ultimo login Mercury
-        String emailSalvata = getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE)
-                .getString("MERCURY_EMAIL", "");
-        if (!emailSalvata.isEmpty()) {
-            ((EditText) findViewById(R.id.editTextEmail)).setText(emailSalvata);
+        // "Ricordami": se presenti, precompila email+password cifrate (hanno priorità
+        // sul solo-email storico sotto, che resta per chi non ha mai spuntato "Ricordami").
+        TokenManager tm = TokenManager.getInstance(this);
+        if (tm.hasCredenzialiRicordami()) {
+            ((EditText) findViewById(R.id.editTextEmail)).setText(tm.getEmailRicordami());
+            ((EditText) findViewById(R.id.editTextPasswordMercury)).setText(tm.getPasswordRicordami());
+            checkBoxRicordamiMercury.setChecked(true);
+        } else {
+            // Ripristina l'email usata nell'ultimo login Mercury
+            String emailSalvata = getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE)
+                    .getString("MERCURY_EMAIL", "");
+            if (!emailSalvata.isEmpty()) {
+                ((EditText) findViewById(R.id.editTextEmail)).setText(emailSalvata);
+            }
         }
 
         System.out.println("EConTab: LoginActivity onCreate EXIT");
@@ -132,13 +145,22 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
     }
 
     /**
-     * Recupera la versione "umana" dell'app risolta da Mercury a partire dal commit
-     * HEAD della build (BuildConfig.GIT_COMMIT) e la mostra in testoVersioneApp.
-     * Se la chiamata fallisce (server non configurato/raggiungibile), ricade sul
-     * versionName locale del pacchetto, così il testo non resta mai vuoto.
+     * Recupera la versione "umana" dell'app (risolta da Mercury a partire dal commit
+     * HEAD della build, BuildConfig.GIT_COMMIT) e quella di Mercury stesso (che risolve
+     * da solo il proprio commit in esecuzione), e le mostra insieme, centrate, sotto la
+     * card di login. Se una chiamata fallisce (server non configurato/raggiungibile) quel
+     * pezzo ricade sul versionName locale del pacchetto (per l'app) o viene omesso (per
+     * Mercury, che non è determinabile offline), così il testo non resta mai vuoto.
      */
-    private void caricaVersioneApp() {
-        mostraVersioneLocale();
+    private void caricaVersioni() {
+        try {
+            PackageInfo pinfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            versioneAppTesto = "App v" + pinfo.versionName;
+        } catch (Exception ignored) {
+            versioneAppTesto = "";
+        }
+        versioneMercuryTesto = "";
+        aggiornaTestoVersioni();
 
         SharedPreferences pref = getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE);
         if (pref.getString("URL", "").isEmpty()) {
@@ -146,13 +168,15 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
         }
 
         MercuryApiService api = MercuryApiClient.getInstance(this).getService();
+
         api.getVersioneApp(pfa.app.econtab.BuildConfig.GIT_COMMIT).enqueue(new Callback<MercuryApiService.VersionResponse>() {
             @Override
             public void onResponse(Call<MercuryApiService.VersionResponse> call,
                                    retrofit2.Response<MercuryApiService.VersionResponse> response) {
                 if (isFinishing() || isDestroyed()) return;
                 if (response.isSuccessful() && response.body() != null && response.body().versione != null) {
-                    testoVersioneApp.setText("v" + response.body().versione);
+                    versioneAppTesto = "App v" + response.body().versione;
+                    aggiornaTestoVersioni();
                 }
             }
 
@@ -161,15 +185,30 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
                 // Nessuna azione: resta il fallback locale già impostato
             }
         });
+
+        api.getVersioneMercury().enqueue(new Callback<MercuryApiService.VersionResponse>() {
+            @Override
+            public void onResponse(Call<MercuryApiService.VersionResponse> call,
+                                   retrofit2.Response<MercuryApiService.VersionResponse> response) {
+                if (isFinishing() || isDestroyed()) return;
+                if (response.isSuccessful() && response.body() != null && response.body().versione != null) {
+                    versioneMercuryTesto = "Mercury v" + response.body().versione;
+                    aggiornaTestoVersioni();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MercuryApiService.VersionResponse> call, Throwable t) {
+                // Nessuna azione: Mercury non raggiungibile, si mostra solo la versione app
+            }
+        });
     }
 
-    private void mostraVersioneLocale() {
-        try {
-            PackageInfo pinfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-            testoVersioneApp.setText("v" + pinfo.versionName);
-        } catch (Exception ignored) {
-            testoVersioneApp.setText("");
-        }
+    private void aggiornaTestoVersioni() {
+        String testo = versioneMercuryTesto.isEmpty()
+                ? versioneAppTesto
+                : versioneAppTesto + "  ·  " + versioneMercuryTesto;
+        testoVersioneApp.setText(testo);
     }
 
     private void verificaConnessione() {
@@ -256,7 +295,16 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
 
                         if (response.isSuccessful() && response.body() != null) {
                             MercuryApiService.LoginResponse body = response.body();
-                            TokenManager.getInstance(LoginActivity.this).saveToken(body);
+                            TokenManager tm = TokenManager.getInstance(LoginActivity.this);
+                            tm.saveToken(body);
+
+                            // "Ricordami": salva o cancella email+password cifrate a seconda della
+                            // checkbox. Restano finché non si fa logout (TokenManager.clearToken()).
+                            if (checkBoxRicordamiMercury.isChecked()) {
+                                tm.saveCredenzialiRicordami(email, password);
+                            } else {
+                                tm.clearCredenzialiRicordami();
+                            }
 
                             // Salva email + segna terminale come attivato (il JWT Mercury è l'attivazione)
                             getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE)
@@ -363,6 +411,16 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
     /** Apre la schermata di configurazione del server Mercury */
     public void apriImpostazioniServer(View v) {
         startActivity(new Intent(this, pfa.app.econtab.server.ConfigurazioneGenActivity.class));
+    }
+
+    /**
+     * Placeholder: non esiste ancora un flusso di registrazione self-service lato
+     * Mercury. Per ora indirizza l'utente a chi gestisce gli accessi.
+     */
+    public void registrati(View v) {
+        Utility.mostraDialog("Registrati",
+                "La registrazione non è ancora disponibile da qui: contatta l'amministratore di Mercury per farti creare un account.",
+                this, "OK");
     }
 
     /** Avvia il flusso di recupero password Mercury (step 1: inserisci email). */

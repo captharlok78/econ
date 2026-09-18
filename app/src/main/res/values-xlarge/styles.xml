@@ -100,6 +100,7 @@
     <dimen name="margine">15dp</dimen>
     <dimen name="margine_tablet">75dp</dimen>
     <dimen name="margine_login">160dp</dimen>
+    <dimen name="padding_login_h">32dp</dimen>
     <dimen name="larghezza_splitter">10dp</dimen>
     <dimen name="altezza_campo">30dp</dimen>
     <dimen name="altezza_campo_doppia">60dp</dimen>
