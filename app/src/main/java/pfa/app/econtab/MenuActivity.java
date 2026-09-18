@@ -21,11 +21,16 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
+import pfa.app.econtab.api.MercuryApiClient;
+import pfa.app.econtab.api.MercuryApiService;
 import pfa.app.econtab.api.TokenManager;
 import pfa.app.econtab.server.ConfigurazioneGenActivity;
 import pfa.app.econtab.utils.AsyncTaskExecutorService;
 import pfa.app.econtab.utils.Sessione;
 import pfa.app.econtab.utils.Utility;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MenuActivity extends EConTabActivity {
 
@@ -315,6 +320,7 @@ public class MenuActivity extends EConTabActivity {
     private void verificaConnessioneServer() {
         View led = findViewById(R.id.led_server);
         if (led != null) led.setBackgroundResource(R.drawable.ic_led_gray);
+        impostaTestoLed("Verifica connessione...");
 
         String url = Utility.getURLServer(this);
         new OkHttpClient.Builder()
@@ -329,6 +335,7 @@ public class MenuActivity extends EConTabActivity {
                     runOnUiThread(() -> {
                         View l = findViewById(R.id.led_server);
                         if (l != null) l.setBackgroundResource(R.drawable.ic_led_red);
+                        impostaTestoLed("Disconnesso");
                     });
                 }
                 @Override
@@ -337,8 +344,124 @@ public class MenuActivity extends EConTabActivity {
                     runOnUiThread(() -> {
                         View l = findViewById(R.id.led_server);
                         if (l != null) l.setBackgroundResource(R.drawable.ic_led_green);
+                        impostaTestoLed("Connesso");
                     });
                 }
             });
+    }
+
+    private void impostaTestoLed(String testo) {
+        TextView tv = findViewById(R.id.testoLedServer);
+        if (tv != null) tv.setText(testo);
+    }
+
+    // ── Modale info account ───────────────────────────────────────────────────
+
+    /** Icona utente nella barra in basso: mostra utente/ditta/versioni/licenza in sola lettura. */
+    public void apriInfoUtente(View v) {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View contenuto = inflater.inflate(R.layout.dialog_profilo, null, false);
+
+        TextView tvUtente    = contenuto.findViewById(R.id.tvProfiloUtente);
+        TextView tvDitta     = contenuto.findViewById(R.id.tvProfiloDitta);
+        TextView tvVersioni  = contenuto.findViewById(R.id.tvProfiloVersioni);
+        TextView tvLicenza   = contenuto.findViewById(R.id.tvProfiloLicenza);
+
+        tvUtente.setText("Caricamento...");
+        tvDitta.setText("");
+        tvVersioni.setText("Versioni: verifica in corso...");
+        tvLicenza.setText("Verifica in corso...");
+
+        new AlertDialog.Builder(this)
+                .setTitle("Account")
+                .setView(contenuto)
+                .setPositiveButton("Chiudi", null)
+                .show();
+
+        MercuryApiService api = MercuryApiClient.getInstance(this).getService();
+
+        api.getProfilo().enqueue(new Callback<MercuryApiService.ProfiloResponse>() {
+            @Override
+            public void onResponse(Call<MercuryApiService.ProfiloResponse> call,
+                                   Response<MercuryApiService.ProfiloResponse> response) {
+                if (isFinishing() || isDestroyed()) return;
+                if (!response.isSuccessful() || response.body() == null) {
+                    tvUtente.setText("Impossibile recuperare i dati account.");
+                    tvLicenza.setText("");
+                    return;
+                }
+                MercuryApiService.ProfiloResponse p = response.body();
+                String nomeCompleto = ((p.nome == null ? "" : p.nome) + " " + (p.cognome == null ? "" : p.cognome)).trim();
+                tvUtente.setText(nomeCompleto.isEmpty() ? p.email : nomeCompleto + "\n" + p.email);
+                tvDitta.setText(p.ditta != null ? "Ditta: " + p.ditta.nome : "Nessuna ditta");
+                tvLicenza.setText(formattaLicenza(p.licenza));
+            }
+
+            @Override
+            public void onFailure(Call<MercuryApiService.ProfiloResponse> call, Throwable t) {
+                if (isFinishing() || isDestroyed()) return;
+                tvUtente.setText("Errore di rete: impossibile recuperare i dati account.");
+                tvLicenza.setText("");
+            }
+        });
+
+        final String[] versioneApp = {null};
+        final String[] versioneMercury = {null};
+        Runnable aggiornaVersioni = () -> {
+            String app = versioneApp[0] != null ? versioneApp[0] : "n.d.";
+            String srv = versioneMercury[0] != null ? versioneMercury[0] : "n.d.";
+            tvVersioni.setText("Versione app: " + app + "\nVersione server: " + srv);
+        };
+
+        api.getVersioneApp(pfa.app.econtab.BuildConfig.GIT_COMMIT).enqueue(new Callback<MercuryApiService.VersionResponse>() {
+            @Override
+            public void onResponse(Call<MercuryApiService.VersionResponse> call,
+                                   Response<MercuryApiService.VersionResponse> response) {
+                if (isFinishing() || isDestroyed()) return;
+                if (response.isSuccessful() && response.body() != null && response.body().versione != null) {
+                    versioneApp[0] = response.body().versione;
+                    aggiornaVersioni.run();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MercuryApiService.VersionResponse> call, Throwable t) {
+                // resta "n.d."
+            }
+        });
+
+        api.getVersioneMercury().enqueue(new Callback<MercuryApiService.VersionResponse>() {
+            @Override
+            public void onResponse(Call<MercuryApiService.VersionResponse> call,
+                                   Response<MercuryApiService.VersionResponse> response) {
+                if (isFinishing() || isDestroyed()) return;
+                if (response.isSuccessful() && response.body() != null && response.body().versione != null) {
+                    versioneMercury[0] = response.body().versione;
+                    aggiornaVersioni.run();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MercuryApiService.VersionResponse> call, Throwable t) {
+                // resta "n.d."
+            }
+        });
+    }
+
+    private String formattaLicenza(MercuryApiService.LicenzaProfilo licenza) {
+        if (licenza == null) {
+            return "Nessuna licenza attiva.";
+        }
+        if (licenza.illimitata) {
+            return "Illimitata (nessuna scadenza).";
+        }
+        if (licenza.scadenza == null) {
+            return "Nessuna licenza attiva.";
+        }
+        int giorni = licenza.giorniRimanenti != null ? licenza.giorniRimanenti : 0;
+        if (giorni < 0) {
+            return "Scaduta il " + licenza.scadenza + " (" + (-giorni) + " giorni fa).";
+        }
+        return "Scadenza: " + licenza.scadenza + " (" + giorni + " giorni rimanenti).";
     }
 }

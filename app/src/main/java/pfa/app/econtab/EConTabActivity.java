@@ -31,14 +31,12 @@ import android.widget.Toast;
 
 import com.android.vending.billing.util.IabHelper;
 import pfa.app.econtab.api.MercuryApiClient;
-import pfa.app.econtab.api.MercuryApiService;
 import pfa.app.econtab.api.TokenManager;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 import pfa.app.econtab.R;
 import pfa.app.econtab.db.DbInterno;
@@ -53,9 +51,6 @@ import pfa.app.econtab.utils.Licenza;
 import pfa.app.econtab.utils.Sessione;
 import pfa.app.econtab.utils.Utility;
 import pfa.app.econtab.views.EConTabSpecialView;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public abstract class EConTabActivity extends FragmentActivity {
 
@@ -618,143 +613,6 @@ public abstract class EConTabActivity extends FragmentActivity {
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-    }
-
-    public void selezionaAzienda(View v) {
-        //System.out.println("EConTab: EConTabActivity selezionaAzienda ENTER");
-        TokenManager tm = TokenManager.getInstance(this);
-        if (tm.hasToken()) {
-            selezionaAziendaDaServer(tm);
-            return;
-        }
-        selezionaAziendaLegacy();
-    }
-
-    /**
-     * Sceglie tra le ditte a cui l'utente è abilitato lato server (stessa lista
-     * restituita al login), non tra tutte quelle mai sincronizzate sul dispositivo:
-     * su un device condiviso tra più aziende evita di proporre ditte non proprie.
-     */
-    private void selezionaAziendaDaServer(final TokenManager tm) {
-        final List<MercuryApiService.DittaInfo> ditte = tm.getDitte();
-        if (ditte.size() <= 1) {
-            return;
-        }
-
-        final int idDittaAttuale = tm.getIdDitta();
-        final String[] items = new String[ditte.size()];
-        for (int i = 0; i < ditte.size(); i++) {
-            items[i] = ditte.get(i).nome;
-        }
-
-        Utility.mostraSelezioneDialog(getString(R.string.selezione_azienda), items, this,
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        MercuryApiService.DittaInfo scelta = ditte.get(which);
-                        if (scelta.idDitta == idDittaAttuale) {
-                            return;
-                        }
-                        cambiaDitta(scelta.idDitta);
-                    }
-                }, false);
-    }
-
-    /** Chiede al server un nuovo JWT scoped sulla ditta scelta e riapre il menu. */
-    private void cambiaDitta(int idDitta) {
-        String deviceSerial = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
-        MercuryApiService api = MercuryApiClient.getInstance(this).getService();
-        api.switchDitta(new MercuryApiService.SwitchDittaRequest(idDitta, deviceSerial))
-                .enqueue(new Callback<MercuryApiService.LoginResponse>() {
-                    @Override
-                    public void onResponse(Call<MercuryApiService.LoginResponse> call, Response<MercuryApiService.LoginResponse> response) {
-                        if (isFinishing() || isDestroyed()) return;
-                        if (response.isSuccessful() && response.body() != null) {
-                            MercuryApiService.LoginResponse body = response.body();
-                            TokenManager tmLocal = TokenManager.getInstance(EConTabActivity.this);
-                            tmLocal.saveToken(body);
-                            Sessione.ripristinaDaToken(EConTabActivity.this);
-                            Toast.makeText(EConTabActivity.this, "Azienda selezionata: " + tmLocal.getNomeDitta(), Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(EConTabActivity.this, MenuActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(intent);
-                            EConTabActivity.this.finish();
-                        } else {
-                            Utility.mostraDialog(getString(R.string.attenzione), "Impossibile cambiare ditta. Riprova.", EConTabActivity.this, "OK");
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<MercuryApiService.LoginResponse> call, Throwable t) {
-                        if (isFinishing() || isDestroyed()) return;
-                        Utility.mostraDialog("Errore di rete", t.getMessage(), EConTabActivity.this, "OK");
-                    }
-                });
-    }
-
-    /** Comportamento storico (pre-Mercury): sceglie tra le ditte sincronizzate sul DB locale. */
-    private void selezionaAziendaLegacy() {
-        DbInterno db = new DbInterno(this);
-        if (!Sessione.isLicenzaBusiness(this)) {
-            // Se non � licenza server imposto l'id utente di default
-            Sessione.setIdOperatore(1, this);
-            ContentValues where = new ContentValues();
-            where.put(Utenti.ID_UTENTE, -1);
-            ArrayList<Object> utente = db.eseguiSelect(new Utenti(), where, null);
-            if (utente.size() > 0) {
-                ContentValues ut = (ContentValues) utente.get(0);
-                Sessione.setNomeOperatore(ut.getAsString(Utenti.NOME) + " " + ut.getAsString(Utenti.COGNOME));
-            }
-
-        }
-
-        // Imposto l'azienda
-
-        final ArrayList<Object> aziende = db.eseguiSelect(new Ditte(), null, new String[]{Ditte.ID_DITTA + " DESC"});
-        if (aziende.size() > 1) {
-            final String[] items = new String[aziende.size()];
-            for (int i = 0; i < aziende.size(); i++) {
-                items[i] = ((ContentValues) aziende.get(i)).getAsString(Ditte.RAGIONE_SOCIALE);
-            }
-
-            final int oldselezione = Sessione.getDittaSelezionata();
-            // Sessione.setNomeDittaSelezionata(items[0]);
-            // Sessione.setDittaSelezionata(((ContentValues) aziende.get(0)).getAsInteger(Ditte.ID_DITTA));
-
-            // Mostro la lista di selezione
-
-            // TODO Auto-generated method stub
-            Utility.mostraSelezioneDialog(getString(R.string.selezione_azienda), items, EConTabActivity.this,
-                    new DialogInterface.OnClickListener() {
-
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            // TODO Auto-generated method stub
-                            Toast.makeText(EConTabActivity.this, "Azienda selezionata: " + items[which], Toast.LENGTH_SHORT).show();
-                            Sessione.setNomeDittaSelezionata(items[which]);
-                            Sessione.setDittaSelezionata(((ContentValues) aziende.get(which)).getAsInteger(Ditte.ID_DITTA));
-                            EConTabActivity.this.impostaTestoAzienda(items[which]);
-                            if (oldselezione != Sessione.getDittaSelezionata()) {
-                                Intent intent = new Intent(EConTabActivity.this, MenuActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                                EConTabActivity.this.finish();
-                            }
-                        }
-                    }, false);
-
-        } else {
-            try {
-                ContentValues az = (ContentValues) aziende.get(0);
-                Sessione.setDittaSelezionata(az.getAsInteger(Ditte.ID_DITTA));
-                Sessione.setNomeDittaSelezionata(az.getAsString(Ditte.RAGIONE_SOCIALE));
-            } catch (Exception e) {
-                Sessione.setDittaSelezionata(-1);
-                Sessione.setNomeDittaSelezionata("Nessuna ditta impostata");
-            }
-        }
-        //System.out.println("EConTab: EConTabActivity selezionaAzienda EXIT");
-        db.close();
     }
 
     public void confermaCancellazione(final AbstractTable tabella, final ContentValues val, final boolean reload) {

@@ -21,8 +21,8 @@
         android:orientation="vertical"
         android:paddingStart="@dimen/padding_login_h"
         android:paddingEnd="@dimen/padding_login_h"
-        android:paddingTop="@dimen/margine"
-        android:paddingBottom="@dimen/margine">
+        android:paddingTop="@dimen/padding_login_h"
+        android:paddingBottom="@dimen/padding_login_h">
 
         <!-- Logo Econ, fuori dalla card -->
         <ImageView

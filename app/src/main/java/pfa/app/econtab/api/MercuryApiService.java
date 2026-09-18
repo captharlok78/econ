@@ -31,6 +31,10 @@ public interface MercuryApiService {
     @GET("api/auth/ditte")
     Call<java.util.List<DittaInfo>> getDitte();
 
+    /** Profilo utente + ditta (sola lettura) + licenza, per il modale "info account" (richiede JWT valido) */
+    @GET("api/auth/profilo")
+    Call<ProfiloResponse> getProfilo();
+
     /** Moduli (voci di menu) abilitati per l'utente (richiede JWT valido) */
     @GET("api/auth/moduli")
     Call<ModuliResponse> getModuli();
@@ -148,6 +152,27 @@ public interface MercuryApiService {
     class DittaInfo {
         public int    idDitta;
         public String nome;
+    }
+
+    class ProfiloResponse {
+        public String nome;
+        public String cognome;
+        public String email;
+        public DittaProfilo ditta;
+        public LicenzaProfilo licenza;
+    }
+
+    class DittaProfilo {
+        public int    id;
+        public String nome;
+    }
+
+    class LicenzaProfilo {
+        public boolean illimitata;
+        /** Formato "Y-m-d", null se nessuna licenza registrata */
+        public String scadenza;
+        /** Negativo se scaduta, null se non applicabile (illimitata o nessuna licenza) */
+        public Integer giorniRimanenti;
     }
 
     class SyncDownloadResponse {

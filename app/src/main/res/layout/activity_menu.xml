@@ -64,10 +64,11 @@
             android:background="@drawable/ic_led_gray" />
 
         <TextView
+            android:id="@+id/testoLedServer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
-            android:text="Mercury"
+            android:text=""
             android:textColor="#AAFFFFFF"
             android:textSize="12sp" />
 
@@ -94,6 +95,7 @@
             android:layout_marginEnd="8dp"
             android:background="#55FFFFFF" />
 
+        <!-- Ditta: sola lettura, non si cambia da app -->
         <TextView
             android:id="@+id/testoFooter"
             android:layout_width="wrap_content"
@@ -105,26 +107,25 @@
             android:textStyle="bold"
             android:singleLine="true"
             android:ellipsize="end"
-            android:maxWidth="130dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:onClick="selezionaAzienda" />
-
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@android:drawable/arrow_down_float"
-            android:tint="#FFFFFF"
-            android:clickable="true"
-            android:focusable="true"
-            android:onClick="selezionaAzienda" />
+            android:maxWidth="130dp" />
 
         <View
             android:layout_width="1dp"
             android:layout_height="20dp"
             android:layout_marginStart="10dp"
             android:background="#55FFFFFF" />
+
+        <ImageButton
+            android:id="@+id/buttonInfoUtente"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="4dp"
+            android:padding="7dp"
+            android:scaleType="fitCenter"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_account"
+            android:contentDescription="Informazioni account"
+            android:onClick="apriInfoUtente" />
 
         <ImageButton
             android:id="@+id/buttonLogoutFooter"
