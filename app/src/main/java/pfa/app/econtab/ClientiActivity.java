@@ -13,7 +13,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -25,13 +24,13 @@ import pfa.app.econtab.db.table.Anagrafica;
 
 /**
  * Prototipo dello standard di ricerca comune a Clienti/Cantieri/Listini/Preventivi/
- * Ordini/Rapportini: form filtri visibile all'apertura con gli "ultimi gestiti" sotto,
- * pulsante Cerca che riduce la form e mostra i risultati paginati.
+ * Ordini/Rapportini: all'apertura si vede SOLO la form filtri (nessun caricamento dati).
+ * Tre pulsanti nella form (Cerca / Reset filtri / Ultimi 20): qualunque venga premuto
+ * chiude la form e avvia la ricerca vera e propria — il caricamento dati avviene solo lì.
  */
 public class ClientiActivity extends EConTabActivity implements OnItemClickListener {
 
 	private static final int RISULTATI_PER_PAGINA = 20;
-	private static final int ULTIMI_GESTITI = 10;
 
 	private ListView lista = null;
 	private ClientiAdapter adapter = null;
@@ -40,10 +39,12 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 	private View cardFiltri = null;
 	private View barraPaginazione = null;
 	private TextView textViewPaginazione = null;
+	private TextView textViewNessunDato = null;
 	private EditText filtro = null;
 
-	/** false = si mostrano gli "ultimi gestiti" (nessuna ricerca ancora eseguita) */
+	/** false = nessuna ricerca ancora eseguita (si vede solo la form) */
 	private boolean ricercaAttiva = false;
+	private boolean ordinaPerRecenti = false;
 	private int paginaCorrente = 0; // 0-based
 	private int totalePagine = 1;
 	private int totaleRisultati = 0;
@@ -55,7 +56,7 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 
 		lista = findViewById(R.id.lista);
 		lista.setOnItemClickListener(this);
-		lista.setEmptyView(findViewById(R.id.textViewNessunDato));
+		textViewNessunDato = findViewById(R.id.textViewNessunDato);
 
 		cardFiltri = findViewById(R.id.cardFiltri);
 		barraPaginazione = findViewById(R.id.barraPaginazione);
@@ -64,13 +65,21 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 		filtro = findViewById(R.id.editText_filtra);
 		filtro.setOnEditorActionListener((v, actionId, event) -> {
 			if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-				eseguiRicerca();
+				eseguiRicerca(false);
 				return true;
 			}
 			return false;
 		});
 
-		((ImageButton) findViewById(R.id.buttonCerca)).setOnClickListener(v -> eseguiRicerca());
+		findViewById(R.id.buttonCerca).setOnClickListener(v -> eseguiRicerca(false));
+		findViewById(R.id.buttonResetFiltri).setOnClickListener(v -> {
+			filtro.setText("");
+			eseguiRicerca(false);
+		});
+		findViewById(R.id.buttonUltimiGestiti).setOnClickListener(v -> {
+			filtro.setText("");
+			eseguiRicerca(true);
+		});
 	}
 
 	/** Icona filtro nella barra in alto: riapre la form se era stata nascosta dopo una ricerca. */
@@ -78,9 +87,26 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 		cardFiltri.setVisibility(cardFiltri.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
 	}
 
-	/** Pulsante Cerca/tasto invio: nasconde la form e mostra i risultati (paginati) del filtro corrente. */
-	private void eseguiRicerca() {
+	/**
+	 * Mostra solo la form filtri, senza alcun caricamento dati: stato di apertura del
+	 * modulo e ripristinato dopo il logout/tra una visita e l'altra della schermata.
+	 */
+	private void mostraSoloForm() {
+		ricercaAttiva = false;
+		cardFiltri.setVisibility(View.VISIBLE);
+		barraPaginazione.setVisibility(View.GONE);
+		textViewNessunDato.setVisibility(View.GONE);
+		popolaLista(new ArrayList<>());
+	}
+
+	/**
+	 * Pulsante Cerca/Reset filtri/Ultimi 20/tasto invio: nasconde la form e mostra i
+	 * risultati paginati. "ordinaPerRecenti" true solo per "Ultimi 20" (ordina per data
+	 * modifica/inserimento invece che alfabeticamente).
+	 */
+	private void eseguiRicerca(boolean ordinaPerRecenti) {
 		nascondiTastiera(filtro);
+		this.ordinaPerRecenti = ordinaPerRecenti;
 		ricercaAttiva = true;
 		paginaCorrente = 0;
 		cardFiltri.setVisibility(View.GONE);
@@ -95,23 +121,7 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 		}
 	}
 
-	/** Ultimi 10 clienti gestiti (per data modifica/inserimento), mostrati prima di ogni ricerca esplicita. */
-	private void mostraUltimiGestiti() {
-		ricercaAttiva = false;
-		cardFiltri.setVisibility(View.VISIBLE);
-		barraPaginazione.setVisibility(View.GONE);
-
-		DbInterno db = new DbInterno(this);
-		String sql = "Select * from " + Anagrafica.NOME_TABELLA
-				+ " order by " + Anagrafica.DATA_MOD + " is null desc, " + Anagrafica.DATA_MOD
-				+ " desc, " + Anagrafica.DATA_INS + " desc limit " + ULTIMI_GESTITI;
-		ArrayList<Object> elems = db.eseguiSelect(sql, null);
-		db.close();
-
-		popolaLista(elems);
-	}
-
-	/** Query paginata (RISULTATI_PER_PAGINA) con il filtro testuale corrente. */
+	/** Query paginata (RISULTATI_PER_PAGINA) con il filtro testuale e l'ordinamento correnti. */
 	private void caricaPagina() {
 		String testo = filtro.getText().toString().trim();
 		String like = testo.isEmpty() ? "%" : "%" + testo + "%";
@@ -119,6 +129,9 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 
 		String whereSql = Anagrafica.RAGIONE_SOCIALE + " like ? or " + Anagrafica.INDIRIZZO + " like ? or "
 				+ Anagrafica.CITTA + " like ? or " + Anagrafica.CODICE_ESTERNO + " like ?";
+		String ordineSql = ordinaPerRecenti
+				? Anagrafica.DATA_MOD + " is null asc, " + Anagrafica.DATA_MOD + " desc, " + Anagrafica.DATA_INS + " desc"
+				: Anagrafica.RAGIONE_SOCIALE + " asc";
 
 		DbInterno db = new DbInterno(this);
 
@@ -131,12 +144,13 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 		}
 
 		String sql = "Select * from " + Anagrafica.NOME_TABELLA + " where " + whereSql
-				+ " order by " + Anagrafica.RAGIONE_SOCIALE + " asc limit " + RISULTATI_PER_PAGINA
+				+ " order by " + ordineSql + " limit " + RISULTATI_PER_PAGINA
 				+ " offset " + (paginaCorrente * RISULTATI_PER_PAGINA);
 		ArrayList<Object> elems = db.eseguiSelect(sql, argsFiltro);
 		db.close();
 
 		popolaLista(elems);
+		textViewNessunDato.setVisibility(elems.isEmpty() ? View.VISIBLE : View.GONE);
 		aggiornaBarraPaginazione();
 	}
 
@@ -227,19 +241,13 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (ricercaAttiva) {
-			caricaPagina();
-		} else {
-			mostraUltimiGestiti();
-		}
+		mostraSoloForm();
 	}
 
 	@Override
 	protected void aggiornaDopoCancellazione() {
 		if (ricercaAttiva) {
 			caricaPagina();
-		} else {
-			mostraUltimiGestiti();
 		}
 	}
 }

@@ -142,6 +142,8 @@
     <string name="centimetri_coda_utilizzatori">cm coda utilizzatori</string>
     <string name="centralino">Centralino</string>
     <string name="cerca">Cerca</string>
+    <string name="reset_filtri">Reset filtri</string>
+    <string name="ultimi_gestiti">Ultimi 20</string>
     <string name="nessun_dato_trovato">Nessun dato trovato</string>
     <string name="cerca_cliente">Cerca per rag. sociale o indirizzo</string>
     <string name="cerca_cliente_2">Cerca per cliente</string>
