@@ -74,7 +74,7 @@
                     android:layout_width="44dp"
                     android:layout_height="44dp"
                     android:background="@android:color/transparent"
-                    android:src="@drawable/nuovo"
+                    android:src="@drawable/ic_add"
                     android:scaleType="fitCenter"
                     android:tint="#FFFFFF"
                     android:onClick="nuovoCliente"
@@ -193,10 +193,37 @@
             android:background="#FFFFFF">
 
             <TextView
-                android:id="@+id/textViewPaginazione"
+                android:id="@+id/textViewPaginaInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="#666666"
+                android:text="" />
+
+            <EditText
+                android:id="@+id/editTextRisultatiPerPagina"
+                android:layout_width="36dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="4dp"
+                android:minHeight="0dp"
+                android:minWidth="0dp"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:gravity="center"
+                android:background="@drawable/bg_input_outline"
+                android:inputType="number"
+                android:maxLength="3"
+                android:singleLine="true"
+                android:textSize="12sp"
+                android:textColor="#1565C0"
+                android:imeOptions="actionDone" />
+
+            <TextView
+                android:id="@+id/textViewPaginaInfo2"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
                 android:textSize="12sp"
                 android:textColor="#666666"
                 android:text="" />

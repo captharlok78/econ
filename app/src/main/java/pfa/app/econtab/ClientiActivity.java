@@ -30,7 +30,7 @@ import pfa.app.econtab.db.table.Anagrafica;
  */
 public class ClientiActivity extends EConTabActivity implements OnItemClickListener {
 
-	private static final int RISULTATI_PER_PAGINA = 20;
+	private static final int RISULTATI_PER_PAGINA_DEFAULT = 20;
 
 	private ListView lista = null;
 	private ClientiAdapter adapter = null;
@@ -38,13 +38,16 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 
 	private View cardFiltri = null;
 	private View barraPaginazione = null;
-	private TextView textViewPaginazione = null;
+	private TextView textViewPaginaInfo = null;
+	private TextView textViewPaginaInfo2 = null;
 	private TextView textViewNessunDato = null;
+	private EditText editTextRisultatiPerPagina = null;
 	private EditText filtro = null;
 
 	/** false = nessuna ricerca ancora eseguita (si vede solo la form) */
 	private boolean ricercaAttiva = false;
 	private boolean ordinaPerRecenti = false;
+	private int risultatiPerPagina = RISULTATI_PER_PAGINA_DEFAULT;
 	private int paginaCorrente = 0; // 0-based
 	private int totalePagine = 1;
 	private int totaleRisultati = 0;
@@ -60,7 +63,24 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 
 		cardFiltri = findViewById(R.id.cardFiltri);
 		barraPaginazione = findViewById(R.id.barraPaginazione);
-		textViewPaginazione = findViewById(R.id.textViewPaginazione);
+		textViewPaginaInfo = findViewById(R.id.textViewPaginaInfo);
+		textViewPaginaInfo2 = findViewById(R.id.textViewPaginaInfo2);
+
+		editTextRisultatiPerPagina = findViewById(R.id.editTextRisultatiPerPagina);
+		editTextRisultatiPerPagina.setText(String.valueOf(risultatiPerPagina));
+		editTextRisultatiPerPagina.setOnFocusChangeListener((v, hasFocus) -> {
+			if (!hasFocus) {
+				applicaRisultatiPerPagina();
+			}
+		});
+		editTextRisultatiPerPagina.setOnEditorActionListener((v, actionId, event) -> {
+			if (actionId == EditorInfo.IME_ACTION_DONE) {
+				nascondiTastiera(editTextRisultatiPerPagina);
+				applicaRisultatiPerPagina();
+				return true;
+			}
+			return false;
+		});
 
 		filtro = findViewById(R.id.editText_filtra);
 		filtro.setOnEditorActionListener((v, actionId, event) -> {
@@ -113,6 +133,32 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 		caricaPagina();
 	}
 
+	/**
+	 * Cambio del numero di risultati per pagina: ricalcola pagine e ricarica mantenendo
+	 * il filtro corrente. Valore non valido/vuoto -> ripristina quello precedente.
+	 */
+	private void applicaRisultatiPerPagina() {
+		String testo = editTextRisultatiPerPagina.getText().toString().trim();
+		int nuovoValore;
+		try {
+			nuovoValore = Integer.parseInt(testo);
+		} catch (NumberFormatException e) {
+			nuovoValore = 0;
+		}
+		if (nuovoValore <= 0) {
+			editTextRisultatiPerPagina.setText(String.valueOf(risultatiPerPagina));
+			return;
+		}
+		if (nuovoValore == risultatiPerPagina) {
+			return;
+		}
+		risultatiPerPagina = nuovoValore;
+		paginaCorrente = 0;
+		if (ricercaAttiva) {
+			caricaPagina();
+		}
+	}
+
 	private void nascondiTastiera(View v) {
 		android.view.inputmethod.InputMethodManager imm = (android.view.inputmethod.InputMethodManager)
 				getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
@@ -138,14 +184,14 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 		ArrayList<Object> conteggio = db.eseguiSelect(
 				"Select count(*) as n from " + Anagrafica.NOME_TABELLA + " where " + whereSql, argsFiltro);
 		totaleRisultati = conteggio.isEmpty() ? 0 : ((ContentValues) conteggio.get(0)).getAsInteger("n");
-		totalePagine = Math.max(1, (int) Math.ceil(totaleRisultati / (double) RISULTATI_PER_PAGINA));
+		totalePagine = Math.max(1, (int) Math.ceil(totaleRisultati / (double) risultatiPerPagina));
 		if (paginaCorrente >= totalePagine) {
 			paginaCorrente = totalePagine - 1;
 		}
 
 		String sql = "Select * from " + Anagrafica.NOME_TABELLA + " where " + whereSql
-				+ " order by " + ordineSql + " limit " + RISULTATI_PER_PAGINA
-				+ " offset " + (paginaCorrente * RISULTATI_PER_PAGINA);
+				+ " order by " + ordineSql + " limit " + risultatiPerPagina
+				+ " offset " + (paginaCorrente * risultatiPerPagina);
 		ArrayList<Object> elems = db.eseguiSelect(sql, argsFiltro);
 		db.close();
 
@@ -173,8 +219,11 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 
 	private void aggiornaBarraPaginazione() {
 		barraPaginazione.setVisibility(View.VISIBLE);
-		textViewPaginazione.setText("Pagina " + (paginaCorrente + 1) + " di " + totalePagine
-				+ "  ·  " + RISULTATI_PER_PAGINA + " per pagina  ·  " + totaleRisultati + " risultati trovati");
+		textViewPaginaInfo.setText("Pagina " + (paginaCorrente + 1) + " di " + totalePagine + "  ·  ");
+		textViewPaginaInfo2.setText("  per pagina  ·  " + totaleRisultati + " risultati trovati");
+		if (!editTextRisultatiPerPagina.isFocused()) {
+			editTextRisultatiPerPagina.setText(String.valueOf(risultatiPerPagina));
+		}
 		findViewById(R.id.buttonPaginaPrec).setEnabled(paginaCorrente > 0);
 		findViewById(R.id.buttonPaginaPrec).setAlpha(paginaCorrente > 0 ? 1f : 0.3f);
 		findViewById(R.id.buttonPaginaSucc).setEnabled(paginaCorrente < totalePagine - 1);

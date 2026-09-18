@@ -64,7 +64,7 @@ public class EConTabMailLayout extends RelativeLayout implements EConTabSpecialV
 	
 	public void setValue(String value){
 		testo.setText(value);
-		if (value.length()>0){
+		if (value != null && value.length()>0){
 			button.setVisibility(View.VISIBLE);
 		}
 		else{

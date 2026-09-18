@@ -247,7 +247,7 @@ public class EConTabSpinner extends RelativeLayout implements EConTabSpecialView
 
 	public void setValue(String value) {
 		codiceSelezionato = value;
-		if (codiceSelezionato.equals("")) {
+		if (codiceSelezionato == null || codiceSelezionato.equals("")) {
 			testo.setText("");
 			setRecordSelezionato(null);
 		}
