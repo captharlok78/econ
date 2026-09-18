@@ -17,6 +17,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import pfa.app.econtab.adapters.ClientiAdapter;
 import pfa.app.econtab.db.DbInterno;
@@ -37,6 +39,7 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 	private ArrayList<Object> dati = null;
 
 	private View cardFiltri = null;
+	private View headerTabella = null;
 	private View barraPaginazione = null;
 	private TextView textViewPaginaInfo = null;
 	private TextView textViewPaginaInfo2 = null;
@@ -44,9 +47,14 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 	private EditText editTextRisultatiPerPagina = null;
 	private EditText filtro = null;
 
+	/** Colonna DB -> coppia di TextView freccia (▲ su, ▼ giù) della testata tabella. */
+	private Map<String, TextView[]> frecceOrdinamento = new HashMap<>();
+
 	/** false = nessuna ricerca ancora eseguita (si vede solo la form) */
 	private boolean ricercaAttiva = false;
 	private boolean ordinaPerRecenti = false;
+	private String colonnaOrdinamento = Anagrafica.RAGIONE_SOCIALE;
+	private boolean ordineDiscendente = false;
 	private int risultatiPerPagina = RISULTATI_PER_PAGINA_DEFAULT;
 	private int paginaCorrente = 0; // 0-based
 	private int totalePagine = 1;
@@ -62,6 +70,13 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 		textViewNessunDato = findViewById(R.id.textViewNessunDato);
 
 		cardFiltri = findViewById(R.id.cardFiltri);
+		headerTabella = findViewById(R.id.headerTabella);
+		registraColonnaOrdinabile(Anagrafica.CODICE_ESTERNO, R.id.arrowUpCodice, R.id.arrowDownCodice);
+		registraColonnaOrdinabile(Anagrafica.RAGIONE_SOCIALE, R.id.arrowUpRagione, R.id.arrowDownRagione);
+		registraColonnaOrdinabile(Anagrafica.INDIRIZZO, R.id.arrowUpVia, R.id.arrowDownVia);
+		registraColonnaOrdinabile(Anagrafica.CITTA, R.id.arrowUpCitta, R.id.arrowDownCitta);
+		registraColonnaOrdinabile(Anagrafica.PROVINCIA, R.id.arrowUpProvincia, R.id.arrowDownProvincia);
+
 		barraPaginazione = findViewById(R.id.barraPaginazione);
 		textViewPaginaInfo = findViewById(R.id.textViewPaginaInfo);
 		textViewPaginaInfo2 = findViewById(R.id.textViewPaginaInfo2);
@@ -107,6 +122,45 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 		cardFiltri.setVisibility(cardFiltri.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
 	}
 
+	private void registraColonnaOrdinabile(String campo, int idFrecciaSu, int idFrecciaGiu) {
+		frecceOrdinamento.put(campo, new TextView[]{findViewById(idFrecciaSu), findViewById(idFrecciaGiu)});
+	}
+
+	/**
+	 * Click su una colonna della testata tabella: se è già la colonna attiva inverte
+	 * la direzione (ASC/DESC), altrimenti diventa la nuova colonna di ordinamento in
+	 * ASC. Disattiva l'ordinamento "ultimi gestiti" e mantiene il filtro corrente.
+	 */
+	public void ordinaPerColonna(View v) {
+		if (!ricercaAttiva) {
+			return;
+		}
+		String campo = (String) v.getTag();
+		if (campo == null || !frecceOrdinamento.containsKey(campo)) {
+			return;
+		}
+		if (campo.equals(colonnaOrdinamento)) {
+			ordineDiscendente = !ordineDiscendente;
+		} else {
+			colonnaOrdinamento = campo;
+			ordineDiscendente = false;
+		}
+		ordinaPerRecenti = false;
+		paginaCorrente = 0;
+		caricaPagina();
+	}
+
+	/** Colora le frecce ▲▼ della testata in base alla colonna/direzione di ordinamento attiva. */
+	private void aggiornaFrecceOrdinamento() {
+		final int coloreAttivo = 0xFF1565C0;
+		final int coloreInattivo = 0xFFBBBBBB;
+		for (Map.Entry<String, TextView[]> voce : frecceOrdinamento.entrySet()) {
+			boolean colonnaAttiva = !ordinaPerRecenti && voce.getKey().equals(colonnaOrdinamento);
+			voce.getValue()[0].setTextColor(colonnaAttiva && !ordineDiscendente ? coloreAttivo : coloreInattivo);
+			voce.getValue()[1].setTextColor(colonnaAttiva && ordineDiscendente ? coloreAttivo : coloreInattivo);
+		}
+	}
+
 	/**
 	 * Mostra solo la form filtri, senza alcun caricamento dati: stato di apertura del
 	 * modulo e ripristinato dopo il logout/tra una visita e l'altra della schermata.
@@ -114,6 +168,7 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 	private void mostraSoloForm() {
 		ricercaAttiva = false;
 		cardFiltri.setVisibility(View.VISIBLE);
+		headerTabella.setVisibility(View.GONE);
 		barraPaginazione.setVisibility(View.GONE);
 		textViewNessunDato.setVisibility(View.GONE);
 		popolaLista(new ArrayList<>());
@@ -177,7 +232,7 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 				+ Anagrafica.CITTA + " like ? or " + Anagrafica.CODICE_ESTERNO + " like ?";
 		String ordineSql = ordinaPerRecenti
 				? Anagrafica.DATA_MOD + " is null asc, " + Anagrafica.DATA_MOD + " desc, " + Anagrafica.DATA_INS + " desc"
-				: Anagrafica.RAGIONE_SOCIALE + " asc";
+				: colonnaOrdinamento + (ordineDiscendente ? " desc" : " asc");
 
 		DbInterno db = new DbInterno(this);
 
@@ -197,6 +252,8 @@ public class ClientiActivity extends EConTabActivity implements OnItemClickListe
 
 		popolaLista(elems);
 		textViewNessunDato.setVisibility(elems.isEmpty() ? View.VISIBLE : View.GONE);
+		headerTabella.setVisibility(View.VISIBLE);
+		aggiornaFrecceOrdinamento();
 		aggiornaBarraPaginazione();
 	}
 
