@@ -46,11 +46,6 @@ public class ClientiActivity extends EConTabListaStandardActivity {
         registerForContextMenu(getController().getListView());
     }
 
-    public void nuovoCliente(View v) {
-        Intent intent = new Intent(this, ClientiDettaglioModActivity.class);
-        apriFinestraInserimento(intent, 1, new Anagrafica());
-    }
-
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
@@ -100,6 +95,17 @@ public class ClientiActivity extends EConTabListaStandardActivity {
             Intent intent = new Intent(host.getContext(), ClientiDettaglioActivity.class);
             intent.putExtra(Anagrafica.ID_ANAGRAFICA, riga.getAsInteger(Anagrafica.ID_ANAGRAFICA));
             host.startActivity(intent);
+        }
+
+        @Override
+        public String getTitolo() {
+            return "Clienti";
+        }
+
+        @Override
+        public void onNuovoClick(EConTabListaStandardController.Host host) {
+            Intent intent = new Intent(host.getContext(), ClientiDettaglioModActivity.class);
+            ((EConTabActivity) host.getContext()).apriFinestraInserimento(intent, 1, new Anagrafica());
         }
 
         @Override

@@ -1,48 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Cantieri e' incorporato sia a schermo intero (CantieriActivity, che fornisce la sua
-    barra blu con indietro/titolo) sia come tab dentro ClientiDettaglioActivity (che non ha
-    una barra propria): per questo qui non c'e' alcuna barra colorata/titolo/indietro, solo
-    le icone filtro/nuovo, coerenti con lo standard usato da Clienti.
+    Cantieri e' incorporato sia a schermo intero (CantieriActivity) sia come tab dentro
+    ClientiDettaglioActivity: in entrambi i casi la testata (indietro|titolo|filtro|nuovo)
+    e' quella standard condivisa con tutti gli altri moduli; quando incorporato come tab
+    indietro/titolo vengono nascosti da CantieriDefinition.mostraBarraTitolo() perche'
+    ridondanti con la tab del contenitore.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="44dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingEnd="4dp">
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
-
-        <ImageButton
-            android:id="@+id/buttonToggleFiltri"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_filter"
-            android:scaleType="center"
-            android:tint="#1565C0"
-            android:contentDescription="Filtra" />
-
-        <ImageButton
-            android:id="@+id/buttonnuovo"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_add"
-            android:scaleType="fitCenter"
-            android:tint="#1565C0"
-            android:onClick="nuovoCantiere"
-            android:contentDescription="@string/nuovo" />
-    </LinearLayout>
+    <include layout="@layout/header_lista_standard" />
 
     <!--
         Form filtri: e' l'unica cosa visibile all'apertura del modulo (nessun caricamento

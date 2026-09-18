@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Preventivi/Ordini: come Cantieri, incorporato a schermo intero (PreventiviActivity/
-    OrdiniActivity forniscono la loro barra blu con indietro/titolo), quindi nessuna barra
-    colorata qui, solo le icone filtro/nuovo. Le righe non sono semplici colonne di testo
-    (hanno un pulsante Azioni con logica di business per riga), quindi il modulo usa un
-    adapter personalizzato (PreventiviAdapter) e non mostra la testata ordinabile
+    OrdiniActivity), con la testata standard condivisa (indietro|titolo|filtro|nuovo) resa
+    direttamente dal fragment. Le righe non sono semplici colonne di testo (hanno un
+    pulsante Azioni con logica di business per riga), quindi il modulo usa un adapter
+    personalizzato (PreventiviAdapter) e non mostra la testata ordinabile
     (isTabellare()=false in PreventiviDefinition), pur restando su form filtri di default/
     paginazione/righe alternate condivise.
 -->
@@ -13,38 +13,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="44dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingEnd="4dp">
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
-
-        <ImageButton
-            android:id="@+id/buttonToggleFiltri"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_filter"
-            android:scaleType="center"
-            android:tint="#1565C0"
-            android:contentDescription="Filtra" />
-
-        <ImageButton
-            android:id="@+id/buttonnuovo"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_add"
-            android:scaleType="fitCenter"
-            android:tint="#1565C0"
-            android:contentDescription="@string/nuovo" />
-    </LinearLayout>
+    <include layout="@layout/header_lista_standard" />
 
     <LinearLayout
         android:id="@+id/cardFiltri"

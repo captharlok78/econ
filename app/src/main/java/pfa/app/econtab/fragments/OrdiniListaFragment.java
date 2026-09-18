@@ -34,4 +34,9 @@ public class OrdiniListaFragment extends PreventiviListaFragment {
     protected String getStatoDefault() {
         return Preventivi.STATO_APERTO;
     }
+
+    @Override
+    protected String getTitoloModulo() {
+        return "Ordini";
+    }
 }

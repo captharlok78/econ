@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Testata standard, identica in ogni modulo lista (Clienti/Cantieri/Preventivi/Ordini/...):
+    indietro | titolo | filtro | nuovo. Riusata via <include> cosi' una modifica qui si
+    propaga automaticamente a tutti i moduli. Titolo e pulsanti sono impostati/agganciati
+    interamente da EConTabListaStandardController (nessun android:onClick qui, tranne
+    "indietro" che risolve sempre sull'Activity ospitante, anche quando questa testata e'
+    inclusa dentro il layout di un Fragment).
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/headerBarraTitolo"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="4dp"
+        android:paddingEnd="8dp"
+        android:background="#1565C0"
+        android:elevation="4dp">
+
+        <LinearLayout
+            android:id="@+id/headerBackTitolo"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageButton
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_back"
+                android:onClick="indietro"
+                android:contentDescription="Indietro" />
+
+            <TextView
+                android:id="@+id/headerTitolo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginStart="4dp" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/buttonToggleFiltri"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_filter"
+            android:scaleType="center"
+            android:contentDescription="Filtra" />
+
+        <ImageButton
+            android:id="@+id/buttonnuovo"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_add"
+            android:scaleType="fitCenter"
+            android:tint="#FFFFFF"
+            android:contentDescription="@string/nuovo" />
+    </LinearLayout>
+
+</LinearLayout>

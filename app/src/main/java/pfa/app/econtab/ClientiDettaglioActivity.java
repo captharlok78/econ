@@ -118,14 +118,6 @@ public class ClientiDettaglioActivity extends EConTabFragmentActivity {
 		System.out.println("EConTab: ClientiDettaglioActivity modifica EXIT");
 	}
 
-	public void nuovoCantiere(View v) {
-		System.out.println("EConTab: ClientiDettaglioActivity nuovoCantiere ENTER");
-		Intent intent = new Intent(this, CantieriDettaglioModActivity.class);
-		intent.putExtras(getIntent().getExtras());
-		apriFinestraInserimento(intent, 2, new Cantieri());
-		System.out.println("EConTab: ClientiDettaglioActivity nuovoCantiere EXIT");
-	}
-
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		System.out.println("EConTab: ClientiDettaglioActivity onActivityResult ENTER");

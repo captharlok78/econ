@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import pfa.app.econtab.CantiereSplitActivity;
+import pfa.app.econtab.EConTabActivity;
 import pfa.app.econtab.PreventiviDettaglioModActivity;
 import pfa.app.econtab.R;
 import pfa.app.econtab.adapters.EConTabListViewAdapter;
@@ -78,12 +79,6 @@ public class PreventiviListaFragment extends EConTabListaStandardFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        findViewById(R.id.buttonnuovo).setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), PreventiviDettaglioModActivity.class);
-            intent.putExtra(Preventivi.TIPO, getTipo());
-            getEConTabActivity().apriFinestraInserimento(intent, 1, new Preventivi());
-        });
-
         AutoCompleteTextView filtro = findViewById(R.id.editText_filtra);
         filtro.setOnItemClickListener((parent, v, position, id) -> {
             ContentValues val = ((EConTabAutoCompleteContentValue) parent.getItemAtPosition(position)).getContentValue();
@@ -111,6 +106,11 @@ public class PreventiviListaFragment extends EConTabListaStandardFragment {
     /** Tipo di documento gestito da questo modulo (sovrascritto da OrdiniListaFragment). */
     protected String getTipo() {
         return Preventivi.TIPO_PREVENTIVO;
+    }
+
+    /** Titolo mostrato nella testata standard (sovrascritto da OrdiniListaFragment). */
+    protected String getTitoloModulo() {
+        return "Preventivi";
     }
 
     /** Opzioni della spinner di stato, con l'eventuale valore "tutti" in testa (sovrascritto da OrdiniListaFragment). */
@@ -350,6 +350,18 @@ public class PreventiviListaFragment extends EConTabListaStandardFragment {
         @Override
         public boolean isOrdinamentoDefaultDiscendente() {
             return true;
+        }
+
+        @Override
+        public String getTitolo() {
+            return getTitoloModulo();
+        }
+
+        @Override
+        public void onNuovoClick(EConTabListaStandardController.Host host) {
+            Intent intent = new Intent(host.getContext(), PreventiviDettaglioModActivity.class);
+            intent.putExtra(Preventivi.TIPO, getTipo());
+            ((EConTabActivity) host.getContext()).apriFinestraInserimento(intent, 1, new Preventivi());
         }
     }
 }

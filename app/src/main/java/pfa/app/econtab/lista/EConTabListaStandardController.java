@@ -143,6 +143,18 @@ public class EConTabListaStandardController {
         if (buttonToggleFiltri != null) {
             buttonToggleFiltri.setOnClickListener(v -> toggleFiltri());
         }
+        View buttonNuovo = host.findViewById(R.id.buttonnuovo);
+        if (buttonNuovo != null) {
+            buttonNuovo.setOnClickListener(v -> definizione.onNuovoClick(host));
+        }
+        TextView headerTitolo = host.findViewById(R.id.headerTitolo);
+        if (headerTitolo != null) {
+            headerTitolo.setText(definizione.getTitolo());
+        }
+        View headerBackTitolo = host.findViewById(R.id.headerBackTitolo);
+        if (headerBackTitolo != null) {
+            headerBackTitolo.setVisibility(definizione.mostraBarraTitolo() ? View.VISIBLE : View.GONE);
+        }
         View buttonPaginaPrec = host.findViewById(R.id.buttonPaginaPrec);
         if (buttonPaginaPrec != null) {
             buttonPaginaPrec.setOnClickListener(v -> paginaPrecedente());

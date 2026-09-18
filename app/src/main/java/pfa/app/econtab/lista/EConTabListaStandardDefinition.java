@@ -27,6 +27,21 @@ public abstract class EConTabListaStandardDefinition {
 
     public abstract void onRigaClick(EConTabListaStandardController.Host host, ContentValues riga);
 
+    /** Titolo mostrato nella testata standard (uguale per struttura/stile in tutti i moduli). */
+    public abstract String getTitolo();
+
+    /** Pulsante "+" nella testata standard: apre la finestra di inserimento del modulo. */
+    public abstract void onNuovoClick(EConTabListaStandardController.Host host);
+
+    /**
+     * false nasconde indietro/titolo nella testata standard, mostrando solo filtro/nuovo:
+     * usato dai moduli incorporati altrove (es. Cantieri come tab di un cliente), dove
+     * indietro/titolo sarebbero ridondanti/sbagliati rispetto al contenitore.
+     */
+    public boolean mostraBarraTitolo() {
+        return true;
+    }
+
     /**
      * Colonne della testata/righe generiche (EConTabListaStandardAdapter). Non serve
      * sovrascriverlo per un modulo che fornisce un adapter personalizzato tramite

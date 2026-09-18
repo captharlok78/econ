@@ -14,6 +14,7 @@ import java.util.List;
 
 import pfa.app.econtab.CantiereSplitActivity;
 import pfa.app.econtab.CantieriDettaglioModActivity;
+import pfa.app.econtab.EConTabActivity;
 import pfa.app.econtab.R;
 import pfa.app.econtab.db.table.Anagrafica;
 import pfa.app.econtab.db.table.Cantieri;
@@ -140,6 +141,27 @@ public class CantieriListaFragment extends EConTabListaStandardFragment {
         @Override
         public String getColonnaOrdinamentoDefault() {
             return Cantieri.NOME;
+        }
+
+        @Override
+        public String getTitolo() {
+            return "Cantieri";
+        }
+
+        @Override
+        public void onNuovoClick(EConTabListaStandardController.Host host) {
+            Intent intent = new Intent(host.getContext(), CantieriDettaglioModActivity.class);
+            if (cliente != 0) {
+                // Incorporato come tab di un cliente: porta con se' tutti gli extra
+                // dell'Activity ospitante (es. l'id del cliente stesso).
+                intent.putExtras(getActivity().getIntent().getExtras());
+            }
+            ((EConTabActivity) host.getContext()).apriFinestraInserimento(intent, 2, new Cantieri());
+        }
+
+        @Override
+        public boolean mostraBarraTitolo() {
+            return cliente == 0;
         }
     }
 }
