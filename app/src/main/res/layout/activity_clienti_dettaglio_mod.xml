@@ -1,20 +1,28 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/container"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:background="#F5F5F5">
 
     <RelativeLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
+        <include
+            android:id="@+id/header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            layout="@layout/header_dettaglio_standard" />
+
         <ScrollView
             android:id="@+id/scroll"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/footer_dettaglio"
-            android:layout_alignParentTop="true"
-           
+            android:layout_below="@+id/header"
+
              >
 
             <LinearLayout
@@ -22,7 +30,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="@dimen/margine" >
+                android:background="@drawable/bg_card_filtri"
+                android:layout_margin="8dp"
+                android:padding="10dp" >
 
                 <TextView
                     style="@style/TestoIntestazione"
@@ -36,13 +46,17 @@
                     android:id="@+id/editText_ragionesociale"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
                     android:ems="10"
                     android:maxLength="100"
                     android:nextFocusRight="@+id/editText_codice"
                     />
 
                 <TextView
-                    android:layout_marginTop="@dimen/margine"
+                    android:layout_marginTop="10dp"
                     style="@style/TestoIntestazione"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -52,6 +66,10 @@
                     android:id="@+id/editText_codice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
                     android:ems="10"
                     android:maxLength="7"
                     android:nextFocusRight="@+id/editText_indirizzo"
@@ -61,7 +79,7 @@
                     android:id="@+id/textView_indirizzo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
+                    android:layout_marginTop="10dp"
                     android:text="@string/indirizzo"
                      />
 
@@ -69,6 +87,10 @@
                     android:id="@+id/editText_indirizzo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
                     android:ems="10"
                     android:maxLength="255"
                     android:nextFocusRight="@+id/editText_cap"
@@ -79,7 +101,7 @@
                     android:id="@+id/textView_capcittaprov"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
+                    android:layout_marginTop="10dp"
                     android:text="@string/cap_citta_provincia"
                      />
 
@@ -88,11 +110,15 @@
                     android:layout_height="wrap_content" >
 
                     <EditText
-                        
                         android:id="@+id/editText_cap"
                         android:layout_width="0sp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.25"
+                        android:layout_marginEnd="4dp"
+                        android:minHeight="40dp"
+                        android:background="@drawable/bg_input_outline"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
                         android:ems="10"
                         android:inputType="number"
                         android:maxLength="5"
@@ -108,6 +134,11 @@
                         android:layout_width="0sp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.6"
+                        android:layout_marginEnd="4dp"
+                        android:minHeight="40dp"
+                        android:background="@drawable/bg_input_outline"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
                         android:ems="10"
                         android:maxLength="70"
                         android:singleLine="true"
@@ -119,6 +150,10 @@
                         android:layout_width="0sp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.15"
+                        android:minHeight="40dp"
+                        android:background="@drawable/bg_input_outline"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
                         android:ems="10"
                         android:maxLength="2"
                         android:singleLine="true"
@@ -131,7 +166,7 @@
                     android:id="@+id/textView_cf"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
+                    android:layout_marginTop="10dp"
                     android:text="@string/codice_fiscale"
                      />
 
@@ -139,6 +174,10 @@
                     android:id="@+id/editText_cf"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
                     android:ems="10"
                     android:maxLength="16"
                     android:singleLine="true"
@@ -150,7 +189,7 @@
                     android:id="@+id/textView_partitaiva"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
+                    android:layout_marginTop="10dp"
                     android:text="@string/partita_iva"
                      />
 
@@ -158,6 +197,10 @@
                     android:id="@+id/editText_partitaiva"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
                     android:ems="10"
                     android:maxLength="50"
                     android:singleLine="true"
@@ -169,7 +212,7 @@
                     android:id="@+id/textView_cellulari"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
+                    android:layout_marginTop="10dp"
                     android:text="@string/cellulari"
                      />
 
@@ -182,6 +225,11 @@
                         android:layout_width="0sp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
+                        android:layout_marginEnd="4dp"
+                        android:minHeight="40dp"
+                        android:background="@drawable/bg_input_outline"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
                         android:ems="10"
                         android:inputType="text"
                         android:maxLength="20"
@@ -193,6 +241,10 @@
                         android:layout_width="0sp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
+                        android:minHeight="40dp"
+                        android:background="@drawable/bg_input_outline"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
                         android:ems="10"
                         android:maxLength="20"
                         android:inputType="text"
@@ -210,6 +262,7 @@
                         android:layout_width="0sp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
+                        android:layout_marginEnd="4dp"
                         android:orientation="vertical" >
 
                         <TextView
@@ -217,7 +270,7 @@
                             android:id="@+id/textView_telefono"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/margine"
+                            android:layout_marginTop="10dp"
                             android:text="@string/telefono"
                              />
 
@@ -225,6 +278,10 @@
                             android:id="@+id/editText_telefono"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:minHeight="40dp"
+                            android:background="@drawable/bg_input_outline"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
                             android:ems="10"
                             android:maxLength="20"
                             android:singleLine="true"
@@ -244,7 +301,7 @@
                             android:id="@+id/textView_iva"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/margine"
+                            android:layout_marginTop="10dp"
                             android:text="@string/iva"
                              />
 
@@ -254,7 +311,7 @@
                             android:layout_height="wrap_content"
 
                             />
-                        
+
                     </LinearLayout>
                 </LinearLayout>
 
@@ -263,7 +320,7 @@
                     android:id="@+id/textView_mail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
+                    android:layout_marginTop="10dp"
                     android:text="@string/mail"
                      />
 
@@ -271,6 +328,10 @@
                     android:id="@+id/editText_mail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
                     android:ems="10"
                     android:inputType="textEmailAddress"
                     android:maxLength="50"
@@ -282,7 +343,7 @@
                     android:id="@+id/textView_note"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
+                    android:layout_marginTop="10dp"
                     android:text="@string/note"
                      />
 
@@ -291,6 +352,10 @@
                     android:gravity="top"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="8dp"
                     android:ems="10"
                     android:minLines="2"
                     android:maxLength="255"

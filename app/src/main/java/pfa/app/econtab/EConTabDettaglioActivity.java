@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import pfa.app.econtab.db.DbInterno;
@@ -40,7 +41,22 @@ public abstract class EConTabDettaglioActivity extends EConTabActivity {
 			}
 
 		}
+
+		TextView headerTitolo = findViewById(R.id.headerTitolo);
+		if (headerTitolo != null && getTitoloDettaglio() != null) {
+			headerTitolo.setText(getTitoloDettaglio());
+		}
 		System.out.println("EConTab: EConTabDettaglioActivity onCreate EXIT");
+	}
+
+	/**
+	 * Titolo mostrato nella testata standard (header_dettaglio_standard), da sovrascrivere
+	 * nel modulo - tipicamente "Nuovo X"/"Modifica X" in base a getModalita(). Se il layout
+	 * del modulo non include quella testata (headerTitolo assente) o il modulo non
+	 * sovrascrive questo metodo (torna null), non succede nulla: l'adozione e' incrementale.
+	 */
+	protected String getTitoloDettaglio() {
+		return null;
 	}
 
 	protected boolean nascondiTastiera() {
@@ -58,7 +74,7 @@ public abstract class EConTabDettaglioActivity extends EConTabActivity {
 
 		View scroll = findViewById(R.id.scroll);
 		if (scroll != null) {
-			scroll.setBackgroundColor(Color.parseColor("#eeeded"));
+			scroll.setBackgroundColor(Color.parseColor("#F5F5F5"));
 		}
 	}
 

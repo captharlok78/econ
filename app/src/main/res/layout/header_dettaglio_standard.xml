@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Testata standard delle pagine di dettaglio/modifica (edit/inserimento), identica per
+    stile alla testata delle liste (header_lista_standard.xml): stessa barra blu, stesso
+    pulsante indietro. Qui non servono i pulsanti filtro/nuovo (non e' una lista), solo il
+    titolo, impostato da EConTabDettaglioActivity a partire da getTitoloDettaglio() del
+    modulo - un modulo che non fornisce headerTitolo o non sovrascrive quel metodo non viene
+    toccato, quindi l'adozione e' incrementale modulo per modulo.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="4dp"
+    android:paddingEnd="8dp"
+    android:background="#1565C0"
+    android:elevation="4dp">
+
+    <ImageButton
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@android:color/transparent"
+        android:src="@drawable/ic_back"
+        android:onClick="annulla"
+        android:contentDescription="Indietro" />
+
+    <TextView
+        android:id="@+id/headerTitolo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginStart="4dp" />
+
+</LinearLayout>

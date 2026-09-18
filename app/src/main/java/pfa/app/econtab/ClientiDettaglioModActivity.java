@@ -28,6 +28,11 @@ public class ClientiDettaglioModActivity extends EConTabDettaglioActivity {
 	}
 
 	@Override
+	protected String getTitoloDettaglio() {
+		return getModalita() == INSERIMENTO ? "Nuovo cliente" : "Modifica cliente";
+	}
+
+	@Override
 	protected void inizializzaModifica() {
 		System.out.println("EConTab: ClientiDettaglioModActivity inizializzaModifica ENTER");
 		// TODO Auto-generated method stub

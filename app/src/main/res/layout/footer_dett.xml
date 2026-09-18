@@ -17,10 +17,10 @@
             android:layout_weight="1"
             android:layout_marginEnd="1dp"
             android:text="@string/annulla"
-            android:textColor="#FFFFFF"
+            android:textColor="#1565C0"
             android:textSize="14sp"
             android:textStyle="bold"
-            android:backgroundTint="#1565C0"
+            android:backgroundTint="#E0E0E0"
             android:onClick="annulla" />
 
         <Button
