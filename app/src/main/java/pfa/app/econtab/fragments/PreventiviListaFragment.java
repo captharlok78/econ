@@ -353,6 +353,13 @@ public class PreventiviListaFragment extends EConTabListaStandardFragment {
         }
 
         @Override
+        public String getOrdineRecenti() {
+            return Preventivi.NOME_TABELLA + "." + Preventivi.DATA_MOD + " is null asc, "
+                    + Preventivi.NOME_TABELLA + "." + Preventivi.DATA_MOD + " desc, "
+                    + Preventivi.NOME_TABELLA + "." + Preventivi.DATA_INS + " desc";
+        }
+
+        @Override
         public String getTitolo() {
             return getTitoloModulo();
         }

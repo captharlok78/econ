@@ -172,6 +172,13 @@ public class CodiciArticoliActivity extends EConTabListaStandardActivity {
         }
 
         @Override
+        public String getOrdineRecenti() {
+            return Listini.NOME_TABELLA + "." + Listini.DATA_MOD + " is null asc, "
+                    + Listini.NOME_TABELLA + "." + Listini.DATA_MOD + " desc, "
+                    + Listini.NOME_TABELLA + "." + Listini.DATA_INS + " desc";
+        }
+
+        @Override
         public String getTitolo() {
             return "Codici articoli";
         }

@@ -51,6 +51,7 @@ public class FornitoriLineeActivity extends EConTabActivity implements OnChildCl
     private FornitoriLineeAdapter adapter = null;
 
     private boolean ricercaAttiva = false;
+    private boolean ordinaPerRecenti = false;
     private int risultatiPerPagina = RISULTATI_PER_PAGINA_DEFAULT;
     private int paginaCorrente = 0;
     private int totalePagine = 1;
@@ -97,15 +98,19 @@ public class FornitoriLineeActivity extends EConTabActivity implements OnChildCl
         filtro = findViewById(R.id.editText_filtra);
         filtro.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                eseguiRicerca();
+                eseguiRicerca(false);
                 return true;
             }
             return false;
         });
-        findViewById(R.id.buttonCerca).setOnClickListener(v -> eseguiRicerca());
+        findViewById(R.id.buttonCerca).setOnClickListener(v -> eseguiRicerca(false));
         findViewById(R.id.buttonResetFiltri).setOnClickListener(v -> {
             filtro.setText("");
-            eseguiRicerca();
+            eseguiRicerca(false);
+        });
+        findViewById(R.id.buttonUltimiGestiti).setOnClickListener(v -> {
+            filtro.setText("");
+            eseguiRicerca(true);
         });
         findViewById(R.id.buttonPaginaPrec).setOnClickListener(v -> paginaPrecedente());
         findViewById(R.id.buttonPaginaSucc).setOnClickListener(v -> paginaSuccessiva());
@@ -140,9 +145,10 @@ public class FornitoriLineeActivity extends EConTabActivity implements OnChildCl
         }
     }
 
-    private void eseguiRicerca() {
+    private void eseguiRicerca(boolean ordinaPerRecenti) {
         nascondiTastiera(filtro);
         ricercaAttiva = true;
+        this.ordinaPerRecenti = ordinaPerRecenti;
         paginaCorrente = 0;
         cardFiltri.setVisibility(View.GONE);
         ricerca();
@@ -201,6 +207,11 @@ public class FornitoriLineeActivity extends EConTabActivity implements OnChildCl
         String testo = getTesto(R.id.editText_filtra);
         String like = testo.isEmpty() ? "%" : "%" + testo + "%";
         String whereSql = Costruttori.RAGIONE_SOCIALE + " like ?";
+        String orderBySql = ordinaPerRecenti
+                ? Costruttori.NOME_TABELLA + "." + Costruttori.DATA_MOD + " is null asc, "
+                        + Costruttori.NOME_TABELLA + "." + Costruttori.DATA_MOD + " desc, "
+                        + Costruttori.NOME_TABELLA + "." + Costruttori.DATA_INS + " desc"
+                : Costruttori.NOME_TABELLA + "." + Costruttori.RAGIONE_SOCIALE;
 
         ArrayList<Object> conteggio = db.eseguiSelect(
                 "Select count(*) as n from " + Costruttori.NOME_TABELLA + " where " + whereSql, new String[]{like});
@@ -212,7 +223,7 @@ public class FornitoriLineeActivity extends EConTabActivity implements OnChildCl
 
         ArrayList<Object> paginaCostruttori = db.eseguiSelect(
                 "Select " + Costruttori.ID_COSTRUTTORE + " from " + Costruttori.NOME_TABELLA + " where " + whereSql
-                        + " order by " + Costruttori.RAGIONE_SOCIALE
+                        + " order by " + orderBySql
                         + " limit " + risultatiPerPagina + " offset " + (paginaCorrente * risultatiPerPagina),
                 new String[]{like});
 
@@ -229,7 +240,7 @@ public class FornitoriLineeActivity extends EConTabActivity implements OnChildCl
                     + Costruttori.NOME_TABELLA + " left join " + Linee.NOME_TABELLA + " on " + Costruttori.NOME_TABELLA + "."
                     + Costruttori.ID_COSTRUTTORE + "=" + Linee.NOME_TABELLA + "." + Linee.ID_COSTRUTTORE
                     + " where " + Costruttori.NOME_TABELLA + "." + Costruttori.ID_COSTRUTTORE + " in (" + idsIn + ")"
-                    + " order by " + Costruttori.RAGIONE_SOCIALE;
+                    + " order by " + orderBySql;
             ArrayList<Object> listaFornitori = db.eseguiSelect(SQL, null);
 
             for (Object o : listaFornitori) {

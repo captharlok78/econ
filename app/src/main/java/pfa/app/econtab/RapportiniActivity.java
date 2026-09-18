@@ -241,6 +241,13 @@ public class RapportiniActivity extends EConTabListaStandardActivity {
         }
 
         @Override
+        public String getOrdineRecenti() {
+            return Rapportini.NOME_TABELLA + "." + Rapportini.DATA_MOD + " is null asc, "
+                    + Rapportini.NOME_TABELLA + "." + Rapportini.DATA_MOD + " desc, "
+                    + Rapportini.NOME_TABELLA + "." + Rapportini.DATA_INS + " desc";
+        }
+
+        @Override
         public String getTitolo() {
             return "Rapportini";
         }

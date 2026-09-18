@@ -29,9 +29,10 @@
 
             <!--
                 Form filtri: e' l'unica cosa visibile all'apertura del modulo (nessun
-                caricamento dati finche' non si preme Cerca/Reset). Le righe di Rapportini
-                hanno pulsanti di azione con logica di business (isTabellare()=false in
-                RapportiniDefinition), quindi non c'e' testata ordinabile/pulsante Ultimi N.
+                caricamento dati finche' non si preme uno dei pulsanti sotto). Le righe di
+                Rapportini hanno pulsanti di azione con logica di business
+                (isTabellare()=false in RapportiniDefinition), quindi non c'e' testata
+                ordinabile per colonna.
             -->
             <LinearLayout
                 android:id="@+id/cardFiltri"
@@ -60,37 +61,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/buttonCerca"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="44dp"
-                        android:layout_marginEnd="4dp"
-                        android:text="@string/cerca"
-                        android:textColor="#FFFFFF"
-                        android:textSize="13sp"
-                        android:textAllCaps="false"
-                        android:backgroundTint="#1565C0" />
-
-                    <Button
-                        android:id="@+id/buttonResetFiltri"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="44dp"
-                        android:layout_marginStart="4dp"
-                        android:text="@string/reset_filtri"
-                        android:textColor="#1565C0"
-                        android:textSize="13sp"
-                        android:textAllCaps="false"
-                        android:backgroundTint="#E0E0E0" />
-
-                </LinearLayout>
+                <include layout="@layout/filtri_azioni_standard" />
 
             </LinearLayout>
 
