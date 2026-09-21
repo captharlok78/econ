@@ -136,11 +136,6 @@
             android:label=""
             android:theme="@style/EConTabPopup"></activity>
         <activity
-            android:name=".UnitaMisuraDettaglioActivity"
-            android:exported="true"
-            android:configChanges="orientation|screenSize"
-            android:label="@string/unita_misura"></activity>
-        <activity
             android:name=".ManodoperaDettaglioActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize"
@@ -279,6 +274,7 @@
             android:name=".LoginActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize"
+            android:windowSoftInputMode="adjustResize"
             android:label="Login"></activity>
         <activity
             android:name=".ComposizioneLiberaActivity"

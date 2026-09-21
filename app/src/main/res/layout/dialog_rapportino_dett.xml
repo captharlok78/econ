@@ -50,6 +50,26 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/linearUdm"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/textView_udm"
+            style="@style/TestoIntestazione"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/unita_misura" />
+
+        <pfa.app.econtab.views.EConTabSpinner
+            android:id="@+id/econtabSpinner_udm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+        </pfa.app.econtab.views.EConTabSpinner>
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/linearNote"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

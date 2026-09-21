@@ -1,5 +1,6 @@
 package pfa.app.econtab;
 
+import pfa.app.econtab.utils.SyncUtil;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -58,8 +59,12 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     private static final int COLOR_ERROR    = Color.parseColor("#E53935");
     private static final int COLOR_UPLOAD   = Color.parseColor("#FF7043"); // arancio upload
 
+    private static final String TABELLA_DITTA = "ditta";
+
     // ── Tabelle DOWNLOAD (da Mercury → app) ──────────────────────────────────
     private static final String[][] TABELLE = {
+        { TABELLA_DITTA,              "Dati ditta e logo" },   // non e' una tabella: vedi sincronizzaDitta()
+        { SyncUtil.TABELLA_OPERATORI, "Operatori" },
         { "anagrafica",               "Clienti" },
         { "cantieri",                 "Cantieri" },
         { "aree",                     "Aree" },
@@ -90,6 +95,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "foto",                     "Foto" },
         { "foto_elementi",            "Foto Elementi" },
         { "iva",                      "IVA" },
+        { "unita_misura",             "Unità di misura" },
         { "relazioni",                "Relazioni" },
         { "collegamenti",             "Collegamenti" },
     };
@@ -228,12 +234,12 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         containerTabelle    = findViewById(R.id.containerTabelle);
 
         if (MODE_UPLOAD.equals(syncMode)) {
-            textSyncTitle.setText("Upload a Mercury");
-            btnSincronizza.setText("AVVIA UPLOAD");
+            textSyncTitle.setText("Carica su server");
+            btnSincronizza.setText("CARICA SU SERVER");
             textLastSync.setVisibility(android.view.View.GONE);
         } else {
-            textSyncTitle.setText("Download da Mercury");
-            btnSincronizza.setText("AVVIA DOWNLOAD");
+            textSyncTitle.setText("Scarica da server");
+            btnSincronizza.setText("SCARICA DA SERVER");
             aggiornaEtichettaUltimaSync();
         }
 
@@ -370,6 +376,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         if (tables != null) {
             for (String[] entry : TABELLE) {
                 String           nome    = entry[0];
+                if (TABELLA_DITTA.equals(nome)) continue;
                 List<JsonObject> records = tables.get(nome);
                 RigaTabella      riga    = righe.get(nome);
                 if (records == null || records.isEmpty()) {
@@ -381,6 +388,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             }
         }
         db.close();
+
+        sincronizzaDitta(api);
 
         setStatus("Eliminazioni...", false);
         try {
@@ -407,8 +416,46 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Dati ditta + logo. La riga mostra la ragione sociale della ditta (dai dati locali, aggiornati o gia' presenti):
+     * ✓ verde se e' stato scaricato qualcosa, ✓ azzurro se era gia' allineata.
+     */
+    private void sincronizzaDitta(MercuryApiService api) {
+        RigaTabella riga = righe.get(TABELLA_DITTA);
+        setStatus("Dati ditta...", false);
+        aggiornaRiga(riga, STATO_IN_CORSO, 0, false);
+        try {
+            boolean aggiornata = pfa.app.econtab.utils.DittaLocale.sincronizza(this, api)
+                    == pfa.app.econtab.utils.DittaLocale.Esito.AGGIORNATA;
+            if (riga != null) riga.total = aggiornata ? 1 : 0;
+            aggiornaRiga(riga, aggiornata ? STATO_FATTO : STATO_SALTO, aggiornata ? 1 : 0, false);
+
+            MercuryApiService.DittaDati d = pfa.app.econtab.utils.DittaLocale.getDati(this);
+            if (riga != null && d != null) {
+                final String testo = d.ragioneSociale + (d.logo != null ? "  ·  logo" : "");
+                // dopo aggiornaRiga (che accoda sul main thread la propria etichetta): la sovrascrive
+                uiHandler.post(() -> {
+                    riga.tvCount.setSingleLine(true);
+                    riga.tvCount.setEllipsize(android.text.TextUtils.TruncateAt.END);
+                    riga.tvCount.setMaxWidth((int) (340 * getResources().getDisplayMetrics().density));
+                    riga.tvCount.setText(testo);
+                });
+            }
+        } catch (Exception e) {
+            // non blocca il resto del download: al prossimo sync si riprova
+            Log.w(TAG, "Errore dati ditta", e);
+            if (riga != null) riga.errorMsg = e.getMessage();
+            aggiornaRiga(riga, STATO_ERRORE, 0, false);
+        }
+        incrementaTabelleCompletate();
+    }
+
     private void runUploadSync(MercuryApiService api) throws Exception {
         setStatus("Scansione dati locali...", false);
+        // solo unita' di misura del server: i valori non validi vengono corretti prima dell'invio
+        DbInterno dbUm = new DbInterno(this);
+        SyncUtil.allineaUnitaMisura(dbUm.getWritableDatabase());
+        dbUm.close();
         scansionaRecordLocali();
         setStatus("Upload a Mercury...", false);
         eseguiUploadLocale(api); // imposta il proprio status finale
@@ -547,14 +594,24 @@ public class SincronizzazioneActivity extends AppCompatActivity {
 
                 // Applica mapping ID e aggiorna DB locale solo se il server conferma il successo
                 applicaIdMappings(body);
-                marcaInServer1();
+                // Segna come inviati solo i record che il server ha accettato: quelli rifiutati restano
+                // in_server=0 e verranno reinviati (prima venivano segnati tutti, perdendo i rifiutati)
+                SyncUtil.EsitoUpload esito = SyncUtil.analizzaErrori(body.errors);
+                marcaInServer1(esito);
                 svuotaRecordEliminati();
 
                 for (String[] entry : TABELLE_UPLOAD) {
                     String      nome = entry[0];
                     RigaTabella riga = righeUpload.get(nome);
                     if (riga != null && riga.total > 0) {
-                        aggiornaRiga(riga, STATO_FATTO, riga.total, true);
+                        java.util.Set<String> rifiutati = esito.falliti.get(nome);
+                        if (rifiutati != null) {
+                            riga.errori   = rifiutati.size();
+                            riga.errorMsg = esito.primoErrore.get(nome);
+                            aggiornaRiga(riga, STATO_ERRORE, Math.max(0, riga.total - rifiutati.size()), true);
+                        } else {
+                            aggiornaRiga(riga, STATO_FATTO, riga.total, true);
+                        }
                     }
                 }
 
@@ -664,16 +721,14 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         }
     }
 
-    private void marcaInServer1() {
+    private void marcaInServer1(SyncUtil.EsitoUpload esito) {
         DbInterno      db     = new DbInterno(this);
         SQLiteDatabase sqlite = db.getWritableDatabase();
         try {
             for (String[] entry : TABELLE_UPLOAD) {
                 String nome = entry[0];
                 if (!hasColumn(sqlite, nome, "in_server")) continue;
-                android.content.ContentValues cv = new android.content.ContentValues();
-                cv.put("in_server", 1);
-                sqlite.update(nome, cv, "in_server = 0", null);
+                SyncUtil.marcaInviati(sqlite, nome, pkCol(nome), esito);
             }
         } finally {
             sqlite.close();
@@ -698,6 +753,14 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         RigaTabella riga = righe.get(nomeTabella);
         if (riga == null) return;
         aggiornaRiga(riga, STATO_IN_CORSO, 0, false);
+        SyncUtil.svuotaSeElencoCompleto(db, nomeTabella, records);
+        if (SyncUtil.TABELLA_OPERATORI.equals(nomeTabella)) {
+            // operatori della ditta: aggiornamento dedicato (non sovrascrive le password dei vecchi utenti locali)
+            int applicati = SyncUtil.applicaOperatori(db, records);
+            aggiornaRiga(riga, STATO_FATTO, applicati, false);
+            incrementaTabelleCompletate();
+            return;
+        }
         boolean haInServer = tabelleConInServer.contains(nomeTabella);
 
         for (int i = 0; i < records.size(); i++) {
@@ -737,6 +800,9 @@ public class SincronizzazioneActivity extends AppCompatActivity {
                     }
                     cv.put("in_server", 1);
                 }
+                SyncUtil.normalizzaDate(cv);
+                SyncUtil.rimuoviColonneSconosciute(db, nomeTabella, cv);
+                SyncUtil.normalizzaNulli(db, nomeTabella, cv);
                 db.insertWithOnConflict(nomeTabella, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
             } catch (Exception e) {
                 Log.w(TAG, "Errore inserimento " + nomeTabella + ": " + e.getMessage());

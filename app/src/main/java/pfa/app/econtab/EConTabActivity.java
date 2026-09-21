@@ -602,6 +602,7 @@ public abstract class EConTabActivity extends FragmentActivity {
         Sessione.logout(this);
         // Logout Mercury: cancella JWT, ditte, moduli e flag attivazione
         TokenManager.getInstance(this).clearToken();
+        pfa.app.econtab.utils.DittaLocale.cancella(this);
         getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE)
                 .edit()
                 .remove(Sessione.CODICE_ATTIVAZIONE)

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Riga del pannello laterale standard (vedi pannello_menu_laterale.xml / MenuLateraleAdapter). -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="@dimen/altezza_item"
+    android:padding="@dimen/margine">
+
+    <!-- Icona Font Awesome (FaIcone.applica): colore di default, nessuna immagine -->
+    <TextView
+        android:id="@+id/icona"
+        android:layout_width="@dimen/altezza_campo"
+        android:layout_height="@dimen/altezza_campo"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:gravity="center" />
+
+    <TextView
+        android:id="@+id/tipo"
+        style="@style/TestoPiccolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/icona"
+        android:layout_alignRight="@+id/nome"
+        android:layout_marginLeft="@dimen/margine"
+        android:layout_toRightOf="@+id/icona"
+        android:singleLine="true"
+        android:text="tipo"
+        android:textAllCaps="true"
+        android:textColor="#757575" />
+
+    <TextView
+        android:id="@+id/nome"
+        style="@style/TestoNeroPiccolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/icona"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:text="Nome"
+        android:textColor="#212121" />
+
+</RelativeLayout>

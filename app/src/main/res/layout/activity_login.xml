@@ -2,19 +2,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Pulsante impostazioni server in alto a destra, sempre visibile -->
-    <ImageButton
-        android:id="@+id/buttonImpostazioniServer"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="top|end"
-        android:layout_margin="8dp"
-        android:background="@android:color/transparent"
-        android:contentDescription="Impostazioni server"
-        android:onClick="apriImpostazioniServer"
-        android:src="@android:drawable/ic_menu_preferences"
-        android:tint="#1784c5" />
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -24,33 +11,49 @@
         android:paddingTop="@dimen/padding_login_h"
         android:paddingBottom="@dimen/padding_login_h">
 
-        <!-- Logo Econ, fuori dalla card -->
-        <ImageView
-            android:id="@+id/imageLogoEcon"
-            android:layout_width="wrap_content"
-            android:layout_height="96dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="@dimen/margine"
-            android:contentDescription="Econ"
-            android:scaleType="fitCenter"
-            android:src="@drawable/logo_econ" />
+        <!-- Form a sinistra, logo Econ a destra: in altezza serve solo la card, cosi' con la tastiera resta visibile -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
         <ScrollView
             android:id="@+id/contenitore"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1" >
 
+            <!-- Scheda di login: logo Econ a sinistra, campi a destra -->
             <LinearLayout
                 android:id="@+id/linear_registrazione"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:drawable/editbox_background_normal"
                 android:layout_gravity="center_vertical"
-                android:orientation="vertical"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:layout_marginLeft="@dimen/margine_login"
                 android:layout_marginRight="@dimen/margine_login"
                 android:padding="@dimen/padding_login_h" >
+
+                <ImageView
+                    android:id="@+id/imageLogoEcon"
+                    android:layout_width="180dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/padding_login_h"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="Econ"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/logo_econ" />
+
+                <LinearLayout
+                    android:id="@+id/campi_login"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical" >
 
                 <!-- Sezione login Mercury (email + password JWT) -->
                 <EditText
@@ -179,41 +182,57 @@
                     android:text="@string/accedi"
                     android:textColor="#1784c5" />
 
+                </LinearLayout>
             </LinearLayout>
         </ScrollView>
 
-        <!-- Indicatore stato connessione Mercury: sotto la card, sopra le versioni -->
+        </LinearLayout>
+
+        <!-- Barra in basso, una sola riga: stato connessione | versioni app e server | impostazioni server -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
             <View
                 android:id="@+id/indicatoreConnessione"
                 android:layout_width="12dp"
                 android:layout_height="12dp"
-                android:background="#9E9E9E"
-                android:layout_marginEnd="8dp" />
+                android:layout_marginEnd="8dp"
+                android:background="#9E9E9E" />
 
             <TextView
                 android:id="@+id/testoStatoConnessione"
                 style="@style/TestoNeroPiccolo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Server non configurato" />
+
+            <TextView
+                android:id="@+id/testoVersioneApp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Server non configurato" />
-        </LinearLayout>
+                android:gravity="end"
+                android:singleLine="true"
+                android:textColor="#9E9E9E"
+                android:textSize="12sp" />
 
-        <!-- Versione app + Mercury, fuori dalla card, in basso, centrata -->
-        <TextView
-            android:id="@+id/testoVersioneApp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margine"
-            android:gravity="center_horizontal"
-            android:textColor="#9E9E9E"
-            android:textSize="12sp" />
+            <ImageButton
+                android:id="@+id/buttonImpostazioniServer"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="4dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="Impostazioni server"
+                android:onClick="apriImpostazioniServer"
+                android:src="@android:drawable/ic_menu_preferences"
+                android:tint="#1784c5" />
+        </LinearLayout>
 
     </LinearLayout>
 

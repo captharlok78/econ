@@ -173,6 +173,7 @@
     <string name="conferma">Conferma</string>
     <string name="conferma_aggiunta_elemento">Conferma aggiunta elemento</string>
     <string name="conferma_cancellazione">Confermare la cancellazione?</string>
+    <string name="conferma_cancellazione_riga_derivata">Questa riga è generata dagli elementi del cantiere: se la elimini potrebbe ricomparire al prossimo ricalcolo del preventivo. Eliminarla comunque?</string>
     <string name="conferma_disconnessione">Confermare la disconnessione?</string>
     <string name="conferma_ricalcolo_preventivo_ordine">Vuoi ricalcolare il dettaglio del preventivo/ordine a partire dagli elementi posizionati nei vari locali?</string>
     <string name="conferma_ripristino_db">Sovrascrivere i dati attuali con quelli del file selezionato?</string>

@@ -17,6 +17,7 @@ import pfa.app.econtab.db.table.Manodopera;
 import pfa.app.econtab.db.table.PreventiviDettaglio;
 import pfa.app.econtab.db.table.Rapportini;
 import pfa.app.econtab.db.table.RapportiniDettaglio;
+import pfa.app.econtab.db.table.UnitaMisura;
 import pfa.app.econtab.utils.Utility;
 
 public class PopupDettaglioRapportino implements OnClickListener, TextWatcher {
@@ -28,6 +29,7 @@ public class PopupDettaglioRapportino implements OnClickListener, TextWatcher {
 	private int idRapportino = 0;
     private int idRapportinoDettaglio = 0;
 	private EConTabSpinner spinnerManodopera = null;
+	private EConTabSpinner spinnerUdm = null;
 	private EditText editOre = null;
     private EditText editNota = null;
 
@@ -45,7 +47,11 @@ public class PopupDettaglioRapportino implements OnClickListener, TextWatcher {
 		editOre  = (EditText) vista.findViewById(R.id.editText_ore);
         editOre.addTextChangedListener(this);
         editNota  = (EditText) vista.findViewById(R.id.editText_nota_dett);
+        spinnerUdm = (EConTabSpinner) vista.findViewById(R.id.econtabSpinner_udm);
         if (idRapportinoDettaglio==0){
+            // nuova riga: ore, salvo diversa scelta
+            spinnerUdm.setValue(Manodopera.UNITA_MISURA_DEFAULT);
+            spinnerUdm.setTabella(new UnitaMisura());
             spinnerManodopera.setTabella(new Manodopera());
         }
         else{
@@ -58,7 +64,10 @@ public class PopupDettaglioRapportino implements OnClickListener, TextWatcher {
                 spinnerManodopera.setValue(""+valDett.getAsInteger(RapportiniDettaglio.ID_MANODOPERA));
                 editOre.setText(Utility.formatNumero(valDett.getAsDouble(RapportiniDettaglio.ORE)));
                 editNota.setText(valDett.getAsString(RapportiniDettaglio.NOTE));
+                String udm = valDett.getAsString(RapportiniDettaglio.UNITA_MISURA);
+                spinnerUdm.setValue(udm == null || udm.trim().isEmpty() ? Manodopera.UNITA_MISURA_DEFAULT : udm);
             }
+            spinnerUdm.setTabella(new UnitaMisura());
             spinnerManodopera.setTabella(new Manodopera());
         }
 	}
@@ -83,6 +92,9 @@ public class PopupDettaglioRapportino implements OnClickListener, TextWatcher {
                 valInsert.put(RapportiniDettaglio.ID_MANODOPERA,spinnerManodopera.getValue());
                 valInsert.put(RapportiniDettaglio.ORE,Utility.formatNumeroDB(editOre.getText().toString()));
                 valInsert.put(RapportiniDettaglio.NOTE, editNota.getText().toString());
+                if (!spinnerUdm.getValue().trim().isEmpty()) {
+                    valInsert.put(RapportiniDettaglio.UNITA_MISURA, spinnerUdm.getValue());
+                }
                 tabRappDett.inserisciRecord(db,valInsert);
             }
             else{
@@ -91,6 +103,9 @@ public class PopupDettaglioRapportino implements OnClickListener, TextWatcher {
                 valUpd.put(RapportiniDettaglio.ID_MANODOPERA,spinnerManodopera.getValue());
                 valUpd.put(RapportiniDettaglio.ORE,Utility.formatNumeroDB(editOre.getText().toString()));
                 valUpd.put(RapportiniDettaglio.NOTE,editNota.getText().toString());
+                if (!spinnerUdm.getValue().trim().isEmpty()) {
+                    valUpd.put(RapportiniDettaglio.UNITA_MISURA, spinnerUdm.getValue());
+                }
                 ContentValues where = new ContentValues();
                 where.put(RapportiniDettaglio.ID_RAPPORTINO_DETTAGLIO,idRapportinoDettaglio);
                 tabRappDett.aggiornaRecord(db,valUpd,where);

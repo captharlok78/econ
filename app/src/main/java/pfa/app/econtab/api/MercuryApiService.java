@@ -6,10 +6,12 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Streaming;
 import retrofit2.http.Query;
 
 /**
@@ -34,6 +36,18 @@ public interface MercuryApiService {
     /** Profilo utente + ditta (sola lettura) + licenza, per il modale "info account" (richiede JWT valido) */
     @GET("api/auth/profilo")
     Call<ProfiloResponse> getProfilo();
+
+    /**
+     * Dati ditta (anagrafica, note predefinite, nome file del logo). Se `versione` coincide con quella
+     * corrente sul server la risposta e' solo {invariata:true}: i dati si scaricano solo quando cambiano.
+     */
+    @GET("api/mobile/ditta")
+    Call<DittaSyncResponse> getDittaSync(@Query("versione") String versione);
+
+    /** File del logo della ditta (404 se non presente). Da scaricare solo se il nome file e' cambiato. */
+    @Streaming
+    @GET("api/mobile/ditta/logo")
+    Call<ResponseBody> getLogoDitta();
 
     /** Moduli (voci di menu) abilitati per l'utente (richiede JWT valido) */
     @GET("api/auth/moduli")
@@ -160,6 +174,29 @@ public interface MercuryApiService {
         public String email;
         public DittaProfilo ditta;
         public LicenzaProfilo licenza;
+    }
+
+    class DittaSyncResponse {
+        public String  versione;
+        public boolean invariata;
+        /** Null se invariata */
+        public DittaDati ditta;
+    }
+
+    class DittaDati {
+        public int    idDitta;
+        public String ragioneSociale;
+        public String indirizzo;
+        public String citta;
+        public String provincia;
+        public String cap;
+        public String codiceFiscale;
+        public String partitaIva;
+        public String noteRapportini;
+        public String notePreventivi;
+        public String noteOrdini;
+        /** Nome file del logo sul server (cambia a ogni nuovo upload), null se la ditta non ha logo */
+        public String logo;
     }
 
     class DittaProfilo {

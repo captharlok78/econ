@@ -58,7 +58,7 @@ import pfa.app.econtab.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECONTAB.db";
 	public static final String DATABASE_NAME_ZIP = ".econtab.db";
-	public static final int SCHEMA_VERSION = 21;
+	public static final int SCHEMA_VERSION = 22;
 
 	private Context cont = null;
 
@@ -373,6 +373,25 @@ public class DbInterno extends SQLiteOpenHelper {
 				db.execSQL("UPDATE " + Locali.NOME_TABELLA + " SET " + Locali.ID_DITTA + " = (SELECT "
 						+ Aree.ID_DITTA + " FROM " + Aree.NOME_TABELLA + " WHERE " + Aree.NOME_TABELLA + "."
 						+ Aree.ID_AREA + " = " + Locali.NOME_TABELLA + "." + Locali.ID_AREA + ")");
+			}
+		}
+
+		if (oldVersion<22){
+			if (oldVersion<newVersion){
+				// Unita' di misura gestite dal server (tabella unita_misura, codici di 2 lettere maiuscole):
+				// manodopera e righe di rapportino ne ricevono una, e i valori liberi gia' presenti vengono
+				// ricondotti ai codici (stessa mappatura della migrazione server Version20260921140000).
+				db.execSQL("Alter table " + Manodopera.NOME_TABELLA + " add column " + Manodopera.UNITA_MISURA + " TEXT");
+				db.execSQL("Alter table " + RapportiniDettaglio.NOME_TABELLA + " add column " + RapportiniDettaglio.UNITA_MISURA + " TEXT");
+				String[] tabelleUdm = { Elementi.NOME_TABELLA, Componenti.NOME_TABELLA, ElementiCantiere.NOME_TABELLA,
+						ComponentiCantiere.NOME_TABELLA, PreventiviDettaglio.NOME_TABELLA };
+				String[][] sinonimi = { { "PZ", "'pz','pezzo','pezzi','oggetto','um','nr','n'" }, { "CM", "'cm'" },
+						{ "MT", "'m','mt','metro','metri','ml'" }, { "MQ", "'mq'" }, { "OR", "'h','hh','or','ora','ore'" } };
+				for (String tabella : tabelleUdm) {
+					for (String[] s : sinonimi) {
+						db.execSQL("UPDATE " + tabella + " SET unita_misura = '" + s[0] + "' WHERE lower(trim(unita_misura)) IN (" + s[1] + ")");
+					}
+				}
 			}
 		}
 	}

@@ -185,6 +185,60 @@ necessario.
 
 ---
 
+## 3. Pannello laterale (menu ad albero delle maschere con split) — PROTOTIPO su Cantiere/Preventivo
+
+Il menu a sinistra di `CantiereSplitActivity` (Preventivo / Cantiere / Unita' / Area / Locale, usato
+da cantieri, preventivi e ordini) era grigio scuro con testo chiaro e con logica grafica nel suo
+adapter. Ora e' un componente standard:
+
+- `pannello_menu_laterale.xml` — contenitore bianco + `ListView` (`@+id/lista`); si inserisce con
+  `<include android:id="@+id/sinistra" layout="@layout/pannello_menu_laterale" .../>`.
+- `list_item_menu_laterale.xml` — riga: icona, tipo (piccolo), nome; testi scuri su bianco.
+- `bg_menu_laterale_sel.xml` — riga selezionata: sfondo azzurrino `#E3F2FD` (`#BBDEFB` da premuta).
+- `MenuLateraleAdapter` (astratto, `adapters/`) — grafica, indentazione per livello e selezione
+  (sfondo + grassetto, impostati in entrambi i sensi perche' le view sono riciclate). Un modulo lo
+  estende implementando solo `getTipoTesto / getNomeTesto / getIconaRes / getLivello /
+  getPosizioneSelezionata`.
+- `CantiereMenuAdapter` ora estende `MenuLateraleAdapter` (solo mappatura dei dati).
+- Icone: Font Awesome nel colore di default (`FaIcone`, `R.color.colore_icona` = `#757374`, lo stesso delle
+  icone `ic_azione_*`), niente piu' PNG colorati per livello.
+
+Verificato dal vivo su tablet: apertura preventivo, pannello bianco, cambio selezione. Rimosso il
+vecchio `list_item_menucantiere.xml`. Nessun altro modulo usa oggi un pannello laterale
+(`EConTabSplitPaneLayout` e' usato solo da `activity_cantiere_split.xml`): un futuro modulo con menu
+laterale deve riusare questi file, non ricopiarli.
+
+---
+
+## 4. Dettaglio a tabella (righe di preventivo/ordine) — PROTOTIPO su Preventivi/Ordini
+
+La lista righe del dettaglio preventivo (`PreventivoDettaglioFragment`) era una lista di card con
+molti campi in ordine sparso. Ora e' una tabella standard, riusabile:
+
+- `DettaglioTabellaAdapter` (astratto, `adapters/`) + `ColonnaDettaglio` — il modulo dichiara le colonne
+  (`getColonne`: icona stretta / testo flessibile o fisso / custom) e il contenuto delle celle
+  (`bindCella`); riga di gruppo opzionale (`isRigaGruppo/bindGruppo`, es. il locale). Testata e righe
+  usano la stessa definizione, quindi restano allineate. `collegaTestata(contenitore)` costruisce la
+  testata, FISSA (fuori dalla lista).
+- Layout: `dettaglio_tabella_standard.xml` (testata `@+id/testata_dettaglio` + `@+id/lista_dett`, scorre in
+  orizzontale se le colonne non stanno, es. con il menu laterale aperto), `list_item_riga_gruppo.xml`,
+  `barra_totali_standard.xml` (totali/IVA STATICI in fondo, stessi id di prima), drawable
+  `bg_cella_dettaglio` / `bg_cella_testata` (bordo grigetto solo a destra/sotto per non raddoppiare).
+- `PreventiviDettaglioAdapter` estende il padre: colonne Tipo (icona con tooltip materiale / manodopera /
+  collegamenti / placche / note) | Descrizione | Codice | Prz. acq. | Prz. lis. | Q.ta' (- valore +) |
+  Prezzo | Importo | Rapportini (solo ordini) | Elimina (icona cestino, tooltip). Popup, opzioni riga,
+  eliminazione con conferma: invariati (restano nell'adapter del modulo).
+- `FaIcone` (`utils/`): Font Awesome 5.15 Free solid (SIL OFL) in `res/font/fa_solid_900.ttf`; per una
+  nuova icona si aggiunge la costante del glifo.
+- Rimossi i vecchi `list_item_preventivo_dettaglio.xml` e `list_item_locale_preventivo_dettaglio.xml`.
+
+Verificato dal vivo su tablet: testata fissa, celle bordate, tooltip pressione lunga, totali statici,
+menu opzioni riga dal tap sulla descrizione. NON ancora provati dal vivo: colonna Rapportini (ordini),
++/- quantita', popup codice/prezzo, elimina riga. Un futuro dettaglio a righe (es. rapportini) deve
+estendere `DettaglioTabellaAdapter`, non ricopiare la grafica.
+
+---
+
 ## File chiave (riferimento rapido)
 
 **Liste** (`pfa.app.econtab.lista`): `EConTabListaStandardController.java`,

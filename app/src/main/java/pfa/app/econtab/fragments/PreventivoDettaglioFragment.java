@@ -611,8 +611,9 @@ public class PreventivoDettaglioFragment extends EConTabFragment implements OnCl
 		db.close();
 
 		if (adapter == null) {
-			adapter = new PreventiviDettaglioAdapter(getActivity(), dati, R.layout.list_item_preventivo_dettaglio);
+			adapter = new PreventiviDettaglioAdapter(getActivity(), dati);
 			adapter.setFragmnent(this);
+			adapter.collegaTestata((ViewGroup) getView().findViewById(R.id.testata_dettaglio));
 			lista.setAdapter(adapter);
 			lista.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
 			// registerForContextMenu(lista);

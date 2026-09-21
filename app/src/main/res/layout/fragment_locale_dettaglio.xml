@@ -51,8 +51,8 @@
                     style="@style/bottoneListaGrande"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                   android:src="@drawable/modifica"
-                    android:background="@drawable/bg_bottone_rotondo"
+                   android:src="@drawable/ic_azione_modifica"
+                    android:background="?android:attr/selectableItemBackground"
                     android:scaleType="fitXY"
                     android:onClick="modifica" />
             </RelativeLayout>

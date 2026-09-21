@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Barra dei totali STATICA in fondo alla maschera di dettaglio (imponibile, IVA, importo): non scorre con la lista.
+    Si include con layout_alignParentBottom e si valorizza con textViewTotaleImponibile / textViewTotaleIva / textViewTotaleImporto.
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:background="@drawable/bg_card_filtri"
+    android:padding="6dp">
+
+    <TextView
+        android:id="@+id/textViewTotaleImponibile"
+        style="@style/TestoPiccolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="@dimen/margine"
+        android:singleLine="true"
+        android:text="@string/tot_imponibile"
+        android:textAllCaps="true" />
+
+    <TextView
+        android:id="@+id/textViewTotaleIva"
+        style="@style/TestoPiccolo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/textViewTotaleImponibile"
+        android:layout_marginRight="@dimen/margine"
+        android:singleLine="true"
+        android:text="@string/tot_iva"
+        android:textAllCaps="true" />
+
+    <TextView
+        android:id="@+id/textViewTotaleImporto"
+        style="@style/Testo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/textViewTotaleIva"
+        android:layout_marginRight="@dimen/margine"
+        android:singleLine="true"
+        android:text="@string/tot_importo"
+        android:textAllCaps="true" />
+
+</RelativeLayout>

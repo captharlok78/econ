@@ -2,7 +2,6 @@ package pfa.app.econtab.db.table;
 
 import android.content.ContentValues;
 
-import pfa.app.econtab.UnitaMisuraDettaglioActivity;
 
 public class UnitaMisura extends AbstractTable {
 	public static final String NOME_TABELLA = "unita_misura";
@@ -39,10 +38,10 @@ public class UnitaMisura extends AbstractTable {
 	 * return lista; }
 	 */
 
+	/** Le unita' di misura arrivano dal server (Sonata, Configurazione): l'app le scarica ma non le crea. */
 	@Override
-	public Class getDettaglioActivity() {
-		// TODO Auto-generated method stub
-		return UnitaMisuraDettaglioActivity.class;
+	public boolean isCreabileDaApp() {
+		return false;
 	}
 
 	@Override

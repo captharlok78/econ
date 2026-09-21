@@ -1,5 +1,6 @@
 package pfa.app.econtab.servizi;
 
+import pfa.app.econtab.utils.SyncUtil;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -139,6 +140,13 @@ public class SyncWorker extends Worker {
             MercuryApiService.SyncDownloadResponse dl = dlResp.body();
             applyDownloadedData(ctx, dl);
 
+            // 1b. Dati ditta e logo: scaricati solo se diversi da quelli locali. Un errore qui non ferma la sync.
+            try {
+                pfa.app.econtab.utils.DittaLocale.sincronizza(ctx, api);
+            } catch (Exception e) {
+                Log.w(TAG, "Sync dati ditta fallita: " + e.getMessage());
+            }
+
             // 2. Scarica record eliminati
             Response<MercuryApiService.DeletedResponse> delResp =
                     api.getDeleted(since).execute();
@@ -147,7 +155,10 @@ public class SyncWorker extends Worker {
                 applyDeletions(ctx, delResp.body());
             }
 
-            // 3. Carica modifiche locali (INSERT/UPDATE/DELETE)
+            // 3. Carica modifiche locali (INSERT/UPDATE/DELETE). Unita' di misura: solo quelle del server.
+            DbInterno dbUm = new DbInterno(ctx);
+            SyncUtil.allineaUnitaMisura(dbUm.getWritableDatabase());
+            dbUm.close();
             MercuryApiService.SyncUploadRequest uploadReq = buildUploadRequest(ctx, since);
             if (hasLocalChanges(uploadReq)) {
                 Response<MercuryApiService.SyncUploadResponse> upResp =
@@ -183,10 +194,18 @@ public class SyncWorker extends Worker {
                     String nomeTabella = entry.getKey();
                     List<JsonObject> records = entry.getValue();
                     if (records == null || records.isEmpty()) continue;
+                    SyncUtil.svuotaSeElencoCompleto(db, nomeTabella, records);
+                    if (SyncUtil.TABELLA_OPERATORI.equals(nomeTabella)) {
+                        SyncUtil.applicaOperatori(db, records);
+                        continue;
+                    }
 
                     for (JsonObject record : records) {
                         ContentValues cv = jsonToContentValues(record);
                         cv.put("in_server", 1);
+                        SyncUtil.normalizzaDate(cv);
+                        SyncUtil.rimuoviColonneSconosciute(db, nomeTabella, cv);
+                        SyncUtil.normalizzaNulli(db, nomeTabella, cv);
                         db.insertWithOnConflict(nomeTabella, null, cv,
                                 SQLiteDatabase.CONFLICT_REPLACE);
                     }
@@ -337,14 +356,16 @@ public class SyncWorker extends Worker {
                     }
                 }
 
-                // 3: marca come sincronizzati tutti i record rimasti con in_server=0
-                //    (record aggiornati e PK-composite già caricati)
+                // 3: marca come sincronizzati i record rimasti con in_server=0 (aggiornati e PK-composite),
+                //    tranne quelli che il server ha rifiutato: restano in_server=0 e vengono reinviati
+                SyncUtil.EsitoUpload esito = SyncUtil.analizzaErrori(resp.errors);
+                for (String err : (resp.errors != null ? resp.errors : new ArrayList<String>())) {
+                    Log.w(TAG, "Upload server error: " + err);
+                }
                 for (String[] tableInfo : SYNC_TABLES) {
                     String tableName = tableInfo[0];
                     if (!hasColumn(db, tableName, "in_server")) continue;
-                    ContentValues cv = new ContentValues();
-                    cv.put("in_server", 1);
-                    int updated = db.update(tableName, cv, "in_server = 0", null);
+                    int updated = SyncUtil.marcaInviati(db, tableName, tableInfo[1], esito);
                     if (updated > 0) Log.d(TAG, "Marcati sync: " + updated + " record in " + tableName);
                 }
 

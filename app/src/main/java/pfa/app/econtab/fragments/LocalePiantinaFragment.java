@@ -441,7 +441,7 @@ public class LocalePiantinaFragment extends EConTabFragment implements OnClickLi
 		if (val != null) {
 			piantina = val.getAsString(Locali.PIANTA_LOGICA);
 			nomeLocale = val.getAsString(Locali.NOME);
-			android.widget.TextView tvTitolo = (android.widget.TextView) getActivity().findViewById(R.id.textView_titolo_cantiere);
+			android.widget.TextView tvTitolo = (android.widget.TextView) getActivity().findViewById(R.id.headerTitolo);
 			if (tvTitolo != null) tvTitolo.setText(nomeLocale);
 
 		}

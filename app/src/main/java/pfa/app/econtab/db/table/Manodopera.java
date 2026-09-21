@@ -12,6 +12,10 @@ public class Manodopera extends AbstractTable {
 	public static final String NOME = "nome";
 	public static final String NUM_OPERATORI_DEFAULT = "num_operatori_default";
 	public static final String COSTO_ORARIO = "costo_orario";
+	/** Codice unita' di misura (tabella unita_misura, gestita dal server) in cui si misura la prestazione, es. OR. */
+	public static final String UNITA_MISURA = "unita_misura";
+	/** Unita' di misura di default (ore) quando la manodopera non ne ha una. */
+	public static final String UNITA_MISURA_DEFAULT = "OR";
 
 	public Manodopera() {
 		setNomeTabella(NOME_TABELLA);
@@ -21,6 +25,7 @@ public class Manodopera extends AbstractTable {
 		aggiungiCampo(NOME, TEXT);
 		aggiungiCampo(NUM_OPERATORI_DEFAULT, INTEGER);
 		aggiungiCampo(COSTO_ORARIO, NUMERIC);
+		aggiungiCampo(UNITA_MISURA, TEXT);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Tabella di dettaglio standard: testata FISSA (fuori dalla lista) + lista che scorre in verticale.
+    Se le colonne non stanno nella larghezza disponibile (es. con il menu laterale aperto) la tabella
+    scorre in orizzontale, testata inclusa. Si popola con un DettaglioTabellaAdapter:
+    adapter.collegaTestata(testata_dettaglio) e lista_dett.setAdapter(adapter).
+-->
+<HorizontalScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:minWidth="720dp"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:id="@+id/testata_dettaglio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <ListView
+            android:id="@+id/lista_dett"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:divider="@null"
+            android:dividerHeight="0dp" />
+    </LinearLayout>
+</HorizontalScrollView>

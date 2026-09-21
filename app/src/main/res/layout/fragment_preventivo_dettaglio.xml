@@ -7,7 +7,7 @@
         android:id="@+id/tasti_prev_dett"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-       android:background="@drawable/bg_econtab_biancosfumato"
+       android:background="#FFFFFF"
         android:layout_alignParentTop="true"
         
          >
@@ -33,51 +33,66 @@
                 <ImageButton
                     android:id="@+id/button_nuovo"
                     style="@style/bottoneListaGrande"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
                     android:layout_marginLeft="@dimen/margine"
                     android:layout_marginRight="@dimen/margine"
-                    android:background="@drawable/bg_bottone_rotondo"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/nuovo"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:scaleType="fitCenter"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_azione_nuovo"
                   
                      />
                  <ImageButton
                     android:id="@+id/button_associa"
                     style="@style/bottoneListaGrande"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
                     android:layout_marginLeft="@dimen/margine"
                     android:layout_marginRight="@dimen/margine"
-                    android:background="@drawable/bg_bottone_rotondo"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/associa"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:scaleType="fitCenter"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_azione_associa"
                   
                      />
                 <ImageButton
                     android:id="@+id/button_esporta"
                     style="@style/bottoneListaGrande"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
                     android:layout_marginLeft="@dimen/margine"
                     android:layout_marginRight="@dimen/margine"
-                    android:background="@drawable/bg_bottone_rotondo"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/condividi"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:scaleType="fitCenter"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_azione_condividi"
                   
                      />
  				<ImageButton
                     android:id="@+id/button_salva_prev"
                     style="@style/bottoneListaGrande"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
                     android:layout_marginLeft="@dimen/margine"
                     android:layout_marginRight="@dimen/margine"
-                    android:background="@drawable/bg_bottone_rotondo"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/salva"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:scaleType="fitCenter"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_azione_salva"
                   
                      />
                 <ImageButton
                     android:id="@+id/button_ricalcola"
                     style="@style/bottoneListaGrande"
+                    android:layout_width="52dp"
+                    android:layout_height="52dp"
                     android:layout_marginLeft="@dimen/margine"
                     android:layout_marginRight="@dimen/margine"
-                    android:background="@drawable/bg_bottone_rotondo"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/ricalcola"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:scaleType="fitCenter"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_azione_ricalcola"
 
                     />
 
@@ -99,18 +114,14 @@
 
    
 
-        <ListView
-            android:layout_alignParentLeft="true"
-       		
-            android:id="@+id/lista_dett"
-            android:dividerHeight="0dp"
-            android:divider="@null"
+        <!-- Tabella standard: testata fissa + lista (dettaglio_tabella_standard.xml) -->
+        <include
+            android:id="@+id/tabella_dettaglio"
+            layout="@layout/dettaglio_tabella_standard"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/tasti_prev_dett"
+            android:layout_height="match_parent"
             android:layout_above="@+id/relative_totale"
-             >
-        </ListView>
+            android:layout_below="@+id/tasti_prev_dett" />
 
         <LinearLayout 
     android:id="@+id/LinearLayout_titolocorrente"
@@ -122,7 +133,7 @@
     android:orientation="horizontal"
     android:paddingLeft="@dimen/margine"
     android:paddingRight="@dimen/margine"
-    android:layout_marginTop="@dimen/margine"
+    android:layout_marginTop="52dp"
     >
 
    
@@ -136,7 +147,7 @@
             android:maxLines="2"
             android:text="Locale"
             android:textAllCaps="true"
-            android:textColor="@android:color/holo_blue_dark" />
+            android:textColor="#212121" />
 
        
     
@@ -144,48 +155,12 @@
 </LinearLayout>
         
         
-        <RelativeLayout
+        <!-- Totali statici in fondo -->
+        <include
             android:id="@+id/relative_totale"
+            layout="@layout/barra_totali_standard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:background="@drawable/bg_econtab_biancosfumato"
-             >
-
-            <TextView
-                android:id="@+id/textViewTotaleImponibile"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginRight="@dimen/margine"
-                android:text="@string/tot_imponibile"
-                android:textAllCaps="true"
-                android:singleLine="true"
-                style="@style/TestoPiccolo"/>
-            <TextView
-                android:id="@+id/textViewTotaleIva"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_below="@+id/textViewTotaleImponibile"
-                android:layout_marginRight="@dimen/margine"
-                android:text="@string/tot_iva"
-                android:textAllCaps="true"
-                android:singleLine="true"
-               style="@style/TestoPiccolo" />
-             <TextView
-                android:id="@+id/textViewTotaleImporto"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_below="@+id/textViewTotaleIva"
-                android:layout_marginRight="@dimen/margine"
-                android:text="@string/tot_importo"
-                android:textAllCaps="true"
-                android:singleLine="true"
-                style="@style/Testo" />
-
-        </RelativeLayout>
+            android:layout_alignParentBottom="true" />
     
 </RelativeLayout>

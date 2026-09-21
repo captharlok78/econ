@@ -742,7 +742,8 @@ public class PreventiviDettaglio extends AbstractTable {
                 valINS.put(NUM_OPERATORI, valori.getAsInteger(Manodopera.NUM_OPERATORI_DEFAULT));
                 valINS.put(DESCRIZIONE, valori.getAsString(Manodopera.NOME));
                 valINS.put(PREZZO, valori.getAsFloat(Manodopera.COSTO_ORARIO));
-                valINS.put(UNITA_MISURA, "H");
+                String udmMano = valori.getAsString(Manodopera.UNITA_MISURA);
+                valINS.put(UNITA_MISURA, udmMano != null && !udmMano.trim().isEmpty() ? udmMano : Manodopera.UNITA_MISURA_DEFAULT);
             }
 
             if (tipoRiga.equals(ALTRO)) {

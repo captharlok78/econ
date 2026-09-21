@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Colore di default delle icone dell'app (lo stesso delle icone d'azione ic_azione_*): mai colori per-icona -->
+    <color name="colore_icona">#757374</color>
+</resources>

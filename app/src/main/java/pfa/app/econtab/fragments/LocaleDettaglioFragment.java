@@ -72,7 +72,7 @@ DbInterno db = new DbInterno(getActivity());
 		if (val!=null){
 			setText(R.id.editText_locale, val.getAsString(Locali.NOME), v);
 			String nomeLocale = val.getAsString(Locali.NOME);
-			android.widget.TextView tvTitolo = (android.widget.TextView) getActivity().findViewById(R.id.textView_titolo_cantiere);
+			android.widget.TextView tvTitolo = (android.widget.TextView) getActivity().findViewById(R.id.headerTitolo);
 			if (tvTitolo != null) tvTitolo.setText(nomeLocale);
 
             if (val.getAsString("ragsoc_costruttore")!=null){

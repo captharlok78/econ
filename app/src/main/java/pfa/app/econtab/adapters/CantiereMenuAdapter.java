@@ -2,106 +2,76 @@ package pfa.app.econtab.adapters;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 
 import pfa.app.econtab.CantiereSplitActivity;
 import pfa.app.econtab.R;
 import pfa.app.econtab.db.table.Preventivi;
+import pfa.app.econtab.utils.FaIcone;
 
-public class CantiereMenuAdapter extends EConTabListViewAdapter {
-	CantiereSplitActivity activity = null;
+/**
+ * Menu laterale del cantiere (Preventivo / Cantiere / Unita' / Area / Locale): specializza il pannello
+ * standard MenuLateraleAdapter dicendo cosa mostrare per ogni riga. Grafica e selezione sono nel padre.
+ */
+public class CantiereMenuAdapter extends MenuLateraleAdapter {
+	private final CantiereSplitActivity activity;
 
-	private class CantiereMenuViewHolder extends EConTabViewHolder {
-		TextView tipo = null;
-		TextView nome = null;
-		ImageView icona = null;
-
-	}
-
-	public CantiereMenuAdapter(Context context, ArrayList<Object> dati, int layoutid) {
-		super(context, dati, layoutid);
+	public CantiereMenuAdapter(Context context, ArrayList<Object> dati) {
+		super(context, dati);
 		activity = (CantiereSplitActivity) context;
-		// TODO Auto-generated constructor stub
+	}
+
+	private ContentValues riga(int position) {
+		return (ContentValues) dati.get(position);
 	}
 
 	@Override
-	protected EConTabViewHolder impostaViewHolder(View convertView, int position) {
-		// TODO Auto-generated method stub
-		CantiereMenuViewHolder holder = new CantiereMenuViewHolder();
-		holder.tipo = (TextView) convertView.findViewById(R.id.tipo);
-		holder.nome = (TextView) convertView.findViewById(R.id.nome);
-		// holder.nome.setMovementMethod(new ScrollingMovementMethod());
-		holder.icona = (ImageView) convertView.findViewById(R.id.icona);
-
-		return holder;
+	protected String getTipoTesto(int position) {
+		return getTipoStringa(riga(position), context);
 	}
 
 	@Override
-	protected void personalizzaView(int position, EConTabViewHolder viewholder) {
-		// TODO Auto-generated method stub
-		// TODO Auto-generated method stub
-		ContentValues val = (ContentValues) dati.get(position);
-		int tipo = val.getAsInteger("TIPO");
-		((CantiereMenuViewHolder) viewholder).tipo.setText(getTipoStringa(val, context));
-		((CantiereMenuViewHolder) viewholder).tipo.setTag(position);
-
-		((CantiereMenuViewHolder) viewholder).nome.setText(val.getAsString("NOME"));
-		((CantiereMenuViewHolder) viewholder).nome.setTag(position);
-
-		((CantiereMenuViewHolder) viewholder).icona.setImageResource(getIcona(tipo, context));
-		((CantiereMenuViewHolder) viewholder).icona.setTag(position);
-
-		super.personalizzaView(position, viewholder);
+	protected String getNomeTesto(int position) {
+		return riga(position).getAsString("NOME");
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		// TODO Auto-generated method stub
-		View v = super.getView(position, convertView, parent);
-		if (position == activity.getSelezionato()) {
-			v.setBackgroundResource(R.drawable.bg_econtab_sel);
-		} else {
-			v.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
-		}
-		ContentValues val = (ContentValues) dati.get(position);
-		int tipo = val.getAsInteger("TIPO");
-		int paddingunitario = context.getResources().getDimensionPixelSize(R.dimen.margine);
-		if (tipo == CantiereSplitActivity.UNITA || tipo == CantiereSplitActivity.CANTIERE || tipo == CantiereSplitActivity.PREVENTIVO) {
-			v.setPadding(paddingunitario, v.getPaddingTop(), v.getPaddingRight(), v.getPaddingBottom());
-		}
+	protected String getIconaGlifo(int position) {
+		return getGlifo(riga(position).getAsInteger("TIPO"));
+	}
+
+	@Override
+	protected int getLivello(int position) {
+		int tipo = riga(position).getAsInteger("TIPO");
 		if (tipo == CantiereSplitActivity.AREA) {
-			v.setPadding(paddingunitario * 2, v.getPaddingTop(), v.getPaddingRight(), v.getPaddingBottom());
+			return 2;
 		}
 		if (tipo == CantiereSplitActivity.LOCALE) {
-			v.setPadding(paddingunitario * 3, v.getPaddingTop(), v.getPaddingRight(), v.getPaddingBottom());
+			return 3;
 		}
-
-		return v;
-
+		return 1; // preventivo, cantiere, unita'
 	}
 
-	public static int getIcona(int tipo, Context context) {
+	@Override
+	protected int getPosizioneSelezionata() {
+		return activity.getSelezionato();
+	}
+
+	public static String getGlifo(int tipo) {
 		if (tipo == CantiereSplitActivity.PREVENTIVO) {
-			return R.drawable.ordini_preventivi_small;
-		}
-		if (tipo == CantiereSplitActivity.CANTIERE) {
-			return R.drawable.icona_cantiere;
+			return FaIcone.PREVENTIVO;
 		}
 		if (tipo == CantiereSplitActivity.UNITA) {
-			return R.drawable.icona_unita;
+			return FaIcone.UNITA;
 		}
 		if (tipo == CantiereSplitActivity.AREA) {
-			return R.drawable.icona_area;
+			return FaIcone.AREA;
 		}
 		if (tipo == CantiereSplitActivity.LOCALE) {
-			return R.drawable.icona_locale;
+			return FaIcone.LOCALE;
 		}
-		return R.drawable.icona_cantiere;
+		return FaIcone.CANTIERE;
 	}
 
 	public static String getTipoStringa(ContentValues item, Context context) {

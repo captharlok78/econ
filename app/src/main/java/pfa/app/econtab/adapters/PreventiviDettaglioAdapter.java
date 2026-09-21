@@ -5,14 +5,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.util.TypedValue;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 import pfa.app.econtab.R;
@@ -26,87 +28,366 @@ import pfa.app.econtab.db.table.PlaccheModuli;
 import pfa.app.econtab.db.table.Preventivi;
 import pfa.app.econtab.db.table.PreventiviDettaglio;
 import pfa.app.econtab.db.table.Rapportini;
+import pfa.app.econtab.db.table.UnitaMisura;
 import pfa.app.econtab.db.table.RapportiniDettaglio;
 import pfa.app.econtab.fragments.PreventivoDettaglioFragment;
+import pfa.app.econtab.utils.FaIcone;
 import pfa.app.econtab.utils.Utility;
 import pfa.app.econtab.views.PopupAssociazioneCodiceListino;
 import pfa.app.econtab.views.PopupModificaRigaPreventivo;
 
-public class PreventiviDettaglioAdapter extends EConTabListViewAdapter {
+/**
+ * Righe di preventivo/ordine come tabella standard (DettaglioTabellaAdapter): qui ci sono solo le colonne,
+ * il contenuto delle celle e le azioni di riga (opzioni, popup, elimina).
+ */
+public class PreventiviDettaglioAdapter extends DettaglioTabellaAdapter {
+
+	private static final String COL_TIPO = "tipo";
+	private static final String COL_DESCRIZIONE = "descrizione";
+	private static final String COL_CODICE = "codice";
+	private static final String COL_PRZ_ACQ = "prz_acq";
+	private static final String COL_PRZ_LIS = "prz_lis";
+	private static final String COL_QTA = "qta";
+	private static final String COL_UDM = "udm";
+	private static final String COL_PREZZO = "prezzo";
+	private static final String COL_IMPORTO = "importo";
+	private static final String COL_RAPPORTINI = "rapportini";
+	private static final String COL_ELIMINA = "elimina";
 
 	private PreventivoDettaglioFragment fragmnent = null;
 	private PreventiviDettaglio tabDett = null;
+	private List<ColonnaDettaglio> colonne = null;
 
-	private class PreventiviDettaglioViewHolder extends EConTabViewHolder {
-		TextView descrizione = null;
-		TextView codice = null;
-		TextView qta = null;
-		TextView udm = null;
-		TextView przAcquisto = null;
-		TextView ricarico = null;
-		TextView przListino = null;
-		TextView sconto = null;
-		TextView prezzo = null;
-		TextView importo = null;
-		Button buttonPiu = null;
-		Button buttonMeno = null;
-		View viewDescrizione = null;
-		TextView inModifica = null;
-        LinearLayout linearRapportini = null;
-        TextView oreRapportini = null;
-        TextView importoRapportini = null;
+	/** Cella della quantita': [-] valore + unita' di misura [+]. */
+	private static class QtaCella extends LinearLayout {
+		final TextView meno;
+		final TextView valore;
+		final TextView piu;
 
+		QtaCella(Context context) {
+			super(context);
+			setOrientation(HORIZONTAL);
+			setGravity(Gravity.CENTER);
+			meno = new TextView(context);
+			piu = new TextView(context);
+			valore = new TextView(context);
+			LinearLayout centro = new LinearLayout(context);
+			centro.setOrientation(VERTICAL);
+			centro.setGravity(Gravity.CENTER);
+			valore.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+			valore.setTextColor(Color.parseColor("#212121"));
+			centro.addView(valore);
+			float d = context.getResources().getDisplayMetrics().density;
+			int lato = (int) (40 * d);
+			addView(meno, new LayoutParams(lato, lato));
+			addView(centro, new LayoutParams(0, LayoutParams.WRAP_CONTENT, 1));
+			addView(piu, new LayoutParams(lato, lato));
+			FaIcone.applica(meno, FaIcone.MENO, null);
+			FaIcone.applica(piu, FaIcone.PIU, null);
+			meno.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+			piu.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+			meno.setBackgroundResource(android.R.drawable.list_selector_background);
+			piu.setBackgroundResource(android.R.drawable.list_selector_background);
+		}
 	}
 
-	private class PreventiviDettaglioLocaleViewHolder extends EConTabViewHolder {
-		TextView unitaArea = null;
-		TextView locale = null;
-		TextView linea = null;
-		View linearLinea = null;
-
-	}
-
-	public PreventiviDettaglioAdapter(Context context, ArrayList<Object> dati, int layoutid) {
-		super(context, dati, layoutid);
+	public PreventiviDettaglioAdapter(Context context, ArrayList<Object> dati) {
+		super(context, dati);
 		tabDett = new PreventiviDettaglio();
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
-	protected EConTabViewHolder impostaViewHolder(View convertView, int position) {
-		// TODO Auto-generated method stub
+	protected List<ColonnaDettaglio> getColonne() {
+		if (colonne == null) {
+			colonne = new ArrayList<ColonnaDettaglio>();
+			colonne.add(ColonnaDettaglio.icona(COL_TIPO, "", 44));
+			colonne.add(ColonnaDettaglio.testo(COL_DESCRIZIONE, getString(R.string.descrizione), 1f));
+			colonne.add(ColonnaDettaglio.testoFisso(COL_CODICE, getString(R.string.codice), 110, Gravity.START));
+			colonne.add(ColonnaDettaglio.testoFisso(COL_PRZ_ACQ, senzaEuro(R.string.prezzo_acquisto), 84, Gravity.END));
+			colonne.add(ColonnaDettaglio.testoFisso(COL_PRZ_LIS, senzaEuro(R.string.prezzo_listino), 84, Gravity.END));
+			colonne.add(ColonnaDettaglio.custom(COL_QTA, getString(R.string.qta), 130));
+			colonne.add(ColonnaDettaglio.testoFisso(COL_UDM, getString(R.string.um_breve), 56, Gravity.CENTER));
+			colonne.add(ColonnaDettaglio.testoFisso(COL_PREZZO, senzaEuro(R.string.prezzo), 76, Gravity.END));
+			colonne.add(ColonnaDettaglio.testoFisso(COL_IMPORTO, senzaEuro(R.string.importo), 84, Gravity.END));
+			if (fragmnent != null && Preventivi.TIPO_ORDINE.equals(fragmnent.getTipoPreventivoOrdine())) {
+				colonne.add(ColonnaDettaglio.testoFisso(COL_RAPPORTINI, getString(R.string.rapportini), 100, Gravity.END));
+			}
+			colonne.add(ColonnaDettaglio.icona(COL_ELIMINA, "", 44));
+		}
+		return colonne;
+	}
 
-		if (getFragmnent().isRigaLocale(position)) {
-			PreventiviDettaglioLocaleViewHolder holder = new PreventiviDettaglioLocaleViewHolder();
-			holder.unitaArea = (TextView) convertView.findViewById(R.id.unitaArea);
-			holder.locale = (TextView) convertView.findViewById(R.id.locale);
-			holder.linea = (TextView) convertView.findViewById(R.id.linea);
-			holder.linearLinea = convertView.findViewById(R.id.linear_linea);
+	/** Titoli colonne senza il simbolo dell'euro (le colonne sono tutte in euro): la testata resta su una riga. */
+	private String senzaEuro(int idStringa) {
+		return getString(idStringa).replace("€", "").trim();
+	}
 
-			return holder;
-		} else {
-			PreventiviDettaglioViewHolder holder = new PreventiviDettaglioViewHolder();
-			holder.descrizione = (TextView) convertView.findViewById(R.id.descrizione_riga);
-			holder.codice = (TextView) convertView.findViewById(R.id.codice_articolo);
-			holder.qta = (TextView) convertView.findViewById(R.id.txt_qta);
-			holder.udm = (TextView) convertView.findViewById(R.id.udm);
-			holder.przAcquisto = (TextView) convertView.findViewById(R.id.text_prxacq);
-			holder.ricarico = (TextView) convertView.findViewById(R.id.text_ricarico);
-			holder.przListino = (TextView) convertView.findViewById(R.id.text_prxLis);
-			holder.sconto = (TextView) convertView.findViewById(R.id.text_sconto);
-			holder.prezzo = (TextView) convertView.findViewById(R.id.text_prezzo);
-			holder.importo = (TextView) convertView.findViewById(R.id.text_importo);
-			holder.buttonPiu = (Button) convertView.findViewById(R.id.buttonPiu);
-			holder.buttonMeno = (Button) convertView.findViewById(R.id.buttonMeno);
-            holder.linearRapportini = (LinearLayout) convertView.findViewById(R.id.linear_rapportini);
-            holder.oreRapportini = (TextView) convertView.findViewById(R.id.oreRapportini);
-            holder.importoRapportini = (TextView) convertView.findViewById(R.id.importoRapportini);
+	@Override
+	protected View creaCellaCustom(ColonnaDettaglio colonna, ViewGroup parent) {
+		return new QtaCella(context);
+	}
 
-			holder.viewDescrizione = convertView.findViewById(R.id.linear_descrizione);
-			holder.inModifica = (TextView) convertView.findViewById(R.id.textView_inModifica);
-			return holder;
+	@Override
+	protected boolean isRigaGruppo(int position) {
+		return getFragmnent().isRigaLocale(position);
+	}
+
+	@Override
+	protected void bindGruppo(int position, TextView sopra, TextView titolo, TextView destra) {
+		ContentValues val = (ContentValues) dati.get(position);
+		titolo.setText(val.getAsString(Locali.NOME));
+		String tipo = val.getAsString(PreventiviDettaglio.TIPO);
+		boolean conDettagli = !(tipo.equals(PreventiviDettaglio.MANOPERA) || tipo.equals(PreventiviDettaglio.COLLEGAMENTI)
+				|| tipo.equals(PreventiviDettaglio.ALTRO));
+		String area = conDettagli ? val.getAsString("nomeArea") : null;
+		String linea = conDettagli ? val.getAsString(Linee.NOME_LINEA) : null;
+		String sigla = conDettagli ? val.getAsString(Costruttori.SIGLA_METEL) : null;
+		sopra.setText(area);
+		sopra.setVisibility(area != null && area.length() > 0 ? View.VISIBLE : View.GONE);
+		boolean haLinea = linea != null && linea.length() > 0;
+		destra.setText(haLinea ? getString(R.string.linea) + ": " + linea + (sigla != null && sigla.length() > 0 ? " - " + sigla : "") : "");
+		destra.setVisibility(haLinea ? View.VISIBLE : View.GONE);
+	}
+
+	@Override
+	protected void bindCella(final int position, ColonnaDettaglio colonna, View cella) {
+		final ContentValues val = (ContentValues) dati.get(position);
+		final String tipo = val.getAsString(PreventiviDettaglio.TIPO);
+		boolean codiceModificabile = tipo.equals(PreventiviDettaglio.MATERIALE) || tipo.equals(PreventiviDettaglio.MATERIALE_PREVENTIVO)
+				|| tipo.equals(PreventiviDettaglio.COLLEGAMENTI) || tipo.equals(PreventiviDettaglio.PLACCHE)
+				|| tipo.equals(PreventiviDettaglio.PLACCHE_PREVENTIVO);
+
+		switch (colonna.id) {
+		case COL_TIPO:
+			bindTipo((TextView) cella, tipo);
+			break;
+
+		case COL_DESCRIZIONE: {
+			TextView tv = (TextView) cella;
+			tv.setText(descrizioneRiga(val, tipo));
+			// riga modificata e non ancora salvata: sfondo evidenziato leggero
+			tv.setBackgroundColor(isInModifica(position) ? Color.parseColor("#FFEBEE") : Color.TRANSPARENT);
+			tv.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					mostraOpzioniRiga(position);
+				}
+			});
+			break;
 		}
 
+		case COL_CODICE: {
+			TextView tv = (TextView) cella;
+			tv.setOnClickListener(null);
+			tv.setClickable(false);
+			boolean haCodice = val.getAsString(PreventiviDettaglio.CODICE_ARTICOLO) != null
+					&& val.getAsString(PreventiviDettaglio.CODICE_ARTICOLO).trim().length() > 0;
+			if (tipo.equals(PreventiviDettaglio.ALTRO)) {
+				tv.setText("");
+			} else if (tipo.equals(PreventiviDettaglio.MANOPERA)) {
+				tv.setText(getString(R.string.operatori) + " " + val.getAsInteger(PreventiviDettaglio.NUM_OPERATORI));
+				tv.setTextColor(Color.parseColor("#212121"));
+				tv.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						apriPopupModifica(position, PreventiviDettaglio.NUM_OPERATORI);
+					}
+				});
+			} else {
+				tv.setText(haCodice ? val.getAsString(PreventiviDettaglio.CODICE_ARTICOLO) : getString(R.string.codice));
+				// placeholder in grigio (non e' un dato), codice valorizzato nel colore testo standard
+				tv.setTextColor(Color.parseColor(haCodice ? "#212121" : "#B9B9B9"));
+				if (codiceModificabile) {
+					tv.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							apriPopupCodice(position);
+						}
+					});
+				}
+			}
+			break;
+		}
+
+		case COL_PRZ_ACQ:
+			((TextView) cella).setText(Utility.formatNumero(val.getAsFloat(PreventiviDettaglio.PREZZO_ACQ), 2));
+			break;
+
+		case COL_PRZ_LIS:
+			((TextView) cella).setText(Utility.formatNumero(val.getAsFloat(PreventiviDettaglio.PREZZO_VEN), 2));
+			break;
+
+		case COL_QTA:
+			bindQta((QtaCella) cella, position, val, tipo);
+			break;
+
+		case COL_UDM: {
+			TextView tv = (TextView) cella;
+			String codice = val.getAsString(PreventiviDettaglio.UNITA_MISURA);
+			tv.setText(codice == null ? "" : codice.trim());
+			// tooltip con la descrizione dell'unita' (dalla tabella scaricata dal server)
+			String nome = nomiUnitaMisura().get(codice == null ? "" : codice.trim());
+			androidx.appcompat.widget.TooltipCompat.setTooltipText(tv, nome != null ? nome : getString(R.string.unita_misura));
+			tv.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					scegliUnitaMisura(position);
+				}
+			});
+			break;
+		}
+
+		case COL_PREZZO: {
+			TextView tv = (TextView) cella;
+			tv.setText(Utility.formatNumero(val.getAsFloat(PreventiviDettaglio.PREZZO), 2));
+			// prezzo sotto il costo di acquisto: evidenziato
+			tv.setBackgroundColor(val.getAsFloat(PreventiviDettaglio.PREZZO) < val.getAsFloat(PreventiviDettaglio.PREZZO_ACQ)
+					? Color.parseColor("#ff4444") : Color.TRANSPARENT);
+			tv.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					apriPopupModifica(position, PreventiviDettaglio.PREZZO);
+				}
+			});
+			break;
+		}
+
+		case COL_IMPORTO:
+			((TextView) cella).setText(Utility.formatNumero(tabDett.getImportoRiga(val), 2));
+			break;
+
+		case COL_RAPPORTINI: {
+			TextView tv = (TextView) cella;
+			tv.setOnClickListener(null);
+			tv.setClickable(false);
+			if (tipo.equals(PreventiviDettaglio.MANOPERA)) {
+				tv.setText(Utility.formatNumero(val.getAsDouble("ORE_RAPP")) + " h  ·  " + Utility.formatNumero(val.getAsDouble("IMPORTO_RAPP"), 2));
+				tv.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						_mostraRapportiniRiga(val.getAsInteger(PreventiviDettaglio.ID_PREVENTIVO), val.getAsInteger(PreventiviDettaglio.ID_MANODOPERA));
+					}
+				});
+			} else {
+				tv.setText("");
+			}
+			break;
+		}
+
+		case COL_ELIMINA:
+			impostaIcona(cella, FaIcone.ELIMINA, getString(R.string.elimina));
+			cella.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					confermaEliminaRiga(position);
+				}
+			});
+			break;
+		}
+	}
+
+	private HashMap<String, String> nomiUm = null;
+
+	/** Codice -> descrizione delle unita' di misura scaricate dal server (caricata una volta sola). */
+	private HashMap<String, String> nomiUnitaMisura() {
+		if (nomiUm == null) {
+			nomiUm = new HashMap<String, String>();
+			DbInterno db = new DbInterno(context);
+			ArrayList<Object> udm = db.eseguiSelect(new UnitaMisura(), null, new String[] { UnitaMisura.UNITA_MISURA });
+			db.close();
+			for (Object o : udm) {
+				ContentValues v = (ContentValues) o;
+				nomiUm.put(v.getAsString(UnitaMisura.UNITA_MISURA), v.getAsString(UnitaMisura.NOME));
+			}
+		}
+		return nomiUm;
+	}
+
+	/** Cambio dell'unita' di misura della riga: si sceglie tra quelle gestite dal server, poi la riga risulta "in modifica". */
+	private void scegliUnitaMisura(final int position) {
+		if (fragmnent.isModificheBloccate()) {
+			Utility.mostraDialog(getString(R.string.attenzione), getString(R.string.modifiche_non_permesse), context, "OK");
+			return;
+		}
+		DbInterno db = new DbInterno(context);
+		final ArrayList<Object> udm = db.eseguiSelect(new UnitaMisura(), null, new String[] { UnitaMisura.UNITA_MISURA });
+		db.close();
+		if (udm.isEmpty()) {
+			Utility.mostraDialog(getString(R.string.attenzione), getString(R.string.unita_misura) + ": nessuna unita' scaricata dal server", context, "OK");
+			return;
+		}
+		String[] voci = new String[udm.size()];
+		for (int i = 0; i < udm.size(); i++) {
+			ContentValues v = (ContentValues) udm.get(i);
+			voci[i] = v.getAsString(UnitaMisura.UNITA_MISURA) + " - " + v.getAsString(UnitaMisura.NOME);
+		}
+		Utility.mostraSelezioneDialog(getString(R.string.unita_misura), voci, context, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				ContentValues val = (ContentValues) dati.get(position);
+				val.put(PreventiviDettaglio.UNITA_MISURA, ((ContentValues) udm.get(which)).getAsString(UnitaMisura.UNITA_MISURA));
+				setInModifica(position);
+			}
+		});
+	}
+
+	/** Icona della tipologia riga (Font Awesome, colore di default) con tooltip. */
+	private void bindTipo(TextView cella, String tipo) {
+		if (tipo.equals(PreventiviDettaglio.MANOPERA)) {
+			impostaIcona(cella, FaIcone.MANODOPERA, getString(R.string.manodopera));
+		} else if (tipo.equals(PreventiviDettaglio.COLLEGAMENTI)) {
+			impostaIcona(cella, FaIcone.COLLEGAMENTI, getString(R.string.collegamenti));
+		} else if (tipo.equals(PreventiviDettaglio.PLACCHE) || tipo.equals(PreventiviDettaglio.PLACCHE_PREVENTIVO)) {
+			impostaIcona(cella, FaIcone.PLACCHE, getString(R.string.placche));
+		} else if (tipo.equals(PreventiviDettaglio.ALTRO)) {
+			impostaIcona(cella, FaIcone.NOTE, getString(R.string.note));
+		} else {
+			impostaIcona(cella, FaIcone.MATERIALE, getString(R.string.materiale));
+		}
+	}
+
+	private String descrizioneRiga(ContentValues val, String tipo) {
+		if (tipo.equals(PreventiviDettaglio.ALTRO)) {
+			return val.getAsString(PreventiviDettaglio.NOTE);
+		}
+		if (tipo.equals(PreventiviDettaglio.PLACCHE) || tipo.equals(PreventiviDettaglio.PLACCHE_PREVENTIVO)) {
+			return getString(R.string.placca) + " " + val.getAsString(PreventiviDettaglio.DESCRIZIONE) + " "
+					+ val.getAsString(PlaccheModuli.NUMERO_MODULI) + " " + getString(R.string.moduli);
+		}
+		if (val.containsKey("DESCRI_LINEA")) {
+			return val.getAsString(PreventiviDettaglio.DESCRIZIONE) + " " + val.getAsString("DESCRI_LINEA");
+		}
+		return val.getAsString(PreventiviDettaglio.DESCRIZIONE);
+	}
+
+	private void bindQta(QtaCella cella, final int position, ContentValues val, String tipo) {
+		cella.valore.setText(Utility.formatNumero(val.getAsFloat(PreventiviDettaglio.QUANTITA)));
+		cella.valore.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				apriPopupModifica(position, PreventiviDettaglio.QUANTITA);
+			}
+		});
+
+		// quantita' delle righe derivate dal cantiere: non si incrementa a mano
+		boolean stepper = !(tipo.equals(PreventiviDettaglio.MATERIALE) || tipo.equals(PreventiviDettaglio.PLACCHE)
+				|| tipo.equals(PreventiviDettaglio.COLLEGAMENTI) || fragmnent.isModificheBloccate());
+		cella.meno.setVisibility(stepper ? View.VISIBLE : View.INVISIBLE);
+		cella.piu.setVisibility(stepper ? View.VISIBLE : View.INVISIBLE);
+		if (stepper) {
+			cella.piu.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					aggiornaQta(position, 1);
+				}
+			});
+			cella.meno.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					aggiornaQta(position, -1);
+				}
+			});
+		}
 	}
 
 	protected void aggiornaQta(int position, int q) {
@@ -121,247 +402,6 @@ public class PreventiviDettaglioAdapter extends EConTabListViewAdapter {
 		val.put(PreventiviDettaglio.QUANTITA, newQta);
 		setInModifica(position);
 		notifyDataSetChanged();
-	}
-
-	@Override
-	protected void personalizzaView(final int position, EConTabViewHolder viewholder) {
-		System.out.println("EConTab: PreventivoDettaglioAdapter personalizzaView ENTER");
-		System.out.println("EConTab: PreventivoDettaglioAdapter personalizzaView position " + position);
-		// TODO Auto-generated method stub
-		final ContentValues val = (ContentValues) dati.get(position);
-		if (getFragmnent().isRigaLocale(position)) {
-			System.out.println("EConTab: PreventivoDettaglioAdapter personalizzaView YES RIGA LOCALE");
-			((PreventiviDettaglioLocaleViewHolder) viewholder).locale.setText(val.getAsString(Locali.NOME));
-			((PreventiviDettaglioLocaleViewHolder) viewholder).locale.setTag(position);
-			String tipo = val.getAsString(PreventiviDettaglio.TIPO);
-			System.out.println("EConTab: PreventivoDettaglioAdapter personalizzaView tipo " + tipo);
-			if (tipo.equals(PreventiviDettaglio.MANOPERA) || tipo.equals(PreventiviDettaglio.COLLEGAMENTI)
-					|| tipo.equals(PreventiviDettaglio.ALTRO)) {
-				((PreventiviDettaglioLocaleViewHolder) viewholder).unitaArea.setVisibility(View.GONE);
-				((PreventiviDettaglioLocaleViewHolder) viewholder).linearLinea.setVisibility(View.GONE);
-			} else {
-				((PreventiviDettaglioLocaleViewHolder) viewholder).unitaArea.setText(val.getAsString("nomeArea"));
-				((PreventiviDettaglioLocaleViewHolder) viewholder).unitaArea.setVisibility(View.VISIBLE);
-				((PreventiviDettaglioLocaleViewHolder) viewholder).linearLinea.setVisibility(View.VISIBLE);
-				((PreventiviDettaglioLocaleViewHolder) viewholder).linea.setText(val.getAsString(Linee.NOME_LINEA) + " - "
-						+ val.getAsString(Costruttori.SIGLA_METEL));
-				((PreventiviDettaglioLocaleViewHolder) viewholder).linea.setTag(position);
-			}
-
-		} else {
-			System.out.println("EConTab: PreventivoDettaglioAdapter personalizzaView NO RIGA LOCALE");
-			PreventiviDettaglioViewHolder holder = (PreventiviDettaglioViewHolder) viewholder;
-			String tipo = val.getAsString(PreventiviDettaglio.TIPO);
-			System.out.println("EConTab: PreventivoDettaglioAdapter personalizzaView tipo " + tipo);
-
-			if (tipo.equals(PreventiviDettaglio.ALTRO)) {
-				holder.codice.setVisibility(View.GONE);
-			} else {
-				holder.codice.setVisibility(View.VISIBLE);
-
-			}
-
-            if (tipo.equals(PreventiviDettaglio.MANOPERA) && fragmnent.getTipoPreventivoOrdine().equals(Preventivi.TIPO_ORDINE) ) {
-                holder.linearRapportini.setVisibility(View.VISIBLE);
-                holder.linearRapportini.setTag(position);
-                holder.linearRapportini.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-_mostraRapportiniRiga(val.getAsInteger(PreventiviDettaglio.ID_PREVENTIVO), val.getAsInteger(PreventiviDettaglio.ID_MANODOPERA));
-                    }
-                });
-
-                holder.oreRapportini.setText(Utility.formatNumero(val.getAsDouble("ORE_RAPP")));
-                holder.oreRapportini.setTag(position);
-
-                holder.importoRapportini.setText(Utility.formatNumero(val.getAsDouble("IMPORTO_RAPP"), 2));
-                holder.importoRapportini.setTag(position);
-            }
-            else{
-                holder.linearRapportini.setVisibility(View.GONE);
-            }
-
-			System.out.println("EConTab: PreventivoDettaglioAdapter personalizzaView val.getAsString(PreventiviDettaglio.CODICE_ARTICOLO) " + val.getAsString(PreventiviDettaglio.CODICE_ARTICOLO));
-
-			if (tipo.equals(PreventiviDettaglio.MANOPERA) ) {
-
-                holder.codice.setText(getString(R.string.operatori) + " " + val.getAsInteger(PreventiviDettaglio.NUM_OPERATORI));
-
-			} else {
-				if (val.getAsString(PreventiviDettaglio.CODICE_ARTICOLO) != null
-						&& val.getAsString(PreventiviDettaglio.CODICE_ARTICOLO).trim().length() > 0) {
-					holder.codice.setText(val.getAsString(PreventiviDettaglio.CODICE_ARTICOLO));
-				} else {
-					holder.codice.setText(getString(R.string.codice));
-				}
-
-			}
-
-			if (tipo.equals(PreventiviDettaglio.ALTRO)) {
-				holder.descrizione.setText(val.getAsString(PreventiviDettaglio.NOTE));
-			} else {
-
-				if (val.containsKey("DESCRI_LINEA")){
-					holder.descrizione.setText(val.getAsString(PreventiviDettaglio.DESCRIZIONE) + " "+val.getAsString("DESCRI_LINEA"));
-				}
-				else {
-					holder.descrizione.setText(val.getAsString(PreventiviDettaglio.DESCRIZIONE));
-				}
-				if (tipo.equals(PreventiviDettaglio.PLACCHE) || tipo.equals(PreventiviDettaglio.PLACCHE_PREVENTIVO)) {
-					holder.descrizione.setText(getString(R.string.placca) + " " + val.getAsString(PreventiviDettaglio.DESCRIZIONE) + " "
-							+ val.getAsString(PlaccheModuli.NUMERO_MODULI) + " " + getString(R.string.moduli));
-				}
-			}
-
-			if (isInModifica(position)) {
-				holder.inModifica.setVisibility(View.VISIBLE);
-				holder.viewDescrizione.setBackgroundResource(R.drawable.bg_econtab_titolo_rosso);
-
-			} else {
-				holder.inModifica.setVisibility(View.GONE);
-				holder.viewDescrizione.setBackgroundResource(R.drawable.bg_econtab_titolo);
-			}
-
-			holder.viewDescrizione.setOnClickListener(new View.OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					// TODO Auto-generated method stub
-					mostraOpzioniRiga(position);
-				}
-			});
-
-            holder.codice.setTextColor(Color.parseColor("#b9b9b9"));
-            holder.codice.setClickable(false);
-            holder.codice.setBackgroundResource(android.R.color.transparent);
-			if (tipo.equals(PreventiviDettaglio.MATERIALE) || tipo.equals(PreventiviDettaglio.MATERIALE_PREVENTIVO)
-					|| tipo.equals(PreventiviDettaglio.COLLEGAMENTI) || tipo.equals(PreventiviDettaglio.PLACCHE)
-					|| tipo.equals(PreventiviDettaglio.PLACCHE_PREVENTIVO)) {
-				holder.codice.setBackgroundResource(R.drawable.bg_bottone_grigio_arrotondato);
-                holder.codice.setClickable(true);
-				if (val.getAsString(PreventiviDettaglio.CODICE_ARTICOLO) != null
-						&& val.getAsString(PreventiviDettaglio.CODICE_ARTICOLO).trim().length() > 0) {
-					holder.codice.setTextColor(Color.parseColor("#0099cc"));
-				}
-				holder.codice.setOnClickListener(new View.OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						// TODO Auto-generated method stub
-						apriPopupCodice(position);
-
-					}
-				});
-
-			}
-
-            if (tipo.equals(PreventiviDettaglio.MANOPERA)){
-                holder.codice.setBackgroundResource(R.drawable.bg_bottone_grigio_arrotondato);
-                holder.codice.setClickable(true);
-
-                holder.codice.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        // TODO Auto-generated method stub
-                        apriPopupModifica(position,PreventiviDettaglio.NUM_OPERATORI);
-
-                    }
-                });
-            }
-
-
-			holder.prezzo.setOnClickListener(new View.OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					// TODO Auto-generated method stub
-					apriPopupModifica(position, PreventiviDettaglio.PREZZO);
-				}
-			});
-			holder.qta.setOnClickListener(new View.OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					// TODO Auto-generated method stub
-					apriPopupModifica(position, PreventiviDettaglio.QUANTITA);
-				}
-			});
-
-			if (tipo.equals(PreventiviDettaglio.MATERIALE) || tipo.equals(PreventiviDettaglio.PLACCHE)
-					|| tipo.equals(PreventiviDettaglio.COLLEGAMENTI) || fragmnent.isModificheBloccate()) {
-				holder.buttonPiu.setVisibility(View.INVISIBLE);
-				holder.buttonMeno.setVisibility(View.INVISIBLE);
-				// holder.qta.setBackgroundResource(android.R.color.transparent);
-
-			} else {
-				holder.buttonPiu.setVisibility(View.VISIBLE);
-				holder.buttonMeno.setVisibility(View.VISIBLE);
-				// holder.qta.setBackgroundResource(R.drawable.bg_econtab_edit);
-
-				holder.buttonPiu.setOnClickListener(new View.OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						// TODO Auto-generated method stub
-						aggiornaQta(position, 1);
-					}
-				});
-
-				holder.buttonMeno.setOnClickListener(new View.OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						// TODO Auto-generated method stub
-						aggiornaQta(position, -1);
-					}
-				});
-			}
-
-			holder.descrizione.setTag(position);
-
-			holder.qta.setText(Utility.formatNumero(val.getAsFloat(PreventiviDettaglio.QUANTITA)));
-			holder.qta.setTag(position);
-
-			String qtaUdm = val.getAsString(PreventiviDettaglio.UNITA_MISURA);
-			if (qtaUdm != null && qtaUdm.trim().length() > 0) {
-				holder.udm.setText(getString(R.string.qta).toUpperCase(Locale.getDefault()) + " " + qtaUdm.trim());
-			} else {
-				holder.udm.setText(getString(R.string.qta).toUpperCase(Locale.getDefault()));
-			}
-			holder.udm.setTag(position);
-
-			holder.przAcquisto.setText(Utility.formatNumero(val.getAsFloat(PreventiviDettaglio.PREZZO_ACQ), 2));
-			holder.przAcquisto.setTag(position);
-
-			holder.ricarico.setText(Utility.formatNumero(val.getAsFloat(PreventiviDettaglio.RICARICO)));
-			holder.ricarico.setTag(position);
-
-			holder.przListino.setText(Utility.formatNumero(val.getAsFloat(PreventiviDettaglio.PREZZO_VEN), 2));
-			holder.przListino.setTag(position);
-
-			holder.sconto.setText(Utility.formatNumero(val.getAsFloat(PreventiviDettaglio.SCONTO)));
-			holder.sconto.setTag(position);
-
-			holder.prezzo.setText(Utility.formatNumero(val.getAsFloat(PreventiviDettaglio.PREZZO), 2));
-			holder.prezzo.setTag(position);
-
-			float prezzo = val.getAsFloat(PreventiviDettaglio.PREZZO);
-			float przAcq = val.getAsFloat(PreventiviDettaglio.PREZZO_ACQ);
-			if (prezzo < przAcq) {
-				holder.prezzo.setBackgroundColor(Color.parseColor("#ff4444"));
-			} else {
-				holder.prezzo.setBackgroundColor(Color.TRANSPARENT);
-			}
-
-			holder.importo.setText(Utility.formatNumero(tabDett.getImportoRiga(val), 2));
-			holder.importo.setTag(position);
-
-		}
-
-		System.out.println("EConTab: PreventivoDettaglioAdapter personalizzaView EXIT");
-
-		super.personalizzaView(position, viewholder);
 	}
 
     private void _mostraRapportiniRiga(int idOrdine, int idManodopera) {
@@ -475,6 +515,40 @@ _mostraRapportiniRiga(val.getAsInteger(PreventiviDettaglio.ID_PREVENTIVO), val.g
 		});
 	}
 
+	/**
+	 * Cancellazione dal pulsante a fine riga. Vale per tutte le righe, a differenza del menu opzioni
+	 * che non propone "Elimina" per le righe generate dal cantiere (materiale, placche, collegamenti):
+	 * per queste chiede una conferma con un avviso, perche' il ricalcolo del preventivo le puo' rigenerare.
+	 */
+	protected void confermaEliminaRiga(final int position) {
+		if (fragmnent.isModificheBloccate()) {
+			Utility.mostraDialog(getString(R.string.attenzione), getString(R.string.modifiche_non_permesse), context, "OK");
+			return;
+		}
+
+		ContentValues val = (ContentValues) dati.get(position);
+		final int idRiga = val.getAsInteger(PreventiviDettaglio.ID_PREVENTIVO_DETTAGLIO);
+		String tipo = val.getAsString(PreventiviDettaglio.TIPO);
+
+		DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				if (which == DialogInterface.BUTTON_POSITIVE) {
+					cancellaRiga(idRiga, position);
+				}
+			}
+		};
+
+		if (tipo.equals(PreventiviDettaglio.MATERIALE) || tipo.equals(PreventiviDettaglio.PLACCHE)
+				|| tipo.equals(PreventiviDettaglio.COLLEGAMENTI)) {
+			Utility.mostraConfermaDialog(getString(R.string.attenzione), getString(R.string.conferma_cancellazione_riga_derivata), context,
+					getString(R.string.conferma), getString(R.string.annulla), listener);
+		} else {
+			Utility.mostraConfermaCancellazioneDialog(context, listener);
+		}
+	}
+
 	protected void apriPopupModifica(int position, String campo) {
 		// TODO Auto-generated method stub
 		ContentValues val = (ContentValues) dati.get(position);
@@ -490,33 +564,6 @@ _mostraRapportiniRiga(val.getAsInteger(PreventiviDettaglio.ID_PREVENTIVO), val.g
 		PopupAssociazioneCodiceListino popup = new PopupAssociazioneCodiceListino(this, context, val, position);
 		popup.setModificheBloccate(fragmnent.isModificheBloccate());
 		popup.apriPopup();
-	}
-
-	@Override
-	protected View impostaLayout(int position, LayoutInflater infalInflater) {
-		// TODO Auto-generated method stub
-
-		if (getFragmnent().isRigaLocale(position)) {
-			return infalInflater.inflate(R.layout.list_item_locale_preventivo_dettaglio, null);
-		} else {
-			return super.impostaLayout(position, infalInflater);
-		}
-
-	}
-
-	@Override
-	public int getViewTypeCount() {
-		// TODO Auto-generated method stub
-		return 2;
-	}
-
-	@Override
-	public int getItemViewType(int position) {
-		// TODO Auto-generated method stub
-		if (getFragmnent().isRigaLocale(position)) {
-			return 0;
-		}
-		return 1;
 	}
 
 	public void setInModifica(int position) {

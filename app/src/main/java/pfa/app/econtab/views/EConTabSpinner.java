@@ -104,11 +104,16 @@ public class EConTabSpinner extends RelativeLayout implements EConTabSpecialView
 			setTabella(tabella, campoCodice, campoDescrizione);
 		}
 
-		Utility.mostraSelezioneDialog("", voci, getContext(), new DialogInterface.OnClickListener() {
+		// Tabelle gestite dal server (es. unita' di misura): niente "[ + crea nuovo ]", si sceglie solo tra i valori scaricati
+		final int scarto = (tabella != null && !tabella.isCreabileDaApp()) ? 1 : 0;
+		String[] vociMostrate = scarto == 0 ? voci : java.util.Arrays.copyOfRange(voci, scarto, voci.length);
 
-			public void onClick(DialogInterface dialog, int which) {
+		Utility.mostraSelezioneDialog("", vociMostrate, getContext(), new DialogInterface.OnClickListener() {
+
+			public void onClick(DialogInterface dialog, int posizioneScelta) {
+				final int which = posizioneScelta + scarto;
 				// TODO Auto-generated method stub
-				if (which == 0 && tabella != null) {
+				if (which == 0 && tabella != null && tabella.isCreabileDaApp()) {
 					refresh = true;
 					nuovoInserimento = true;
 					Intent intent = new Intent(getContext(), tabella.getDettaglioActivity());

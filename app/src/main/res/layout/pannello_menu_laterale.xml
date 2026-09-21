@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Pannello laterale standard (menu ad albero a sinistra di una maschera con split): sfondo bianco, lista di
+    righe list_item_menu_laterale. Si usa con <include android:id="@+id/sinistra" .../> e si popola con un
+    adapter che estende MenuLateraleAdapter: qui non c'e' nessuna logica specifica di un modulo.
+    La lista e' @+id/lista.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <ListView
+        android:id="@+id/lista"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:divider="@drawable/divider_menu_laterale"
+        android:dividerHeight="1px" />
+
+</FrameLayout>

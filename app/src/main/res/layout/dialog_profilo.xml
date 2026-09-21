@@ -5,6 +5,16 @@
     android:orientation="vertical"
     android:padding="20dp">
 
+    <ImageView
+        android:id="@+id/ivProfiloLogo"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_marginBottom="12dp"
+        android:adjustViewBounds="true"
+        android:contentDescription="Logo ditta"
+        android:scaleType="fitCenter"
+        android:visibility="gone" />
+
     <TextView
         android:id="@+id/tvProfiloUtente"
         android:layout_width="match_parent"

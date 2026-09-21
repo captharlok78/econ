@@ -37,7 +37,6 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity imp
     private int codicecliente;
     private ArrayAdapter<Object> adapter = null;
     private EConTabSpinner spinner_ordini = null;
-    private EConTabSpinner spinner_operatori = null;
 
     private AutoCompleteTextView edit_cliente = null;
     private EConTabCalendario data = null;
@@ -50,20 +49,11 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity imp
         data = (EConTabCalendario) findViewById(R.id.edit_data);
 
         spinner_ordini = (EConTabSpinner) findViewById(R.id.spinner_ordini);
-        spinner_operatori = (EConTabSpinner) findViewById(R.id.spinner_operatori);
         super.onCreate(savedInstanceState);
 
-        if (Sessione.isLicenzaBusiness(this)){
-            findViewById(R.id.textView_operatore).setVisibility(View.VISIBLE);
-            if (getModalita() == INSERIMENTO) {
-                spinner_operatori.setValue(""+Sessione.getIdOperatore(this));
-            }
-            _caricaOperatori();
-            spinner_operatori.setVisibility(View.VISIBLE);
-        }
-        else{
-            findViewById(R.id.textView_operatore).setVisibility(View.GONE);
-            spinner_operatori.setVisibility(View.GONE);
+        // Operatore = utente loggato (etichetta fissa); in modifica resta quello del rapportino (vedi inizializzaModifica)
+        if (getModalita() == INSERIMENTO) {
+            impostaOperatore(Sessione.getIdOperatore(this));
         }
 
         if (getModalita() == INSERIMENTO) {
@@ -72,39 +62,36 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity imp
 
             //prendo l'ultimo rapportino inserito per l'operatore e imposto lo stesso ordine
             Rapportini tabRapp = new Rapportini();
+            Preventivi tabPrev0 = new Preventivi();
             ContentValues lastRapp = tabRapp.getUltimoRapportinoOperatore(dbcl, Sessione.getIdOperatore(this));
+            boolean preselezionato = false;
             if (lastRapp != null) {
                 int idOrdine = lastRapp.getAsInteger(Rapportini.ID_ORDINE);
 
-                Preventivi tabPrev = new Preventivi();
-                ContentValues valCli = tabPrev.getClientePreventivo(dbcl, idOrdine);
-                if (valCli != null) {
-                    codicecliente = valCli.getAsInteger(Anagrafica.ID_ANAGRAFICA);
-                    edit_cliente.setText(valCli.getAsString(Anagrafica.RAGIONE_SOCIALE));
-                    spinner_ordini.setValue("" + idOrdine);
-                    _caricaOrdiniCliente();
+                // stesso ordine dell'ultimo rapportino, ma solo se e' ancora aperto
+                if (tabPrev0.isOrdineAperto(dbcl, idOrdine)) {
+                    ContentValues valCli = tabPrev0.getClientePreventivo(dbcl, idOrdine);
+                    if (valCli != null) {
+                        codicecliente = valCli.getAsInteger(Anagrafica.ID_ANAGRAFICA);
+                        edit_cliente.setText(valCli.getAsString(Anagrafica.RAGIONE_SOCIALE));
+                        spinner_ordini.setValue("" + idOrdine);
+                        _caricaOrdiniCliente();
+                        preselezionato = true;
+                    }
                 }
-            } else {
-                int numCl = dbcl.eseguiCount(new Anagrafica(), new ContentValues());
-                if (numCl == 1) {
-                    ContentValues valCl = dbcl.getRecord(new Anagrafica(), new ContentValues());
+            }
+            if (!preselezionato) {
+                // un solo cliente con ordini aperti: lo propongo gia' selezionato
+                ArrayList<Object> clientiAperti = dbcl.eseguiSelect(Preventivi.getSqlClientiConOrdiniAperti(), null);
+                if (clientiAperti.size() == 1) {
+                    ContentValues valCl = (ContentValues) clientiAperti.get(0);
                     codicecliente = valCl.getAsInteger(Anagrafica.ID_ANAGRAFICA);
-                }
-                dbcl.close();
-
-                if (codicecliente != 0) {
-                    DbInterno db = new DbInterno(this);
-                    ContentValues where = new ContentValues();
-                    where.put(Anagrafica.ID_ANAGRAFICA, codicecliente);
-                    ContentValues val = db.getRecord(new Anagrafica(), where);
-                    db.close();
-                    setText(R.id.editText_cliente, val.getAsString(Anagrafica.RAGIONE_SOCIALE));
+                    setText(R.id.editText_cliente, valCl.getAsString(Anagrafica.RAGIONE_SOCIALE));
                     edit_cliente.setTextColor(Color.BLACK);
                     _caricaOrdiniCliente();
                 }
             }
-
-
+            dbcl.close();
         }
 
         // imposto i listener solo in inserimento e dopo aver chiamato il primo settext
@@ -113,47 +100,29 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity imp
         System.out.println("EConTab: RapportinoDettaglioModActivity onCreate EXIT");
     }
 
-    private void _caricaOperatori() {
-        System.out.println("EConTab: RapportinoDettaglioModActivity _caricaOperatori ENTER");
-        ArrayList<Object> valoriSpinner = new ArrayList<Object>();
-        ContentValues valOp = new ContentValues();
-        valOp.put(EConTabSpinner.VALORE, "" + Sessione.getIdOperatore(this));
-
-        valoriSpinner.add(valOp);
-
-        DbInterno db = new DbInterno(this);
-        ArrayList<Object> utenti = db.eseguiSelect(new Utenti(),new ContentValues(),new String[]{Utenti.NOME,Utenti.COGNOME},true);
-
-        for (int i = 0; i < utenti.size(); i++) {
-            ContentValues utente = (ContentValues) utenti.get(i);
-
-            if (utente.getAsInteger(Utenti.ID_UTENTE)!=Sessione.getIdOperatore(this)){
-                ContentValues valCurr = new ContentValues();
-                valCurr.put(EConTabSpinner.VALORE, "" + utente.getAsInteger(Utenti.ID_UTENTE));
-                String nomeOperatore = utente.getAsString(Utenti.NOME) + " " + utente.getAsString(Utenti.COGNOME);
-                valCurr.put(EConTabSpinner.DESCRIZIONE, nomeOperatore);
-
-                valoriSpinner.add(valCurr);
-            }
-            else{
-                ((ContentValues)valoriSpinner.get(0)).put(EConTabSpinner.DESCRIZIONE,utente.getAsString(Utenti.NOME) + " " + utente.getAsString(Utenti.COGNOME));
-
-            }
-
+    /** Mostra il nome dell'operatore nell'etichetta fissa (l'utente loggato, o l'autore del rapportino in modifica). */
+    private void impostaOperatore(int idOperatore) {
+        String nome = null;
+        if (idOperatore == Sessione.getIdOperatore(this)) {
+            nome = Sessione.getNomeOperatore();
         }
-
-        spinner_operatori.setValoriSpinnerLibero(valoriSpinner);
-
-        db.close();
-        System.out.println("EConTab: RapportinoDettaglioModActivity _caricaOperatori EXIT");
+        if (nome == null || nome.trim().isEmpty()) {
+            DbInterno db = new DbInterno(this);
+            ContentValues where = new ContentValues();
+            where.put(Utenti.ID_UTENTE, idOperatore);
+            ContentValues ut = db.getRecord(new Utenti(), where);
+            db.close();
+            nome = ut != null ? ut.getAsString(Utenti.NOME) + " " + ut.getAsString(Utenti.COGNOME) : "";
+        }
+        ((TextView) findViewById(R.id.text_operatore)).setText(nome.trim());
     }
-
 
     @Override
     protected void onResume() {
         System.out.println("EConTab: RapportinoDettaglioModActivity onResume ENTER");
         super.onResume();
-        adapter = Utility.getArrayAdapterTabella(this, "Select * from " + Anagrafica.NOME_TABELLA, Anagrafica.RAGIONE_SOCIALE);
+        // solo i clienti della ditta con ordini aperti
+        adapter = Utility.getArrayAdapterTabella(this, Preventivi.getSqlClientiConOrdiniAperti(), Anagrafica.RAGIONE_SOCIALE);
         edit_cliente.setAdapter(adapter);
         System.out.println("EConTab: RapportinoDettaglioModActivity onResume EXIT");
     }
@@ -173,11 +142,7 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity imp
             data.setValue("" + val.getAsLong(Rapportini.DATA_RAPPORTINO));
             setText(R.id.editText_note, val.getAsString(Rapportini.NOTE));
             int idOrdine = val.getAsInteger(Rapportini.ID_ORDINE);
-            if (Sessione.isLicenzaBusiness(this)){
-                int idOperatoreRapp = val.getAsInteger(Rapportini.ID_OPERATORE);
-                spinner_operatori.setValue(""+idOperatoreRapp);
-                _caricaOperatori();
-            }
+            impostaOperatore(val.getAsInteger(Rapportini.ID_OPERATORE));
 
             Preventivi tabPrev = new Preventivi();
             ContentValues valCli = tabPrev.getClientePreventivo(db, idOrdine);
@@ -209,14 +174,7 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity imp
         val.put(Rapportini.DATA_RAPPORTINO, Long.parseLong(data.getValue()));
         val.put(Rapportini.ID_ORDINE, getTesto(R.id.spinner_ordini));
         val.put(Rapportini.NOTE, getTesto(R.id.editText_note));
-        if (Sessione.isLicenzaBusiness(this)){
-            val.put(Rapportini.ID_OPERATORE, getTesto(R.id.spinner_operatori));
-        }
-        else{
-            val.put(Rapportini.ID_OPERATORE, Sessione.getIdOperatore(this));
-        }
-
-
+        val.put(Rapportini.ID_OPERATORE, Sessione.getIdOperatore(this));
 
         tabella.inserisciRecord(db, val);
         getIntent().putExtra("ID",val.getAsInteger(Rapportini.ID_RAPPORTINO));
@@ -239,13 +197,7 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity imp
         val.put(Rapportini.DATA_RAPPORTINO, Long.parseLong(data.getValue()));
         val.put(Rapportini.ID_ORDINE, getTesto(R.id.spinner_ordini));
         val.put(Rapportini.NOTE, getTesto(R.id.editText_note));
-        if (Sessione.isLicenzaBusiness(this)){
-            val.put(Rapportini.ID_OPERATORE, getTesto(R.id.spinner_operatori));
-        }
-        else{
-            val.put(Rapportini.ID_OPERATORE, Sessione.getIdOperatore(this));
-        }
-
+        // l'operatore non si modifica: resta quello che ha aperto il rapportino
 
         ContentValues where = new ContentValues();
         where.put(Rapportini.ID_RAPPORTINO, getIDModifica());
@@ -300,7 +252,11 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity imp
         System.out.println("EConTab: RapportinoDettaglioModActivity _caricaOrdiniCliente ENTER");
         DbInterno db = new DbInterno(this);
         Preventivi tabPrev = new Preventivi();
-        ArrayList<Object> ordini = tabPrev.getOrdiniCliente(db, codicecliente);
+        int ordineCorrente = 0;
+        if (getModalita() != INSERIMENTO && !spinner_ordini.getValue().equals("")) {
+            ordineCorrente = Integer.parseInt(spinner_ordini.getValue());
+        }
+        ArrayList<Object> ordini = tabPrev.getOrdiniCliente(db, codicecliente, true, ordineCorrente);
         ArrayList<Object> valoriSpinner = new ArrayList<Object>();
         for (int i = 0; i < ordini.size(); i++) {
             ContentValues ordine = (ContentValues) ordini.get(i);
@@ -359,7 +315,9 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity imp
 
 
             ((TextView)dett.findViewById(R.id.tipo_manodopera)).setText(curr.getAsString(Manodopera.NOME));
-            ((TextView)dett.findViewById(R.id.ore)).setText(getString(R.string.ore)+": "+Utility.formatNumero(curr.getAsDouble(RapportiniDettaglio.ORE)));
+            ((TextView)dett.findViewById(R.id.ore)).setText(getString(R.string.ore)+": "+Utility.formatNumero(curr.getAsDouble(RapportiniDettaglio.ORE))
+                    + (curr.getAsString(RapportiniDettaglio.UNITA_MISURA) != null && !curr.getAsString(RapportiniDettaglio.UNITA_MISURA).trim().isEmpty()
+                        ? " " + curr.getAsString(RapportiniDettaglio.UNITA_MISURA).trim() : ""));
             ((TextView)dett.findViewById(R.id.nota)).setText(curr.getAsString(RapportiniDettaglio.NOTE));
 
             dett.setTag(curr.getAsInteger(RapportiniDettaglio.ID_RAPPORTINO_DETTAGLIO));

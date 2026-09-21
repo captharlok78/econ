@@ -140,6 +140,7 @@
     <string name="cerca">Cerca</string>
     <string name="reset_filtri">Reset filtri</string>
     <string name="ultimi_gestiti">Ultimi 20</string>
+    <string name="nessun_ordine_aperto_rapportino">Non ci sono ordini aperti per la tua ditta: non puoi aprire nessun rapportino.</string>
     <string name="nessun_dato_trovato">Nessun dato trovato</string>
     <string name="cerca_cliente">Cerca per ragione sociale o indirizzo</string>
     <string name="cerca_cliente_2">Cerca per cliente</string>
@@ -169,6 +170,7 @@
     <string name="conferma">Conferma</string>
     <string name="conferma_aggiunta_elemento">Conferma aggiunta elemento</string>
     <string name="conferma_cancellazione">Conferma eliminazione?</string>
+    <string name="conferma_cancellazione_riga_derivata">Questa riga è generata dagli elementi del cantiere: se la elimini potrebbe ricomparire al prossimo ricalcolo del preventivo. Eliminarla comunque?</string>
     <string name="conferma_disconnessione">Conferma disconnessione?</string>
     <string name="conferma_ricalcolo_preventivo_ordine">Vuoi ricalcolare il dettaglio del preventivo/ordine partendo dagli elementi posizionati nelle varie aree?</string>
     <string name="conferma_ripristino_db">Sovrascrivere i dati correnti con quelli del file selezionato?</string>
@@ -313,6 +315,7 @@
     <string name="prezzo_listino">Prz. lis. €</string>
     <string name="proporzioni">Proporzioni</string>
     <string name="punti_di_comando">Punti di comando</string>
+    <string name="um_breve">UM</string>
     <string name="qta">Qtà</string>
     <string name="qta_cavo">Qtà cavo</string>
     <string name="quantita">Quantità</string>

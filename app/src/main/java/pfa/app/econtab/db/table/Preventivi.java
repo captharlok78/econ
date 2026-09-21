@@ -479,19 +479,53 @@ public class Preventivi extends AbstractTable {
 		return 2;
 	}
 
-    public ArrayList<Object> getOrdiniCliente(DbInterno db, int codicecliente) {
+    /**
+     * SQL dei clienti della ditta selezionata che hanno almeno un ordine APERTO: sono i soli per cui si puo'
+     * aprire un rapportino.
+     */
+    public static String getSqlClientiConOrdiniAperti() {
+        return "Select distinct " + Anagrafica.NOME_TABELLA + ".* from " + Anagrafica.NOME_TABELLA
+                + " inner join " + Cantieri.NOME_TABELLA + " on " + Cantieri.NOME_TABELLA + "." + Cantieri.ID_ANAGRAFICA
+                + "=" + Anagrafica.NOME_TABELLA + "." + Anagrafica.ID_ANAGRAFICA
+                + " inner join " + NOME_TABELLA + " on " + NOME_TABELLA + "." + ID_CANTIERE + "=" + Cantieri.NOME_TABELLA + "." + Cantieri.ID_CANTIERE
+                + " where " + NOME_TABELLA + "." + TIPO + "='" + TIPO_ORDINE + "' and " + NOME_TABELLA + "." + STATO + "='" + STATO_APERTO + "'"
+                + " and " + Cantieri.NOME_TABELLA + "." + Cantieri.ID_DITTA + "=" + Sessione.getDittaSelezionata()
+                + " order by " + Anagrafica.NOME_TABELLA + "." + Anagrafica.RAGIONE_SOCIALE;
+    }
+
+    /** True se nella ditta selezionata c'e' almeno un ordine aperto. */
+    public boolean esistonoOrdiniAperti(DbInterno db) {
+        return !db.eseguiSelect(getSqlClientiConOrdiniAperti(), null).isEmpty();
+    }
+
+    /** True se l'ordine esiste, e' un ordine ed e' aperto. */
+    public boolean isOrdineAperto(DbInterno db, int idOrdine) {
+        ContentValues where = new ContentValues();
+        where.put(ID_PREVENTIVO, idOrdine);
+        ContentValues rec = db.getRecord(this, where);
+        return rec != null && TIPO_ORDINE.equals(rec.getAsString(TIPO)) && STATO_APERTO.equals(rec.getAsString(STATO));
+    }
+
+    /**
+     * Ordini del cliente nella ditta selezionata. Con soloAperti restano i soli ordini aperti; idOrdineSempreIncluso
+     * (0 = nessuno) resta in elenco anche se non piu' aperto, per non perdere l'ordine di un rapportino gia' esistente.
+     */
+    public ArrayList<Object> getOrdiniCliente(DbInterno db, int codicecliente, boolean soloAperti, int idOrdineSempreIncluso) {
         Join j1 = new Join(NOME_TABELLA, Cantieri.NOME_TABELLA);
         j1.addCampiDiJoin(ID_CANTIERE, Cantieri.ID_CANTIERE);
 
         Join j2 = new Join(Cantieri.NOME_TABELLA, Anagrafica.NOME_TABELLA);
         j2.addCampiDiJoin(Cantieri.ID_ANAGRAFICA, Anagrafica.ID_ANAGRAFICA);
 
-        Anagrafica tabCliente = new Anagrafica();
+        String filtroStato = "";
+        if (soloAperti) {
+            filtroStato = " and (" + NOME_TABELLA + "." + STATO + "='" + STATO_APERTO + "'"
+                    + (idOrdineSempreIncluso > 0 ? " or " + NOME_TABELLA + "." + ID_PREVENTIVO + "=" + idOrdineSempreIncluso : "") + ")";
+        }
         String SQL = "Select " + NOME_TABELLA+".*," + Cantieri.NOME +" as nome_cantiere from " + NOME_TABELLA + j1.getSQLJoin() + j2.getSQLJoin()
-                + " where " + Anagrafica.NOME_TABELLA+"."+Anagrafica.ID_ANAGRAFICA + " = " + codicecliente + " and "+TIPO+"='"+TIPO_ORDINE+"' and "+Cantieri.ID_DITTA+"="+ Sessione.getDittaSelezionata()+" order by " + DATA + " desc";
-        ArrayList<Object> recs = db.eseguiSelect(SQL, null);
-
-       return recs;
+                + " where " + Anagrafica.NOME_TABELLA+"."+Anagrafica.ID_ANAGRAFICA + " = " + codicecliente + " and "+TIPO+"='"+TIPO_ORDINE+"' and "+Cantieri.ID_DITTA+"="+ Sessione.getDittaSelezionata()
+                + filtroStato + " order by " + DATA + " desc";
+        return db.eseguiSelect(SQL, null);
     }
 
 	/**

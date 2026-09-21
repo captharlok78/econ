@@ -112,6 +112,8 @@ public class ConfigurazioneActivity extends EConTabActivity implements OnChildCl
 				// TODO Auto-generated method stub
 				setText(R.id.nomeCategoria, sezioni.get(groupPosition), convertView);
 				Button buttonNuovo = (Button) convertView.findViewById(R.id.buttonNuovo);
+				// le unita' di misura arrivano dal server: nessuna creazione dall'app
+				buttonNuovo.setVisibility(groupPosition == 2 ? View.GONE : View.VISIBLE);
 
 				buttonNuovo.setOnClickListener(new View.OnClickListener() {
 
@@ -125,10 +127,6 @@ public class ConfigurazioneActivity extends EConTabActivity implements OnChildCl
 						if (groupPosition == 1) {
 							Intent intent = new Intent(ConfigurazioneActivity.this, IvaDettaglioActivity.class);
 							apriFinestraInserimento(intent, 1, new Iva());
-						}
-						if (groupPosition == 2) {
-							Intent intent = new Intent(ConfigurazioneActivity.this, UnitaMisuraDettaglioActivity.class);
-							apriFinestraInserimento(intent, 1, new UnitaMisura());
 						}
 						if (groupPosition == 3) {
 							Intent intent = new Intent(ConfigurazioneActivity.this, ManodoperaDettaglioActivity.class);
@@ -290,10 +288,8 @@ public class ConfigurazioneActivity extends EConTabActivity implements OnChildCl
 			}
 
 			if (group == 2) {
-				menu.setHeaderTitle(val.getAsString(UnitaMisura.UNITA_MISURA));
-				menu.add(Menu.NONE, 1, Menu.NONE, getString(R.string.modifica));
-				menu.add(Menu.NONE, 2, Menu.NONE, getString(R.string.elimina));
-
+				// unita' di misura gestite dal server: solo consultazione
+				menu.setHeaderTitle(val.getAsString(UnitaMisura.UNITA_MISURA) + " - " + val.getAsString(UnitaMisura.NOME));
 			}
 
 			if (group == 3) {
@@ -337,18 +333,6 @@ public class ConfigurazioneActivity extends EConTabActivity implements OnChildCl
 				}
 				if (item.getItemId() == 2) {
 					confermaCancellazione(new Iva(), val, true);
-				}
-
-			}
-
-			if (group == 2) {
-				if (item.getItemId() == 1) {
-					Intent intent = new Intent(ConfigurazioneActivity.this, UnitaMisuraDettaglioActivity.class);
-					intent.putExtra("ID", val.getAsString(UnitaMisura.UNITA_MISURA));
-					apriFinestraModifica(intent, 1);
-				}
-				if (item.getItemId() == 2) {
-					confermaCancellazione(new UnitaMisura(), val, true);
 				}
 
 			}

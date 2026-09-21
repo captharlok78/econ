@@ -5,19 +5,13 @@
     android:layout_height="fill_parent"
     tools:context=".CantiereSplitActivity" >
 
-    <TextView
-        android:id="@+id/textView_titolo_cantiere"
+    <!-- Testata standard (blu, indietro | titolo), uguale alle altre maschere. Il titolo e' headerTitolo. -->
+    <include
+        android:id="@+id/header"
+        layout="@layout/header_dettaglio_standard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:background="#cceeeded"
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
-        android:singleLine="true"
-        android:ellipsize="end"
-        style="@style/Titolo" />
+        android:layout_alignParentTop="true" />
 
     <pfa.app.econtab.views.EConTabSplitPaneLayout
         xmlns:spl="http://schemas.android.com/apk/res-auto"
@@ -36,20 +30,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
         </FrameLayout>
-        <FrameLayout
+        <!-- Menu laterale: pannello standard (bianco, riga selezionata azzurra/grassetto) -->
+        <include
             android:id="@+id/sinistra"
+            layout="@layout/pannello_menu_laterale"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#ee5b5b5b" >
-
-            <ListView
-                android:id="@+id/lista"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:divider="@drawable/divider_light" >
-            </ListView>
-        </FrameLayout>
+            android:layout_height="wrap_content" />
 
     </pfa.app.econtab.views.EConTabSplitPaneLayout>
 
@@ -58,7 +44,7 @@
         android:id="@+id/nuovo_figlio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/footerview"
+        android:layout_alignParentBottom="true"
         android:background="#cceeeded"
         android:clickable="true"
         android:gravity="center_horizontal"
@@ -77,7 +63,7 @@
                 android:layout_marginRight="@dimen/margine"
                 android:clickable="false"
                 android:contentDescription="+"
-                android:src="@drawable/nuovo" />
+                android:src="@drawable/ic_azione_nuovo" />
 
             <TextView
                 android:id="@+id/nuovo_elemento"
@@ -133,30 +119,39 @@
         android:layout_alignParentBottom="true"
         layout="@layout/footer" />
 
+    <!-- Preventivo attivo: card chiara come i filtri delle liste, testo allineato a sinistra -->
     <RelativeLayout
         android:id="@+id/preventivo_attivo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textView_titolo_cantiere"
-        android:background="@drawable/bg_bottone_grigio_semitrasparente"
-        android:padding="4dp" >
+        android:layout_below="@+id/header"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="6dp"
+        android:background="@drawable/bg_card_filtri"
+        android:paddingStart="6dp"
+        android:paddingEnd="2dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp" >
 
         <LinearLayout
             android:id="@+id/linear_preventivo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/button_cambiapreventivo"
+            android:gravity="center_vertical"
             android:orientation="horizontal" >
 
-            <ImageView
+            <!-- Icona Font Awesome nel colore di default (impostata in CantiereSplitActivity con FaIcone) -->
+            <TextView
                 android:id="@+id/imageView1"
                 android:layout_width="@dimen/altezza_campo"
                 android:layout_height="@dimen/altezza_campo"
-               
-                android:layout_margin="@dimen/bordo_piantina"
-                android:scaleType="fitXY"
-                android:src="@drawable/ordini_preventivi_small" />
+                android:layout_marginEnd="6dp"
+                android:gravity="center" />
 
             <TextView
                 android:id="@+id/textView_preventivo"
@@ -164,21 +159,25 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:singleLine="true"
-               
+                android:ellipsize="end"
                 android:textAllCaps="true"
+                android:textStyle="bold"
                 android:text="@string/preventivo_num_del"
-                android:textColor="@android:color/white" />
+                android:textColor="#212121" />
         </LinearLayout>
 
         <ImageButton
             android:id="@+id/button_cambiapreventivo"
-            android:layout_width="@dimen/altezza_campo"
-            android:layout_height="@dimen/altezza_campo"
-            android:layout_alignParentRight="true"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:background="@drawable/bg_bottone_grigio_arrotondato"
-            android:scaleType="fitXY"
-            android:src="@drawable/freccia_giu" />
+            android:background="?android:attr/selectableItemBackground"
+            android:contentDescription="@string/preventivi"
+            android:padding="10dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/freccia_giu"
+            android:tint="#757575" />
     </RelativeLayout>
 
 </RelativeLayout>

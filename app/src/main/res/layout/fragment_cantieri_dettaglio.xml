@@ -49,10 +49,10 @@
                     style="@style/bottoneListaGrande"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:background="@drawable/bg_bottone_rotondo"
+                    android:background="?android:attr/selectableItemBackground"
                     android:onClick="modifica"
                     android:scaleType="fitXY"
-                    android:src="@drawable/modifica" />
+                    android:src="@drawable/ic_azione_modifica" />
             </RelativeLayout>
 
             <LinearLayout

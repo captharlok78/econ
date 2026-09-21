@@ -12,4 +12,5 @@
     <item name="buttonSync"         type="id" />
     <item name="menu_9"             type="id" />
     <item name="testoSincronizza"   type="id" />
+    <item name="tag_celle_dettaglio" type="id" />
 </resources>

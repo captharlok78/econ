@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,7 +27,9 @@ import pfa.app.econtab.api.MercuryApiService;
 import pfa.app.econtab.api.TokenManager;
 import pfa.app.econtab.server.ConfigurazioneGenActivity;
 import pfa.app.econtab.utils.AsyncTaskExecutorService;
+import pfa.app.econtab.db.DbInterno;
 import pfa.app.econtab.utils.Sessione;
+import pfa.app.econtab.utils.SyncUtil;
 import pfa.app.econtab.utils.Utility;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -94,6 +97,29 @@ public class MenuActivity extends EConTabActivity {
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
+    /**
+     * Ripara i dati scaricati da versioni precedenti del server: date in testo ("yyyy-MM-dd HH:mm:ss" invece
+     * di yyyyMMddHHmmss) e valori NULL (l'app vuole '' o 0). In entrambi i casi l'app andava in crash.
+     * Idempotente e veloce.
+     */
+    private void riparaDateLocali() {
+        try {
+            DbInterno db = new DbInterno(this);
+            try {
+                android.database.sqlite.SQLiteDatabase sqlite = db.getWritableDatabase();
+                SyncUtil.normalizzaNulliLocali(sqlite);
+                int tabelle = SyncUtil.normalizzaDateLocali(sqlite);
+                if (tabelle > 0) {
+                    System.out.println("EConTab: MenuActivity riparate date testuali in " + tabelle + " tabelle");
+                }
+            } finally {
+                db.close();
+            }
+        } catch (Exception e) {
+            System.out.println("EConTab: MenuActivity riparaDateLocali errore: " + e.getMessage());
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         System.out.println("EConTab: MenuActivity onCreate ENTER");
@@ -101,6 +127,7 @@ public class MenuActivity extends EConTabActivity {
         setContentView(R.layout.activity_menu);
 
         costruisciGriglia();
+        riparaDateLocali();
 
         SharedPreferences pref = getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE);
         if (!pref.contains("PERINIZIARE") && pref.contains("ECONTAB_REG")) {
@@ -378,9 +405,18 @@ public class MenuActivity extends EConTabActivity {
         TextView tvDitta     = contenuto.findViewById(R.id.tvProfiloDitta);
         TextView tvVersioni  = contenuto.findViewById(R.id.tvProfiloVersioni);
         TextView tvLicenza   = contenuto.findViewById(R.id.tvProfiloLicenza);
+        ImageView ivLogo     = contenuto.findViewById(R.id.ivProfiloLogo);
+
+        // Logo e dati ditta arrivano dal sync di download e sono in locale: il modale li mostra anche offline
+        android.graphics.Bitmap logo = pfa.app.econtab.utils.DittaLocale.getLogo(this);
+        if (logo != null) {
+            ivLogo.setImageBitmap(logo);
+            ivLogo.setVisibility(View.VISIBLE);
+        }
+        final MercuryApiService.DittaDati dittaLocale = pfa.app.econtab.utils.DittaLocale.getDati(this);
 
         tvUtente.setText("Caricamento...");
-        tvDitta.setText("");
+        tvDitta.setText(dittaLocale != null ? "Ditta: " + dittaLocale.ragioneSociale + dettagliDitta(dittaLocale) : "");
         tvVersioni.setText("Versioni: verifica in corso...");
         tvLicenza.setText("Verifica in corso...");
 
@@ -405,7 +441,7 @@ public class MenuActivity extends EConTabActivity {
                 MercuryApiService.ProfiloResponse p = response.body();
                 String nomeCompleto = ((p.nome == null ? "" : p.nome) + " " + (p.cognome == null ? "" : p.cognome)).trim();
                 tvUtente.setText(nomeCompleto.isEmpty() ? p.email : nomeCompleto + "\n" + p.email);
-                tvDitta.setText(p.ditta != null ? "Ditta: " + p.ditta.nome : "Nessuna ditta");
+                tvDitta.setText(p.ditta != null ? "Ditta: " + p.ditta.nome + dettagliDitta(dittaLocale) : "Nessuna ditta");
                 tvLicenza.setText(formattaLicenza(p.licenza));
             }
 
@@ -458,6 +494,19 @@ public class MenuActivity extends EConTabActivity {
                 // resta "n.d."
             }
         });
+    }
+
+    /** Indirizzo e dati fiscali della ditta (da sync locale), a capo dopo il nome; vuoto se non ancora scaricati. */
+    private String dettagliDitta(MercuryApiService.DittaDati d) {
+        if (d == null) return "";
+        StringBuilder sb = new StringBuilder();
+        String localita = ((d.cap == null ? "" : d.cap + " ") + (d.citta == null ? "" : d.citta)
+                + (d.provincia == null || d.provincia.isEmpty() ? "" : " (" + d.provincia + ")")).trim();
+        if (d.indirizzo != null && !d.indirizzo.isEmpty()) sb.append("\n").append(d.indirizzo);
+        if (!localita.isEmpty()) sb.append("\n").append(localita);
+        if (d.partitaIva != null && !d.partitaIva.isEmpty()) sb.append("\nP.IVA ").append(d.partitaIva);
+        if (d.codiceFiscale != null && !d.codiceFiscale.isEmpty()) sb.append("\nC.F. ").append(d.codiceFiscale);
+        return sb.toString();
     }
 
     private String formattaLicenza(MercuryApiService.LicenzaProfilo licenza) {

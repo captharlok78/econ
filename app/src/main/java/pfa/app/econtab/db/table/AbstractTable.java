@@ -340,6 +340,11 @@ public abstract class AbstractTable {
 		return null;
 	}
 
+	/** False per le tabelle gestite dal server e solo scaricate (es. unita' di misura): l'app non puo' crearne record. */
+	public boolean isCreabileDaApp() {
+		return true;
+	}
+
 	/**
 	 * Ritorna la query personalizzata per i record da mostrare negli spinner di EConTab
 	 * 

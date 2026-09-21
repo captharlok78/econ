@@ -219,6 +219,7 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 		}
 
 		lista = (ListView) findViewById(R.id.lista);
+		pfa.app.econtab.utils.FaIcone.applica((TextView) findViewById(R.id.imageView1), pfa.app.econtab.utils.FaIcone.PREVENTIVO, null);
 		lista.setOnItemClickListener(this);
 		registerForContextMenu(lista);
 		split = (EConTabSplitPaneLayout) findViewById(R.id.split);
@@ -244,6 +245,14 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 		Sessione.setIdPreventivoSelezionato(idPreventivoSelezionato);
 
 		System.out.println("EConTab: CantiereSplitActivity onCreate EXIT");
+	}
+
+	/** Scrive il titolo del cantiere nella testata standard (headerTitolo). */
+	private void impostaTitoloCantiere() {
+		TextView tvTitolo = (TextView) findViewById(R.id.headerTitolo);
+		if (tvTitolo != null) {
+			tvTitolo.setText(titoloCantiere.trim());
+		}
 	}
 
 	private void creaMenu() {
@@ -285,8 +294,7 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 		while (titoloCantiere.length()<50){
 			titoloCantiere = titoloCantiere+" ";
 		}
-		android.widget.TextView tvTitolo = (android.widget.TextView) findViewById(R.id.textView_titolo_cantiere);
-		if (tvTitolo != null) tvTitolo.setText(titoloCantiere.trim());
+			impostaTitoloCantiere();
 		val.put("NOME", recCantiere.getAsString(Cantieri.NOME));
 		val.put("ID", cantiere);
 		dati.add(val);
@@ -329,7 +337,7 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 		}
 
 		if (adapter == null) {
-			adapter = new CantiereMenuAdapter(this, dati, R.layout.list_item_menucantiere);
+			adapter = new CantiereMenuAdapter(this, dati);
 			lista.setAdapter(adapter);
 			lista.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
 			registerForContextMenu(lista);
@@ -599,12 +607,12 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 			params.putInt(Preventivi.ID_PREVENTIVO, idPreventivoSelezionato);
 			fragmentPagerPreventivo.setArguments(params);
 			impostaFragment(R.id.destra, fragmentPagerPreventivo);
-			android.widget.TextView tvTitolo = (android.widget.TextView) findViewById(R.id.textView_titolo_cantiere);
-		if (tvTitolo != null) tvTitolo.setText(titoloCantiere.trim());
+			impostaTitoloCantiere();
 
+			// Il dettaglio del preventivo occupa tutta la larghezza, come le altre maschere: il menu del
+			// cantiere si riapre con la freccia sul divisore.
 			if (getSplitterPositionPercent() > 0.2f) {
-
-				//split.collapse();
+				split.collapse();
 			}
 
 		}
@@ -616,8 +624,7 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 			impostaFragment(R.id.destra, fragmentPagerCantiere);
 			setText(R.id.nuovo_elemento, getResources().getString(R.string.nuova_unita));
 
-			android.widget.TextView tvTitolo = (android.widget.TextView) findViewById(R.id.textView_titolo_cantiere);
-		if (tvTitolo != null) tvTitolo.setText(titoloCantiere.trim());
+			impostaTitoloCantiere();
 
 		}
 		if (tipoElementoSelezionato == UNITA) {
@@ -629,8 +636,7 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 			impostaFragment(R.id.destra, fragmentPagerUnita);
 			setText(R.id.nuovo_elemento, getResources().getString(R.string.nuova_area));
 
-			android.widget.TextView tvTitolo = (android.widget.TextView) findViewById(R.id.textView_titolo_cantiere);
-		if (tvTitolo != null) tvTitolo.setText(titoloCantiere.trim());
+			impostaTitoloCantiere();
 		}
 		if (tipoElementoSelezionato == AREA) {
 			System.out.println("EConTab: CantiereSplitActivity onItemClick AREA");
@@ -641,8 +647,7 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 			impostaFragment(R.id.destra, fragmentPagerArea);
 			setText(R.id.nuovo_elemento, getResources().getString(R.string.nuovo_locale));
 
-			android.widget.TextView tvTitolo = (android.widget.TextView) findViewById(R.id.textView_titolo_cantiere);
-		if (tvTitolo != null) tvTitolo.setText(titoloCantiere.trim());
+			impostaTitoloCantiere();
 		}
 
 		if (tipoElementoSelezionato == LOCALE) {

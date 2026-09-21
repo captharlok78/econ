@@ -23,6 +23,7 @@ import pfa.app.econtab.adapters.EConTabListViewAdapter;
 import pfa.app.econtab.adapters.RapportiniAdapter;
 import pfa.app.econtab.db.table.Anagrafica;
 import pfa.app.econtab.db.table.Cantieri;
+import pfa.app.econtab.db.DbInterno;
 import pfa.app.econtab.db.table.Preventivi;
 import pfa.app.econtab.db.table.Rapportini;
 import pfa.app.econtab.db.table.RapportiniDettaglio;
@@ -254,6 +255,15 @@ public class RapportiniActivity extends EConTabListaStandardActivity {
 
         @Override
         public void onNuovoClick(EConTabListaStandardController.Host host) {
+            // Un rapportino si apre su un ordine aperto: senza, non si puo' aprirne nessuno
+            DbInterno db = new DbInterno(host.getContext());
+            boolean ordiniAperti = new Preventivi().esistonoOrdiniAperti(db);
+            db.close();
+            if (!ordiniAperti) {
+                Utility.mostraDialog(host.getContext().getString(R.string.attenzione),
+                        host.getContext().getString(R.string.nessun_ordine_aperto_rapportino), host.getContext(), "OK");
+                return;
+            }
             Intent intent = new Intent(host.getContext(), RapportinoDettaglioModActivity.class);
             ((EConTabActivity) host.getContext()).apriFinestraInserimento(intent, 1, new Rapportini());
         }
