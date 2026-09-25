@@ -27,6 +27,8 @@ public class AuthInterceptor implements Interceptor {
         if (token != null) {
             builder.header("Authorization", "Bearer " + token);
         }
+        // Il server invia le tabelle nuove (es. operatori delle righe dei rapportini) solo agli schemi che le hanno
+        builder.header("X-App-Schema", String.valueOf(pfa.app.econtab.db.DbInterno.SCHEMA_VERSION));
         builder.header("Accept", "application/json");
         builder.header("Content-Type", "application/json");
 

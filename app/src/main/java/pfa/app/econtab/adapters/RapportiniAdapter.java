@@ -1,6 +1,5 @@
 package pfa.app.econtab.adapters;
 
-import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,12 +13,9 @@ import java.util.ArrayList;
 
 import pfa.app.econtab.R;
 import pfa.app.econtab.RapportiniActivity;
-import pfa.app.econtab.db.DbInterno;
 import pfa.app.econtab.db.table.Anagrafica;
 import pfa.app.econtab.db.table.Preventivi;
 import pfa.app.econtab.db.table.Rapportini;
-import pfa.app.econtab.db.table.RapportiniDettaglio;
-import pfa.app.econtab.db.table.Utenti;
 import pfa.app.econtab.utils.Sessione;
 import pfa.app.econtab.utils.Utility;
 
@@ -55,10 +51,10 @@ public class RapportiniAdapter extends EConTabListViewAdapter  {
         ((RapportiniViewHolder) viewholder).data_rapportino.setTag(position);
 
         if (val.getAsDouble("tot_ore") != null) {
-            ((RapportiniViewHolder) viewholder).ore.setText(getString(R.string.ore) + ": " + Utility.formatNumero(val.getAsDouble("tot_ore")));
+            ((RapportiniViewHolder) viewholder).ore.setText(getString(R.string.ore_uomo) + ": " + Utility.formatNumero(val.getAsDouble("tot_ore")));
 
         } else {
-            ((RapportiniViewHolder) viewholder).ore.setText(getString(R.string.ore) + ": 0");
+            ((RapportiniViewHolder) viewholder).ore.setText(getString(R.string.ore_uomo) + ": 0");
         }
         ((RapportiniViewHolder) viewholder).ore.setTag(position);
 
@@ -66,10 +62,13 @@ public class RapportiniAdapter extends EConTabListViewAdapter  {
         ((RapportiniViewHolder) viewholder).ragione_sociale.setText(val.getAsString(Anagrafica.RAGIONE_SOCIALE));
         ((RapportiniViewHolder) viewholder).ragione_sociale.setTag(position);
 
-        String nomeCantiere = val.getAsString("nome_cantiere");
-        String testoOrdine = context.getResources().getString(R.string.ordine_num_del, val.getAsString(Preventivi.NUMERO), Utility.numberToDataShort(val.getAsLong("data_ordine")));
-        testoOrdine = testoOrdine + " - " + val.getAsString(Preventivi.TITOLO);
-        testoOrdine = testoOrdine + " (" + nomeCantiere + ")";
+        // cantiere e ordine facoltativi (il rapportino puo' essere solo per il cliente)
+        String nomeCantiere = val.getAsString("nome_cantiere") != null ? val.getAsString("nome_cantiere") : "";
+        String testoOrdine = nomeCantiere;
+        if (val.getAsString(Preventivi.NUMERO) != null && val.getAsLong("data_ordine") != null) {
+            testoOrdine = context.getResources().getString(R.string.ordine_num_del, val.getAsString(Preventivi.NUMERO), Utility.numberToDataShort(val.getAsLong("data_ordine")))
+                    + " - " + val.getAsString(Preventivi.TITOLO) + (nomeCantiere.isEmpty() ? "" : " (" + nomeCantiere + ")");
+        }
         ((RapportiniViewHolder) viewholder).ordine.setText(testoOrdine);
         ((RapportiniViewHolder) viewholder).ordine.setTag(position);
 
@@ -80,13 +79,13 @@ public class RapportiniAdapter extends EConTabListViewAdapter  {
             ((RapportiniViewHolder) viewholder).operatore.setVisibility(View.VISIBLE);
             ((RapportiniViewHolder) viewholder).operatore.setText(" - "+val.getAsString("nome_operatore")+" "+val.getAsString("cognome_operatore"));
             ((RapportiniViewHolder) viewholder).operatore.setTag(position);
-            ((RapportiniViewHolder) viewholder).buttonDuplica.setVisibility(View.VISIBLE);
-            ((RapportiniViewHolder) viewholder).buttonDuplica.setTag(position);
         }
         else{
             ((RapportiniViewHolder) viewholder).operatore.setVisibility(View.GONE);
-            ((RapportiniViewHolder) viewholder).buttonDuplica.setVisibility(View.GONE);
         }
+        // "Duplica per altri utenti" non c'e' piu': chi ha lavorato si indica con gli operatori di ogni riga, e
+        // duplicare il rapportino per altri conterebbe due volte le stesse ore
+        ((RapportiniViewHolder) viewholder).buttonDuplica.setVisibility(View.GONE);
 
 
         ((RapportiniViewHolder) viewholder).buttonAzioni.setOnClickListener(new View.OnClickListener() {
@@ -114,72 +113,6 @@ public class RapportiniAdapter extends EConTabListViewAdapter  {
                         }
                     }
                 });
-            }
-        });
-
-        ((RapportiniViewHolder) viewholder).buttonDuplica.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setTitle(R.string.duplica_rapportino_per);
-                DbInterno db = new DbInterno(context);
-                final ArrayList<Object> listaUtenti = db.eseguiSelect("Select * from " + Utenti.NOME_TABELLA + " where " + Utenti.ID_UTENTE + "<>" + val.getAsInteger(Rapportini.ID_OPERATORE) ,null);
-                String[] utenti = new String[listaUtenti.size()];
-                for (int i=0;i<listaUtenti.size();i++){
-                    utenti[i] = ((ContentValues)listaUtenti.get(i)).getAsString(Utenti.NOME)+" "+((ContentValues)listaUtenti.get(i)).getAsString(Utenti.COGNOME);
-                }
-                final boolean[] checkedItems = new boolean[listaUtenti.size()];
-                builder.setMultiChoiceItems(utenti, checkedItems, new DialogInterface.OnMultiChoiceClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i, boolean b) {
-
-
-                    }
-                });
-
-                builder.setPositiveButton(getString(R.string.duplica), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        DbInterno db = new DbInterno(context);
-                        Rapportini tabella = new Rapportini();
-                        RapportiniDettaglio tabellaRighe = new RapportiniDettaglio();
-                        for (int n=0;n<checkedItems.length;n++){
-                            if (checkedItems[n]){
-                                ContentValues valCopia = (ContentValues)listaUtenti.get(n);
-                                ContentValues valRappCopia = tabella.getValoriLogInserimento(db);
-                                valRappCopia.put(Rapportini.DATA_RAPPORTINO, val.getAsLong(Rapportini.DATA_RAPPORTINO));
-                                valRappCopia.put(Rapportini.ID_ORDINE, val.getAsInteger(Rapportini.ID_ORDINE));
-                                valRappCopia.put(Rapportini.NOTE, val.getAsString(Rapportini.NOTE));
-                                valRappCopia.put(Rapportini.ID_OPERATORE, valCopia.getAsInteger(Utenti.ID_UTENTE));
-
-                                tabella.inserisciRecord(db, valRappCopia);
-
-                                //inserisco le righe
-                                ArrayList<Object> listaRighe = db.eseguiSelect("Select * from " + RapportiniDettaglio.NOME_TABELLA + " where " + RapportiniDettaglio.ID_RAPPORTINO + "=" + val.getAsInteger(Rapportini.ID_RAPPORTINO),null);
-                                for (int r = 0;r<listaRighe.size();r++){
-                                    ContentValues valCopiaDett = (ContentValues)listaRighe.get(r);
-                                    ContentValues valRappCopiaDett = tabellaRighe.getValoriLogInserimento(db);
-                                    valRappCopiaDett.put(RapportiniDettaglio.ID_RAPPORTINO,valRappCopia.getAsInteger(Rapportini.ID_RAPPORTINO));
-                                    valRappCopiaDett.put(RapportiniDettaglio.ID_MANODOPERA,valCopiaDett.getAsInteger(RapportiniDettaglio.ID_MANODOPERA));
-                                    valRappCopiaDett.put(RapportiniDettaglio.ORE,valCopiaDett.getAsDouble(RapportiniDettaglio.ORE));
-                                    valRappCopiaDett.put(RapportiniDettaglio.NOTE, valCopiaDett.getAsString(RapportiniDettaglio.NOTE));
-                                    tabellaRighe.inserisciRecord(db,valRappCopiaDett);
-                                }
-                            }
-                        }
-                        db.close();
-                        dialogInterface.cancel();
-                        ((RapportiniActivity)context).ricerca();
-                    }
-                });
-                builder.setNegativeButton(getString(R.string.annulla), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialogInterface.cancel();
-                    }
-                });
-                AlertDialog dialog = builder.create();
-                dialog.show();
             }
         });
 

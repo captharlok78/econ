@@ -13,8 +13,15 @@ public class Rapportini extends AbstractTable {
 
 	public static final String ID_RAPPORTINO = "id_rapportino";
     public static final String ID_DITTA = "id_ditta";
+    /**
+     * Cliente, cantiere e ordine: facoltativi ma almeno uno. Con l'ordine il cantiere e' quello dell'ordine, con il
+     * cantiere il cliente e' quello del cantiere (lo stesso fa il server, Rapportini::allineaRiferimenti()).
+     */
+    public static final String ID_CLIENTE = "id_cliente";
+    public static final String ID_CANTIERE = "id_cantiere";
     public static final String ID_ORDINE = "id_ordine";
-    public static final String ID_OPERATORE = "id_operatore";
+    /** Autore del rapportino come persona della ditta (utenti.id_utente_ditta). */
+    public static final String ID_UTENTE_DITTA = "id_utente_ditta";
     public static final String DATA_RAPPORTINO = "data_rapportino";
     public static final String NOTE = "note";
 
@@ -29,8 +36,10 @@ public class Rapportini extends AbstractTable {
 
 		aggiungiCampo(ID_RAPPORTINO, INTEGER);
         aggiungiCampo(ID_DITTA, INTEGER);
+        aggiungiCampo(ID_CLIENTE, INTEGER);
+        aggiungiCampo(ID_CANTIERE, INTEGER);
         aggiungiCampo(ID_ORDINE, INTEGER);
-        aggiungiCampo(ID_OPERATORE, INTEGER);
+        aggiungiCampo(ID_UTENTE_DITTA, INTEGER);
         aggiungiCampo(DATA_RAPPORTINO, DATE);
         aggiungiCampo(NOTE, TEXT);
 
@@ -44,8 +53,9 @@ public class Rapportini extends AbstractTable {
 	}
 
 
-    public ContentValues getUltimoRapportinoOperatore(DbInterno dbcl, int idOperatore) {
-        String SQL = "Select * from " + NOME_TABELLA+" where "+ID_OPERATORE+"="+idOperatore+" and "+ID_DITTA+"="+ Sessione.getDittaSelezionata() +" order by "+DATA_RAPPORTINO+" desc";
+    /** Ultimo rapportino dell'autore (id_utente_ditta), per proporre gli stessi riferimenti in un rapportino nuovo. */
+    public ContentValues getUltimoRapportinoOperatore(DbInterno dbcl, int idUtenteDitta) {
+        String SQL = "Select * from " + NOME_TABELLA+" where "+ID_UTENTE_DITTA+"="+idUtenteDitta+" and "+ID_DITTA+"="+ Sessione.getDittaSelezionata() +" order by "+DATA_RAPPORTINO+" desc";
         ArrayList<Object> recs = dbcl.eseguiSelect(SQL,null);
         if (recs.size()>0){
             return (ContentValues)recs.get(0);

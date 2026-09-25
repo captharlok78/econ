@@ -27,6 +27,7 @@ import pfa.app.econtab.db.DbInterno;
 import pfa.app.econtab.db.table.Preventivi;
 import pfa.app.econtab.db.table.Rapportini;
 import pfa.app.econtab.db.table.RapportiniDettaglio;
+import pfa.app.econtab.db.table.RapportiniDettaglioOperatori;
 import pfa.app.econtab.db.table.Utenti;
 import pfa.app.econtab.export.RapportinoXLS;
 import pfa.app.econtab.lista.EConTabListaStandardActivity;
@@ -172,31 +173,36 @@ public class RapportiniActivity extends EConTabListaStandardActivity {
 
         @Override
         public QueryPagina costruisciQuery(String testoFiltro, boolean ordinaPerRecenti) {
+            // cliente, cantiere e ordine del rapportino sono facoltativi (almeno uno): tutti in left join
             String fromJoin = Rapportini.NOME_TABELLA
-                    + " inner join " + Preventivi.NOME_TABELLA + " on " + Rapportini.NOME_TABELLA + "." + Rapportini.ID_ORDINE
+                    + " left join " + Preventivi.NOME_TABELLA + " on " + Rapportini.NOME_TABELLA + "." + Rapportini.ID_ORDINE
                     + "=" + Preventivi.NOME_TABELLA + "." + Preventivi.ID_PREVENTIVO
-                    + " inner join " + Utenti.NOME_TABELLA + " on " + Rapportini.NOME_TABELLA + "." + Rapportini.ID_OPERATORE
-                    + "=" + Utenti.NOME_TABELLA + "." + Utenti.ID_UTENTE
-                    + " inner join " + Cantieri.NOME_TABELLA + " on " + Preventivi.NOME_TABELLA + "." + Preventivi.ID_CANTIERE
-                    + "=" + Cantieri.NOME_TABELLA + "." + Cantieri.ID_CANTIERE
-                    + " inner join " + Anagrafica.NOME_TABELLA + " on " + Cantieri.NOME_TABELLA + "." + Cantieri.ID_ANAGRAFICA
-                    + "=" + Anagrafica.NOME_TABELLA + "." + Anagrafica.ID_ANAGRAFICA;
+                    + " left join " + Utenti.NOME_TABELLA + " on " + Rapportini.NOME_TABELLA + "." + Rapportini.ID_UTENTE_DITTA
+                    + "=" + Utenti.NOME_TABELLA + "." + Utenti.ID_UTENTE_DITTA
+                    + " left join " + Cantieri.NOME_TABELLA + " on " + Cantieri.NOME_TABELLA + "." + Cantieri.ID_CANTIERE
+                    + "=" + Rapportini.NOME_TABELLA + "." + Rapportini.ID_CANTIERE
+                    + " left join " + Anagrafica.NOME_TABELLA + " on " + Anagrafica.NOME_TABELLA + "." + Anagrafica.ID_ANAGRAFICA
+                    + "=(case when " + Rapportini.NOME_TABELLA + "." + Rapportini.ID_CLIENTE + ">0 then " + Rapportini.NOME_TABELLA + "."
+                    + Rapportini.ID_CLIENTE + " else " + Cantieri.NOME_TABELLA + "." + Cantieri.ID_ANAGRAFICA + " end)";
 
             String select = Rapportini.NOME_TABELLA + ".*, " + Anagrafica.NOME_TABELLA + "." + Anagrafica.RAGIONE_SOCIALE + ", "
                     + Preventivi.NOME_TABELLA + "." + Preventivi.NUMERO + ", "
                     + Preventivi.NOME_TABELLA + "." + Preventivi.TITOLO + ", "
                     + Preventivi.NOME_TABELLA + "." + Preventivi.DATA + " as data_ordine, "
                     + Cantieri.NOME_TABELLA + "." + Cantieri.NOME + " as nome_cantiere, "
-                    + "(select sum(" + RapportiniDettaglio.ORE + ") from " + RapportiniDettaglio.NOME_TABELLA + " where "
+                    + "(select sum(" + RapportiniDettaglioOperatori.sqlOreUomoRiga() + ") from " + RapportiniDettaglio.NOME_TABELLA + " where "
                     + RapportiniDettaglio.NOME_TABELLA + "." + RapportiniDettaglio.ID_RAPPORTINO + "=" + Rapportini.NOME_TABELLA + "."
                     + Rapportini.ID_RAPPORTINO + ") as tot_ore, "
                     + Utenti.NOME_TABELLA + "." + Utenti.NOME + " as nome_operatore, "
                     + Utenti.NOME_TABELLA + "." + Utenti.COGNOME + " as cognome_operatore";
 
-            QueryPagina like = FiltriHelper.likeMultiCampo(fromJoin, testoFiltro, Anagrafica.NOME_TABELLA + "." + Anagrafica.RAGIONE_SOCIALE);
+            // coalesce: con i left join cliente o cantiere possono mancare, e NULL like '%' nasconderebbe il rapportino
+            QueryPagina like = FiltriHelper.likeMultiCampo(fromJoin, testoFiltro,
+                    "coalesce(" + Anagrafica.NOME_TABELLA + "." + Anagrafica.RAGIONE_SOCIALE + ",'')",
+                    "coalesce(" + Cantieri.NOME_TABELLA + "." + Cantieri.NOME + ",'')");
 
             String periodo = spinnerPeriodo.getValue();
-            String where = like.whereSql;
+            String where = "(" + like.whereSql + ")";
             if (!periodo.equals("")) {
                 Calendar cal = Calendar.getInstance();
                 int giorni = 0;
@@ -255,15 +261,7 @@ public class RapportiniActivity extends EConTabListaStandardActivity {
 
         @Override
         public void onNuovoClick(EConTabListaStandardController.Host host) {
-            // Un rapportino si apre su un ordine aperto: senza, non si puo' aprirne nessuno
-            DbInterno db = new DbInterno(host.getContext());
-            boolean ordiniAperti = new Preventivi().esistonoOrdiniAperti(db);
-            db.close();
-            if (!ordiniAperti) {
-                Utility.mostraDialog(host.getContext().getString(R.string.attenzione),
-                        host.getContext().getString(R.string.nessun_ordine_aperto_rapportino), host.getContext(), "OK");
-                return;
-            }
+            // I cantieri ammessi dipendono dalla data scelta nel rapportino: il controllo e' nella testata
             Intent intent = new Intent(host.getContext(), RapportinoDettaglioModActivity.class);
             ((EConTabActivity) host.getContext()).apriFinestraInserimento(intent, 1, new Rapportini());
         }

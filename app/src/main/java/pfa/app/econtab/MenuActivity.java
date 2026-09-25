@@ -38,9 +38,9 @@ import retrofit2.Response;
 public class MenuActivity extends EConTabActivity {
 
     // ── Definizione voci di menu ──────────────────────────────────────────────
-    // Il "codice" deve combaciare con quello del catalogo Moduli in Sonata
-    // (Admin → Amministrazione → Moduli App): è così che il server sa quale
-    // voce abilitare o nascondere per ciascun utente.
+    // Il "codice" deve combaciare con quello dei moduli di tipo app del catalogo in Sonata
+    // (Amministrazione → Moduli): il server concede le voci in base ai pacchetti licenza app
+    // assegnati all'utente, e l'app le riceve a ogni apertura (SincronizzazioneActivity, avvio).
 
     private static class MenuItemDef {
         final int buttonId;
@@ -72,8 +72,8 @@ public class MenuActivity extends EConTabActivity {
     }
 
     /**
-     * Voci di menu effettivamente da mostrare: filtrate sui moduli abilitati per
-     * l'utente lato server (Sonata → scheda Utente → "Moduli visibili"). Se il
+     * Voci di menu effettivamente da mostrare: filtrate sui moduli concessi all'utente
+     * dai pacchetti licenza app (Sonata → Licenze → Pacchetti ditte). Se il
      * server non ha mai inviato la lista (login legacy, o server non aggiornato)
      * si mostra tutto per compatibilità, invece di un menu vuoto.
      */
@@ -128,6 +128,8 @@ public class MenuActivity extends EConTabActivity {
 
         costruisciGriglia();
         riparaDateLocali();
+        // a ogni login/apertura il listino si riallinea agli articoli della ditta (in background, senza avvisi)
+        pfa.app.econtab.utils.CatalogoLocale.allineaInBackground(this);
 
         SharedPreferences pref = getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE);
         if (!pref.contains("PERINIZIARE") && pref.contains("ECONTAB_REG")) {
@@ -277,6 +279,7 @@ public class MenuActivity extends EConTabActivity {
         System.out.println("EConTab: MenuActivity onResume ENTER");
         super.onResume();
 
+        aggiornaOggi();
         verificaConnessioneServer();
 
         SharedPreferences pref = getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE);
@@ -392,6 +395,267 @@ public class MenuActivity extends EConTabActivity {
         super.impostaTestoOperatore(operatore);
         TextView tv = findViewById(R.id.textViewUtenteTopBar);
         if (tv != null) tv.setText(operatore == null ? "" : operatore);
+    }
+
+    // ── Micro dashboard: cantieri di oggi ─────────────────────────────────────
+
+    /** Blocchi di oggi dell'ultima lettura, per il riquadro che si apre toccando la riga. */
+    private ArrayList<Object> blocchiOggi = new ArrayList<>();
+
+    /**
+     * Una riga sotto la barra in alto con i cantieri pianificati oggi per l'utente collegato (dalla pianificazione
+     * scaricata in sync), e la data di oggi nella barra blu. Riga nascosta se l'elenco operatori non e' ancora stato
+     * scaricato.
+     */
+    private void aggiornaOggi() {
+        Calendar oggi = Calendar.getInstance();
+        TextView tvData = findViewById(R.id.textDataOggi);
+        if (tvData != null) {
+            String data = String.format(java.util.Locale.ITALY, "%1$tA %1$td/%1$tm", oggi);
+            tvData.setText(data.substring(0, 1).toUpperCase(java.util.Locale.ITALY) + data.substring(1));
+        }
+
+        View riga = findViewById(R.id.rigaOggi);
+        TextView tv = findViewById(R.id.textOggi);
+        if (riga == null || tv == null) return;
+        pfa.app.econtab.utils.RegoleRapportino.Utente utente = utenteCorrente();
+        if (utente == null || utente.idUtenteDitta == 0) {
+            riga.setVisibility(View.GONE);
+            return;
+        }
+        ArrayList<Object> blocchi = pianificazione(utente, Utility.dataToNumber(oggi));
+
+        StringBuilder testo = new StringBuilder("Pianificato per oggi: ");
+        blocchiOggi = blocchi;
+        for (int i = 0; i < blocchi.size(); i++) {
+            android.content.ContentValues b = (android.content.ContentValues) blocchi.get(i);
+            if (i > 0) testo.append(" · ");
+            testo.append(fascia(b)).append(": ").append(b.getAsString("nome_cantiere")).append(" ").append(durata(b.getAsInteger("minuti")));
+        }
+        if (blocchi.isEmpty()) {
+            testo.append("nessun cantiere");
+        }
+        tv.setText(testo.toString());
+        riga.setVisibility(View.VISIBLE);
+    }
+
+    private pfa.app.econtab.utils.RegoleRapportino.Utente utenteCorrente() {
+        DbInterno db = new DbInterno(this);
+        try {
+            return pfa.app.econtab.utils.RegoleRapportino.utenteCorrente(db, this);
+        } catch (Exception e) {
+            return null; // tabelle non ancora presenti
+        } finally {
+            db.close();
+        }
+    }
+
+    private ArrayList<Object> pianificazione(pfa.app.econtab.utils.RegoleRapportino.Utente utente, long giorno) {
+        DbInterno db = new DbInterno(this);
+        try {
+            return pfa.app.econtab.utils.RegoleRapportino.pianificazioneGiorno(db, utente, giorno);
+        } catch (Exception e) {
+            return new ArrayList<>(); // pianificazione non ancora scaricata
+        } finally {
+            db.close();
+        }
+    }
+
+    private static String fascia(android.content.ContentValues b) {
+        return "M".equals(b.getAsString("fascia")) ? "Mattina" : "Pomeriggio";
+    }
+
+    /** "Cantiere — Cliente", piu' "Squadra: X" per i blocchi di squadra. */
+    private static String descrizioneBlocco(android.content.ContentValues b) {
+        String cliente = b.getAsString("cliente");
+        String squadra = b.getAsString("squadra");
+        return b.getAsString("nome_cantiere")
+                + (cliente != null && !cliente.trim().isEmpty() ? " — " + cliente.trim() : "")
+                + (squadra != null && !squadra.trim().isEmpty() ? "\nSquadra: " + squadra.trim() : "");
+    }
+
+    // ── Calendario della settimana ────────────────────────────────────────────
+
+    /** Icona calendario: pianificazione dell'utente collegato, settimana per settimana (lunedi-domenica). */
+    public void apriCalendarioSettimana(View v) {
+        pfa.app.econtab.utils.RegoleRapportino.Utente utente = utenteCorrente();
+        if (utente == null || utente.idUtenteDitta == 0) {
+            Toast.makeText(this, "Elenco operatori non ancora scaricato: esegui una sincronizzazione.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        float dp = getResources().getDisplayMetrics().density;
+
+        LinearLayout contenuto = new LinearLayout(this);
+        contenuto.setOrientation(LinearLayout.VERTICAL);
+
+        LinearLayout testata = new LinearLayout(this);
+        testata.setOrientation(LinearLayout.HORIZONTAL);
+        testata.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        testata.setPadding((int) (8 * dp), (int) (8 * dp), (int) (8 * dp), (int) (4 * dp));
+        Button prec = new Button(this, null, android.R.attr.borderlessButtonStyle);
+        prec.setText("‹");
+        prec.setTextSize(22);
+        Button succ = new Button(this, null, android.R.attr.borderlessButtonStyle);
+        succ.setText("›");
+        succ.setTextSize(22);
+        TextView titolo = new TextView(this);
+        titolo.setGravity(android.view.Gravity.CENTER);
+        titolo.setTextSize(17);
+        titolo.setTypeface(null, android.graphics.Typeface.BOLD);
+        titolo.setTextColor(0xFF0D47A1);
+        testata.addView(prec);
+        testata.addView(titolo, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+        testata.addView(succ);
+        contenuto.addView(testata);
+
+        android.widget.ScrollView scroll = new android.widget.ScrollView(this);
+        LinearLayout giorni = new LinearLayout(this);
+        giorni.setOrientation(LinearLayout.VERTICAL);
+        giorni.setPadding((int) (16 * dp), 0, (int) (16 * dp), (int) (8 * dp));
+        scroll.addView(giorni);
+        contenuto.addView(scroll, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        final int[] spostamento = { 0 }; // settimane rispetto a quella corrente
+        Runnable disegna = () -> disegnaSettimana(utente, spostamento[0], titolo, giorni, dp);
+        prec.setOnClickListener(x -> { spostamento[0]--; disegna.run(); });
+        succ.setOnClickListener(x -> { spostamento[0]++; disegna.run(); });
+        disegna.run();
+
+        new AlertDialog.Builder(this)
+                .setView(contenuto)
+                .setPositiveButton("Chiudi", null)
+                .show();
+    }
+
+    private void disegnaSettimana(pfa.app.econtab.utils.RegoleRapportino.Utente utente, int spostamento,
+                                  TextView titolo, LinearLayout giorni, float dp) {
+        Calendar oggi = Calendar.getInstance();
+        Calendar giorno = Calendar.getInstance();
+        giorno.add(Calendar.DATE, -((giorno.get(Calendar.DAY_OF_WEEK) + 5) % 7) + 7 * spostamento); // lunedi
+        Calendar domenica = (Calendar) giorno.clone();
+        domenica.add(Calendar.DATE, 6);
+        titolo.setText(String.format(java.util.Locale.ITALY, "Settimana %1$td/%1$tm – %2$td/%2$tm", giorno, domenica));
+
+        giorni.removeAllViews();
+        for (int i = 0; i < 7; i++, giorno.add(Calendar.DATE, 1)) {
+            boolean eOggi = giorno.get(Calendar.YEAR) == oggi.get(Calendar.YEAR) && giorno.get(Calendar.DAY_OF_YEAR) == oggi.get(Calendar.DAY_OF_YEAR);
+            ArrayList<Object> blocchi = pianificazione(utente, Utility.dataToNumber(giorno));
+
+            LinearLayout box = new LinearLayout(this);
+            box.setOrientation(LinearLayout.VERTICAL);
+            box.setPadding((int) (10 * dp), (int) (6 * dp), (int) (10 * dp), (int) (6 * dp));
+            if (eOggi) box.setBackgroundColor(0xFFE3F2FD);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            lp.topMargin = (int) (4 * dp);
+
+            TextView nome = new TextView(this);
+            String etichetta = String.format(java.util.Locale.ITALY, "%1$tA %1$td/%1$tm", giorno);
+            nome.setText(etichetta.substring(0, 1).toUpperCase(java.util.Locale.ITALY) + etichetta.substring(1) + (eOggi ? "  (oggi)" : ""));
+            nome.setTypeface(null, android.graphics.Typeface.BOLD);
+            nome.setTextColor(blocchi.isEmpty() && i >= 5 ? 0xFF9E9E9E : 0xFF212121);
+            box.addView(nome);
+
+            if (blocchi.isEmpty()) {
+                TextView vuoto = new TextView(this);
+                vuoto.setText("—");
+                vuoto.setTextColor(0xFF9E9E9E);
+                box.addView(vuoto);
+            }
+            for (Object o : blocchi) {
+                android.content.ContentValues b = (android.content.ContentValues) o;
+                box.addView(vistaBlocco(b, fascia(b) + " · " + durata(b.getAsInteger("minuti")) + "  " + descrizioneBlocco(b).replace("\n", " · "), dp));
+            }
+            giorni.addView(box, lp);
+        }
+    }
+
+    /** 240 → "4h", 90 → "1h30", 30 → "30m". */
+    private static String durata(Integer minuti) {
+        int m = minuti != null ? minuti : 0;
+        if (m < 60) return m + "m";
+        return (m / 60) + "h" + (m % 60 > 0 ? String.format(java.util.Locale.ITALY, "%02d", m % 60) : "");
+    }
+
+    /** Tocco sulla riga di oggi: dettaglio con cliente e squadra di ogni blocco; tocco sul cantiere = mappa. */
+    public void apriDettaglioOggi(View v) {
+        float dp = getResources().getDisplayMetrics().density;
+        LinearLayout elenco = new LinearLayout(this);
+        elenco.setOrientation(LinearLayout.VERTICAL);
+        elenco.setPadding((int) (16 * dp), (int) (8 * dp), (int) (16 * dp), 0);
+        if (blocchiOggi.isEmpty()) {
+            TextView vuoto = new TextView(this);
+            vuoto.setText("Nessun cantiere pianificato per oggi.\nLa pianificazione arriva con la sincronizzazione.");
+            elenco.addView(vuoto);
+        }
+        for (Object o : blocchiOggi) {
+            android.content.ContentValues b = (android.content.ContentValues) o;
+            elenco.addView(vistaBlocco(b, fascia(b) + " · " + durata(b.getAsInteger("minuti")) + "\n" + descrizioneBlocco(b), dp));
+        }
+        android.widget.ScrollView scroll = new android.widget.ScrollView(this);
+        scroll.addView(elenco);
+        new AlertDialog.Builder(this)
+                .setTitle("I tuoi cantieri di oggi")
+                .setView(scroll)
+                .setPositiveButton("Chiudi", null)
+                .show();
+    }
+
+    /**
+     * Riga di un blocco di pianificazione: testo e, se il cantiere ha un indirizzo, icona mappa; il tocco apre
+     * Google Maps (o un'altra app di mappe) sull'indirizzo del cantiere.
+     */
+    private View vistaBlocco(android.content.ContentValues b, String testo, float dp) {
+        LinearLayout riga = new LinearLayout(this);
+        riga.setOrientation(LinearLayout.HORIZONTAL);
+        riga.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        riga.setPadding((int) (8 * dp), (int) (6 * dp), (int) (4 * dp), (int) (6 * dp));
+
+        TextView t = new TextView(this);
+        t.setText(testo);
+        t.setTextColor(0xFF0D47A1);
+        t.setTextSize(15);
+        riga.addView(t, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+
+        final String indirizzo = indirizzoCantiere(b);
+        if (indirizzo != null) {
+            ImageView mappa = new ImageView(this);
+            mappa.setImageResource(R.drawable.ic_mappa);
+            mappa.setContentDescription("Apri nella mappa");
+            riga.addView(mappa, new LinearLayout.LayoutParams((int) (28 * dp), (int) (28 * dp)));
+            android.util.TypedValue sfondo = new android.util.TypedValue();
+            getTheme().resolveAttribute(android.R.attr.selectableItemBackground, sfondo, true);
+            riga.setBackgroundResource(sfondo.resourceId);
+            riga.setOnClickListener(x -> apriMappa(indirizzo));
+        }
+        return riga;
+    }
+
+    /** "Via, CAP Citta (PR)" dai campi del cantiere, null se manca l'indirizzo. */
+    private static String indirizzoCantiere(android.content.ContentValues b) {
+        String via = b.getAsString("indirizzo");
+        if (via == null || via.trim().isEmpty()) return null;
+        StringBuilder sb = new StringBuilder(via.trim());
+        String cap = b.getAsString("cap"), citta = b.getAsString("citta"), prov = b.getAsString("provincia");
+        String luogo = ((cap != null ? cap.trim() : "") + " " + (citta != null ? citta.trim() : "")).trim();
+        if (!luogo.isEmpty()) sb.append(", ").append(luogo);
+        if (prov != null && !prov.trim().isEmpty()) sb.append(" (").append(prov.trim()).append(")");
+        return sb.toString();
+    }
+
+    /** Apre l'indirizzo in Google Maps, o in un'altra app di mappe se Google Maps non c'e'. */
+    private void apriMappa(String indirizzo) {
+        android.net.Uri uri = android.net.Uri.parse("geo:0,0?q=" + android.net.Uri.encode(indirizzo));
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        intent.setPackage("com.google.android.apps.maps");
+        try {
+            startActivity(intent);
+        } catch (android.content.ActivityNotFoundException e) {
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, uri));
+            } catch (android.content.ActivityNotFoundException e2) {
+                Toast.makeText(this, "Nessuna app di mappe installata", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     // ── Modale info account ───────────────────────────────────────────────────

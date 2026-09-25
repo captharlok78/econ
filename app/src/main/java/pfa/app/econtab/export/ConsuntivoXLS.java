@@ -329,7 +329,16 @@ public class ConsuntivoXLS {
         if (ordini.endsWith(",")){
             ordini = ordini.substring(0,ordini.length()-1);
         }
-        ArrayList<Object> rapportini =  db.eseguiSelect("Select rapportini_dettaglio.*,rapportini.data_rapportino,utenti.nome as nomeutente,utenti.cognome as cognomeutente,manodopera.nome,manodopera.costo_orario from rapportini inner join rapportini_dettaglio on rapportini.id_rapportino=rapportini_dettaglio.id_rapportino inner join manodopera on rapportini_dettaglio.id_manodopera=manodopera.id_manodopera inner join utenti on rapportini.id_operatore=utenti.id_utente inner join preventivi on rapportini.id_ordine=preventivi.id_preventivo where rapportini.id_ordine in ("+ordini+") order by rapportini.data_rapportino,rapportini.id_operatore,rapportini.id_rapportino", null);
+        // una riga per ogni operatore delle righe (viaggi e lavoro) dei rapportini degli ordini; costo: copiato dal server,
+        // altrimenti quello attuale dell'operatore, 0 se la riga non e' a costo
+        ArrayList<Object> rapportini =  db.eseguiSelect("Select rapportini_dettaglio.*,rapportini.data_rapportino,uo.nome as nomeutente,"
+                + "uo.cognome as cognomeutente,o.ore as ore_operatore,"
+                + "(case when rapportini_dettaglio.a_costo=0 then 0 when coalesce(o.costo_orario,0)>0 then o.costo_orario else coalesce(uo.costo_orario,0) end) as costo_operatore"
+                + " from rapportini inner join rapportini_dettaglio on rapportini.id_rapportino=rapportini_dettaglio.id_rapportino"
+                + " inner join rapportini_dettaglio_operatori o on o.id_rapportino_dettaglio=rapportini_dettaglio.id_rapportino_dettaglio"
+                + " left join utenti uo on uo.id_utente_ditta=o.id_utente_ditta"
+                + " where rapportini.id_ordine in ("+ordini+")"
+                + " order by rapportini.data_rapportino,rapportini.id_rapportino," + RapportiniDettaglio.sqlOrdinamento(RapportiniDettaglio.NOME_TABELLA), null);
         db.close();
 
         for (int i=0;i<rapportini.size();i++){
@@ -1244,7 +1253,7 @@ public class ConsuntivoXLS {
         c.setCellStyle(cs);
 
         c = riga.createCell(2);
-        c.setCellValue(val.getAsString(Manodopera.NOME));// CODICE ARTICOLO
+        c.setCellValue(pfa.app.econtab.RapportinoDettaglioModActivity.titoloRiga(ctx, val));
         c.setCellStyle(cs);
 
         c = riga.createCell(3);
@@ -1253,18 +1262,18 @@ public class ConsuntivoXLS {
 
 
         c = riga.createCell(4);
-        oreTotRApportini = oreTotRApportini+ val.getAsDouble(RapportiniDettaglio.ORE);
-        c.setCellValue(val.getAsDouble(RapportiniDettaglio.ORE));
+        oreTotRApportini = oreTotRApportini+ val.getAsDouble("ore_operatore");
+        c.setCellValue(val.getAsDouble("ore_operatore"));
         c.setCellType(Cell.CELL_TYPE_NUMERIC);
         c.setCellStyle(cs);
 
         c = riga.createCell(5);
-        c.setCellValue(Utility.arrotonda(val.getAsDouble(Manodopera.COSTO_ORARIO), 2));
+        c.setCellValue(Utility.arrotonda(val.getAsDouble("costo_operatore"), 2));
         c.setCellType(Cell.CELL_TYPE_NUMERIC);
         c.setCellStyle(currencyCellStyle);
 
         c = riga.createCell(6);
-        double tot = val.getAsDouble(Manodopera.COSTO_ORARIO)  * val.getAsDouble(RapportiniDettaglio.ORE);
+        double tot = val.getAsDouble("costo_operatore")  * val.getAsDouble("ore_operatore");
         String cellaQta = "E" + (rowCountRapportini + 1);
         String cellaPrezzo = "F" + (rowCountRapportini + 1);
         c.setCellFormula("PRODUCT(" + cellaQta + ":" + cellaPrezzo + ")");

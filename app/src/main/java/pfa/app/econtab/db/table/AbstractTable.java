@@ -1044,6 +1044,21 @@ public abstract class AbstractTable {
         if (tabella.equalsIgnoreCase(RapportiniDettaglio.NOME_TABELLA)) {
             return new RapportiniDettaglio();
         }
+        if (tabella.equalsIgnoreCase(RapportiniDettaglioOperatori.NOME_TABELLA)) {
+            return new RapportiniDettaglioOperatori();
+        }
+        if (tabella.equalsIgnoreCase(Squadre.NOME_TABELLA)) {
+            return new Squadre();
+        }
+        if (tabella.equalsIgnoreCase(SquadreMembri.NOME_TABELLA)) {
+            return new SquadreMembri();
+        }
+        if (tabella.equalsIgnoreCase(PianificazioneAssegnazioni.NOME_TABELLA)) {
+            return new PianificazioneAssegnazioni();
+        }
+        if (tabella.equalsIgnoreCase(PianificazioneEsclusioni.NOME_TABELLA)) {
+            return new PianificazioneEsclusioni();
+        }
 		if (tabella.equalsIgnoreCase(Unita.NOME_TABELLA)) {
 			return new Unita();
 		}

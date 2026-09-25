@@ -70,6 +70,7 @@ public class SyncWorker extends Worker {
         {"preventivi_dettaglio",   "id_preventivo_dettaglio"},
         {"rapportini",             "id_rapportino"},
         {"rapportini_dettaglio",   "id_rapportino_dettaglio"},
+        {"rapportini_dettaglio_operatori", "id_rapportino_dettaglio_operatore"},
         {"foto",                   "id_foto"},
     };
 
@@ -79,6 +80,7 @@ public class SyncWorker extends Worker {
      */
     private static final String[][] FK_CHILDREN = {
         {"anagrafica",        "id_anagrafica",   "cantieri",              "id_anagrafica"},
+        {"anagrafica",        "id_anagrafica",   "rapportini",            "id_cliente"},
         {"cantieri",          "id_cantiere",     "unita",                 "id_cantiere"},
         {"cantieri",          "id_cantiere",     "preventivi",            "id_cantiere"},
         {"cantieri",          "id_cantiere",     "rapportini",            "id_cantiere"},
@@ -93,7 +95,10 @@ public class SyncWorker extends Worker {
         {"preventivi",        "id_preventivo",   "preventivi_dettaglio",  "id_preventivo"},
         {"preventivi",        "id_preventivo",   "elementi_cantiere",     "id_preventivo"},
         {"preventivi",        "id_preventivo",   "componenti_cantiere",   "id_preventivo"},
+        {"preventivi",        "id_preventivo",   "rapportini",            "id_ordine"},
         {"rapportini",        "id_rapportino",   "rapportini_dettaglio",  "id_rapportino"},
+        {"rapportini_dettaglio", "id_rapportino_dettaglio", "rapportini_dettaglio_operatori", "id_rapportino_dettaglio"},
+        {"preventivi_dettaglio", "id_preventivo_dettaglio", "rapportini_dettaglio", "id_preventivo_dettaglio"},
         // FK intra-tabella e verso tabelle composite
         {"elementi_cantiere", "id_elemento_cant","componenti_cantiere",   "id_elemento_cavo"},
         {"elementi_cantiere", "id_elemento_cant","componenti_cantiere",   "id_elemento_tubo"},
@@ -145,6 +150,13 @@ public class SyncWorker extends Worker {
                 pfa.app.econtab.utils.DittaLocale.sincronizza(ctx, api);
             } catch (Exception e) {
                 Log.w(TAG, "Sync dati ditta fallita: " + e.getMessage());
+            }
+
+            // 1c. Listino: solo gli articoli che spettano alla ditta. Un errore qui non ferma la sync.
+            try {
+                pfa.app.econtab.utils.CatalogoLocale.allinea(ctx, api);
+            } catch (Exception e) {
+                Log.w(TAG, "Allineamento catalogo fallito: " + e.getMessage());
             }
 
             // 2. Scarica record eliminati
@@ -200,8 +212,11 @@ public class SyncWorker extends Worker {
                         continue;
                     }
 
+                    String pkCol = getPkCol(nomeTabella);
                     for (JsonObject record : records) {
                         ContentValues cv = jsonToContentValues(record);
+                        // record modificato in locale e non ancora inviato: lo carica l'upload, non va sovrascritto
+                        if (SyncUtil.isModificatoInLocale(db, nomeTabella, pkCol, cv)) continue;
                         cv.put("in_server", 1);
                         SyncUtil.normalizzaDate(cv);
                         SyncUtil.rimuoviColonneSconosciute(db, nomeTabella, cv);
@@ -458,6 +473,7 @@ public class SyncWorker extends Worker {
 
     private String buildPkWhereClause(String tabella, String chiaveRecord) {
         String pkCol = getPkCol(tabella);
+        if (pkCol == null) pkCol = SyncUtil.pkTabellaSoloDownload(tabella);
         if (pkCol != null) return pkCol + " = " + chiaveRecord;
         // Fallback per tabelle sconosciute
         return "id = " + chiaveRecord;

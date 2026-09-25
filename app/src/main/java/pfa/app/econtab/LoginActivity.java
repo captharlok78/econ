@@ -651,15 +651,16 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
     /** Costante per indicare che dopo il login si deve tornare all'activity chiamante. */
     public static final String EXTRA_RETURN_AFTER_LOGIN = "return_after_login";
 
-    /** Naviga al menu principale, oppure torna all'activity chiamante se richiesto. */
+    /**
+     * Dopo l'accesso: allineamento con il server (moduli, pacchetti, invio e scarico dati) che poi porta
+     * al menu; oppure torna all'activity chiamante se richiesto.
+     */
     private void avanzaAlMenu() {
         if (getIntent().getBooleanExtra(EXTRA_RETURN_AFTER_LOGIN, false)) {
             setResult(android.app.Activity.RESULT_OK);
             finish();
             return;
         }
-        Intent intent = new Intent(this, MenuActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
+        pfa.app.econtab.utils.AccessoMercury.apriAllineamento(this);
     }
 }

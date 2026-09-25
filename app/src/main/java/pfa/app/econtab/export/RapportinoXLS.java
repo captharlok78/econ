@@ -26,11 +26,13 @@ import pfa.app.econtab.db.table.Anagrafica;
 import pfa.app.econtab.db.table.Cantieri;
 import pfa.app.econtab.db.table.Costruttori;
 import pfa.app.econtab.db.table.Linee;
-import pfa.app.econtab.db.table.Manodopera;
+import pfa.app.econtab.RapportinoDettaglioModActivity;
 import pfa.app.econtab.db.table.Preventivi;
 import pfa.app.econtab.db.table.PreventiviDettaglio;
 import pfa.app.econtab.db.table.Rapportini;
 import pfa.app.econtab.db.table.RapportiniDettaglio;
+import pfa.app.econtab.db.table.RapportiniDettaglioOperatori;
+import pfa.app.econtab.utils.RegoleRapportino;
 import pfa.app.econtab.utils.Utility;
 import pfa.app.general.simplecropimage.Util;
 
@@ -42,6 +44,10 @@ public class RapportinoXLS {
     int rowCount = 0;
     private HSSFWorkbook wb = null;
     private Sheet sheet1 = null;
+    /** Costi (costo orario e totale per operatore) solo per l'Amministratore ditta. */
+    private boolean amministratore = false;
+    private double totaleOre = 0;
+    private double totaleCosto = 0;
 
     public RapportinoXLS(Context ctx){
         this.ctx = ctx;
@@ -55,9 +61,16 @@ public class RapportinoXLS {
         String numeroOrdine = "";
         DbInterno db = new DbInterno(ctx);
 
-        ArrayList<Object> recs =  db.eseguiSelect("Select rapportini.*,Preventivi.numero,Preventivi.data,Anagrafica.ragione_sociale,Utenti.nome as nome_operatore,Utenti.cognome as cognome_operatore,ditte.ragione_sociale as rag_soc_ditta from Rapportini inner join Utenti on rapportini.id_operatore=Utenti.id_utente inner join  Preventivi on rapportini.id_ordine=Preventivi.id_preventivo inner join  cantieri on preventivi.id_cantiere=cantieri.id_cantiere inner join anagrafica on  cantieri.id_anagrafica=anagrafica.id_anagrafica inner join ditte on rapportini.id_ditta=ditte.id_ditta where id_rapportino=" + idRapportino, null);
+        // cliente, cantiere e ordine facoltativi (almeno uno); il cliente e' quello del rapportino o del cantiere
+        ArrayList<Object> recs =  db.eseguiSelect("Select rapportini.*,Preventivi.numero,Preventivi.data,Anagrafica.ragione_sociale,cantieri.nome as nome_cantiere,"
+                + "Utenti.nome as nome_operatore,Utenti.cognome as cognome_operatore,ditte.ragione_sociale as rag_soc_ditta"
+                + " from Rapportini left join Utenti on rapportini.id_utente_ditta=Utenti.id_utente_ditta left join Preventivi on rapportini.id_ordine=Preventivi.id_preventivo"
+                + " left join cantieri on cantieri.id_cantiere=rapportini.id_cantiere"
+                + " left join anagrafica on anagrafica.id_anagrafica=(case when rapportini.id_cliente>0 then rapportini.id_cliente else cantieri.id_anagrafica end)"
+                + " left join ditte on rapportini.id_ditta=ditte.id_ditta where id_rapportino=" + idRapportino, null);
         if (recs.size()>0){
             valTestata = (ContentValues)recs.get(0);
+            amministratore = RegoleRapportino.utenteCorrente(db, ctx).amministratore;
             dataRapp = Utility.numberToData(valTestata.getAsLong(Rapportini.DATA_RAPPORTINO));
             numeroOrdine = valTestata.getAsString(Preventivi.NUMERO);
 
@@ -67,40 +80,28 @@ public class RapportinoXLS {
             //prendo le righe
             _aggiungiRigaIntestazione();
 
-
-            ArrayList<Object> righe = db.eseguiSelect("Select rapportini_dettaglio.*,manodopera.nome,manodopera.costo_orario from rapportini_dettaglio inner join manodopera on rapportini_dettaglio.id_manodopera=manodopera.id_manodopera where id_rapportino=" + idRapportino,null);
-
-
             ArrayList descrizioni = new ArrayList();
-
-            for (int i=0;i<righe.size();i++){
-                ContentValues riga = (ContentValues)righe.get(i);
-                _aggiungiRigaTecnico(valTestata,riga);
-                String descrizione = riga.getAsString(RapportiniDettaglio.NOTE);
-                if (!descrizioni.contains(descrizione)){
-                    descrizioni.add(descrizione);
-                }
-
-            }
+            _aggiungiRigheRapportino(db, idRapportino, valTestata, descrizioni);
 
             if (multiplo){
-                //prendo gli altri rapportini nella stessa data /ordine
-                long dataRapportino = valTestata.getAsLong(Rapportini.DATA_RAPPORTINO);
-                int idOrdine = valTestata.getAsInteger(Rapportini.ID_ORDINE);
-                ArrayList<Object> righeAltriRapportini = db.eseguiSelect("Select Utenti.nome as nome_operatore,Utenti.cognome as cognome_operatore, rapportini_dettaglio.*,manodopera.nome,manodopera.costo_orario from rapportini_dettaglio inner join rapportini on rapportini_dettaglio.id_rapportino=rapportini.id_rapportino inner join Utenti on rapportini.id_operatore=Utenti.id_utente  inner join manodopera on rapportini_dettaglio.id_manodopera=manodopera.id_manodopera where rapportini_dettaglio.id_rapportino in (select id_rapportino from rapportini where data_rapportino="+dataRapportino+" and id_ordine="+idOrdine+" and id_rapportino<>"+idRapportino+")",null);
-                for (int i=0;i<righeAltriRapportini.size();i++){
-                    ContentValues riga = (ContentValues)righeAltriRapportini.get(i);
-                    ContentValues valUtente = new ContentValues();
-                    valUtente.put("nome_operatore",riga.getAsString("nome_operatore"));
-                    valUtente.put("cognome_operatore",riga.getAsString("cognome_operatore"));
-                    _aggiungiRigaTecnico(valUtente,riga);
-                    String descrizione = riga.getAsString(RapportiniDettaglio.NOTE);
-                    if (!descrizioni.contains(descrizione)){
-                        descrizioni.add(descrizione);
-                    }
+                //prendo gli altri rapportini nella stessa data e sullo stesso cantiere (senza cantiere: stesso cliente)
+                Integer idCantiere = valTestata.getAsInteger(Rapportini.ID_CANTIERE);
+                Integer idCliente = valTestata.getAsInteger(Rapportini.ID_CLIENTE);
+                String stesso = idCantiere != null && idCantiere > 0 ? "rapportini.id_cantiere=" + idCantiere
+                        : "coalesce(rapportini.id_cantiere,0)=0 and rapportini.id_cliente=" + (idCliente != null ? idCliente : 0);
+                ArrayList<Object> altriRapportini = db.eseguiSelect("Select rapportini.id_rapportino,Utenti.nome as nome_operatore,Utenti.cognome as cognome_operatore"
+                        + " from rapportini left join Utenti on rapportini.id_utente_ditta=Utenti.id_utente_ditta"
+                        + " where rapportini.data_rapportino=" + valTestata.getAsLong(Rapportini.DATA_RAPPORTINO)
+                        + " and " + stesso
+                        + " and rapportini.id_ditta=" + valTestata.getAsInteger(Rapportini.ID_DITTA)
+                        + " and rapportini.id_rapportino<>" + idRapportino, null);
+                for (int i=0;i<altriRapportini.size();i++){
+                    ContentValues altro = (ContentValues)altriRapportini.get(i);
+                    _aggiungiRigheRapportino(db, altro.getAsInteger(Rapportini.ID_RAPPORTINO), altro, descrizioni);
                 }
             }
 
+            _aggiungiRigaTotali();
 
             _aggiungiRigaIntestazioneDescrizioni();
 
@@ -183,7 +184,9 @@ public class RapportinoXLS {
             dirExport.mkdirs();
         }
 
-        String nomeRapp = "RAPP_" + dataRapp.replaceAll("/","") + "_ORD_" + numeroOrdine;
+        String nomeRapp = "RAPP_" + dataRapp.replaceAll("/","") + (numeroOrdine != null
+                ? "_ORD_" + numeroOrdine
+                : "_" + Utility.formattaStringaPerNomeFile(valTestata != null && valTestata.getAsString("nome_cantiere") != null ? valTestata.getAsString("nome_cantiere") : ""));
 
 
         File fileExport = new File(dirExport, nomeRapp + ".xls");
@@ -252,50 +255,104 @@ public class RapportinoXLS {
         rowCount++;
     }
 
-    private void _aggiungiRigaTecnico(ContentValues val, ContentValues val_riga) {
+    /**
+     * Una riga del foglio per ogni operatore di ogni riga del rapportino (viaggi di andata, lavoro, viaggi di ritorno),
+     * con le sue ore; le note delle righe vanno nell'elenco descrizioni. valAutore non serve piu' (le ore sono solo
+     * sugli operatori) ma resta per i rapportini multipli.
+     */
+    private void _aggiungiRigheRapportino(DbInterno db, int idRapportino, ContentValues valAutore, ArrayList descrizioni) {
+        ArrayList<Object> righe = db.eseguiSelect("Select * from " + RapportiniDettaglio.NOME_TABELLA + " where " + RapportiniDettaglio.ID_RAPPORTINO
+                + "=" + idRapportino + " order by " + RapportiniDettaglio.sqlOrdinamento(null), null);
+        for (int i=0;i<righe.size();i++){
+            ContentValues riga = (ContentValues)righe.get(i);
+            String tipo = RapportinoDettaglioModActivity.titoloRiga(ctx, riga);
+            Integer aCosto = riga.getAsInteger(RapportiniDettaglio.A_COSTO);
+            if (aCosto != null && aCosto == 0) tipo += " (" + ctx.getString(R.string.non_a_costo) + ")";
+            for (Object o : RapportiniDettaglioOperatori.operatoriRiga(db, riga.getAsInteger(RapportiniDettaglio.ID_RAPPORTINO_DETTAGLIO))) {
+                ContentValues op = (ContentValues) o;
+                String nome = ((op.getAsString(RapportiniDettaglioOperatori.NOME_OPERATORE) != null ? op.getAsString(RapportiniDettaglioOperatori.NOME_OPERATORE) : "")
+                        + " " + (op.getAsString(RapportiniDettaglioOperatori.COGNOME_OPERATORE) != null ? op.getAsString(RapportiniDettaglioOperatori.COGNOME_OPERATORE) : "")).trim();
+                _aggiungiRigaTecnico(nome, tipo, op.getAsDouble(RapportiniDettaglioOperatori.ORE),
+                        aCosto != null && aCosto == 0 ? 0 : RapportiniDettaglioOperatori.costoOrario(op));
+            }
+            String nota = riga.getAsString(RapportiniDettaglio.NOTE);
+            if (nota != null && !nota.trim().isEmpty() && !descrizioni.contains(nota)){
+                descrizioni.add(nota);
+            }
+        }
+    }
+
+    /** Colonne: tecnico 0-2, tipo 3-6 (3-4 per l'amministratore), ore 7 (5), costo orario 6 e totale 7 solo per l'amministratore. */
+    private void _aggiungiRigaTecnico(String operatore, String manodopera, double ore, double costoOrario) {
         Row riga = sheet1.createRow(rowCount);
 
         CellStyle cs = wb.createCellStyle();
         cs.setWrapText(true);
 
-        CellStyle currencyCellStyle = wb.createCellStyle();
-        currencyCellStyle.setWrapText(true);
-
-        currencyCellStyle.setDataFormat(wb.createDataFormat().getFormat("#,##0.00"));
-
         Cell c = riga.createCell(0);
-        c.setCellValue(val.getAsString("nome_operatore") + " "+val.getAsString("cognome_operatore"));
+        c.setCellValue(operatore);
         c.setCellStyle(cs);
-
         sheet1.addMergedRegion(new CellRangeAddress(rowCount, rowCount, 0, 2));
 
         c = riga.createCell(3);
-        c.setCellValue(val_riga.getAsString(Manodopera.NOME));// CODICE ARTICOLO
+        c.setCellValue(manodopera);
         c.setCellStyle(cs);
+        sheet1.addMergedRegion(new CellRangeAddress(rowCount, rowCount, 3, amministratore ? 4 : 6));
 
-        sheet1.addMergedRegion(new CellRangeAddress(rowCount, rowCount, 3, 6));
+        c = riga.createCell(amministratore ? 5 : 7);
+        c.setCellValue(ore);
+        c.setCellType(Cell.CELL_TYPE_NUMERIC);
+        c.setCellStyle(cs);
+        totaleOre += ore;
 
+        if (amministratore) {
+            CellStyle currencyCellStyle = wb.createCellStyle();
+            currencyCellStyle.setWrapText(true);
+            currencyCellStyle.setDataFormat(wb.createDataFormat().getFormat("#,##0.00"));
 
-        c = riga.createCell(7);
-        c.setCellValue(val_riga.getAsDouble(RapportiniDettaglio.ORE));
+            c = riga.createCell(6);
+            c.setCellValue(Utility.arrotonda(costoOrario, 2));
+            c.setCellType(Cell.CELL_TYPE_NUMERIC);
+            c.setCellStyle(currencyCellStyle);
+
+            c = riga.createCell(7);
+            c.setCellValue(Utility.arrotonda(ore * costoOrario, 2));
+            c.setCellType(Cell.CELL_TYPE_NUMERIC);
+            c.setCellStyle(currencyCellStyle);
+            totaleCosto += ore * costoOrario;
+        }
+
+        rowCount++;
+    }
+
+    /** Totale ore-uomo (e costo, per l'amministratore) sotto le righe dei tecnici. */
+    private void _aggiungiRigaTotali() {
+        Row riga = sheet1.createRow(rowCount);
+
+        CellStyle cs = wb.createCellStyle();
+        Font fBold = wb.createFont();
+        fBold.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        cs.setFont(fBold);
+
+        Cell c = riga.createCell(0);
+        c.setCellValue(ctx.getResources().getString(R.string.totale).toUpperCase(Locale.getDefault()));
+        c.setCellStyle(cs);
+        sheet1.addMergedRegion(new CellRangeAddress(rowCount, rowCount, 0, amministratore ? 4 : 6));
+
+        c = riga.createCell(amministratore ? 5 : 7);
+        c.setCellValue(Utility.arrotonda(totaleOre, 2));
         c.setCellType(Cell.CELL_TYPE_NUMERIC);
         c.setCellStyle(cs);
 
-       /* c = riga.createCell(3);
-        c.setCellValue(Utility.arrotonda(val.getAsDouble(Manodopera.COSTO_ORARIO), 2));
-        c.setCellType(Cell.CELL_TYPE_NUMERIC);
-        c.setCellStyle(currencyCellStyle);
-
-        c = riga.createCell(4);
-        double tot = val.getAsDouble(Manodopera.COSTO_ORARIO)  * val.getAsDouble(RapportiniDettaglio.ORE);
-        String cellaQta = "C" + (rowCount + 1);
-        String cellaPrezzo = "D" + (rowCount + 1);
-        c.setCellFormula("PRODUCT(" + cellaQta + ":" + cellaPrezzo + ")");
-        c.setCellValue(Utility.arrotonda(tot, 2));
-        c.setCellType(Cell.CELL_TYPE_FORMULA);
-        c.setCellStyle(currencyCellStyle);*/
-
-
+        if (amministratore) {
+            CellStyle csCosto = wb.createCellStyle();
+            csCosto.cloneStyleFrom(cs);
+            csCosto.setDataFormat(wb.createDataFormat().getFormat("#,##0.00"));
+            c = riga.createCell(7);
+            c.setCellValue(Utility.arrotonda(totaleCosto, 2));
+            c.setCellType(Cell.CELL_TYPE_NUMERIC);
+            c.setCellStyle(csCosto);
+        }
 
         rowCount++;
     }
@@ -349,7 +406,13 @@ public class RapportinoXLS {
 
         String testoClienteCantiere = ctx.getResources().getString(R.string.cliente).toUpperCase(Locale.getDefault());
 
-        testoClienteCantiere = testoClienteCantiere + ": " + val.getAsString(Anagrafica.RAGIONE_SOCIALE) + "\n" + ctx.getResources().getString(R.string.ordine_num_del,val.getAsString(Preventivi.NUMERO), Utility.numberToData(val.getAsLong(Preventivi.DATA))).toUpperCase(Locale.getDefault());
+        String cliente = val.getAsString(Anagrafica.RAGIONE_SOCIALE) != null ? val.getAsString(Anagrafica.RAGIONE_SOCIALE) : "";
+        String cantiere = val.getAsString("nome_cantiere") != null ? val.getAsString("nome_cantiere") : "";
+        testoClienteCantiere = testoClienteCantiere + ": " + cliente + "\n"
+                + ctx.getResources().getString(R.string.cantiere).toUpperCase(Locale.getDefault()) + ": " + cantiere;
+        if (val.getAsString(Preventivi.NUMERO) != null && val.getAsLong(Preventivi.DATA) != null) {
+            testoClienteCantiere = testoClienteCantiere + "\n" + ctx.getResources().getString(R.string.ordine_num_del,val.getAsString(Preventivi.NUMERO), Utility.numberToData(val.getAsLong(Preventivi.DATA))).toUpperCase(Locale.getDefault());
+        }
         c = row.createCell(0);
         c.setCellValue(testoClienteCantiere);
         c.setCellStyle(csBluBold);
@@ -399,11 +462,21 @@ public class RapportinoXLS {
         c = row.createCell(3);
         c.setCellValue(ctx.getResources().getString(R.string.tipo).toUpperCase(Locale.getDefault()));
         c.setCellStyle(cs);
-        sheet1.addMergedRegion(new CellRangeAddress(rowCount, rowCount, 3, 6));
+        sheet1.addMergedRegion(new CellRangeAddress(rowCount, rowCount, 3, amministratore ? 4 : 6));
 
-        c = row.createCell(7);
+        c = row.createCell(amministratore ? 5 : 7);
         c.setCellValue(ctx.getResources().getString(R.string.ore).toUpperCase(Locale.getDefault()));
         c.setCellStyle(cs);
+
+        if (amministratore) {
+            c = row.createCell(6);
+            c.setCellValue(ctx.getResources().getString(R.string.costo_orario).toUpperCase(Locale.getDefault()));
+            c.setCellStyle(cs);
+
+            c = row.createCell(7);
+            c.setCellValue(ctx.getResources().getString(R.string.totale).toUpperCase(Locale.getDefault()));
+            c.setCellStyle(cs);
+        }
 
        // c = row.createCell(3);
        // c.setCellValue(ctx.getResources().getString(R.string.costo_orario).toUpperCase(Locale.getDefault()));
@@ -419,55 +492,6 @@ public class RapportinoXLS {
         //sheet1.setColumnWidth(2, (15 * 200));
         //sheet1.setColumnWidth(3, (15 * 200));
         //sheet1.setColumnWidth(4, (15 * 200));
-
-
-        rowCount++;
-    }
-
-
-    private void _aggiungiRiga(ContentValues val) {
-        // TODO Auto-generated method stub
-
-
-
-        Row riga = sheet1.createRow(rowCount);
-
-        CellStyle cs = wb.createCellStyle();
-        cs.setWrapText(true);
-
-        CellStyle currencyCellStyle = wb.createCellStyle();
-        currencyCellStyle.setWrapText(true);
-
-        currencyCellStyle.setDataFormat(wb.createDataFormat().getFormat("#,##0.00"));
-
-        Cell c = riga.createCell(0);
-        c.setCellValue(val.getAsString(Manodopera.NOME));// CODICE ARTICOLO
-        c.setCellStyle(cs);
-
-        c = riga.createCell(1);
-        c.setCellValue(val.getAsString(RapportiniDettaglio.NOTE));
-        c.setCellStyle(cs);
-
-
-        c = riga.createCell(2);
-        c.setCellValue(val.getAsDouble(RapportiniDettaglio.ORE));
-        c.setCellType(Cell.CELL_TYPE_NUMERIC);
-        c.setCellStyle(cs);
-
-        c = riga.createCell(3);
-        c.setCellValue(Utility.arrotonda(val.getAsDouble(Manodopera.COSTO_ORARIO), 2));
-        c.setCellType(Cell.CELL_TYPE_NUMERIC);
-        c.setCellStyle(currencyCellStyle);
-
-        c = riga.createCell(4);
-        double tot = val.getAsDouble(Manodopera.COSTO_ORARIO)  * val.getAsDouble(RapportiniDettaglio.ORE);
-        String cellaQta = "C" + (rowCount + 1);
-        String cellaPrezzo = "D" + (rowCount + 1);
-        c.setCellFormula("PRODUCT(" + cellaQta + ":" + cellaPrezzo + ")");
-        c.setCellValue(Utility.arrotonda(tot, 2));
-        c.setCellType(Cell.CELL_TYPE_FORMULA);
-        c.setCellStyle(currencyCellStyle);
-
 
 
         rowCount++;

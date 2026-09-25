@@ -44,6 +44,13 @@ public interface MercuryApiService {
     @GET("api/mobile/ditta")
     Call<DittaSyncResponse> getDittaSync(@Query("versione") String versione);
 
+    /**
+     * Articoli di listino che spettano alla ditta (configurazione catalogo). Con `firma` uguale a quella del server
+     * arrivano solo gli articoli modificati da `since`, altrimenti l'elenco completo da sostituire (vedi CatalogoLocale).
+     */
+    @GET("api/mobile/catalogo")
+    Call<CatalogoResponse> getCatalogo(@Query("firma") String firma, @Query("since") String since);
+
     /** File del logo della ditta (404 se non presente). Da scaricare solo se il nome file e' cambiato. */
     @Streaming
     @GET("api/mobile/ditta/logo")
@@ -155,12 +162,27 @@ public interface MercuryApiService {
         public String nome;
         public String cognome;
         public java.util.List<DittaInfo> ditte;
-        /** Codici dei moduli (voci di menu) abilitati per l'utente, es. ["CLIENTI","PREVENTIVI",...] */
+        /** Codici dei moduli app concessi dai pacchetti licenza (più quelli di base), es. ["CLIENTI","PREVENTIVI",...] */
         public java.util.List<String> moduli;
+        /** Pacchetti licenza assegnati all'utente nella ditta, con stato e scadenza. */
+        public java.util.List<PacchettoInfo> pacchetti;
     }
 
+    /** GET api/auth/moduli: moduli app e pacchetti dell'utente nella ditta del token (chiamato a ogni apertura). */
     class ModuliResponse {
         public java.util.List<String> moduli;
+        public java.util.List<PacchettoInfo> pacchetti;
+    }
+
+    /** Pacchetto licenza assegnato: tipo "APP" o "WEB" (server), stato leggibile (Attiva, In scadenza, Scaduta, ...). */
+    class PacchettoInfo {
+        public String  nome;
+        public String  tipo;
+        public String  stato;
+        public boolean valido;
+        public String  scadenza;
+        public boolean canaleApp;
+        public boolean canaleWeb;
     }
 
     class DittaInfo {
@@ -174,6 +196,16 @@ public interface MercuryApiService {
         public String email;
         public DittaProfilo ditta;
         public LicenzaProfilo licenza;
+    }
+
+    class CatalogoResponse {
+        /** Impronta dell'elenco di articoli della ditta: da rimandare al prossimo allineamento */
+        public String  firma;
+        /** true = elenco completo, il listino locale va sostituito; false = solo articoli modificati */
+        public boolean completo;
+        /** Momento dell'allineamento sul server: da rimandare come `since` */
+        public String  timestamp;
+        public java.util.List<com.google.gson.JsonObject> articoli;
     }
 
     class DittaSyncResponse {

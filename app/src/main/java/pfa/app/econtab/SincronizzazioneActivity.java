@@ -50,6 +50,12 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     public static final String EXTRA_MODE    = "SYNC_MODE";
     public static final String MODE_DOWNLOAD = "download";
     public static final String MODE_UPLOAD   = "upload";
+    /**
+     * Allineamento all'apertura dell'app (dopo il login o con token/"Ricordami" validi): aggiorna moduli e
+     * pacchetti dal server, invia le modifiche locali, scarica i dati; al termine porta da sola al menu.
+     * Vedi utils.AccessoMercury.
+     */
+    public static final String MODE_AVVIO    = "avvio";
 
     // ── Colori stato ──────────────────────────────────────────────────────────
     private static final int COLOR_PENDING  = Color.parseColor("#BDBDBD");
@@ -75,6 +81,11 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "preventivi_dettaglio",     "Righe Preventivo" },
         { "rapportini",               "Rapportini" },
         { "rapportini_dettaglio",     "Righe Rapportino" },
+        { "rapportini_dettaglio_operatori", "Operatori Righe Rapportino" },
+        { "squadre",                  "Squadre" },
+        { "squadre_membri",           "Membri Squadre" },
+        { "pianificazione_assegnazioni", "Pianificazione" },
+        { "pianificazione_esclusioni",   "Esclusioni Pianificazione" },
         { "elementi",                 "Elementi" },
         { "elementi_cantiere",        "Elementi Cantiere" },
         { "elementi_codici",          "Codici Elementi" },
@@ -111,6 +122,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "preventivi_dettaglio",     "Righe Preventivo" },
         { "rapportini",               "Rapportini" },
         { "rapportini_dettaglio",     "Righe Rapportino" },
+        { "rapportini_dettaglio_operatori", "Operatori Righe Rapportino" },
         { "elementi_cantiere",        "Elementi Cantiere" },
         { "componenti_cantiere",      "Componenti Cantiere" },
         { "composizioni_cantiere",    "Composizioni Cantiere" },
@@ -138,6 +150,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             case "preventivi_dettaglio":     return "id_preventivo_dettaglio";
             case "rapportini":               return "id_rapportino";
             case "rapportini_dettaglio":     return "id_rapportino_dettaglio";
+            case "rapportini_dettaglio_operatori": return "id_rapportino_dettaglio_operatore";
             case "elementi_cantiere":        return "id_elemento_cant";
             case "componenti_cantiere":      return "id_componente_cant";
             case "collegamenti":             return "id_collegamento";
@@ -155,8 +168,10 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     // FK da aggiornare dopo rimappatura ID (tabella_padre, pk_padre, tabella_figlio, fk_figlio)
     private static final String[][] FK_CHILDREN = {
         {"anagrafica",        "id_anagrafica",    "cantieri",               "id_anagrafica"},
+        {"anagrafica",        "id_anagrafica",   "rapportini",            "id_cliente"},
         {"cantieri",          "id_cantiere",      "unita",                  "id_cantiere"},
         {"cantieri",          "id_cantiere",      "preventivi",             "id_cantiere"},
+        {"cantieri",          "id_cantiere",      "rapportini",             "id_cantiere"},
         {"cantieri",          "id_cantiere",      "elementi_cantiere",      "id_cantiere"},
         {"cantieri",          "id_cantiere",      "componenti_cantiere",    "id_cantiere"},
         {"unita",             "id_unita",         "aree",                   "id_unita"},
@@ -170,6 +185,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         {"preventivi",        "id_preventivo",    "elementi_cantiere",      "id_preventivo"},
         {"preventivi",        "id_preventivo",    "componenti_cantiere",    "id_preventivo"},
         {"rapportini",        "id_rapportino",    "rapportini_dettaglio",   "id_rapportino"},
+        {"rapportini_dettaglio", "id_rapportino_dettaglio", "rapportini_dettaglio_operatori", "id_rapportino_dettaglio"},
+        {"preventivi_dettaglio", "id_preventivo_dettaglio", "rapportini_dettaglio", "id_preventivo_dettaglio"},
         {"elementi_cantiere", "id_elemento_cant", "componenti_cantiere",    "id_elemento_cavo"},
         {"elementi_cantiere", "id_elemento_cant", "componenti_cantiere",    "id_elemento_tubo"},
         {"elementi_cantiere", "id_elemento_cant", "elementi_cantiere",      "id_elemento_cant_origine"},
@@ -206,6 +223,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     private final Set<String> tabelleConInServer = new HashSet<>();
     private int     tabelleCompletate  = 0;
     private boolean redirectingToLogin = false;
+    /** Modalità avvio: qualche passo è fallito, quindi non si va al menu da soli (resta il pulsante Continua). */
+    private volatile boolean erroreAvvio = false;
 
     // ── Costanti stato ────────────────────────────────────────────────────────
     private static final int STATO_PENDING   = 0;
@@ -223,7 +242,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sincronizzazione);
 
         String mode = getIntent().getStringExtra(EXTRA_MODE);
-        syncMode = (MODE_UPLOAD.equals(mode)) ? MODE_UPLOAD : MODE_DOWNLOAD;
+        syncMode = MODE_UPLOAD.equals(mode) || MODE_AVVIO.equals(mode) ? mode : MODE_DOWNLOAD;
 
         textSyncTitle       = findViewById(R.id.textSyncTitle);
         textSyncStatus      = findViewById(R.id.textSyncStatus);
@@ -233,7 +252,12 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         btnSincronizza      = findViewById(R.id.btnSincronizza);
         containerTabelle    = findViewById(R.id.containerTabelle);
 
-        if (MODE_UPLOAD.equals(syncMode)) {
+        if (MODE_AVVIO.equals(syncMode)) {
+            textSyncTitle.setText("Allineamento con il server");
+            btnSincronizza.setText("CONTINUA");
+            btnSincronizza.setVisibility(android.view.View.GONE);
+            aggiornaEtichettaUltimaSync();
+        } else if (MODE_UPLOAD.equals(syncMode)) {
             textSyncTitle.setText("Carica su server");
             btnSincronizza.setText("CARICA SU SERVER");
             textLastSync.setVisibility(android.view.View.GONE);
@@ -244,6 +268,11 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         }
 
         costruisciRighe();
+
+        if (MODE_AVVIO.equals(syncMode)) {
+            avviaAllineamento();
+            return;
+        }
 
         if (!TokenManager.getInstance(this).hasToken()) {
             btnSincronizza.setEnabled(false);
@@ -259,7 +288,64 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         }
     }
 
+    /** Avvio: senza token si torna al login; senza rete si prosegue con i dati del dispositivo. */
+    private void avviaAllineamento() {
+        if (!TokenManager.getInstance(this).hasToken()) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
+        if (!pfa.app.econtab.utils.Utility.isOnline(this)) {
+            setStatus("Nessuna connessione: si lavora con i dati già presenti sul dispositivo.", true);
+            mostraContinua();
+            uiHandler.postDelayed(this::vaiAlMenu, 2500);
+            return;
+        }
+        uiHandler.postDelayed(() -> avviaSincronizzazione(null), 300);
+    }
+
+    private void mostraContinua() {
+        uiHandler.post(() -> {
+            btnSincronizza.setVisibility(android.view.View.VISIBLE);
+            btnSincronizza.setEnabled(true);
+        });
+    }
+
+    private void vaiAlMenu() {
+        if (isFinishing() || isDestroyed()) return;
+        Intent intent = new Intent(this, MenuActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    /**
+     * Moduli app e pacchetti licenza dal server (GET api/auth/moduli): il menu dell'app mostra solo i
+     * moduli concessi dai pacchetti assegnati in Sonata.
+     */
+    private void aggiornaModuli(MercuryApiService api) throws Exception {
+        setStatus("Aggiornamento moduli e pacchetti...", false);
+        Response<MercuryApiService.ModuliResponse> resp = api.getModuli().execute();
+        if (resp.code() == 401) {
+            gestisci401();
+            return;
+        }
+        if (!resp.isSuccessful() || resp.body() == null) {
+            setStatus("Moduli non aggiornati: HTTP " + resp.code(), true);
+            return;
+        }
+        TokenManager tm = TokenManager.getInstance(this);
+        tm.saveModuli(resp.body().moduli);
+        tm.savePacchetti(resp.body().pacchetti);
+    }
+
     public void chiudi(View v) {
+        if (MODE_AVVIO.equals(syncMode)) {
+            vaiAlMenu();
+            return;
+        }
         if (getIntent().getBooleanExtra("FIRST_RUN", false)) {
             Intent intent = new Intent(this, MenuActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -298,6 +384,11 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     }
 
     public void avviaSincronizzazione(View v) {
+        // In avvio il pulsante è "Continua": porta al menu con i dati presenti.
+        if (MODE_AVVIO.equals(syncMode) && v != null) {
+            vaiAlMenu();
+            return;
+        }
         if (!TokenManager.getInstance(this).hasToken()) {
             setStatus("Nessun token JWT — esegui prima il login", true);
             return;
@@ -312,7 +403,12 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     private void eseguiSync() {
         try {
             MercuryApiService api = MercuryApiClient.getInstance(this).getService();
-            if (MODE_UPLOAD.equals(syncMode)) {
+            if (MODE_AVVIO.equals(syncMode)) {
+                erroreAvvio = false;
+                aggiornaModuli(api);
+                if (!redirectingToLogin) runUploadSync(api);
+                if (!redirectingToLogin) runDownloadSync(api);
+            } else if (MODE_UPLOAD.equals(syncMode)) {
                 runUploadSync(api);
             } else {
                 runDownloadSync(api);
@@ -321,7 +417,16 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             Log.e(TAG, "Errore sync", e);
             setStatus("Errore: " + e.getMessage(), true);
         } finally {
-            if (!redirectingToLogin) {
+            if (MODE_AVVIO.equals(syncMode)) {
+                if (!redirectingToLogin) {
+                    if (erroreAvvio) {
+                        mostraContinua();
+                    } else {
+                        setStatus("Allineamento completato ✓", false);
+                        uiHandler.postDelayed(this::vaiAlMenu, 1200);
+                    }
+                }
+            } else if (!redirectingToLogin) {
                 uiHandler.post(() -> btnSincronizza.setEnabled(true));
             }
         }
@@ -390,6 +495,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         db.close();
 
         sincronizzaDitta(api);
+        allineaCatalogo(api);
 
         setStatus("Eliminazioni...", false);
         try {
@@ -413,6 +519,25 @@ public class SincronizzazioneActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
             }, 2000);
+        }
+    }
+
+    /**
+     * Listino: solo gli articoli che spettano alla ditta (CatalogoLocale). Usa la riga "listini" della tabella, che la
+     * sync generale non riempie piu' (schema 24).
+     */
+    private void allineaCatalogo(MercuryApiService api) {
+        RigaTabella riga = righe.get("listini");
+        setStatus("Listino della ditta...", false);
+        aggiornaRiga(riga, STATO_IN_CORSO, 0, false);
+        try {
+            int ricevuti = pfa.app.econtab.utils.CatalogoLocale.allinea(this, api);
+            if (riga != null) riga.total = ricevuti;
+            aggiornaRiga(riga, ricevuti > 0 ? STATO_FATTO : STATO_SALTO, ricevuti, false);
+        } catch (Exception e) {
+            Log.w(TAG, "Allineamento catalogo", e);
+            if (riga != null) riga.errorMsg = e.getMessage();
+            aggiornaRiga(riga, STATO_ERRORE, 0, false);
         }
     }
 
@@ -845,7 +970,20 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     private void costruisciRighe() {
         LayoutInflater inflater = LayoutInflater.from(this);
 
-        if (MODE_UPLOAD.equals(syncMode)) {
+        if (MODE_AVVIO.equals(syncMode)) {
+            // Prima si inviano le modifiche locali, poi si scarica: entrambe le liste.
+            aggiungiIntestazione("↑  Dati da inviare a Mercury", Color.parseColor("#BF360C"));
+            for (String[] entry : TABELLE_UPLOAD) {
+                RigaTabella r = creaRiga(inflater, entry[0], entry[1]);
+                r.isUpload = true;
+                righeUpload.put(entry[0], r);
+            }
+            aggiungiIntestazione("↓  Dati da scaricare da Mercury", Color.parseColor("#1565C0"));
+            for (String[] entry : TABELLE) {
+                RigaTabella r = creaRiga(inflater, entry[0], entry[1]);
+                righe.put(entry[0], r);
+            }
+        } else if (MODE_UPLOAD.equals(syncMode)) {
             aggiungiIntestazione("↑  Dati da inviare a Mercury", Color.parseColor("#BF360C"));
             for (String[] entry : TABELLE_UPLOAD) {
                 RigaTabella r = creaRiga(inflater, entry[0], entry[1]);
@@ -1005,6 +1143,9 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     }
 
     private void setStatus(String msg, boolean isError) {
+        if (isError && MODE_AVVIO.equals(syncMode)) {
+            erroreAvvio = true;
+        }
         uiHandler.post(() -> {
             textSyncStatus.setText(msg);
             textSyncStatus.setTextColor(isError ? COLOR_ERROR : Color.parseColor("#333333"));
@@ -1086,6 +1227,10 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         pk.put("elementi_cantiere",    "id_elemento_cant = "        + chiaveRecord);
         pk.put("preventivi_dettaglio", "id_preventivo_dettaglio = " + chiaveRecord);
         pk.put("rapportini_dettaglio", "id_rapportino_dettaglio = " + chiaveRecord);
+        pk.put("rapportini_dettaglio_operatori", "id_rapportino_dettaglio_operatore = " + chiaveRecord);
+        for (String[] t : SyncUtil.TABELLE_SOLO_DOWNLOAD) {
+            pk.put(t[0], t[1] + " = " + chiaveRecord);
+        }
         pk.put("anagrafica",           "id_anagrafica = "           + chiaveRecord);
         pk.put("aree",                 "id_area = "                 + chiaveRecord);
         pk.put("componenti",           "id_componente = "           + chiaveRecord);

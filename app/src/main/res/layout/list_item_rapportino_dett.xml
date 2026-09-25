@@ -26,6 +26,16 @@
         style="@style/TestoPiccolo"
         android:text="Nota" />
 
+    <!-- Operatori della riga con le loro ore (e il costo, solo per l'Amministratore ditta) -->
+    <TextView
+        android:id="@+id/operatori"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/nota"
+        style="@style/TestoPiccolo"
+        android:textStyle="italic" />
+
     <TextView
         android:id="@+id/ore"
         android:layout_width="wrap_content"

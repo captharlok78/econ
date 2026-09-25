@@ -28,6 +28,7 @@ public class TokenManager {
     private static final String KEY_COGNOME    = "user_cognome";
     private static final String KEY_MODULI     = "moduli_abilitati";
     private static final String KEY_DITTE      = "ditte_abilitate";
+    private static final String KEY_PACCHETTI  = "pacchetti_assegnati";
     private static final String KEY_RICORDA_EMAIL    = "ricorda_email";
     private static final String KEY_RICORDA_PASSWORD  = "ricorda_password";
 
@@ -83,7 +84,29 @@ public class TokenManager {
                 .putString(KEY_COGNOME,    response.cognome)
                 .apply();
         saveModuli(response.moduli);
+        savePacchetti(response.pacchetti);
         saveDitte(response.ditte);
+    }
+
+    /** Pacchetti licenza assegnati (dal login o da GET api/auth/moduli), salvati come JSON. */
+    public void savePacchetti(java.util.List<MercuryApiService.PacchettoInfo> pacchetti) {
+        if (pacchetti == null) {
+            return;
+        }
+        prefs.edit().putString(KEY_PACCHETTI, new com.google.gson.Gson().toJson(pacchetti)).apply();
+    }
+
+    public java.util.List<MercuryApiService.PacchettoInfo> getPacchetti() {
+        String json = prefs.getString(KEY_PACCHETTI, "");
+        if (json.isEmpty()) {
+            return new java.util.ArrayList<>();
+        }
+        try {
+            MercuryApiService.PacchettoInfo[] arr = new com.google.gson.Gson().fromJson(json, MercuryApiService.PacchettoInfo[].class);
+            return new java.util.ArrayList<>(java.util.Arrays.asList(arr));
+        } catch (Exception e) {
+            return new java.util.ArrayList<>();
+        }
     }
 
     /**
@@ -219,6 +242,7 @@ public class TokenManager {
                 .remove(KEY_NOME)
                 .remove(KEY_COGNOME)
                 .remove(KEY_MODULI)
+                .remove(KEY_PACCHETTI)
                 .remove(KEY_DITTE)
                 .apply();
         clearCredenzialiRicordami();

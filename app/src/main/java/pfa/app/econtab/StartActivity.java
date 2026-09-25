@@ -17,12 +17,16 @@ import androidx.core.content.ContextCompat;
 import org.json.JSONObject;
 
 import pfa.app.econtab.api.TokenManager;
+import pfa.app.econtab.utils.AccessoMercury;
 import pfa.app.econtab.utils.Sessione;
+import pfa.app.econtab.utils.Utility;
 
 public class StartActivity extends EConTabActivity {
 
     private static final int REQUEST_PERMISSIONS = 1234;
     private static Handler splashHandler;
+    /** inizia() può arrivare sia dal timer dello splash sia dai tocchi: l'accesso va fatto una volta sola. */
+    private boolean avviato = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,22 +99,59 @@ public class StartActivity extends EConTabActivity {
     }
 
     private void inizia() {
+        if (avviato) return;
+        avviato = true;
         if (splashHandler != null) {
             splashHandler.removeCallbacksAndMessages(null);
             splashHandler = null;
         }
 
+        // Ad ogni apertura l'app si riallinea al server (moduli, pacchetti, dati) prima del menu:
+        // con "Ricordami" rifà l'accesso con le credenziali salvate, altrimenti usa il token ancora valido.
         TokenManager tm = TokenManager.getInstance(this);
-        if (tm.hasToken() && isTokenValid() && tm.getIdDitta() > 0) {
-            Sessione.setIdOperatore(tm.getUserId(), this);
-            Sessione.setDittaSelezionata(tm.getIdDitta());
-            Sessione.setNomeDittaSelezionata(tm.getNomeDitta());
-            Intent intent = new Intent(this, MenuActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
+        boolean tokenValido = tm.hasToken() && isTokenValid() && tm.getIdDitta() > 0;
+
+        if (tm.hasCredenzialiRicordami() && Utility.isOnline(this)) {
+            ((TextView) findViewById(R.id.textViewVersione)).setText("Accesso in corso...");
+            AccessoMercury.accediConCredenzialiRicordate(this, new AccessoMercury.Esito() {
+                @Override
+                public void accesso() {
+                    AccessoMercury.apriAllineamento(StartActivity.this);
+                    finish();
+                }
+
+                @Override
+                public void rifiutato(String messaggio) {
+                    android.widget.Toast.makeText(StartActivity.this, messaggio, android.widget.Toast.LENGTH_LONG).show();
+                    apriLogin();
+                }
+
+                @Override
+                public void erroreRete(String messaggio) {
+                    // Server non raggiungibile: si prosegue con i dati del dispositivo se il token vale ancora.
+                    if (tokenValido) {
+                        Sessione.ripristinaDaToken(StartActivity.this);
+                        AccessoMercury.apriAllineamento(StartActivity.this);
+                        finish();
+                    } else {
+                        apriLogin();
+                    }
+                }
+            });
+            return;
+        }
+
+        if (tokenValido) {
+            Sessione.ripristinaDaToken(this);
+            AccessoMercury.apriAllineamento(this);
         } else {
             startActivity(new Intent(this, LoginActivity.class));
         }
+        finish();
+    }
+
+    private void apriLogin() {
+        startActivity(new Intent(this, LoginActivity.class));
         finish();
     }
 

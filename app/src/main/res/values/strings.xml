@@ -496,4 +496,31 @@
     <string name="LANGUAGES_ALLARMI">Allarmi</string>
     <string name="LANGUAGES_CAVI">Cavi</string>
     <string name="LANGUAGES_TUBI">Tubi</string>
+    <!-- Rapportini: cantiere, ordine facoltativo e operatori per riga -->
+    <string name="ordine_facoltativo">Ordine (facoltativo)</string>
+    <string name="nessun_ordine">Nessun ordine</string>
+    <string name="nessun_cantiere_rapportino">Nella settimana di questa data non risulti pianificato su nessun cantiere: puoi fare il rapportino solo per un cliente, oppure controlla la data o sincronizza la pianificazione.</string>
+    <string name="operatori_non_scaricati">L\'elenco degli operatori della ditta non è ancora stato scaricato: esegui una sincronizzazione.</string>
+    <string name="ore_uomo">Ore-uomo</string>
+    <string name="pianificato">pianificato</string>
+    <string name="solo_ore_proprie">Puoi registrare ore solo su te stesso</string>
+    <string name="costo_euro">Costo €</string>
+    <!-- Rapportini: cliente/cantiere/ordine (almeno uno), righe di lavoro e di viaggio -->
+    <string name="cantiere_facoltativo">Cantiere (facoltativo)</string>
+    <string name="nessun_cliente">Nessun cliente</string>
+    <string name="nessun_cantiere">Nessun cantiere</string>
+    <string name="errore_riferimento_rapportino">Indica almeno un cliente, un cantiere o un ordine</string>
+    <string name="tipo_viaggio_andata">Viaggio andata</string>
+    <string name="tipo_lavoro">Lavoro</string>
+    <string name="tipo_viaggio_ritorno">Viaggio ritorno</string>
+    <string name="ora_inizio">Dalle</string>
+    <string name="ora_fine">Alle</string>
+    <string name="durata_ore">Ore (durata)</string>
+    <string name="a_costo">A costo</string>
+    <string name="non_a_costo">non a costo</string>
+    <string name="riga_ordine">Riga dell\'ordine</string>
+    <string name="extra_ordine">Extra ordine (non imputato)</string>
+    <string name="descrizione_lavoro_obbligatoria">Descrivi il lavoro svolto</string>
+    <string name="orari_non_validi">L\'ora di fine deve essere dopo l\'ora di inizio</string>
+    <string name="pulisci">Pulisci</string>
 </resources>

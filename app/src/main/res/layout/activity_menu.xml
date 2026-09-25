@@ -46,6 +46,16 @@
             android:layout_height="1dp"
             android:layout_weight="1" />
 
+        <!-- Data di oggi (impostata in MenuActivity) -->
+        <TextView
+            android:id="@+id/textDataOggi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:text=""
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="36dp"
@@ -63,6 +73,45 @@
             android:textStyle="bold"
             android:letterSpacing="0.08" />
 
+    </LinearLayout>
+
+    <!-- Micro dashboard, una riga: cantieri pianificati oggi per l'utente collegato (tocco = dettaglio),
+         icona calendario = pianificazione della settimana -->
+    <LinearLayout
+        android:id="@+id/rigaOggi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp"
+        android:background="#E3F2FD"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/textOggi"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:textColor="#0D47A1"
+            android:textSize="14sp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:onClick="apriDettaglioOggi" />
+
+        <ImageButton
+            android:id="@+id/buttonCalendario"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="8dp"
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_calendario"
+            android:contentDescription="Pianificazione della settimana"
+            android:onClick="apriCalendarioSettimana" />
     </LinearLayout>
 
     <!-- Griglia menu (costruita dinamicamente in MenuActivity) -->

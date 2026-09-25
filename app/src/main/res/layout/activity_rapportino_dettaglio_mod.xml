@@ -71,6 +71,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
 
+                        <!-- Cliente, cantiere e ordine: almeno uno. Il cantiere porta il suo cliente, l'ordine il suo cantiere. -->
                         <TextView
                             android:id="@+id/textView_cliente"
                             style="@style/TestoIntestazione"
@@ -78,17 +79,26 @@
                             android:layout_height="wrap_content"
                             android:text="@string/cliente" />
 
-                        <AutoCompleteTextView
-                            android:id="@+id/editText_cliente"
+                        <pfa.app.econtab.views.EConTabSpinner
+                            android:id="@+id/spinner_clienti"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/seleziona_cliente"
-                            android:ems="10" >
-
-                            <requestFocus />
-                        </AutoCompleteTextView>
+                            android:layout_height="wrap_content" />
                     </LinearLayout>
                 </LinearLayout>
+
+                <!-- Solo i cantieri su cui l'utente e' pianificato nella settimana della data (vedi RegoleRapportino) -->
+                <TextView
+                    android:id="@+id/textView_cantiere"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="@string/cantiere_facoltativo" />
+
+                <pfa.app.econtab.views.EConTabSpinner
+                    android:id="@+id/spinner_cantieri"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
                 <TextView
                     android:id="@+id/textView_ordine"
@@ -96,7 +106,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/margine"
-                    android:text="@string/ordine" />
+                    android:text="@string/ordine_facoltativo" />
 
                 <pfa.app.econtab.views.EConTabSpinner
                     android:id="@+id/spinner_ordini"

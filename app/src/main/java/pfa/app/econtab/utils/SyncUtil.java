@@ -26,7 +26,7 @@ public final class SyncUtil {
 
     /** Tabelle locali con una colonna unita' di misura (chiave esterna verso unita_misura sul server). */
     private static final String[] TABELLE_CON_UNITA_MISURA = { "elementi", "componenti", "elementi_cantiere",
-            "componenti_cantiere", "preventivi_dettaglio", "manodopera", "rapportini_dettaglio" };
+            "componenti_cantiere", "preventivi_dettaglio", "manodopera" };
 
     /** Valori liberi usati in passato dall'app -> codice attuale (stessa mappatura della migrazione server). */
     private static final Map<String, String> SINONIMI_UNITA_MISURA = new HashMap<String, String>();
@@ -101,6 +101,12 @@ public final class SyncUtil {
             ContentValues aggiorna = new ContentValues();
             aggiorna.put("nome", nome);
             aggiorna.put("cognome", cognome);
+            // Appartenenza alla ditta e ruolo (server con schema 23); il costo orario arriva solo all'Amministratore
+            // ditta: per gli altri si azzera, cosi' non resta un valore scaricato quando l'utente lo vedeva.
+            aggiorna.put("id_utente_ditta", intero(r, "id_utente_ditta"));
+            aggiorna.put("operatore", intero(r, "operatore"));
+            aggiorna.put("amministratore", intero(r, "amministratore"));
+            aggiorna.put("costo_orario", r.has("costo_orario") && !r.get("costo_orario").isJsonNull() ? r.get("costo_orario").getAsDouble() : 0);
             int toccate = db.update(TABELLA_OPERATORI, aggiorna, "id_utente = ?", new String[] { String.valueOf(id) });
             if (toccate == 0) {
                 ContentValues nuovo = new ContentValues(aggiorna);
@@ -120,6 +126,45 @@ public final class SyncUtil {
                     + " AND id_utente NOT IN (" + ids + ")");
         }
         return n;
+    }
+
+    private static int intero(com.google.gson.JsonObject r, String campo) {
+        if (!r.has(campo) || r.get(campo).isJsonNull()) return 0;
+        com.google.gson.JsonPrimitive p = r.get(campo).getAsJsonPrimitive();
+        return p.isBoolean() ? (p.getAsBoolean() ? 1 : 0) : p.getAsInt();
+    }
+
+    /**
+     * Tabelle che il server invia in sola lettura (squadre e pianificazione, per scegliere cantiere e operatori dei
+     * rapportini) con la loro chiave primaria: servono per applicare le cancellazioni fatte sul server.
+     */
+    public static final String[][] TABELLE_SOLO_DOWNLOAD = {
+        { "squadre",                     "id_squadra" },
+        { "squadre_membri",              "id" },
+        { "pianificazione_assegnazioni", "id" },
+        { "pianificazione_esclusioni",   "id" },
+    };
+
+    /** Chiave primaria delle tabelle sola lettura, null per le altre. */
+    public static String pkTabellaSoloDownload(String tabella) {
+        for (String[] t : TABELLE_SOLO_DOWNLOAD) {
+            if (t[0].equals(tabella)) return t[1];
+        }
+        return null;
+    }
+
+    /**
+     * True se il record locale con quella chiave ha modifiche non ancora inviate (in_server=0): il download non
+     * deve sovrascriverlo, verra' caricato con l'upload.
+     */
+    public static boolean isModificatoInLocale(SQLiteDatabase db, String tabella, String pkCol, ContentValues cv) {
+        if (pkCol == null || !cv.containsKey(pkCol) || cv.get(pkCol) == null) return false;
+        try (Cursor c = db.rawQuery("SELECT in_server FROM " + tabella + " WHERE " + pkCol + " = ?",
+                new String[] { cv.getAsString(pkCol) })) {
+            return c.moveToFirst() && !c.isNull(0) && c.getInt(0) == 0;
+        } catch (Exception e) {
+            return false; // tabella senza in_server
+        }
     }
 
     /** Svuota la tabella prima di applicare un elenco completo. Con un elenco vuoto non tocca nulla (errore/assenza dati). */

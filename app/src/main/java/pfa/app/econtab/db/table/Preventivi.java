@@ -528,8 +528,19 @@ public class Preventivi extends AbstractTable {
         return db.eseguiSelect(SQL, null);
     }
 
+    /**
+     * Ordini aperti del cantiere, dal piu' recente. idOrdineSempreIncluso (0 = nessuno) resta in elenco anche se non
+     * piu' aperto, per non perdere l'ordine di un rapportino gia' esistente.
+     */
+    public ArrayList<Object> getOrdiniCantiere(DbInterno db, int idCantiere, int idOrdineSempreIncluso) {
+        String SQL = "Select * from " + NOME_TABELLA + " where " + ID_CANTIERE + " = " + idCantiere + " and " + TIPO + "='" + TIPO_ORDINE + "'"
+                + " and (" + STATO + "='" + STATO_APERTO + "'" + (idOrdineSempreIncluso > 0 ? " or " + ID_PREVENTIVO + "=" + idOrdineSempreIncluso : "") + ")"
+                + " order by " + DATA + " desc";
+        return db.eseguiSelect(SQL, null);
+    }
+
 	/**
-	 * spsota tutti gli elementi_cantiere ,i componenti_cantiere e i collegamenti dall'ordine al cantiere
+	 * spsota tutti gli elementi_cantiere,i componenti_cantiere e i collegamenti dall'ordine al cantiere
 	 * @param db
 	 * @param idOrdine
      */

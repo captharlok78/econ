@@ -265,7 +265,7 @@ public class PreventiviDettaglioAdapter extends DettaglioTabellaAdapter {
 				tv.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View view) {
-						_mostraRapportiniRiga(val.getAsInteger(PreventiviDettaglio.ID_PREVENTIVO), val.getAsInteger(PreventiviDettaglio.ID_MANODOPERA));
+						_mostraRapportiniRiga(val.getAsInteger(PreventiviDettaglio.ID_PREVENTIVO), val.getAsInteger(PreventiviDettaglio.ID_PREVENTIVO_DETTAGLIO));
 					}
 				});
 			} else {
@@ -404,12 +404,13 @@ public class PreventiviDettaglioAdapter extends DettaglioTabellaAdapter {
 		notifyDataSetChanged();
 	}
 
-    private void _mostraRapportiniRiga(int idOrdine, int idManodopera) {
+    /** Rapportini con righe imputate a questa riga dell'ordine. */
+    private void _mostraRapportiniRiga(int idOrdine, int idRigaOrdine) {
         DbInterno db = new DbInterno(context);
         Join j0 = new Join(Rapportini.NOME_TABELLA,RapportiniDettaglio.NOME_TABELLA);
         j0.addCampiDiJoin(Rapportini.ID_RAPPORTINO,RapportiniDettaglio.ID_RAPPORTINO);
 
-        String SQL = "Select distinct "+Rapportini.NOME_TABELLA+".* from "+ Rapportini.NOME_TABELLA+ j0.getSQLJoin()+" where "+Rapportini.ID_ORDINE+"="+idOrdine+" and "+RapportiniDettaglio.ID_MANODOPERA+"="+idManodopera;
+        String SQL = "Select distinct "+Rapportini.NOME_TABELLA+".* from "+ Rapportini.NOME_TABELLA+ j0.getSQLJoin()+" where "+Rapportini.ID_ORDINE+"="+idOrdine+" and "+RapportiniDettaglio.NOME_TABELLA+"."+RapportiniDettaglio.ID_PREVENTIVO_DETTAGLIO+"="+idRigaOrdine;
         final ArrayList<Object> rapp = db.eseguiSelect(SQL,null);
 
         db.close();
