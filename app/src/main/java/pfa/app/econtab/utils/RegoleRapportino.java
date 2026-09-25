@@ -16,6 +16,8 @@ import pfa.app.econtab.db.table.PianificazioneAssegnazioni;
 import pfa.app.econtab.db.table.PianificazioneEsclusioni;
 import pfa.app.econtab.db.table.Squadre;
 import pfa.app.econtab.db.table.SquadreMembri;
+import pfa.app.econtab.db.table.StatiDocumento;
+import pfa.app.econtab.db.table.StatiDocumentoTransizioni;
 import pfa.app.econtab.db.table.Utenti;
 
 /**
@@ -216,6 +218,83 @@ public final class RegoleRapportino {
     private static int intero(ContentValues cv, String campo) {
         Integer v = cv.getAsInteger(campo);
         return v != null ? v : 0;
+    }
+
+    // ── Prezzi e stati (GESTIONE_RAPPORTINI.md §9 e §10) ────────────────────────────────────────────────────────
+
+    /**
+     * Prezzo e "a costo" delle righe: li vedono e li impostano solo l'amministratore, i coordinatori di una squadra attiva
+     * e l'unico operatore della ditta (come PermessiRapportini::vedePrezzi() del server, che scarta i valori degli altri).
+     */
+    public static boolean vedePrezzi(DbInterno db, Utente utente) {
+        if (utente.amministratore) return true;
+        if (utente.idUtenteDitta == 0) return false;
+        if (!interi(db, "select 1 from " + Squadre.NOME_TABELLA + " where " + Squadre.ID_COORDINATORE + "=" + utente.idUtenteDitta
+                + " and " + Squadre.ATTIVA + "=1 and " + Squadre.ID_DITTA + "=" + Sessione.getDittaSelezionata()).isEmpty()) {
+            return true;
+        }
+        return interi(db, "select " + Utenti.ID_UTENTE_DITTA + " from " + Utenti.NOME_TABELLA + " where " + Utenti.ID_UTENTE_DITTA + ">0").size() == 1;
+    }
+
+    /**
+     * Colore del badge di uno stato: sul server e' un colore Bootstrap (primary, success...) oppure un codice #rrggbb;
+     * vuoto o sconosciuto = grigio.
+     */
+    public static int coloreStato(String colore) {
+        String c = colore != null ? colore.trim().toLowerCase(java.util.Locale.ROOT) : "";
+        switch (c) {
+            case "primary": return android.graphics.Color.parseColor("#0D6EFD");
+            case "secondary": return android.graphics.Color.parseColor("#6C757D");
+            case "success": return android.graphics.Color.parseColor("#198754");
+            case "info": return android.graphics.Color.parseColor("#0AA2C0");
+            case "warning": return android.graphics.Color.parseColor("#E0A800");
+            case "danger": return android.graphics.Color.parseColor("#DC3545");
+            case "dark": return android.graphics.Color.parseColor("#212529");
+        }
+        try {
+            return android.graphics.Color.parseColor(c.startsWith("#") ? c : "#" + c);
+        } catch (IllegalArgumentException e) {
+            return android.graphics.Color.parseColor("#6C757D");
+        }
+    }
+
+    /** Stato con quell'id (null se non c'e': stati non ancora scaricati, o documento vecchio senza stato). */
+    public static ContentValues stato(DbInterno db, int idStato) {
+        return idStato > 0 ? db.getRecord("select * from " + StatiDocumento.NOME_TABELLA + " where " + StatiDocumento.ID + "=" + idStato) : null;
+    }
+
+    /** Stato iniziale dei rapportini (null se gli stati non sono ancora scaricati: il server lo assegna all'invio). */
+    public static ContentValues statoIniziale(DbInterno db) {
+        return db.getRecord("select * from " + StatiDocumento.NOME_TABELLA + " where " + StatiDocumento.AMBITO + "='"
+                + StatiDocumento.AMBITO_RAPPORTINI + "' and " + StatiDocumento.INIZIALE + "=1");
+    }
+
+    public static ContentValues statoPerCodice(DbInterno db, String codice) {
+        return db.getRecord("select * from " + StatiDocumento.NOME_TABELLA + " where " + StatiDocumento.AMBITO + "='"
+                + StatiDocumento.AMBITO_RAPPORTINI + "' and " + StatiDocumento.CODICE + "='" + codice + "'");
+    }
+
+    /** Senza stato (non ancora scaricato) il rapportino si tratta come in bozza. */
+    public static boolean isModificabile(ContentValues stato) {
+        return stato == null || intero(stato, StatiDocumento.MODIFICABILE) == 1;
+    }
+
+    public static boolean isCancellabile(ContentValues stato) {
+        return stato == null || intero(stato, StatiDocumento.CANCELLABILE) == 1;
+    }
+
+    /** Passaggio ammesso tra due stati (quelli riservati all'amministratore solo per lui). */
+    public static boolean passaggioAmmesso(DbInterno db, int idStatoDa, int idStatoA, Utente utente) {
+        if (idStatoDa == idStatoA) return true;
+        if (idStatoDa <= 0) { // documento nuovo o senza stato: dall'iniziale
+            ContentValues iniziale = statoIniziale(db);
+            if (iniziale == null) return false;
+            idStatoDa = intero(iniziale, StatiDocumento.ID);
+            if (idStatoDa == idStatoA) return true;
+        }
+        return !interi(db, "select 1 from " + StatiDocumentoTransizioni.NOME_TABELLA + " where " + StatiDocumentoTransizioni.ID_STATO_DA
+                + "=" + idStatoDa + " and " + StatiDocumentoTransizioni.ID_STATO_A + "=" + idStatoA
+                + (utente.amministratore ? "" : " and coalesce(" + StatiDocumentoTransizioni.SOLO_AMMINISTRATORE + ",0)=0")).isEmpty();
     }
 
     /** Nome dell'operatore con quell'id_utente_ditta, "" se non e' tra gli operatori scaricati. */

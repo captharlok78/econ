@@ -11,7 +11,8 @@ public class Rapportini extends AbstractTable {
 	public static final String NOME_TABELLA = "rapportini";
 
 
-	public static final String ID_RAPPORTINO = "id_rapportino";
+	/** Dallo schema 26 la tabella usa i nomi del server (GESTIONE_RAPPORTINI.md §11.4): chiave "id". */
+	public static final String ID = "id";
     public static final String ID_DITTA = "id_ditta";
     /**
      * Cliente, cantiere e ordine: facoltativi ma almeno uno. Con l'ordine il cantiere e' quello dell'ordine, con il
@@ -22,6 +23,8 @@ public class Rapportini extends AbstractTable {
     public static final String ID_ORDINE = "id_ordine";
     /** Autore del rapportino come persona della ditta (utenti.id_utente_ditta). */
     public static final String ID_UTENTE_DITTA = "id_utente_ditta";
+    /** Stato del documento (stati_documento, ambito "rapportini"): decide se si modifica o si cancella. */
+    public static final String ID_STATO = "id_stato";
     public static final String DATA_RAPPORTINO = "data_rapportino";
     public static final String NOTE = "note";
 
@@ -32,14 +35,15 @@ public class Rapportini extends AbstractTable {
 
 	public Rapportini() {
 		setNomeTabella(NOME_TABELLA);
-		setCampoNumeratore(ID_RAPPORTINO);
+		setCampoNumeratore(ID);
 
-		aggiungiCampo(ID_RAPPORTINO, INTEGER);
+		aggiungiCampo(ID, INTEGER);
         aggiungiCampo(ID_DITTA, INTEGER);
         aggiungiCampo(ID_CLIENTE, INTEGER);
         aggiungiCampo(ID_CANTIERE, INTEGER);
         aggiungiCampo(ID_ORDINE, INTEGER);
         aggiungiCampo(ID_UTENTE_DITTA, INTEGER);
+        aggiungiCampo(ID_STATO, INTEGER);
         aggiungiCampo(DATA_RAPPORTINO, DATE);
         aggiungiCampo(NOTE, TEXT);
 
@@ -49,7 +53,7 @@ public class Rapportini extends AbstractTable {
 		aggiungiCampo(DATA_MOD, DATE);
 		aggiungiCampo(IN_SERVER, INTEGER);
 
-		aggiungiCampoChiave(ID_RAPPORTINO);
+		aggiungiCampoChiave(ID);
 	}
 
 
@@ -65,9 +69,22 @@ public class Rapportini extends AbstractTable {
     }
 
 
+    /** Si cancella solo in uno stato cancellabile (GESTIONE_RAPPORTINI.md §10; il server fa lo stesso controllo). */
+    @Override
+    public boolean cancellazionePossibile(DbInterno db, ContentValues val, android.content.Context ctx) {
+        Integer idStato = val.getAsInteger(ID_STATO);
+        ContentValues stato = pfa.app.econtab.utils.RegoleRapportino.stato(db, idStato != null ? idStato : 0);
+        if (!pfa.app.econtab.utils.RegoleRapportino.isCancellabile(stato)) {
+            pfa.app.econtab.utils.Utility.mostraDialog(ctx.getString(pfa.app.econtab.R.string.attenzione), ctx.getString(
+                    pfa.app.econtab.R.string.rapportino_non_cancellabile, stato.getAsString(StatiDocumento.NOME)), ctx, "OK");
+            return false;
+        }
+        return super.cancellazionePossibile(db, val, ctx);
+    }
+
     @Override
     protected void eliminaCorrelati(DbInterno db, ContentValues val) {
-        int rapportino = val.getAsInteger(ID_RAPPORTINO);
+        int rapportino = val.getAsInteger(ID);
         RapportiniDettaglio tabRappDett = new RapportiniDettaglio();
         ContentValues where = new ContentValues();
         where.put(RapportiniDettaglio.ID_RAPPORTINO, rapportino);

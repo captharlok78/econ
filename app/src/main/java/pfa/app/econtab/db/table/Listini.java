@@ -11,6 +11,8 @@ public class Listini extends AbstractTable {
 	public static final String NOME_TABELLA = "listini";
 
 	public static final String CODICE_ARTICOLO = "codice_articolo";
+	/** Id sul server: le righe di materiale dei rapportini (schema 26) vi fanno riferimento con id_listino. */
+	public static final String ID = "id";
 	public static final String ID_COSTRUTTORE = "id_costruttore";
 	public static final String ID_LINEA = "id_linea";
 	public static final String DESCRIZIONE = "descrizione";
@@ -22,6 +24,7 @@ public class Listini extends AbstractTable {
 		setNomeTabella(NOME_TABELLA);
 
 		aggiungiCampo(CODICE_ARTICOLO, TEXT);
+		aggiungiCampo(ID, INTEGER);
 		aggiungiCampo(ID_COSTRUTTORE, INTEGER);
 		aggiungiCampo(ID_LINEA, INTEGER);
 		aggiungiCampo(DESCRIZIONE, TEXT);

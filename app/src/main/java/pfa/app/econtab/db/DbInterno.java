@@ -49,7 +49,9 @@ import pfa.app.econtab.db.table.Preventivi;
 import pfa.app.econtab.db.table.PreventiviDettaglio;
 import pfa.app.econtab.db.table.Rapportini;
 import pfa.app.econtab.db.table.RapportiniDettaglio;
-import pfa.app.econtab.db.table.RapportiniDettaglioOperatori;
+import pfa.app.econtab.db.table.RapportiniDettaglioTipi;
+import pfa.app.econtab.db.table.StatiDocumento;
+import pfa.app.econtab.db.table.StatiDocumentoTransizioni;
 import pfa.app.econtab.db.table.Relazioni;
 import pfa.app.econtab.db.table.Squadre;
 import pfa.app.econtab.db.table.SquadreMembri;
@@ -63,7 +65,7 @@ import pfa.app.econtab.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECONTAB.db";
 	public static final String DATABASE_NAME_ZIP = ".econtab.db";
-	public static final int SCHEMA_VERSION = 25;
+	public static final int SCHEMA_VERSION = 26;
 
 	private Context cont = null;
 
@@ -126,7 +128,7 @@ public class DbInterno extends SQLiteOpenHelper {
         db.execSQL(new Relazioni().getSQL_create());
         db.execSQL(new Rapportini().getSQL_create());
         db.execSQL(new RapportiniDettaglio().getSQL_create());
-        creaTabelleRapportiniOperatori(db);
+        creaTabelleSquadreERapportini(db);
 
         db.execSQL(new Utenti().getSQL_create());
         db.execSQL(new UtentiDitta().getSQL_create());
@@ -186,7 +188,7 @@ public class DbInterno extends SQLiteOpenHelper {
         db.execSQL(new Relazioni().getSQL_create());
         db.execSQL(new Rapportini().getSQL_create());
         db.execSQL(new RapportiniDettaglio().getSQL_create());
-        creaTabelleRapportiniOperatori(db);
+        creaTabelleSquadreERapportini(db);
 		db.execSQL(new AssCodiciLinee().getSQL_create());
 		db.execSQL(new IconeModificate().getSQL_create());
 
@@ -398,7 +400,7 @@ public class DbInterno extends SQLiteOpenHelper {
 				db.execSQL("Alter table " + Utenti.NOME_TABELLA + " add column " + Utenti.OPERATORE + " INTEGER");
 				db.execSQL("Alter table " + Utenti.NOME_TABELLA + " add column " + Utenti.AMMINISTRATORE + " INTEGER");
 				db.execSQL("Alter table " + Utenti.NOME_TABELLA + " add column " + Utenti.COSTO_ORARIO + " NUMERIC");
-				creaTabelleRapportiniOperatori(db);
+				creaTabelleSquadre(db);
 				// Il server invia le tabelle nuove solo alle app con schema 23: i record creati prima dell'aggiornamento
 				// (squadre, pianificazione, operatori delle righe) non arriverebbero mai con il download incrementale.
 				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
@@ -424,59 +426,76 @@ public class DbInterno extends SQLiteOpenHelper {
 			}
 		}
 
-		if (oldVersion<25){
+		// Schema 25 (cliente/autore/righe con tipo): la conversione dei rapportini la fa ora il blocco 26, che legge le
+		// colonne presenti e parte da qualunque versione precedente.
+
+		if (oldVersion<26){
 			if (oldVersion<newVersion){
-				ricostruisciRapportini25(db);
-				// il server ha migrato i rapportini (cliente, autore, righe): download completo una tantum per riceverli
+				ricostruisciRapportini26(db);
+				// il server usa la riga unica e i nomi del server per i rapportini: download completo una tantum, e anche il
+				// listino si riscarica per ricevere gli id degli articoli
 				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
+				pfa.app.econtab.utils.CatalogoLocale.cancella(getContext());
 			}
 		}
 	}
 
 	/**
-	 * Schema 25 (STUDIO_PIANIFICAZIONE_E_LAVORI §9): stessa migrazione del server Version20260925150000.
-	 * Testata: id_cliente (cliente del cantiere) e autore id_utente_ditta al posto di id_operatore.
-	 * Righe: tipo (LA/VA/VR), orari, a_costo, descrizione (nome della manodopera o, se mancava, la nota) e riga
-	 * d'ordine; tolti id_manodopera, ore e unita_misura (le ore sono solo sugli operatori della riga).
-	 * SQLite non toglie colonne: le due tabelle si ricreano e i dati si ricopiano, tenendo in_server e date.
+	 * Schema 26 (GESTIONE_RAPPORTINI.md §1.2, §11.4): rapportini e righe con i nomi del server, stato del documento, riga unica
+	 * (tipo, utente della manodopera, quantita' + unita' di misura, articolo, prezzo, a costo), tabelle in sola lettura dei tipi
+	 * di riga e degli stati; id del server in unita_misura e listini. Parte da qualunque versione precedente leggendo le colonne
+	 * presenti. Le testate si convertono (restano quelle non ancora inviate); le righe gia' sul server si scartano e tornano con
+	 * il download completo; quelle non inviate non si possono convertire (mancano tipi e unita' del server) e restano da parte
+	 * in rapportini_dettaglio_old25, senza sincronizzarsi.
 	 */
-	private void ricostruisciRapportini25(SQLiteDatabase db) {
+	private void ricostruisciRapportini26(SQLiteDatabase db) {
 		String r = Rapportini.NOME_TABELLA;
 		List<String> colR = getTableColumns(db, r);
 		db.execSQL("ALTER TABLE " + r + " RENAME TO " + r + "_old");
 		db.execSQL(new Rapportini().getSQL_create());
-		String autore = colR.contains("id_operatore")
-				? "(select u." + Utenti.ID_UTENTE_DITTA + " from " + Utenti.NOME_TABELLA + " u where u." + Utenti.ID_UTENTE + "=o.id_operatore)"
-				: (colR.contains(Rapportini.ID_UTENTE_DITTA) ? "o." + Rapportini.ID_UTENTE_DITTA : "0");
-		db.execSQL("INSERT INTO " + r + " (id_rapportino, id_ditta, id_cliente, id_cantiere, id_ordine, id_utente_ditta, data_rapportino, note,"
+		String cliente = colR.contains("id_cliente") ? "o.id_cliente"
+				: "coalesce((select c." + Cantieri.ID_ANAGRAFICA + " from " + Cantieri.NOME_TABELLA + " c where c." + Cantieri.ID_CANTIERE + "=o.id_cantiere), 0)";
+		String cantiere = colR.contains("id_cantiere") ? "o.id_cantiere" : "0";
+		String autore = colR.contains("id_utente_ditta") ? "o.id_utente_ditta"
+				: (colR.contains("id_operatore") ? "(select u." + Utenti.ID_UTENTE_DITTA + " from " + Utenti.NOME_TABELLA + " u where u." + Utenti.ID_UTENTE + "=o.id_operatore)" : "0");
+		db.execSQL("INSERT INTO " + r + " (id, id_ditta, id_cliente, id_cantiere, id_ordine, id_utente_ditta, id_stato, data_rapportino, note,"
 				+ " id_operatore_ins, data_ins, id_operatore_mod, data_mod, in_server)"
-				+ " SELECT o.id_rapportino, o.id_ditta,"
-				+ " coalesce((select c." + Cantieri.ID_ANAGRAFICA + " from " + Cantieri.NOME_TABELLA + " c where c." + Cantieri.ID_CANTIERE + "=o.id_cantiere), 0),"
-				+ " o.id_cantiere, o.id_ordine, coalesce(" + autore + ", 0), o.data_rapportino, o.note,"
-				+ " o.id_operatore_ins, o.data_ins, o.id_operatore_mod, o.data_mod, o.in_server FROM " + r + "_old o");
+				+ " SELECT o.id_rapportino, o.id_ditta, " + cliente + ", " + cantiere + ", o.id_ordine, coalesce(" + autore + ", 0), 0,"
+				+ " o.data_rapportino, o.note, o.id_operatore_ins, o.data_ins, o.id_operatore_mod, o.data_mod, o.in_server FROM " + r + "_old o");
 		db.execSQL("DROP TABLE " + r + "_old");
 
 		String d = RapportiniDettaglio.NOME_TABELLA;
-		List<String> colD = getTableColumns(db, d);
-		db.execSQL("ALTER TABLE " + d + " RENAME TO " + d + "_old");
+		db.execSQL("ALTER TABLE " + d + " RENAME TO " + d + "_old25");
+		db.execSQL("DELETE FROM " + d + "_old25 WHERE coalesce(in_server, 0) <> 0");
 		db.execSQL(new RapportiniDettaglio().getSQL_create());
-		String nomeMano = colD.contains("id_manodopera")
-				? "(select m." + Manodopera.NOME + " from " + Manodopera.NOME_TABELLA + " m where m." + Manodopera.ID_MANODOPERA + "=o.id_manodopera)"
-				: "null";
-		db.execSQL("INSERT INTO " + d + " (id_rapportino_dettaglio, id_rapportino, tipo, a_costo, descrizione, note, id_preventivo_dettaglio,"
-				+ " id_operatore_ins, data_ins, id_operatore_mod, data_mod, in_server)"
-				+ " SELECT o.id_rapportino_dettaglio, o.id_rapportino, '" + RapportiniDettaglio.TIPO_LAVORO + "', 1,"
-				+ " coalesce(" + nomeMano + ", o.note), case when " + nomeMano + " is null then null else o.note end, 0,"
-				+ " o.id_operatore_ins, o.data_ins, o.id_operatore_mod, o.data_mod, o.in_server FROM " + d + "_old o");
-		db.execSQL("DROP TABLE " + d + "_old");
+		db.execSQL("DROP TABLE IF EXISTS rapportini_dettaglio_operatori");
+
+		db.execSQL(new RapportiniDettaglioTipi().getSQL_create());
+		db.execSQL(new StatiDocumento().getSQL_create());
+		db.execSQL(new StatiDocumentoTransizioni().getSQL_create());
+		if (!getTableColumns(db, UnitaMisura.NOME_TABELLA).contains(UnitaMisura.ID)) {
+			db.execSQL("ALTER TABLE " + UnitaMisura.NOME_TABELLA + " ADD COLUMN " + UnitaMisura.ID + " INTEGER");
+			db.execSQL("ALTER TABLE " + UnitaMisura.NOME_TABELLA + " ADD COLUMN " + UnitaMisura.MINUTI_PER_UNITA + " INTEGER");
+		}
+		if (!getTableColumns(db, Listini.NOME_TABELLA).contains(Listini.ID)) {
+			db.execSQL("ALTER TABLE " + Listini.NOME_TABELLA + " ADD COLUMN " + Listini.ID + " INTEGER");
+		}
 	}
 
-	private static void creaTabelleRapportiniOperatori(SQLiteDatabase db) {
-		db.execSQL(new RapportiniDettaglioOperatori().getSQL_create());
+	/** Squadre e pianificazione (sola lettura, schema 23). */
+	private static void creaTabelleSquadre(SQLiteDatabase db) {
 		db.execSQL(new Squadre().getSQL_create());
 		db.execSQL(new SquadreMembri().getSQL_create());
 		db.execSQL(new PianificazioneAssegnazioni().getSQL_create());
 		db.execSQL(new PianificazioneEsclusioni().getSQL_create());
+	}
+
+	/** Installazione nuova: squadre, pianificazione, tipi di riga e stati dei documenti (sola lettura). */
+	private static void creaTabelleSquadreERapportini(SQLiteDatabase db) {
+		creaTabelleSquadre(db);
+		db.execSQL(new RapportiniDettaglioTipi().getSQL_create());
+		db.execSQL(new StatiDocumento().getSQL_create());
+		db.execSQL(new StatiDocumentoTransizioni().getSQL_create());
 	}
 
 	private List<String> getTableColumns(SQLiteDatabase db, String tableName) {

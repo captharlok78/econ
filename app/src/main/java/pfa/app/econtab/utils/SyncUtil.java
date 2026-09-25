@@ -22,7 +22,8 @@ public final class SyncUtil {
      * l'app le allinea sostituendo il contenuto locale, cosi' rinomine, cancellazioni fatte da Sonata e valori
      * rimasti da vecchie versioni dell'app non restano in giro.
      */
-    private static final String[] TABELLE_ELENCO_COMPLETO = { "unita_misura" };
+    private static final String[] TABELLE_ELENCO_COMPLETO = { "unita_misura", "rapportini_dettaglio_tipi", "stati_documento",
+            "stati_documento_transizioni" };
 
     /** Tabelle locali con una colonna unita' di misura (chiave esterna verso unita_misura sul server). */
     private static final String[] TABELLE_CON_UNITA_MISURA = { "elementi", "componenti", "elementi_cantiere",
@@ -143,6 +144,9 @@ public final class SyncUtil {
         { "squadre_membri",              "id" },
         { "pianificazione_assegnazioni", "id" },
         { "pianificazione_esclusioni",   "id" },
+        { "rapportini_dettaglio_tipi",   "id" },
+        { "stati_documento",             "id" },
+        { "stati_documento_transizioni", "id" },
     };
 
     /** Chiave primaria delle tabelle sola lettura, null per le altre. */

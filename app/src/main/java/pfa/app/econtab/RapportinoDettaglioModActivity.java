@@ -2,17 +2,28 @@ package pfa.app.econtab;
 
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
+import pfa.app.econtab.adapters.ColonnaDettaglio;
+import pfa.app.econtab.adapters.DettaglioTabellaAdapter;
 import pfa.app.econtab.db.DbInterno;
 import pfa.app.econtab.db.table.Anagrafica;
 import pfa.app.econtab.db.table.Cantieri;
@@ -20,98 +31,134 @@ import pfa.app.econtab.db.table.Preventivi;
 import pfa.app.econtab.db.table.PreventiviDettaglio;
 import pfa.app.econtab.db.table.Rapportini;
 import pfa.app.econtab.db.table.RapportiniDettaglio;
-import pfa.app.econtab.db.table.RapportiniDettaglioOperatori;
+import pfa.app.econtab.db.table.RapportiniDettaglioTipi;
+import pfa.app.econtab.db.table.StatiDocumento;
+import pfa.app.econtab.db.table.Utenti;
+import pfa.app.econtab.utils.FaIcone;
 import pfa.app.econtab.utils.RegoleRapportino;
+import pfa.app.econtab.utils.RigheRapportino;
 import pfa.app.econtab.utils.Sessione;
 import pfa.app.econtab.utils.Utility;
+import pfa.app.econtab.views.CampoRicerca;
 import pfa.app.econtab.views.EConTabCalendario;
-import pfa.app.econtab.views.EConTabSpinner;
-import pfa.app.econtab.views.PopupDettaglioRapportino;
+import pfa.app.econtab.views.PopupRigaRapportino;
 
 /**
- * Testata del rapportino: data, cliente, cantiere e ordine (facoltativi ma almeno uno; il cantiere porta il suo
- * cliente, l'ordine il suo cantiere) e note; sotto, le righe (viaggi e lavoro) con i loro operatori. I cantieri
+ * Rapportino, schema 26 (GESTIONE_RAPPORTINI.md §12): testata (operatore, data, cliente / cantiere / ordine con ricerca,
+ * almeno uno; note), righe aggiunte con le finestre Manodopera, Viaggio e Articolo e mostrate in tabella. Le righe restano in
+ * memoria fino a Salva (il rapportino resta nello stato attuale, per un rapportino nuovo quello iniziale, Bozza) o Conferma
+ * (passa a Confermato); Annulla scarta tutto. Se lo stato non e' modificabile la maschera e' in sola lettura. I cantieri
  * sceglibili sono quelli su cui l'utente e' pianificato nella settimana della data (vedi RegoleRapportino).
  */
-public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity implements View.OnLongClickListener, View.OnClickListener {
+public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity {
 
-    private EConTabSpinner spinner_clienti = null;
-    private EConTabSpinner spinner_cantieri = null;
-    private EConTabSpinner spinner_ordini = null;
-    private EConTabCalendario data = null;
+    /** Colonna solo in memoria: la riga e' nuova o cambiata e va scritta al salvataggio. */
+    private static final String DA_SALVARE = "_da_salvare";
 
-    private RegoleRapportino.Utente utente = null;
-    /** Riferimenti salvati sul rapportino in modifica: cantiere e ordine restano sceglibili anche se non piu' ammessi. */
-    private int idCantiereSalvato = 0;
-    private int idOrdineSalvato = 0;
-    /** Cantieri ammessi per la data (id_cantiere, nome, id_anagrafica, ragione_sociale), prima del filtro per cliente. */
+    private EConTabCalendario data;
+    private CampoRicerca campoCliente, campoCantiere, campoOrdine;
+    private EditText editNote;
+
+    private RegoleRapportino.Utente utente;
+    private boolean vedePrezzi;
+
+    /** Testata letta dal DB (null per un rapportino nuovo). */
+    private ContentValues testata = null;
+    /** Stato attuale (null se gli stati non sono ancora scaricati). */
+    private ContentValues stato = null;
+    private boolean modificabile = true;
+
+    private final ArrayList<Object> righe = new ArrayList<Object>();
+    /** Id delle righe gia' salvate e tolte dalla tabella: si cancellano al salvataggio. */
+    private final List<Integer> righeEliminate = new ArrayList<Integer>();
+    private RigheAdapter adapter;
+    private boolean modificato = false;
+
+    /** Cantieri ammessi per la data (id_cantiere, nome, id_anagrafica, ragione_sociale). */
     private ArrayList<Object> cantieriAmmessi = new ArrayList<Object>();
-    /** Ultimi valori per cui sono stati caricati cantieri e ordini (i listener scattano anche sui setText interni). */
     private String dataCaricata = null;
-    private String clienteCaricato = null;
-    private String cantiereCaricato = null;
-    /** true mentre i valori degli spinner si impostano da codice: i listener non devono ricaricare a cascata. */
-    private boolean aggiornamentoInCorso = false;
+    /** Stato a cui porta il salvataggio in corso (Salva: lo stesso o l'iniziale; Conferma: Confermato). */
+    private int idStatoDestino = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_rapportino_dettaglio_mod);
         data = (EConTabCalendario) findViewById(R.id.edit_data);
-        spinner_clienti = (EConTabSpinner) findViewById(R.id.spinner_clienti);
-        spinner_cantieri = (EConTabSpinner) findViewById(R.id.spinner_cantieri);
-        spinner_ordini = (EConTabSpinner) findViewById(R.id.spinner_ordini);
+        campoCliente = (CampoRicerca) findViewById(R.id.campo_cliente);
+        campoCantiere = (CampoRicerca) findViewById(R.id.campo_cantiere);
+        campoOrdine = (CampoRicerca) findViewById(R.id.campo_ordine);
+        campoOrdine.setMinimoLettere(0);
+        editNote = (EditText) findViewById(R.id.editText_note);
 
         DbInterno db = new DbInterno(this);
         utente = RegoleRapportino.utenteCorrente(db, this);
+        vedePrezzi = RegoleRapportino.vedePrezzi(db, utente);
         db.close();
 
-        super.onCreate(savedInstanceState);
+        adapter = new RigheAdapter();
+        adapter.collegaTestata((ViewGroup) findViewById(R.id.testata_dettaglio));
+        ((ListView) findViewById(R.id.lista_dett)).setAdapter(adapter);
 
-        caricaClienti();
-        if (getModalita() == INSERIMENTO) {
-            // Autore = utente loggato (etichetta fissa); in modifica resta quello del rapportino (vedi inizializzaModifica)
+        super.onCreate(savedInstanceState); // in modifica chiama inizializzaModifica()
+
+        db = new DbInterno(this);
+        int idCliente = 0, idCantiere = 0, idOrdine = 0;
+        if (testata != null) {
+            idCliente = RigheRapportino.intero(testata, Rapportini.ID_CLIENTE);
+            idCantiere = RigheRapportino.intero(testata, Rapportini.ID_CANTIERE);
+            idOrdine = RigheRapportino.intero(testata, Rapportini.ID_ORDINE);
+        } else {
+            stato = RegoleRapportino.statoIniziale(db);
             impostaOperatore(utente.idUtenteDitta);
-            findViewById(R.id.linear_lista_dett).setVisibility(View.GONE);
-
             // stessi cliente e cantiere dell'ultimo rapportino dell'autore (il cantiere se e' ancora tra quelli ammessi)
-            DbInterno dbcl = new DbInterno(this);
-            ContentValues lastRapp = new Rapportini().getUltimoRapportinoOperatore(dbcl, utente.idUtenteDitta);
-            dbcl.close();
-            if (lastRapp != null) {
-                spinner_clienti.setValue("" + intero(lastRapp, Rapportini.ID_CLIENTE));
-                spinner_cantieri.setValue("" + intero(lastRapp, Rapportini.ID_CANTIERE));
+            ContentValues ultimo = new Rapportini().getUltimoRapportinoOperatore(db, utente.idUtenteDitta);
+            if (ultimo != null) {
+                idCliente = RigheRapportino.intero(ultimo, Rapportini.ID_CLIENTE);
+                idCantiere = RigheRapportino.intero(ultimo, Rapportini.ID_CANTIERE);
             }
-            caricaClienti();
-            caricaCantieri();
         }
+        modificabile = RegoleRapportino.isModificabile(stato);
+        caricaClienti(db);
+        db.close();
 
-        // data, cliente e cantiere cambiano gli elenchi successivi: listener impostati dopo i primi valori
-        data.addTextChangeListener(new CambioValore() {
-            @Override
-            public void afterTextChanged(Editable editable) {
-                caricaCantieri();
-            }
-        });
-        spinner_clienti.addTextChangeListener(new CambioValore() {
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (!aggiornamentoInCorso) cambioCliente();
-            }
-        });
-        spinner_cantieri.addTextChangeListener(new CambioValore() {
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (!aggiornamentoInCorso) cambioCantiere();
-            }
-        });
+        caricaCantieriAmmessi();
+        campoCliente.selezionaId(idCliente);
+        aggiornaElencoCantieri();
+        campoCantiere.selezionaId(idCantiere);
+        aggiornaElencoOrdini(idOrdine);
+        campoOrdine.selezionaId(idOrdine);
+
+        impostaAscoltatori();
+        applicaStato();
+        aggiornaInviaMail();
     }
 
-    /** Mostra il nome dell'autore nell'etichetta fissa (l'utente loggato, o l'autore del rapportino in modifica). */
-    private void impostaOperatore(int idUtenteDitta) {
-        String nome = null;
-        if (idUtenteDitta == utente.idUtenteDitta) {
-            nome = Sessione.getNomeOperatore();
+    @Override
+    protected String getTitoloDettaglio() {
+        return getString(getModalita() == INSERIMENTO ? R.string.nuovo_rapportino : R.string.rapportino);
+    }
+
+    @Override
+    protected void inizializzaModifica() {
+        super.inizializzaModifica();
+        DbInterno db = new DbInterno(this);
+        ContentValues where = new ContentValues();
+        where.put(Rapportini.ID, getIDModifica());
+        testata = db.getRecord(new Rapportini(), where);
+        if (testata != null) {
+            data.setValue("" + testata.getAsLong(Rapportini.DATA_RAPPORTINO));
+            editNote.setText(testata.getAsString(Rapportini.NOTE));
+            impostaOperatore(RigheRapportino.intero(testata, Rapportini.ID_UTENTE_DITTA));
+            stato = RegoleRapportino.stato(db, RigheRapportino.intero(testata, Rapportini.ID_STATO));
+            righe.addAll(RigheRapportino.righe(db, getIDModifica()));
         }
+        db.close();
+        adapter.notifyDataSetChanged();
+    }
+
+    /** Nome dell'autore (l'utente collegato, o l'autore del rapportino in modifica). */
+    private void impostaOperatore(int idUtenteDitta) {
+        String nome = idUtenteDitta == utente.idUtenteDitta ? Sessione.getNomeOperatore() : null;
         if (nome == null || nome.trim().isEmpty()) {
             DbInterno db = new DbInterno(this);
             nome = RegoleRapportino.nomeOperatore(db, idUtenteDitta);
@@ -120,31 +167,42 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity imp
         ((TextView) findViewById(R.id.text_operatore)).setText(nome.trim());
     }
 
-    @Override
-    protected void inizializzaModifica() {
-        super.inizializzaModifica();
-        DbInterno db = new DbInterno(this);
-        ContentValues where = new ContentValues();
-        where.put(Rapportini.ID_RAPPORTINO, getIDModifica());
-        ContentValues val = db.getRecord(new Rapportini(), where);
-        db.close();
+    // ── Stato ────────────────────────────────────────────────────────────────────────────────────────────────
 
-        if (val != null) {
-            data.setValue("" + val.getAsLong(Rapportini.DATA_RAPPORTINO));
-            setText(R.id.editText_note, val.getAsString(Rapportini.NOTE));
-            impostaOperatore(intero(val, Rapportini.ID_UTENTE_DITTA));
-
-            idOrdineSalvato = intero(val, Rapportini.ID_ORDINE);
-            idCantiereSalvato = intero(val, Rapportini.ID_CANTIERE);
-            spinner_clienti.setValue("" + intero(val, Rapportini.ID_CLIENTE));
-            spinner_cantieri.setValue("" + idCantiereSalvato);
-            spinner_ordini.setValue("" + idOrdineSalvato);
+    /** Badge dello stato; in sola lettura se lo stato non e' modificabile; Conferma solo se il passaggio e' ammesso. */
+    private void applicaStato() {
+        TextView badge = (TextView) findViewById(R.id.badge_stato);
+        if (stato != null) {
+            badge.setVisibility(View.VISIBLE);
+            badge.setText(RigheRapportino.testo(stato, StatiDocumento.NOME));
+            GradientDrawable sfondo = new GradientDrawable();
+            sfondo.setCornerRadius(40);
+            sfondo.setColor(RegoleRapportino.coloreStato(RigheRapportino.testo(stato, StatiDocumento.COLORE)));
+            badge.setBackground(sfondo);
+        } else {
+            badge.setVisibility(View.GONE);
         }
 
-        caricaClienti();
-        caricaCantieri();
-        caricaDettaglio();
+        data.setEnabled(modificabile);
+        campoCliente.setEnabled(modificabile);
+        campoCantiere.setEnabled(modificabile);
+        campoOrdine.setEnabled(modificabile);
+        editNote.setEnabled(modificabile);
+        findViewById(R.id.pulsanti_righe).setVisibility(modificabile ? View.VISIBLE : View.GONE);
+        findViewById(R.id.button_salva).setVisibility(modificabile ? View.VISIBLE : View.GONE);
+
+        DbInterno db = new DbInterno(this);
+        ContentValues confermato = RegoleRapportino.statoPerCodice(db, StatiDocumento.CODICE_CONFERMATO);
+        boolean confermabile = modificabile && confermato != null
+                && (stato == null || RigheRapportino.intero(stato, StatiDocumento.ID) != RigheRapportino.intero(confermato, StatiDocumento.ID))
+                && RegoleRapportino.passaggioAmmesso(db,
+                stato != null ? RigheRapportino.intero(stato, StatiDocumento.ID) : 0, RigheRapportino.intero(confermato, StatiDocumento.ID), utente);
+        db.close();
+        findViewById(R.id.button_conferma).setVisibility(confermabile ? View.VISIBLE : View.GONE);
+        adapter.notifyDataSetChanged();
     }
+
+    // ── Cliente, cantiere, ordine ─────────────────────────────────────────────────────────────────────────────
 
     private long dataRapportino() {
         try {
@@ -154,118 +212,398 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity imp
         }
     }
 
-    /** Clienti della ditta (l'app scarica solo quelli), piu' "nessun cliente". */
-    private void caricaClienti() {
-        ArrayList<Object> valori = new ArrayList<Object>();
-        valori.add(voce("0", getString(R.string.nessun_cliente)));
-        DbInterno db = new DbInterno(this);
-        for (Object o : db.eseguiSelect("Select " + Anagrafica.ID_ANAGRAFICA + ", " + Anagrafica.RAGIONE_SOCIALE + " from "
-                + Anagrafica.NOME_TABELLA + " order by " + Anagrafica.RAGIONE_SOCIALE, null)) {
+    private void caricaClienti(DbInterno db) {
+        List<CampoRicerca.Voce> voci = new ArrayList<CampoRicerca.Voce>();
+        for (Object o : db.eseguiSelect("select * from " + Anagrafica.NOME_TABELLA + " order by " + Anagrafica.RAGIONE_SOCIALE, null)) {
             ContentValues c = (ContentValues) o;
-            valori.add(voce("" + c.getAsInteger(Anagrafica.ID_ANAGRAFICA), c.getAsString(Anagrafica.RAGIONE_SOCIALE)));
+            voci.add(new CampoRicerca.Voce(RigheRapportino.intero(c, Anagrafica.ID_ANAGRAFICA), RigheRapportino.testo(c, Anagrafica.RAGIONE_SOCIALE), c));
         }
+        campoCliente.setVoci(voci);
+    }
+
+    /** Cantieri ammessi per la data (quello del rapportino salvato resta sempre sceglibile). */
+    private void caricaCantieriAmmessi() {
+        dataCaricata = data.getValue();
+        DbInterno db = new DbInterno(this);
+        cantieriAmmessi = RegoleRapportino.cantieriDisponibili(db, utente, dataRapportino(),
+                testata != null ? RigheRapportino.intero(testata, Rapportini.ID_CANTIERE) : 0);
         db.close();
-        aggiornamentoInCorso = true;
-        impostaElenco(spinner_clienti, valori);
-        aggiornamentoInCorso = false;
-        clienteCaricato = spinner_clienti.getValue();
-    }
-
-    /** Cantieri ammessi per la data; se quello scelto non lo e' piu' la selezione si svuota. */
-    private void caricaCantieri() {
-        String d = data.getValue();
-        if (!d.equals(dataCaricata)) {
-            dataCaricata = d;
-            DbInterno db = new DbInterno(this);
-            cantieriAmmessi = RegoleRapportino.cantieriDisponibili(db, utente, dataRapportino(), idCantiereSalvato);
-            db.close();
-            if (cantieriAmmessi.isEmpty()) {
-                Toast.makeText(this, getString(!utente.amministratore && utente.idUtenteDitta == 0
-                        ? R.string.operatori_non_scaricati : R.string.nessun_cantiere_rapportino), Toast.LENGTH_LONG).show();
-            }
+        if (cantieriAmmessi.isEmpty() && modificabile) {
+            Toast.makeText(this, getString(!utente.amministratore && utente.idUtenteDitta == 0
+                    ? R.string.operatori_non_scaricati : R.string.nessun_cantiere_rapportino), Toast.LENGTH_LONG).show();
         }
-        mostraCantieri();
     }
 
-    /** Cantieri ammessi del cliente scelto (tutti se nessun cliente), piu' "nessun cantiere". */
-    private void mostraCantieri() {
-        int cliente = valore(spinner_clienti);
-        ArrayList<Object> valori = new ArrayList<Object>();
-        valori.add(voce("0", getString(R.string.nessun_cantiere)));
+    /** Cantieri ammessi del cliente scelto (tutti se nessun cliente). */
+    private void aggiornaElencoCantieri() {
+        int cliente = campoCliente.getIdScelto();
+        List<CampoRicerca.Voce> voci = new ArrayList<CampoRicerca.Voce>();
         for (Object o : cantieriAmmessi) {
             ContentValues c = (ContentValues) o;
-            if (cliente > 0 && intero(c, Cantieri.ID_ANAGRAFICA) != cliente) continue;
-            String rs = c.getAsString(Anagrafica.RAGIONE_SOCIALE);
-            valori.add(voce("" + c.getAsInteger(Cantieri.ID_CANTIERE), c.getAsString(Cantieri.NOME)
-                    + (cliente == 0 && rs != null && !rs.trim().isEmpty() ? " - " + rs.trim() : "")));
+            if (cliente > 0 && RigheRapportino.intero(c, Cantieri.ID_ANAGRAFICA) != cliente) continue;
+            String rs = RigheRapportino.testo(c, Anagrafica.RAGIONE_SOCIALE);
+            voci.add(new CampoRicerca.Voce(RigheRapportino.intero(c, Cantieri.ID_CANTIERE),
+                    RigheRapportino.testo(c, Cantieri.NOME) + (cliente == 0 && !rs.isEmpty() ? " - " + rs : ""), c));
         }
-        aggiornamentoInCorso = true;
-        impostaElenco(spinner_cantieri, valori);
-        aggiornamentoInCorso = false;
-        caricaOrdini();
+        campoCantiere.setVoci(voci);
     }
 
-    /** Cambiando cliente il cantiere di un altro cliente non vale piu'. */
-    private void cambioCliente() {
-        if (spinner_clienti.getValue().equals(clienteCaricato)) return;
-        clienteCaricato = spinner_clienti.getValue();
-        mostraCantieri();
-    }
-
-    /** Scegliendo un cantiere il cliente diventa il suo (come sul server). */
-    private void cambioCantiere() {
-        int cantiere = valore(spinner_cantieri);
-        if (cantiere > 0) {
-            for (Object o : cantieriAmmessi) {
-                ContentValues c = (ContentValues) o;
-                int cliente = intero(c, Cantieri.ID_ANAGRAFICA);
-                if (intero(c, Cantieri.ID_CANTIERE) == cantiere && cliente > 0 && cliente != valore(spinner_clienti)) {
-                    aggiornamentoInCorso = true;
-                    spinner_clienti.setValue("" + cliente);
-                    caricaClienti();
-                    aggiornamentoInCorso = false;
-                    mostraCantieri();
-                    return;
-                }
-            }
+    /** Ordini aperti del cantiere scelto, o di tutti i cantieri ammessi (del cliente scelto); il salvato resta sceglibile. */
+    private void aggiornaElencoOrdini(int idOrdineSempreIncluso) {
+        Set<Integer> cantieri = new HashSet<Integer>();
+        if (campoCantiere.getIdScelto() > 0) {
+            cantieri.add(campoCantiere.getIdScelto());
+        } else {
+            for (CampoRicerca.Voce v : campoCantiere.getVoci()) cantieri.add(v.id);
         }
-        caricaOrdini();
-    }
-
-    /** Ordini aperti del cantiere scelto, piu' "nessun ordine" (l'ordine e' facoltativo e richiede il cantiere). */
-    private void caricaOrdini() {
-        String cantiere = spinner_cantieri.getValue();
-        if (cantiere.equals(cantiereCaricato)) return;
-        boolean primoCaricamento = cantiereCaricato == null;
-        cantiereCaricato = cantiere;
-
-        ArrayList<Object> valori = new ArrayList<Object>();
-        valori.add(voce("0", getString(R.string.nessun_ordine)));
-
-        ArrayList<Object> ordini = new ArrayList<Object>();
-        if (valore(spinner_cantieri) > 0) {
+        List<CampoRicerca.Voce> voci = new ArrayList<CampoRicerca.Voce>();
+        if (!cantieri.isEmpty()) {
+            String elenco = cantieri.toString().replace("[", "").replace("]", "");
             DbInterno db = new DbInterno(this);
-            ordini = new Preventivi().getOrdiniCantiere(db, valore(spinner_cantieri), idOrdineSalvato);
+            for (Object o : db.eseguiSelect("select * from " + Preventivi.NOME_TABELLA + " where " + Preventivi.ID_CANTIERE + " in (" + elenco
+                    + ") and " + Preventivi.TIPO + "='" + Preventivi.TIPO_ORDINE + "' and (" + Preventivi.STATO + "='" + Preventivi.STATO_APERTO + "'"
+                    + (idOrdineSempreIncluso != 0 ? " or " + Preventivi.ID_PREVENTIVO + "=" + idOrdineSempreIncluso : "")
+                    + ") order by " + Preventivi.DATA + " desc", null)) {
+                ContentValues ordine = (ContentValues) o;
+                voci.add(new CampoRicerca.Voce(RigheRapportino.intero(ordine, Preventivi.ID_PREVENTIVO), "N. " + ordine.getAsInteger(Preventivi.NUMERO)
+                        + " del " + Utility.numberToDataShort(ordine.getAsLong(Preventivi.DATA)) + " - "
+                        + RigheRapportino.testo(ordine, Preventivi.TITOLO), ordine));
+            }
             db.close();
         }
-        for (Object o : ordini) {
-            ContentValues ordine = (ContentValues) o;
-            valori.add(voce("" + ordine.getAsInteger(Preventivi.ID_PREVENTIVO), "N. " + ordine.getAsInteger(Preventivi.NUMERO) + " del "
-                    + Utility.numberToDataShort(ordine.getAsLong(Preventivi.DATA)) + " - " + ordine.getAsString(Preventivi.TITOLO)));
+        campoOrdine.setVoci(voci);
+    }
+
+    private void impostaAscoltatori() {
+        campoCliente.setAscoltatore(new CampoRicerca.Ascoltatore() {
+            @Override
+            public void selezioneCambiata(CampoRicerca campo, CampoRicerca.Voce voce) {
+                modificato = true;
+                // il cantiere di un altro cliente non vale piu' (e con lui l'ordine)
+                CampoRicerca.Voce cantiere = campoCantiere.getScelta();
+                if (voce != null && cantiere != null && RigheRapportino.intero(cantiere.dati, Cantieri.ID_ANAGRAFICA) != voce.id) {
+                    campoCantiere.seleziona(null);
+                    campoOrdine.seleziona(null);
+                }
+                aggiornaElencoCantieri();
+                aggiornaElencoOrdini(0);
+                aggiornaInviaMail();
+            }
+        });
+        campoCantiere.setAscoltatore(new CampoRicerca.Ascoltatore() {
+            @Override
+            public void selezioneCambiata(CampoRicerca campo, CampoRicerca.Voce voce) {
+                modificato = true;
+                if (voce != null) { // il cliente diventa quello del cantiere (come sul server)
+                    int cliente = RigheRapportino.intero(voce.dati, Cantieri.ID_ANAGRAFICA);
+                    if (cliente > 0 && cliente != campoCliente.getIdScelto()) {
+                        campoCliente.selezionaId(cliente);
+                        aggiornaInviaMail();
+                    }
+                }
+                CampoRicerca.Voce ordine = campoOrdine.getScelta();
+                if (ordine != null && (voce == null || RigheRapportino.intero(ordine.dati, Preventivi.ID_CANTIERE) != voce.id)) {
+                    campoOrdine.seleziona(null);
+                }
+                aggiornaElencoOrdini(0);
+            }
+        });
+        campoOrdine.setAscoltatore(new CampoRicerca.Ascoltatore() {
+            @Override
+            public void selezioneCambiata(CampoRicerca campo, CampoRicerca.Voce voce) {
+                modificato = true;
+                if (voce == null) return;
+                // l'ordine porta il suo cantiere, il cantiere il suo cliente
+                int idCantiere = RigheRapportino.intero(voce.dati, Preventivi.ID_CANTIERE);
+                if (idCantiere != campoCantiere.getIdScelto()) {
+                    for (Object o : cantieriAmmessi) {
+                        ContentValues c = (ContentValues) o;
+                        if (RigheRapportino.intero(c, Cantieri.ID_CANTIERE) != idCantiere) continue;
+                        int cliente = RigheRapportino.intero(c, Cantieri.ID_ANAGRAFICA);
+                        if (cliente > 0) campoCliente.selezionaId(cliente);
+                        aggiornaElencoCantieri();
+                        campoCantiere.selezionaId(idCantiere);
+                        aggiornaInviaMail();
+                    }
+                }
+            }
+        });
+        data.addTextChangeListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                cambioData();
+            }
+        });
+        editNote.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                modificato = true;
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+    }
+
+    /**
+     * Cambio data (§12.4): cantieri ammessi diversi, quindi cliente, cantiere e ordine si scelgono di nuovo; le righe restano,
+     * con un avviso se il loro utente non e' piu' sceglibile.
+     */
+    private void cambioData() {
+        if (data.getValue().equals(dataCaricata)) return;
+        modificato = true;
+        caricaCantieriAmmessi();
+        campoCliente.seleziona(null);
+        campoCantiere.seleziona(null);
+        campoOrdine.seleziona(null);
+        aggiornaElencoCantieri();
+        aggiornaElencoOrdini(0);
+        aggiornaInviaMail();
+
+        DbInterno db = new DbInterno(this);
+        Set<Integer> sceglibili = new HashSet<Integer>();
+        for (ContentValues ut : RegoleRapportino.operatoriSelezionabili(db, utente, 0, dataRapportino())) {
+            sceglibili.add(RigheRapportino.intero(ut, Utenti.ID_UTENTE_DITTA));
+        }
+        db.close();
+        Set<String> nomi = new LinkedHashSet<String>();
+        for (Object o : righe) {
+            ContentValues r = (ContentValues) o;
+            int id = RigheRapportino.intero(r, RapportiniDettaglio.ID_UTENTE_MANODOPERA);
+            if (id > 0 && !sceglibili.contains(id)) nomi.add(RigheRapportino.testo(r, RigheRapportino.NOME_UTENTE));
+        }
+        String avviso = getString(R.string.avviso_cambio_data);
+        if (!nomi.isEmpty()) {
+            avviso += "\n\n" + getString(R.string.avviso_utenti_non_sceglibili, android.text.TextUtils.join(", ", nomi));
+        }
+        Utility.mostraDialog(getString(R.string.attenzione), avviso, this, "OK");
+    }
+
+    /** "Invia mail" solo se il cliente ha l'email (per ora senza azione, §8.9). */
+    private void aggiornaInviaMail() {
+        CampoRicerca.Voce cliente = campoCliente.getScelta();
+        findViewById(R.id.button_invia_mail).setEnabled(cliente != null && !RigheRapportino.testo(cliente.dati, Anagrafica.MAIL).isEmpty());
+    }
+
+    // ── Righe ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    public void nuovaManodopera(View v) {
+        apriRiga(RapportiniDettaglioTipi.CATEGORIA_LAVORO, -1);
+    }
+
+    public void nuovoViaggio(View v) {
+        apriRiga(RapportiniDettaglioTipi.CATEGORIA_VIAGGIO, -1);
+    }
+
+    public void nuovoArticolo(View v) {
+        apriRiga(RapportiniDettaglioTipi.CATEGORIA_MATERIALE, -1);
+    }
+
+    /** Apre la finestra della riga: nuova (posizione -1) o esistente. */
+    private void apriRiga(String categoria, final int posizione) {
+        PopupRigaRapportino.Contesto c = new PopupRigaRapportino.Contesto();
+        c.utente = utente;
+        c.vedePrezzi = vedePrezzi;
+        c.idCantiere = campoCantiere.getIdScelto();
+        c.idOrdine = campoOrdine.getIdScelto();
+        c.data = dataRapportino();
+        ContentValues riga = posizione >= 0 ? (ContentValues) righe.get(posizione) : null;
+        new PopupRigaRapportino(this, categoria, riga, c, new PopupRigaRapportino.Esito() {
+            @Override
+            public void rigaConfermata(ContentValues nuova) {
+                nuova.put(DA_SALVARE, 1);
+                if (posizione >= 0) {
+                    righe.set(posizione, nuova);
+                } else {
+                    righe.add(nuova);
+                }
+                ordinaRighe();
+                modificato = true;
+                adapter.notifyDataSetChanged();
+            }
+        }).apri();
+    }
+
+    /** Ordine della scheda: ordine del tipo, poi ora di inizio (senza orario in fondo al gruppo); a parita', come inserite. */
+    private void ordinaRighe() {
+        Collections.sort(righe, new Comparator<Object>() {
+            @Override
+            public int compare(Object a, Object b) {
+                ContentValues ra = (ContentValues) a, rb = (ContentValues) b;
+                int c = RigheRapportino.intero(ra, RigheRapportino.ORDINE_TIPO) - RigheRapportino.intero(rb, RigheRapportino.ORDINE_TIPO);
+                if (c != 0) return c;
+                String oa = RigheRapportino.testo(ra, RapportiniDettaglio.ORA_INIZIO), ob = RigheRapportino.testo(rb, RapportiniDettaglio.ORA_INIZIO);
+                if (oa.isEmpty() != ob.isEmpty()) return oa.isEmpty() ? 1 : -1;
+                return oa.compareTo(ob);
+            }
+        });
+    }
+
+    private void eliminaRiga(final int posizione) {
+        Utility.mostraConfermaCancellazioneDialog(this, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which != DialogInterface.BUTTON_POSITIVE) return;
+                ContentValues r = (ContentValues) righe.remove(posizione);
+                if (r.getAsInteger(RapportiniDettaglio.ID) != null) righeEliminate.add(r.getAsInteger(RapportiniDettaglio.ID));
+                modificato = true;
+                adapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    /** Tabella delle righe: modifica | elimina | tipo | descrizione tipo | utente | articolo | UM | quantita'. */
+    private class RigheAdapter extends DettaglioTabellaAdapter {
+        private final List<ColonnaDettaglio> colonne = new ArrayList<ColonnaDettaglio>();
+
+        RigheAdapter() {
+            super(RapportinoDettaglioModActivity.this, righe);
+            colonne.add(ColonnaDettaglio.icona("modifica", "", 40));
+            colonne.add(ColonnaDettaglio.icona("elimina", "", 40));
+            colonne.add(ColonnaDettaglio.testoFisso("tipo", getString(R.string.tipo), 56, Gravity.START));
+            colonne.add(ColonnaDettaglio.testo("descrizione_tipo", getString(R.string.descrizione_tipo), 1.2f));
+            colonne.add(ColonnaDettaglio.testo("utente", getString(R.string.utente), 1f));
+            colonne.add(ColonnaDettaglio.testo("articolo", getString(R.string.articolo), 1.5f));
+            colonne.add(ColonnaDettaglio.testoFisso("um", getString(R.string.um), 50, Gravity.START));
+            colonne.add(ColonnaDettaglio.testoFisso("quantita", getString(R.string.qta), 70, Gravity.END));
         }
 
-        // cambiando cantiere l'ordine precedente non vale piu'; in un rapportino nuovo con un solo ordine aperto lo propongo
-        if (!primoCaricamento || getModalita() == INSERIMENTO) {
-            spinner_ordini.setValue(getModalita() == INSERIMENTO && ordini.size() == 1
-                    ? ((ContentValues) valori.get(1)).getAsString(EConTabSpinner.VALORE) : "0");
+        @Override
+        protected List<ColonnaDettaglio> getColonne() {
+            return colonne;
         }
-        spinner_ordini.setValoriSpinnerLibero(valori);
-        spinner_ordini.setEnabled(!ordini.isEmpty());
+
+        @Override
+        protected void bindCella(final int position, ColonnaDettaglio colonna, View cella) {
+            ContentValues r = (ContentValues) righe.get(position);
+            cella.setOnClickListener(null);
+            cella.setClickable(false);
+            switch (colonna.id) {
+                case "modifica":
+                case "elimina":
+                    boolean modifica = colonna.id.equals("modifica");
+                    if (!modificabile) {
+                        ((TextView) cella).setText("");
+                        break;
+                    }
+                    impostaIcona(cella, modifica ? FaIcone.MODIFICA : FaIcone.ELIMINA, getString(modifica ? R.string.modifica : R.string.elimina));
+                    final String categoria = RigheRapportino.testo(r, RigheRapportino.CATEGORIA);
+                    cella.setOnClickListener(modifica ? new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            apriRiga(categoria, position);
+                        }
+                    } : new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            eliminaRiga(position);
+                        }
+                    });
+                    break;
+                case "tipo":
+                    ((TextView) cella).setText(RigheRapportino.testo(r, RigheRapportino.CODICE_TIPO));
+                    break;
+                case "descrizione_tipo":
+                    String orari = RigheRapportino.orari(r);
+                    String note = RigheRapportino.testo(r, RapportiniDettaglio.NOTE);
+                    ((TextView) cella).setText(RigheRapportino.testo(r, RigheRapportino.DESCRIZIONE_TIPO)
+                            + (orari.isEmpty() ? "" : "  " + orari) + (note.isEmpty() ? "" : "\n" + note));
+                    break;
+                case "utente":
+                    ((TextView) cella).setText(RigheRapportino.testo(r, RigheRapportino.NOME_UTENTE));
+                    break;
+                case "articolo":
+                    ((TextView) cella).setText(RigheRapportino.articolo(r));
+                    break;
+                case "um":
+                    ((TextView) cella).setText(RigheRapportino.testo(r, RigheRapportino.CODICE_UNITA));
+                    break;
+                case "quantita":
+                    ((TextView) cella).setText(Utility.formatNumero(RigheRapportino.decimale(r, RapportiniDettaglio.QUANTITA)));
+                    break;
+            }
+        }
+    }
+
+    // ── Salvataggio ───────────────────────────────────────────────────────────────────────────────────────────
+
+    /** Salva: il rapportino resta nello stato attuale (nuovo: quello iniziale, Bozza). */
+    @Override
+    public void salva(View v) {
+        idStatoDestino = stato != null ? RigheRapportino.intero(stato, StatiDocumento.ID) : 0;
+        eseguiSalvataggio();
+    }
+
+    /**
+     * Testata e righe in un'unica transazione, confermata solo se tutto va bene (la classe base la conferma anche quando
+     * il salvataggio ritorna un messaggio d'errore: qui un errore non deve lasciare il rapportino salvato a meta').
+     */
+    private void eseguiSalvataggio() {
+        DbInterno db = new DbInterno(this);
+        android.database.sqlite.SQLiteDatabase sqlite = db.getReadableDatabase();
+        String esito;
+        sqlite.beginTransaction();
+        try {
+            esito = getModalita() == INSERIMENTO ? eseguiInserimento(db) : eseguiAggiornamento(db);
+            if (SALVATAGGIO_OK.equals(esito)) sqlite.setTransactionSuccessful();
+        } catch (Exception e) {
+            esito = "ERR_" + (e.getMessage() != null ? e.getMessage() : android.util.Log.getStackTraceString(e));
+        } finally {
+            sqlite.endTransaction();
+            db.close();
+        }
+        if (SALVATAGGIO_OK.equals(esito)) {
+            setResult(RESULT_OK);
+            finish();
+        } else if (esito.startsWith("ERR")) {
+            EConTabCrash(esito);
+        } else {
+            Toast.makeText(this, esito, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /** Conferma: salva e passa a Confermato; l'avviso dice cosa non si potra' piu' fare (regole dello stato Confermato). */
+    public void conferma(final View v) {
+        DbInterno dbs = new DbInterno(this);
+        ContentValues arrivo = RegoleRapportino.statoPerCodice(dbs, StatiDocumento.CODICE_CONFERMATO);
+        dbs.close();
+        String messaggio = getString(R.string.conferma_rapportino);
+        if (!RegoleRapportino.isModificabile(arrivo)) {
+            messaggio += " " + getString(R.string.conferma_non_modificabile);
+        } else if (!RegoleRapportino.isCancellabile(arrivo)) {
+            messaggio += " " + getString(R.string.conferma_non_cancellabile);
+        }
+        Utility.mostraConfermaDialog(getString(R.string.conferma), messaggio, this, getString(R.string.conferma),
+                getString(R.string.annulla), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which != DialogInterface.BUTTON_POSITIVE) return;
+                        DbInterno db = new DbInterno(RapportinoDettaglioModActivity.this);
+                        ContentValues confermato = RegoleRapportino.statoPerCodice(db, StatiDocumento.CODICE_CONFERMATO);
+                        db.close();
+                        if (confermato == null) return;
+                        idStatoDestino = RigheRapportino.intero(confermato, StatiDocumento.ID);
+                        eseguiSalvataggio();
+                    }
+                });
     }
 
     @Override
     protected String eseguiInserimento(DbInterno db) {
-        String errore = controllaTestata();
+        String errore = controlla(db);
         if (errore != null) return errore;
         if (utente.idUtenteDitta == 0) return getString(R.string.operatori_non_scaricati);
 
@@ -273,260 +611,132 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity imp
         ContentValues val = tabella.getValoriLogInserimento(db);
         valoriTestata(val);
         val.put(Rapportini.ID_UTENTE_DITTA, utente.idUtenteDitta);
-
+        // inserisciRecord ritorna il rowid, negativo per i record locali: il limite di licenza si controlla prima
+        if (!tabella.controllaMaxInserimentiLicenza(db)) return getString(R.string.messaggio_licenza_inserimenti);
         tabella.inserisciRecord(db, val);
-        getIntent().putExtra("ID", val.getAsInteger(Rapportini.ID_RAPPORTINO));
-        setChiudiAlSalvataggio(false);
-        return super.eseguiInserimento(db);
+        return salvaRighe(db, val.getAsInteger(Rapportini.ID), val.getAsInteger(Rapportini.ID_ORDINE));
     }
 
     @Override
     protected String eseguiAggiornamento(DbInterno db) {
-        String errore = controllaTestata();
+        String errore = controlla(db);
         if (errore != null) return errore;
 
         Rapportini tabella = new Rapportini();
         ContentValues val = tabella.getValoriLogModifica(db);
-        valoriTestata(val);
-        // l'autore non si modifica: resta chi ha aperto il rapportino
-
+        valoriTestata(val); // l'autore non cambia
         ContentValues where = new ContentValues();
-        where.put(Rapportini.ID_RAPPORTINO, getIDModifica());
+        where.put(Rapportini.ID, getIDModifica());
         tabella.aggiornaRecord(db, val, where);
-        scollegaRigheAltroOrdine(db, val.getAsInteger(Rapportini.ID_ORDINE));
-        return super.eseguiAggiornamento(db);
-    }
 
-    /** Righe imputate a righe di un ordine diverso da quello del rapportino (ordine tolto o cambiato): tornano extra ordine. */
-    private void scollegaRigheAltroOrdine(DbInterno db, int idOrdine) {
-        RapportiniDettaglio tab = new RapportiniDettaglio();
-        ArrayList<Object> righe = db.eseguiSelect("Select " + RapportiniDettaglio.ID_RAPPORTINO_DETTAGLIO + " from " + RapportiniDettaglio.NOME_TABELLA
-                + " where " + RapportiniDettaglio.ID_RAPPORTINO + "=" + getIDModifica() + " and coalesce(" + RapportiniDettaglio.ID_PREVENTIVO_DETTAGLIO + ",0)<>0"
-                + " and " + RapportiniDettaglio.ID_PREVENTIVO_DETTAGLIO + " not in (select " + PreventiviDettaglio.ID_PREVENTIVO_DETTAGLIO + " from "
-                + PreventiviDettaglio.NOME_TABELLA + " where " + PreventiviDettaglio.ID_PREVENTIVO + "=" + idOrdine + ")", null);
-        for (Object o : righe) {
-            ContentValues val = tab.getValoriLogModifica(db);
-            val.put(RapportiniDettaglio.ID_PREVENTIVO_DETTAGLIO, 0);
-            ContentValues where = new ContentValues();
-            where.put(RapportiniDettaglio.ID_RAPPORTINO_DETTAGLIO, ((ContentValues) o).getAsInteger(RapportiniDettaglio.ID_RAPPORTINO_DETTAGLIO));
-            tab.aggiornaRecord(db, val, where);
+        RapportiniDettaglio tabRighe = new RapportiniDettaglio();
+        for (Integer id : righeEliminate) {
+            ContentValues del = new ContentValues();
+            del.put(RapportiniDettaglio.ID, id);
+            tabRighe.cancellaRecord(db, del);
         }
+        return salvaRighe(db, getIDModifica(), val.getAsInteger(Rapportini.ID_ORDINE));
     }
 
-    private String controllaTestata() {
-        if (valore(spinner_clienti) == 0 && valore(spinner_cantieri) == 0 && valore(spinner_ordini) == 0) {
-            spinner_clienti.setError(getString(R.string.errore_riferimento_rapportino));
+    private String controlla(DbInterno db) {
+        if (!modificabile) return getString(R.string.rapportino_non_modificabile, RigheRapportino.testo(stato, StatiDocumento.NOME));
+        if (campoCliente.getIdScelto() == 0 && campoCantiere.getIdScelto() == 0 && campoOrdine.getIdScelto() == 0) {
             return getString(R.string.errore_riferimento_rapportino);
         }
-        spinner_clienti.setError(null);
+        int idStatoAttuale = stato != null ? RigheRapportino.intero(stato, StatiDocumento.ID) : 0;
+        if (idStatoDestino != idStatoAttuale && !RegoleRapportino.passaggioAmmesso(db, idStatoAttuale, idStatoDestino, utente)) {
+            return getString(R.string.passaggio_stato_non_ammesso);
+        }
         return null;
     }
 
+    /** Testata: l'ordine porta il suo cantiere, il cantiere il suo cliente (come Rapportini::allineaRiferimenti() del server). */
     private void valoriTestata(ContentValues val) {
+        int idCliente = campoCliente.getIdScelto();
+        int idCantiere = campoCantiere.getIdScelto();
+        CampoRicerca.Voce ordine = campoOrdine.getScelta();
+        if (ordine != null && RigheRapportino.intero(ordine.dati, Preventivi.ID_CANTIERE) > 0) {
+            idCantiere = RigheRapportino.intero(ordine.dati, Preventivi.ID_CANTIERE);
+        }
+        CampoRicerca.Voce cantiere = campoCantiere.cercaId(idCantiere);
+        if (cantiere != null && RigheRapportino.intero(cantiere.dati, Cantieri.ID_ANAGRAFICA) > 0) {
+            idCliente = RigheRapportino.intero(cantiere.dati, Cantieri.ID_ANAGRAFICA);
+        }
         val.put(Rapportini.DATA_RAPPORTINO, dataRapportino());
-        val.put(Rapportini.ID_CLIENTE, valore(spinner_clienti));
-        val.put(Rapportini.ID_CANTIERE, valore(spinner_cantieri));
-        val.put(Rapportini.ID_ORDINE, valore(spinner_ordini));
-        val.put(Rapportini.NOTE, getTesto(R.id.editText_note));
+        val.put(Rapportini.ID_CLIENTE, idCliente);
+        val.put(Rapportini.ID_CANTIERE, idCantiere);
+        val.put(Rapportini.ID_ORDINE, ordine != null ? ordine.id : 0);
+        val.put(Rapportini.ID_STATO, idStatoDestino);
+        val.put(Rapportini.NOTE, editNote.getText().toString().trim());
     }
 
-    @Override
-    protected void aggiornaDopoSalvataggio() {
-        super.aggiornaDopoSalvataggio();
-        setChiudiAlSalvataggio(true);
-        Toast.makeText(this, getString(R.string.messaggio_salvataggio_eseguito), Toast.LENGTH_SHORT).show();
-        setModalita(MODIFICA);
-        // da qui il cantiere e l'ordine salvati restano sempre sceglibili, come per un rapportino aperto in modifica
-        idCantiereSalvato = valore(spinner_cantieri);
-        idOrdineSalvato = valore(spinner_ordini);
-        findViewById(R.id.linear_lista_dett).setVisibility(View.VISIBLE);
-        caricaDettaglio();
-    }
-
-    public void nuovoDettaglio(View v) {
-        new PopupDettaglioRapportino(this, getIDModifica(), 0).apriPopup();
-    }
-
-    public void caricaDettaglio() {
-        LinearLayout listaDett = (LinearLayout) findViewById(R.id.linear_lista_dett);
-        listaDett.removeViews(1, listaDett.getChildCount() - 1);
-
-        DbInterno db = new DbInterno(this);
-        String rd = RapportiniDettaglio.NOME_TABELLA;
-        String SQLDETT = "Select " + rd + ".*, pd." + PreventiviDettaglio.DESCRIZIONE + " as descrizione_riga_ordine, "
-                + RapportiniDettaglioOperatori.sqlOreUomoRiga() + " as ore_uomo"
-                + " from " + rd + " left join " + PreventiviDettaglio.NOME_TABELLA + " pd on pd." + PreventiviDettaglio.ID_PREVENTIVO_DETTAGLIO
-                + "=" + rd + "." + RapportiniDettaglio.ID_PREVENTIVO_DETTAGLIO
-                + " where " + rd + "." + RapportiniDettaglio.ID_RAPPORTINO + "=" + getIDModifica()
-                + " order by " + RapportiniDettaglio.sqlOrdinamento(rd);
-        ArrayList<Object> dettaglio = db.eseguiSelect(SQLDETT, null);
-
-        for (int i = 0; i < dettaglio.size(); i++) {
-            ContentValues curr = (ContentValues) dettaglio.get(i);
-            View dett = View.inflate(this, R.layout.list_item_rapportino_dett, null);
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-
-            ((TextView) dett.findViewById(R.id.tipo_manodopera)).setText(titoloRiga(this, curr));
-            ((TextView) dett.findViewById(R.id.ore)).setText(getString(R.string.ore_uomo) + ": " + Utility.formatNumero(curr.getAsDouble("ore_uomo")));
-            ((TextView) dett.findViewById(R.id.nota)).setText(sottotitoloRiga(curr));
-            ((TextView) dett.findViewById(R.id.operatori)).setText(testoOperatori(db, curr));
-
-            dett.setTag(curr.getAsInteger(RapportiniDettaglio.ID_RAPPORTINO_DETTAGLIO));
-            dett.setOnClickListener(this);
-            dett.setOnLongClickListener(this);
-            listaDett.addView(dett, lp);
+    /**
+     * Scrive le righe nuove o cambiate; quelle imputate a righe di un ordine diverso da quello del rapportino (ordine tolto o
+     * cambiato) tornano extra ordine.
+     */
+    private String salvaRighe(DbInterno db, int idRapportino, int idOrdine) {
+        Set<Integer> righeOrdine = new HashSet<Integer>();
+        for (Object o : db.eseguiSelect("select " + PreventiviDettaglio.ID_PREVENTIVO_DETTAGLIO + " from " + PreventiviDettaglio.NOME_TABELLA
+                + " where " + PreventiviDettaglio.ID_PREVENTIVO + "=" + idOrdine, null)) {
+            righeOrdine.add(((ContentValues) o).getAsInteger(PreventiviDettaglio.ID_PREVENTIVO_DETTAGLIO));
         }
-        db.close();
-    }
+        RapportiniDettaglio tab = new RapportiniDettaglio();
+        for (Object o : righe) {
+            ContentValues r = (ContentValues) o;
+            int rigaOrdine = RigheRapportino.intero(r, RapportiniDettaglio.ID_PREVENTIVO_DETTAGLIO);
+            if (rigaOrdine != 0 && (idOrdine == 0 || !righeOrdine.contains(rigaOrdine))) {
+                r.put(RapportiniDettaglio.ID_PREVENTIVO_DETTAGLIO, 0);
+                r.put(DA_SALVARE, 1);
+            }
+            if (RigheRapportino.intero(r, DA_SALVARE) != 1) continue;
 
-    /** "Viaggio andata 08:00-08:30" oppure "Posa canaline 08:30-12:30". */
-    public static String titoloRiga(android.content.Context ctx, ContentValues riga) {
-        String tipo = riga.getAsString(RapportiniDettaglio.TIPO);
-        String titolo;
-        if (RapportiniDettaglio.TIPO_VIAGGIO_ANDATA.equals(tipo)) {
-            titolo = ctx.getString(R.string.tipo_viaggio_andata);
-        } else if (RapportiniDettaglio.TIPO_VIAGGIO_RITORNO.equals(tipo)) {
-            titolo = ctx.getString(R.string.tipo_viaggio_ritorno);
-        } else {
-            titolo = testo(riga, RapportiniDettaglio.DESCRIZIONE);
-            if (titolo.isEmpty()) titolo = ctx.getString(R.string.tipo_lavoro);
-        }
-        String inizio = testo(riga, RapportiniDettaglio.ORA_INIZIO);
-        String fine = testo(riga, RapportiniDettaglio.ORA_FINE);
-        if (!inizio.isEmpty() || !fine.isEmpty()) {
-            titolo += "  " + (inizio.isEmpty() ? "?" : inizio) + "-" + (fine.isEmpty() ? "?" : fine);
-        }
-        return titolo;
-    }
-
-    /** Descrizione del viaggio, riga d'ordine, "non a costo" e nota. */
-    private String sottotitoloRiga(ContentValues riga) {
-        StringBuilder sb = new StringBuilder();
-        if (RapportiniDettaglio.isViaggio(riga.getAsString(RapportiniDettaglio.TIPO))) {
-            aggiungi(sb, testo(riga, RapportiniDettaglio.DESCRIZIONE));
-        }
-        aggiungi(sb, testo(riga, "descrizione_riga_ordine"));
-        if (intero(riga, RapportiniDettaglio.A_COSTO) == 0) {
-            aggiungi(sb, getString(R.string.non_a_costo));
-        }
-        aggiungi(sb, testo(riga, RapportiniDettaglio.NOTE));
-        return sb.toString();
-    }
-
-    private static void aggiungi(StringBuilder sb, String s) {
-        if (s.isEmpty()) return;
-        if (sb.length() > 0) sb.append(" · ");
-        sb.append(s);
-    }
-
-    private static String testo(ContentValues cv, String campo) {
-        String s = cv.getAsString(campo);
-        return s != null ? s.trim() : "";
-    }
-
-    /** "Mario Rossi 4 · Luigi Bianchi 3,5", e per l'Amministratore ditta il costo della riga (0 se non a costo). */
-    private String testoOperatori(DbInterno db, ContentValues riga) {
-        boolean aCosto = intero(riga, RapportiniDettaglio.A_COSTO) != 0;
-        double costo = 0;
-        StringBuilder sb = new StringBuilder();
-        for (Object o : RapportiniDettaglioOperatori.operatoriRiga(db, riga.getAsInteger(RapportiniDettaglio.ID_RAPPORTINO_DETTAGLIO))) {
-            ContentValues op = (ContentValues) o;
-            double ore = op.getAsDouble(RapportiniDettaglioOperatori.ORE);
-            if (sb.length() > 0) sb.append(" · ");
-            String nome = ((op.getAsString(RapportiniDettaglioOperatori.NOME_OPERATORE) != null ? op.getAsString(RapportiniDettaglioOperatori.NOME_OPERATORE) : "")
-                    + " " + (op.getAsString(RapportiniDettaglioOperatori.COGNOME_OPERATORE) != null ? op.getAsString(RapportiniDettaglioOperatori.COGNOME_OPERATORE) : "")).trim();
-            sb.append(nome.isEmpty() ? "#" + op.getAsInteger(RapportiniDettaglioOperatori.ID_UTENTE_DITTA) : nome).append(" ").append(Utility.formatNumero(ore));
-            if (aCosto) costo += ore * RapportiniDettaglioOperatori.costoOrario(op);
-        }
-        if (utente.amministratore && sb.length() > 0) {
-            sb.append("  —  ").append(getString(R.string.costo_euro)).append(" ").append(Utility.formatNumero(costo, 2));
-        }
-        return sb.toString();
-    }
-
-    @Override
-    public boolean onLongClick(final View view) {
-        String[] items = new String[] { getString(R.string.modifica), getString(R.string.elimina) };
-        Utility.mostraSelezioneDialog(getString(R.string.dettaglio_rapportino), items, this, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (which == 0) {
-                    apriDettaglio(view);
+            Integer id = r.getAsInteger(RapportiniDettaglio.ID);
+            ContentValues val = id == null ? tab.getValoriLogInserimento(db) : tab.getValoriLogModifica(db);
+            for (String campo : tab.getNomiCampi()) {
+                if (campo.equals(RapportiniDettaglio.ID) || campo.equals(RapportiniDettaglio.ID_DITTA) || campo.startsWith("id_operatore_")
+                        || campo.startsWith("data_") || campo.equals(RapportiniDettaglio.IN_SERVER) || !r.containsKey(campo)) {
+                    continue;
                 }
-                if (which == 1) {
-                    eliminaDettaglio(view);
+                Object v = r.get(campo);
+                if (v == null) {
+                    val.putNull(campo);
+                } else {
+                    val.put(campo, v.toString());
                 }
             }
-        });
-        return true;
-    }
-
-    private void eliminaDettaglio(final View view) {
-        Utility.mostraConfermaCancellazioneDialog(this, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (which == DialogInterface.BUTTON_POSITIVE) {
-                    DbInterno db = new DbInterno(RapportinoDettaglioModActivity.this);
-                    ContentValues valDel = new ContentValues();
-                    valDel.put(RapportiniDettaglio.ID_RAPPORTINO_DETTAGLIO, (Integer) view.getTag());
-                    new RapportiniDettaglio().cancellaRecord(db, valDel);
-                    db.close();
-                    caricaDettaglio();
-                }
+            val.put(RapportiniDettaglio.ID_RAPPORTINO, idRapportino);
+            if (id == null) {
+                if (!tab.controllaMaxInserimentiLicenza(db)) return getString(R.string.messaggio_licenza_inserimenti);
+                tab.inserisciRecord(db, val);
+            } else {
+                ContentValues where = new ContentValues();
+                where.put(RapportiniDettaglio.ID, id);
+                tab.aggiornaRecord(db, val, where);
             }
-        });
+        }
+        return SALVATAGGIO_OK;
     }
 
-    private void apriDettaglio(View view) {
-        new PopupDettaglioRapportino(this, getIDModifica(), (Integer) view.getTag()).apriPopup();
+    // ── Uscita ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    /** Annulla (e indietro): con modifiche non salvate chiede conferma. */
+    @Override
+    public void annulla(View v) {
+        if (!modificato || !modificabile) {
+            super.annulla(v);
+            return;
+        }
+        Utility.mostraConfermaDialog(getString(R.string.attenzione), getString(R.string.modifiche_non_salvate), this, "OK",
+                getString(R.string.annulla), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which == DialogInterface.BUTTON_POSITIVE) RapportinoDettaglioModActivity.super.annulla(null);
+                    }
+                });
     }
 
     @Override
-    public void onClick(View view) {
-        apriDettaglio(view);
-    }
-
-    private static int intero(ContentValues cv, String campo) {
-        Integer v = cv.getAsInteger(campo);
-        return v != null ? v : 0;
-    }
-
-    /** Valore numerico di uno spinner: 0 se vuoto o "nessuno". */
-    private static int valore(EConTabSpinner spinner) {
-        try {
-            return Integer.parseInt(spinner.getValue());
-        } catch (NumberFormatException e) {
-            return 0;
-        }
-    }
-
-    /** Imposta l'elenco; se il valore scelto non c'e' (piu') si passa alla prima voce, "nessuno". */
-    private static void impostaElenco(EConTabSpinner spinner, ArrayList<Object> valori) {
-        boolean presente = false;
-        for (Object v : valori) {
-            if (((ContentValues) v).getAsString(EConTabSpinner.VALORE).equals(spinner.getValue())) presente = true;
-        }
-        if (!presente) {
-            spinner.setValue(((ContentValues) valori.get(0)).getAsString(EConTabSpinner.VALORE));
-        }
-        spinner.setValoriSpinnerLibero(valori);
-    }
-
-    private static ContentValues voce(String valore, String descrizione) {
-        ContentValues v = new ContentValues();
-        v.put(EConTabSpinner.VALORE, valore);
-        v.put(EConTabSpinner.DESCRIZIONE, descrizione);
-        return v;
-    }
-
-    /** TextWatcher con i soli metodi che servono qui. */
-    private abstract static class CambioValore implements TextWatcher {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-        }
+    public void onBackPressed() {
+        annulla(null);
     }
 }

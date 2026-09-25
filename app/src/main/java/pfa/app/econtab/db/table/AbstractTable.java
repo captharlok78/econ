@@ -743,7 +743,7 @@ public abstract class AbstractTable {
 			String tipo = campi.get(campo);
 			if (!isAutoincremento(campo)) {
 				if (jsonObject.has(campo)) {
-					String valore = jsonObject.getString(campo).trim();
+					String valore = jsonObject.isNull(campo) ? "" : jsonObject.getString(campo).trim(); // null del server = vuoto
 					//System.out.println("EConTab: AbstractTable costruisciInsertParametri HAS campo " + campo + ", tipo " + tipo + ", valore " + valore + ", index " + index);
 					if (tipo.equals(TEXT)) {
 						st.bindString(index, valore);
@@ -818,7 +818,7 @@ public abstract class AbstractTable {
 			String tipo = campi.get(campo);
 			if (!isChiave(campo)) {
 				if (jsonObject.has(campo)) {
-					String valore = jsonObject.getString(campo).trim();
+					String valore = jsonObject.isNull(campo) ? "" : jsonObject.getString(campo).trim(); // null del server = vuoto
 					//System.out.println("EConTab: AbstractTable costruisciUpdateParametri valore " + valore);
 					if (tipo.equals(TEXT)) {
 						st.bindString(index, valore);
@@ -890,7 +890,7 @@ public abstract class AbstractTable {
 			String tipo = campi.get(campo);
 			if (isChiave(campo)) {
 				if (jsonObject.has(campo)) {
-					String valore = jsonObject.getString(campo).trim();
+					String valore = jsonObject.isNull(campo) ? "" : jsonObject.getString(campo).trim(); // null del server = vuoto
 					if (tipo.equals(TEXT)) {
 						st.bindString(index, valore);
 					}
@@ -1044,8 +1044,14 @@ public abstract class AbstractTable {
         if (tabella.equalsIgnoreCase(RapportiniDettaglio.NOME_TABELLA)) {
             return new RapportiniDettaglio();
         }
-        if (tabella.equalsIgnoreCase(RapportiniDettaglioOperatori.NOME_TABELLA)) {
-            return new RapportiniDettaglioOperatori();
+        if (tabella.equalsIgnoreCase(RapportiniDettaglioTipi.NOME_TABELLA)) {
+            return new RapportiniDettaglioTipi();
+        }
+        if (tabella.equalsIgnoreCase(StatiDocumento.NOME_TABELLA)) {
+            return new StatiDocumento();
+        }
+        if (tabella.equalsIgnoreCase(StatiDocumentoTransizioni.NOME_TABELLA)) {
+            return new StatiDocumentoTransizioni();
         }
         if (tabella.equalsIgnoreCase(Squadre.NOME_TABELLA)) {
             return new Squadre();

@@ -21,6 +21,18 @@
 
 
             android:text="10/02/2015" />
+        <!-- stato del rapportino (badge colorato, vedi RapportiniAdapter) -->
+        <TextView
+            android:id="@+id/stato"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
         <TextView
             android:id="@+id/operatore"
             android:layout_width="0dp"

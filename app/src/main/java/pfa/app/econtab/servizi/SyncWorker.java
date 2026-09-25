@@ -68,9 +68,9 @@ public class SyncWorker extends Worker {
         {"relazioni",              "id_relazione"},
         {"preventivi",             "id_preventivo"},
         {"preventivi_dettaglio",   "id_preventivo_dettaglio"},
-        {"rapportini",             "id_rapportino"},
-        {"rapportini_dettaglio",   "id_rapportino_dettaglio"},
-        {"rapportini_dettaglio_operatori", "id_rapportino_dettaglio_operatore"},
+        // dallo schema 26 rapportini e righe usano i nomi del server (chiave "id")
+        {"rapportini",             "id"},
+        {"rapportini_dettaglio",   "id"},
         {"foto",                   "id_foto"},
     };
 
@@ -96,8 +96,7 @@ public class SyncWorker extends Worker {
         {"preventivi",        "id_preventivo",   "elementi_cantiere",     "id_preventivo"},
         {"preventivi",        "id_preventivo",   "componenti_cantiere",   "id_preventivo"},
         {"preventivi",        "id_preventivo",   "rapportini",            "id_ordine"},
-        {"rapportini",        "id_rapportino",   "rapportini_dettaglio",  "id_rapportino"},
-        {"rapportini_dettaglio", "id_rapportino_dettaglio", "rapportini_dettaglio_operatori", "id_rapportino_dettaglio"},
+        {"rapportini",        "id",              "rapportini_dettaglio",  "id_rapportino"},
         {"preventivi_dettaglio", "id_preventivo_dettaglio", "rapportini_dettaglio", "id_preventivo_dettaglio"},
         // FK intra-tabella e verso tabelle composite
         {"elementi_cantiere", "id_elemento_cant","componenti_cantiere",   "id_elemento_cavo"},

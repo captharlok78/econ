@@ -81,7 +81,9 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "preventivi_dettaglio",     "Righe Preventivo" },
         { "rapportini",               "Rapportini" },
         { "rapportini_dettaglio",     "Righe Rapportino" },
-        { "rapportini_dettaglio_operatori", "Operatori Righe Rapportino" },
+        { "rapportini_dettaglio_tipi", "Tipi di riga rapportino" },
+        { "stati_documento",          "Stati documenti" },
+        { "stati_documento_transizioni", "Passaggi di stato" },
         { "squadre",                  "Squadre" },
         { "squadre_membri",           "Membri Squadre" },
         { "pianificazione_assegnazioni", "Pianificazione" },
@@ -122,7 +124,6 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "preventivi_dettaglio",     "Righe Preventivo" },
         { "rapportini",               "Rapportini" },
         { "rapportini_dettaglio",     "Righe Rapportino" },
-        { "rapportini_dettaglio_operatori", "Operatori Righe Rapportino" },
         { "elementi_cantiere",        "Elementi Cantiere" },
         { "componenti_cantiere",      "Componenti Cantiere" },
         { "composizioni_cantiere",    "Composizioni Cantiere" },
@@ -148,9 +149,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             case "locali":                   return "id_locale";
             case "preventivi":               return "id_preventivo";
             case "preventivi_dettaglio":     return "id_preventivo_dettaglio";
-            case "rapportini":               return "id_rapportino";
-            case "rapportini_dettaglio":     return "id_rapportino_dettaglio";
-            case "rapportini_dettaglio_operatori": return "id_rapportino_dettaglio_operatore";
+            case "rapportini":               return "id"; // nomi del server dallo schema 26
+            case "rapportini_dettaglio":     return "id";
             case "elementi_cantiere":        return "id_elemento_cant";
             case "componenti_cantiere":      return "id_componente_cant";
             case "collegamenti":             return "id_collegamento";
@@ -184,8 +184,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         {"preventivi",        "id_preventivo",    "rapportini",             "id_ordine"},
         {"preventivi",        "id_preventivo",    "elementi_cantiere",      "id_preventivo"},
         {"preventivi",        "id_preventivo",    "componenti_cantiere",    "id_preventivo"},
-        {"rapportini",        "id_rapportino",    "rapportini_dettaglio",   "id_rapportino"},
-        {"rapportini_dettaglio", "id_rapportino_dettaglio", "rapportini_dettaglio_operatori", "id_rapportino_dettaglio"},
+        {"rapportini",        "id",               "rapportini_dettaglio",   "id_rapportino"},
         {"preventivi_dettaglio", "id_preventivo_dettaglio", "rapportini_dettaglio", "id_preventivo_dettaglio"},
         {"elementi_cantiere", "id_elemento_cant", "componenti_cantiere",    "id_elemento_cavo"},
         {"elementi_cantiere", "id_elemento_cant", "componenti_cantiere",    "id_elemento_tubo"},
@@ -1223,11 +1222,10 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         Map<String, String> pk = new HashMap<>();
         pk.put("cantieri",             "id_cantiere = "             + chiaveRecord);
         pk.put("preventivi",           "id_preventivo = "           + chiaveRecord);
-        pk.put("rapportini",           "id_rapportino = "           + chiaveRecord);
+        pk.put("rapportini",           "id = "                      + chiaveRecord);
         pk.put("elementi_cantiere",    "id_elemento_cant = "        + chiaveRecord);
         pk.put("preventivi_dettaglio", "id_preventivo_dettaglio = " + chiaveRecord);
-        pk.put("rapportini_dettaglio", "id_rapportino_dettaglio = " + chiaveRecord);
-        pk.put("rapportini_dettaglio_operatori", "id_rapportino_dettaglio_operatore = " + chiaveRecord);
+        pk.put("rapportini_dettaglio", "id = "                      + chiaveRecord);
         for (String[] t : SyncUtil.TABELLE_SOLO_DOWNLOAD) {
             pk.put(t[0], t[1] + " = " + chiaveRecord);
         }

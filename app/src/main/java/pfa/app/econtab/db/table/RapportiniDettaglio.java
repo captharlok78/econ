@@ -1,41 +1,45 @@
 package pfa.app.econtab.db.table;
 
 /**
- * Riga di un rapportino: lavoro (cosa si e' fatto) oppure viaggio di andata/ritorno (solo tempo), con orari
- * facoltativi (HH:MM) e, facoltativamente, la riga di manodopera (MD) dell'ordine a cui si imputano le ore.
- * Le ore sono solo sugli operatori della riga (rapportini_dettaglio_operatori). a_costo = 0: le ore restano ma non
- * entrano nel costo (es. viaggio non addebitato). Stessa struttura del server (STUDIO_PIANIFICAZIONE_E_LAVORI §9).
+ * Riga di un rapportino, schema 26 (nomi del server, GESTIONE_RAPPORTINI.md §1.2): tipo (la categoria del tipo decide il
+ * comportamento: LAVORO, VIAGGIO, MATERIALE), utente della manodopera, quantita' con la sua unita' di misura (per lavoro e
+ * viaggio un'unita' di tempo), orari facoltativi, articolo del listino (materiale), prezzo e "a costo" (solo per chi li vede),
+ * note, riga dell'ordine. Nessuna descrizione salvata: la si ricava dal contenuto.
  */
 public class RapportiniDettaglio extends AbstractTable {
 	public static final String NOME_TABELLA = "rapportini_dettaglio";
 
-	public static final String ID_RAPPORTINO_DETTAGLIO = "id_rapportino_dettaglio";
+	public static final String ID = "id";
+    public static final String ID_DITTA = "id_ditta";
     public static final String ID_RAPPORTINO = "id_rapportino";
-    public static final String TIPO = "tipo";
+    public static final String ID_TIPO = "id_tipo";
+    public static final String ID_UTENTE_MANODOPERA = "id_utente_manodopera";
+    public static final String QUANTITA = "quantita";
+    public static final String ID_UNITA_MISURA = "id_unita_misura";
     public static final String ORA_INIZIO = "ora_inizio";
     public static final String ORA_FINE = "ora_fine";
+    public static final String ID_LISTINO = "id_listino";
+    public static final String PREZZO = "prezzo";
     public static final String A_COSTO = "a_costo";
-    public static final String DESCRIZIONE = "descrizione";
     public static final String NOTE = "note";
     public static final String ID_PREVENTIVO_DETTAGLIO = "id_preventivo_dettaglio";
 
-    public static final String TIPO_VIAGGIO_ANDATA = "VA";
-    public static final String TIPO_LAVORO = "LA";
-    public static final String TIPO_VIAGGIO_RITORNO = "VR";
-    /** Tipi nell'ordine in cui si mostrano le righe: andata, lavoro, ritorno. */
-    public static final String[] TIPI = { TIPO_VIAGGIO_ANDATA, TIPO_LAVORO, TIPO_VIAGGIO_RITORNO };
-
 	public RapportiniDettaglio() {
 		setNomeTabella(NOME_TABELLA);
-		setCampoNumeratore(ID_RAPPORTINO_DETTAGLIO);
+		setCampoNumeratore(ID);
 
-		aggiungiCampo(ID_RAPPORTINO_DETTAGLIO, INTEGER);
+		aggiungiCampo(ID, INTEGER);
+        aggiungiCampo(ID_DITTA, INTEGER);
         aggiungiCampo(ID_RAPPORTINO, INTEGER);
-        aggiungiCampo(TIPO, TEXT);
+        aggiungiCampo(ID_TIPO, INTEGER);
+        aggiungiCampo(ID_UTENTE_MANODOPERA, INTEGER);
+        aggiungiCampo(QUANTITA, NUMERIC);
+        aggiungiCampo(ID_UNITA_MISURA, INTEGER);
         aggiungiCampo(ORA_INIZIO, TEXT);
         aggiungiCampo(ORA_FINE, TEXT);
+        aggiungiCampo(ID_LISTINO, INTEGER);
+        aggiungiCampo(PREZZO, NUMERIC);
         aggiungiCampo(A_COSTO, INTEGER);
-        aggiungiCampo(DESCRIZIONE, TEXT);
         aggiungiCampo(NOTE, TEXT);
         aggiungiCampo(ID_PREVENTIVO_DETTAGLIO, INTEGER);
 
@@ -45,33 +49,14 @@ public class RapportiniDettaglio extends AbstractTable {
 		aggiungiCampo(DATA_MOD, DATE);
 		aggiungiCampo(IN_SERVER, INTEGER);
 
-		aggiungiCampoChiave(ID_RAPPORTINO_DETTAGLIO);
+		aggiungiCampoChiave(ID);
 	}
 
-    public static boolean isViaggio(String tipo) {
-        return TIPO_VIAGGIO_ANDATA.equals(tipo) || TIPO_VIAGGIO_RITORNO.equals(tipo);
-    }
-
-    /** Espressione SQL per ordinare le righe come nella scheda: andata, lavoro, ritorno, poi per ora di inizio. */
-    public static String sqlOrdinamento(String alias) {
-        String a = alias != null ? alias + "." : "";
-        return "(case " + a + TIPO + " when '" + TIPO_VIAGGIO_ANDATA + "' then 0 when '" + TIPO_VIAGGIO_RITORNO + "' then 2 else 1 end), "
-                + "coalesce(" + a + ORA_INIZIO + ",'') = '', " + a + ORA_INIZIO + ", " + a + ID_RAPPORTINO_DETTAGLIO;
-    }
-
-    /**
-     * Gli operatori della riga si tolgono solo in locale: sul server li cancella la riga stessa (ON DELETE CASCADE),
-     * quindi non vanno in record_eliminati (il server risponderebbe "record non trovato").
-     */
-    @Override
-    protected void eliminaCorrelati(pfa.app.econtab.db.DbInterno db, android.content.ContentValues val) {
-        Integer idRiga = val.getAsInteger(ID_RAPPORTINO_DETTAGLIO);
-        if (idRiga != null) {
-            android.content.ContentValues where = new android.content.ContentValues();
-            where.put(RapportiniDettaglioOperatori.ID_RAPPORTINO_DETTAGLIO, idRiga);
-            db.delete(RapportiniDettaglioOperatori.NOME_TABELLA, where);
-        }
-        super.eliminaCorrelati(db, val);
+    /** Ore-uomo di una riga come espressione SQL (alias u = unita_misura): quantita' × minuti / 60, 0 per il materiale. */
+    public static String sqlOreUomo(String aliasRiga, String aliasTipo, String aliasUnita) {
+        return "(case when " + aliasTipo + "." + RapportiniDettaglioTipi.CATEGORIA + " = '" + RapportiniDettaglioTipi.CATEGORIA_MATERIALE
+                + "' then 0 else coalesce(" + aliasRiga + "." + QUANTITA + ",0) * coalesce(" + aliasUnita + "." + UnitaMisura.MINUTI_PER_UNITA
+                + ",0) / 60.0 end)";
     }
 
     @Override

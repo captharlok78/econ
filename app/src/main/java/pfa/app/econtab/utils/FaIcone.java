@@ -26,6 +26,7 @@ public final class FaIcone {
 	public static final String PLACCHE = "";     // th-large
 	public static final String NOTE = "";        // sticky-note
 	// Azioni
+	public static final String MODIFICA = "\uf304";     // pen
 	public static final String ELIMINA = "";     // trash-alt
 	public static final String PIU = "";         // plus
 	public static final String MENO = "";        // minus

@@ -27,7 +27,9 @@ import pfa.app.econtab.db.DbInterno;
 import pfa.app.econtab.db.table.Preventivi;
 import pfa.app.econtab.db.table.Rapportini;
 import pfa.app.econtab.db.table.RapportiniDettaglio;
-import pfa.app.econtab.db.table.RapportiniDettaglioOperatori;
+import pfa.app.econtab.db.table.RapportiniDettaglioTipi;
+import pfa.app.econtab.db.table.StatiDocumento;
+import pfa.app.econtab.db.table.UnitaMisura;
 import pfa.app.econtab.db.table.Utenti;
 import pfa.app.econtab.export.RapportinoXLS;
 import pfa.app.econtab.lista.EConTabListaStandardActivity;
@@ -93,7 +95,7 @@ public class RapportiniActivity extends EConTabListaStandardActivity {
 
     public void modifica(ContentValues rapportino) {
         Intent intent = new Intent(this, RapportinoDettaglioModActivity.class);
-        intent.putExtra("ID", rapportino.getAsInteger(Rapportini.ID_RAPPORTINO));
+        intent.putExtra("ID", rapportino.getAsInteger(Rapportini.ID));
         apriFinestraModifica(intent, 1);
     }
 
@@ -160,10 +162,10 @@ public class RapportiniActivity extends EConTabListaStandardActivity {
             confermaCancellazione(new Rapportini(), rapportino, true);
         }
         if (item.getItemId() == 3) {
-            esportaRapportino(rapportino.getAsInteger(Rapportini.ID_RAPPORTINO), false);
+            esportaRapportino(rapportino.getAsInteger(Rapportini.ID), false);
         }
         if (item.getItemId() == 4) {
-            esportaRapportino(rapportino.getAsInteger(Rapportini.ID_RAPPORTINO), true);
+            esportaRapportino(rapportino.getAsInteger(Rapportini.ID), true);
         }
         return super.onContextItemSelected(item);
     }
@@ -190,9 +192,14 @@ public class RapportiniActivity extends EConTabListaStandardActivity {
                     + Preventivi.NOME_TABELLA + "." + Preventivi.TITOLO + ", "
                     + Preventivi.NOME_TABELLA + "." + Preventivi.DATA + " as data_ordine, "
                     + Cantieri.NOME_TABELLA + "." + Cantieri.NOME + " as nome_cantiere, "
-                    + "(select sum(" + RapportiniDettaglioOperatori.sqlOreUomoRiga() + ") from " + RapportiniDettaglio.NOME_TABELLA + " where "
-                    + RapportiniDettaglio.NOME_TABELLA + "." + RapportiniDettaglio.ID_RAPPORTINO + "=" + Rapportini.NOME_TABELLA + "."
-                    + Rapportini.ID_RAPPORTINO + ") as tot_ore, "
+                    + "(select sum(" + RapportiniDettaglio.sqlOreUomo("d", "t", "u") + ") from " + RapportiniDettaglio.NOME_TABELLA + " d"
+                    + " inner join " + RapportiniDettaglioTipi.NOME_TABELLA + " t on t." + RapportiniDettaglioTipi.ID + "=d." + RapportiniDettaglio.ID_TIPO
+                    + " left join " + UnitaMisura.NOME_TABELLA + " u on u." + UnitaMisura.ID + "=d." + RapportiniDettaglio.ID_UNITA_MISURA
+                    + " where d." + RapportiniDettaglio.ID_RAPPORTINO + "=" + Rapportini.NOME_TABELLA + "." + Rapportini.ID + ") as tot_ore, "
+                    + "(select " + StatiDocumento.NOME + " from " + StatiDocumento.NOME_TABELLA + " sd where sd." + StatiDocumento.ID + "="
+                    + Rapportini.NOME_TABELLA + "." + Rapportini.ID_STATO + ") as nome_stato, "
+                    + "(select " + StatiDocumento.COLORE + " from " + StatiDocumento.NOME_TABELLA + " sd where sd." + StatiDocumento.ID + "="
+                    + Rapportini.NOME_TABELLA + "." + Rapportini.ID_STATO + ") as colore_stato, "
                     + Utenti.NOME_TABELLA + "." + Utenti.NOME + " as nome_operatore, "
                     + Utenti.NOME_TABELLA + "." + Utenti.COGNOME + " as cognome_operatore";
 
@@ -233,7 +240,7 @@ public class RapportiniActivity extends EConTabListaStandardActivity {
         @Override
         public void onRigaClick(EConTabListaStandardController.Host host, ContentValues riga) {
             Intent intent = new Intent(host.getContext(), RapportinoDettaglioModActivity.class);
-            intent.putExtra("ID", riga.getAsInteger(Rapportini.ID_RAPPORTINO));
+            intent.putExtra("ID", riga.getAsInteger(Rapportini.ID));
             ((EConTabActivity) host.getContext()).apriFinestraModifica(intent, 1);
         }
 

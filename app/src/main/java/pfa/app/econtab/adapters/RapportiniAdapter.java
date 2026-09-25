@@ -38,7 +38,7 @@ public class RapportiniAdapter extends EConTabListViewAdapter  {
         holder.note = (TextView) convertView.findViewById(R.id.note);
         holder.buttonAzioni = (Button) convertView.findViewById(R.id.buttonAzioni);
         holder.buttonDuplica = (Button) convertView.findViewById(R.id.buttonDuplica);
-        holder.operatore = (TextView) convertView.findViewById(R.id.operatore);
+        holder.stato = (TextView) convertView.findViewById(R.id.stato);
 
         return holder;
     }
@@ -49,6 +49,20 @@ public class RapportiniAdapter extends EConTabListViewAdapter  {
         final ContentValues val = (ContentValues) dati.get(position);
         ((RapportiniViewHolder) viewholder).data_rapportino.setText(Utility.numberToData(val.getAsLong(Rapportini.DATA_RAPPORTINO)));
         ((RapportiniViewHolder) viewholder).data_rapportino.setTag(position);
+
+        // badge dello stato (nome e colore da stati_documento; assente se gli stati non sono ancora scaricati)
+        TextView stato = ((RapportiniViewHolder) viewholder).stato;
+        String nomeStato = val.getAsString("nome_stato");
+        if (nomeStato != null && !nomeStato.isEmpty()) {
+            stato.setVisibility(View.VISIBLE);
+            stato.setText(nomeStato);
+            android.graphics.drawable.GradientDrawable sfondo = new android.graphics.drawable.GradientDrawable();
+            sfondo.setCornerRadius(24);
+            sfondo.setColor(pfa.app.econtab.utils.RegoleRapportino.coloreStato(val.getAsString("colore_stato")));
+            stato.setBackground(sfondo);
+        } else {
+            stato.setVisibility(View.GONE);
+        }
 
         if (val.getAsDouble("tot_ore") != null) {
             ((RapportiniViewHolder) viewholder).ore.setText(getString(R.string.ore_uomo) + ": " + Utility.formatNumero(val.getAsDouble("tot_ore")));
@@ -106,10 +120,10 @@ public class RapportiniAdapter extends EConTabListViewAdapter  {
                             ((RapportiniActivity) context).confermaCancellazione(new Rapportini(), val, true);
                         }
                         if (i == 2) {
-                            ((RapportiniActivity) context).esportaRapportino(val.getAsInteger(Rapportini.ID_RAPPORTINO),false);
+                            ((RapportiniActivity) context).esportaRapportino(val.getAsInteger(Rapportini.ID),false);
                         }
                         if (i == 3) {
-                            ((RapportiniActivity) context).esportaRapportino(val.getAsInteger(Rapportini.ID_RAPPORTINO),true);
+                            ((RapportiniActivity) context).esportaRapportino(val.getAsInteger(Rapportini.ID),true);
                         }
                     }
                 });
@@ -130,6 +144,7 @@ public class RapportiniAdapter extends EConTabListViewAdapter  {
         TextView note = null;
         Button buttonAzioni = null;
         Button buttonDuplica = null;
+        TextView stato = null;
 
     }
 

@@ -408,7 +408,7 @@ public class PreventiviDettaglioAdapter extends DettaglioTabellaAdapter {
     private void _mostraRapportiniRiga(int idOrdine, int idRigaOrdine) {
         DbInterno db = new DbInterno(context);
         Join j0 = new Join(Rapportini.NOME_TABELLA,RapportiniDettaglio.NOME_TABELLA);
-        j0.addCampiDiJoin(Rapportini.ID_RAPPORTINO,RapportiniDettaglio.ID_RAPPORTINO);
+        j0.addCampiDiJoin(Rapportini.ID,RapportiniDettaglio.ID_RAPPORTINO);
 
         String SQL = "Select distinct "+Rapportini.NOME_TABELLA+".* from "+ Rapportini.NOME_TABELLA+ j0.getSQLJoin()+" where "+Rapportini.ID_ORDINE+"="+idOrdine+" and "+RapportiniDettaglio.NOME_TABELLA+"."+RapportiniDettaglio.ID_PREVENTIVO_DETTAGLIO+"="+idRigaOrdine;
         final ArrayList<Object> rapp = db.eseguiSelect(SQL,null);
@@ -424,7 +424,7 @@ public class PreventiviDettaglioAdapter extends DettaglioTabellaAdapter {
             @Override
             public void onClick(DialogInterface dialogInterface, int which) {
                 Intent intent = new Intent(context,RapportinoDettaglioModActivity.class);
-                intent.putExtra("ID",((ContentValues)rapp.get(which)).getAsInteger(Rapportini.ID_RAPPORTINO));
+                intent.putExtra("ID",((ContentValues)rapp.get(which)).getAsInteger(Rapportini.ID));
                 context.startActivity(intent);
             }
         });

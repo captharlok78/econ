@@ -1,184 +1,293 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Rapportino (GESTIONE_RAPPORTINI.md §12.1): testata standard con lo stato, operatore e data, cliente / cantiere / ordine
+    con ricerca, note, i tre pulsanti che aprono le finestre delle righe, la tabella delle righe (testata fissa) e in fondo
+    Annulla · Firma · Invia mail · Salva · Conferma.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/container"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5"
+    android:orientation="vertical">
 
-    <RelativeLayout
-        android:id="@+id/content"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="wrap_content">
 
-        <ScrollView
-            android:id="@+id/scroll"
+        <include layout="@layout/header_dettaglio_standard" />
+
+        <TextView
+            android:id="@+id/badge_stato"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="12dp"
+            android:elevation="5dp"
+            android:paddingStart="10dp"
+            android:paddingTop="3dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="3dp"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/campi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="@dimen/margine"
+        android:paddingTop="@dimen/margine"
+        android:paddingEnd="@dimen/margine">
+
+        <!-- riga 1: operatore (chi compila, fisso) e data -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/footer_dettaglio"
-            android:layout_alignParentTop="true" >
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/operatore" />
+
+            <TextView
+                android:id="@+id/text_operatore"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingStart="8dp"
+                android:textColor="#212121"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/data" />
+
+            <pfa.app.econtab.views.EConTabCalendario
+                android:id="@+id/edit_data"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- riga 2: cliente, cantiere, ordine (almeno uno); ricerca da 3 lettere, l'ordine anche toccando il campo -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margine"
+            android:orientation="horizontal">
 
             <LinearLayout
-                android:id="@+id/campi"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="@dimen/margine" >
+                android:layout_weight="1"
+                android:orientation="vertical">
+
                 <TextView
-                    android:id="@+id/textView_operatore"
                     style="@style/TestoIntestazione"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
-                    android:text="@string/operatore" />
+                    android:text="@string/cliente" />
 
-                <!-- L'operatore e' sempre l'utente loggato: solo etichetta, non modificabile -->
-                <TextView
-                    android:id="@+id/text_operatore"
+                <pfa.app.econtab.views.CampoRicerca
+                    android:id="@+id/campo_cliente"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingStart="4dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
-                    android:textColor="#212121"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-                <LinearLayout
-                    android:orientation="horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <LinearLayout
-                        android:orientation="vertical"
-
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
-
-                        <TextView
-                            android:id="@+id/textView_data"
-                            style="@style/TestoIntestazione"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/data" />
-
-                        <pfa.app.econtab.views.EConTabCalendario
-                            android:id="@+id/edit_data"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content">
-                        </pfa.app.econtab.views.EConTabCalendario>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:orientation="vertical"
-                        android:layout_marginLeft="@dimen/margine"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <!-- Cliente, cantiere e ordine: almeno uno. Il cantiere porta il suo cliente, l'ordine il suo cantiere. -->
-                        <TextView
-                            android:id="@+id/textView_cliente"
-                            style="@style/TestoIntestazione"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/cliente" />
-
-                        <pfa.app.econtab.views.EConTabSpinner
-                            android:id="@+id/spinner_clienti"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <!-- Solo i cantieri su cui l'utente e' pianificato nella settimana della data (vedi RegoleRapportino) -->
-                <TextView
-                    android:id="@+id/textView_cantiere"
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
-                    android:text="@string/cantiere_facoltativo" />
-
-                <pfa.app.econtab.views.EConTabSpinner
-                    android:id="@+id/spinner_cantieri"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-                <TextView
-                    android:id="@+id/textView_ordine"
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
-                    android:text="@string/ordine_facoltativo" />
-
-                <pfa.app.econtab.views.EConTabSpinner
-                    android:id="@+id/spinner_ordini"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-                <TextView
-                    android:id="@+id/textView_note"
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
-                    android:text="@string/note" />
-
-                <EditText
-                    android:id="@+id/editText_note"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:gravity="top"
-                    android:maxLength="255"
-                    android:nextFocusRight="@+id/editText_cantiere"/>
-
-                <LinearLayout
-                    android:id="@+id/linear_lista_dett"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/altezza_campo"
-                    android:background="@android:drawable/editbox_background_normal"
-                    android:orientation="vertical"
-                    android:showDividers="middle"
-                    android:divider="@drawable/divider"
-
-                    android:paddingTop="@dimen/margine" >
-
-                    <RelativeLayout
-                        android:id="@+id/linear_nuovo_dett"
-                        android:layout_width="match_parent"
-                        android:paddingBottom="@dimen/margine"
-                        android:layout_height="wrap_content" >
-
-                        <TextView
-                            android:id="@+id/textView_dettaglio"
-                            style="@style/TestoIntestazione"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentLeft="true"
-                            android:layout_centerVertical="true"
-                            android:layout_gravity="center_vertical"
-                            android:text="@string/dettaglio_rapportino"
-                            android:textAllCaps="true" />
-
-                        <ImageButton
-                            android:id="@+id/button_aggiungi_dettaglio"
-                            style="@style/bottoneListaGrande"
-                            android:layout_alignParentRight="true"
-                            android:layout_alignParentTop="true"
-                            android:background="@drawable/bg_bottone_rotondo"
-                            android:scaleType="fitXY"
-                            android:src="@drawable/nuovo"
-                            android:onClick="nuovoDettaglio" />
-                    </RelativeLayout>
-                </LinearLayout>
+                    android:hint="@string/cerca_3_lettere" />
             </LinearLayout>
-        </ScrollView>
 
-        <include
-            android:id="@+id/footer_dettaglio"
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/margine"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cantiere" />
+
+                <pfa.app.econtab.views.CampoRicerca
+                    android:id="@+id/campo_cantiere"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/cerca_3_lettere" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/margine"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ordine" />
+
+                <pfa.app.econtab.views.CampoRicerca
+                    android:id="@+id/campo_ordine"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- riga 3: note -->
+        <EditText
+            android:id="@+id/editText_note"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            layout="@layout/footer_dett" />
-    </RelativeLayout>
+            android:layout_marginTop="@dimen/margine"
+            android:hint="@string/note_rapportino"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLength="255" />
 
-</FrameLayout>
+        <!-- riga 4: nuove righe -->
+        <LinearLayout
+            android:id="@+id/pulsanti_righe"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="@dimen/margine"
+            android:layout_marginBottom="@dimen/margine"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_manodopera"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:backgroundTint="#E3F2FD"
+                android:onClick="nuovaManodopera"
+                android:text="@string/aggiungi_manodopera"
+                android:textColor="#1565C0"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/button_viaggio"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:backgroundTint="#E3F2FD"
+                android:onClick="nuovoViaggio"
+                android:text="@string/aggiungi_viaggio"
+                android:textColor="#1565C0"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/button_articolo"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:backgroundTint="#E3F2FD"
+                android:onClick="nuovoArticolo"
+                android:text="@string/aggiungi_articolo"
+                android:textColor="#1565C0"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- righe: testata fissa + lista (DettaglioTabellaAdapter) -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginStart="@dimen/margine"
+        android:layout_marginEnd="@dimen/margine"
+        android:background="#FFFFFF">
+
+        <include layout="@layout/dettaglio_tabella_standard" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="@dimen/margine"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button_annulla"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="1dp"
+            android:backgroundTint="#E0E0E0"
+            android:onClick="annulla"
+            android:text="@string/annulla"
+            android:textColor="#1565C0"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <!-- Firma e Invia mail: presenti, per ora senza azione (§8.8, §8.9) -->
+        <Button
+            android:id="@+id/button_firma"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="1dp"
+            android:layout_marginEnd="1dp"
+            android:backgroundTint="#E0E0E0"
+            android:text="@string/firma"
+            android:textColor="#1565C0"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/button_invia_mail"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="1dp"
+            android:layout_marginEnd="1dp"
+            android:backgroundTint="#E0E0E0"
+            android:text="@string/invia_mail"
+            android:textColor="#1565C0"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/button_salva"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="1dp"
+            android:layout_marginEnd="1dp"
+            android:backgroundTint="#1565C0"
+            android:onClick="salva"
+            android:text="@string/salva"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/button_conferma"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="1dp"
+            android:backgroundTint="#2E7D32"
+            android:onClick="conferma"
+            android:text="@string/conferma"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <include layout="@layout/footer" />
+</LinearLayout>

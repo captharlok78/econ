@@ -567,7 +567,12 @@ public class PreventivoDettaglioFragment extends EConTabFragment implements OnCl
             //se sono in un ordine aggiungo i valori dei rapportini
             if (tipoPreventivoOrdine.equals(Preventivi.TIPO_ORDINE)){
                 // ore dei rapportini imputate a questa riga dell'ordine (righe di rapportino con id_preventivo_dettaglio)
-                String SQLRAPP = "Select Sum("+ pfa.app.econtab.db.table.RapportiniDettaglioOperatori.sqlOreUomoRiga()+") as ore_rapp from " + RapportiniDettaglio.NOME_TABELLA+" inner join "+ Rapportini.NOME_TABELLA+" on "+Rapportini.NOME_TABELLA+"."+Rapportini.ID_RAPPORTINO+"="+RapportiniDettaglio.NOME_TABELLA+"."+RapportiniDettaglio.ID_RAPPORTINO+" where "+RapportiniDettaglio.NOME_TABELLA+"."+RapportiniDettaglio.ID_PREVENTIVO_DETTAGLIO+"="+recCurr.getAsInteger(PreventiviDettaglio.ID_PREVENTIVO_DETTAGLIO)+" and " + Rapportini.ID_ORDINE+"="+idPreventivo;
+                String SQLRAPP = "Select Sum(" + RapportiniDettaglio.sqlOreUomo("d", "t", "u") + ") as ore_rapp from " + RapportiniDettaglio.NOME_TABELLA + " d"
+                        + " inner join " + Rapportini.NOME_TABELLA + " r on r." + Rapportini.ID + "=d." + RapportiniDettaglio.ID_RAPPORTINO
+                        + " inner join " + pfa.app.econtab.db.table.RapportiniDettaglioTipi.NOME_TABELLA + " t on t.id=d." + RapportiniDettaglio.ID_TIPO
+                        + " left join " + pfa.app.econtab.db.table.UnitaMisura.NOME_TABELLA + " u on u.id=d." + RapportiniDettaglio.ID_UNITA_MISURA
+                        + " where d." + RapportiniDettaglio.ID_PREVENTIVO_DETTAGLIO + "=" + recCurr.getAsInteger(PreventiviDettaglio.ID_PREVENTIVO_DETTAGLIO)
+                        + " and r." + Rapportini.ID_ORDINE + "=" + idPreventivo;
                 ArrayList<Object> rapp = db.eseguiSelect(SQLRAPP,null);
                 double przUni = recCurr.getAsDouble(PreventiviDettaglio.PREZZO);
                 double tot_ore = 0;

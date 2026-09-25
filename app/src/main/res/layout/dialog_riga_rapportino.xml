@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Finestra di una riga del rapportino (GESTIONE_RAPPORTINI.md §12.2): la stessa per Manodopera, Viaggio e Articolo;
+    PopupRigaRapportino mostra solo le parti che servono alla categoria del tipo.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/margine">
+
+        <!-- Articolo: tab Listino / Nuovo articolo (disattivata finche' non c'e' la libreria della ditta, §8.6) -->
+        <LinearLayout
+            android:id="@+id/sezione_articolo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/button_tab_listino"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="1dp"
+                    android:backgroundTint="#1565C0"
+                    android:text="@string/listino"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/button_tab_nuovo_articolo"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginStart="1dp"
+                    android:backgroundTint="#E0E0E0"
+                    android:enabled="false"
+                    android:text="@string/nuovo_articolo"
+                    android:textColor="#9E9E9E" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margine"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TestoIntestazione"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/costruttore" />
+
+                    <Spinner
+                        android:id="@+id/spinner_costruttore"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/margine"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TestoIntestazione"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/linea" />
+
+                    <Spinner
+                        android:id="@+id/spinner_linea"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margine"
+                android:text="@string/articolo" />
+
+            <pfa.app.econtab.views.CampoRicerca
+                android:id="@+id/campo_articolo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/cerca_3_lettere" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margine"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/sezione_tipo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/tipo" />
+
+                <Spinner
+                    android:id="@+id/spinner_tipo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/sezione_utente"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/margine"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/utente" />
+
+                <Spinner
+                    android:id="@+id/spinner_utente"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Viaggio: partenza e arrivo calcolano la durata; oppure la durata si scrive a mano -->
+        <LinearLayout
+            android:id="@+id/sezione_orari"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margine"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ora_partenza" />
+
+                <EditText
+                    android:id="@+id/edit_ora_inizio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:hint="--:--" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/margine"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ora_arrivo" />
+
+                <EditText
+                    android:id="@+id/edit_ora_fine"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="false"
+                    android:hint="--:--" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margine"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/quantita" />
+
+                <EditText
+                    android:id="@+id/edit_quantita"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
+                    android:selectAllOnFocus="true" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/margine"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/unita_misura" />
+
+                <Spinner
+                    android:id="@+id/spinner_unita"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sezione_riga_ordine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margine"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/riga_ordine" />
+
+            <Spinner
+                android:id="@+id/spinner_riga_ordine"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/TestoIntestazione"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margine"
+            android:text="@string/note" />
+
+        <EditText
+            android:id="@+id/edit_note_riga"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLength="255" />
+
+        <!-- Prezzo e "a costo": solo amministratore, coordinatori, unico operatore della ditta -->
+        <LinearLayout
+            android:id="@+id/sezione_prezzo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margine"
+            android:gravity="bottom"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/label_prezzo"
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/costo_fisso" />
+
+                <EditText
+                    android:id="@+id/edit_prezzo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
+                    android:selectAllOnFocus="true" />
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/check_a_costo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/margine"
+                android:text="@string/a_costo" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

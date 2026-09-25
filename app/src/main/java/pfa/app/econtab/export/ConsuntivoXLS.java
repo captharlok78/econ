@@ -43,6 +43,8 @@ import pfa.app.econtab.db.table.PlaccheModuli;
 import pfa.app.econtab.db.table.Preventivi;
 import pfa.app.econtab.db.table.PreventiviDettaglio;
 import pfa.app.econtab.db.table.Rapportini;
+import pfa.app.econtab.db.table.RapportiniDettaglioTipi;
+import pfa.app.econtab.utils.RigheRapportino;
 import pfa.app.econtab.db.table.RapportiniDettaglio;
 import pfa.app.econtab.db.table.Utenti;
 import pfa.app.econtab.utils.Utility;
@@ -329,16 +331,14 @@ public class ConsuntivoXLS {
         if (ordini.endsWith(",")){
             ordini = ordini.substring(0,ordini.length()-1);
         }
-        // una riga per ogni operatore delle righe (viaggi e lavoro) dei rapportini degli ordini; costo: copiato dal server,
-        // altrimenti quello attuale dell'operatore, 0 se la riga non e' a costo
-        ArrayList<Object> rapportini =  db.eseguiSelect("Select rapportini_dettaglio.*,rapportini.data_rapportino,uo.nome as nomeutente,"
-                + "uo.cognome as cognomeutente,o.ore as ore_operatore,"
-                + "(case when rapportini_dettaglio.a_costo=0 then 0 when coalesce(o.costo_orario,0)>0 then o.costo_orario else coalesce(uo.costo_orario,0) end) as costo_operatore"
-                + " from rapportini inner join rapportini_dettaglio on rapportini.id_rapportino=rapportini_dettaglio.id_rapportino"
-                + " inner join rapportini_dettaglio_operatori o on o.id_rapportino_dettaglio=rapportini_dettaglio.id_rapportino_dettaglio"
-                + " left join utenti uo on uo.id_utente_ditta=o.id_utente_ditta"
-                + " where rapportini.id_ordine in ("+ordini+")"
-                + " order by rapportini.data_rapportino,rapportini.id_rapportino," + RapportiniDettaglio.sqlOrdinamento(RapportiniDettaglio.NOME_TABELLA), null);
+        // una riga per ogni riga di tempo (lavoro e viaggi) dei rapportini degli ordini, con le ore-uomo e il costo orario
+        // attuale dell'utente (i costi si calcolano sempre al momento, come sul server)
+        ArrayList<Object> rapportini = db.eseguiSelect(RigheRapportino.sqlRighe(
+                "inner join " + Rapportini.NOME_TABELLA + " r on r." + Rapportini.ID + "=d." + RapportiniDettaglio.ID_RAPPORTINO,
+                "r." + Rapportini.ID_ORDINE + " in (" + ordini + ") and coalesce(t." + RapportiniDettaglioTipi.CATEGORIA + ",'')<>'"
+                        + RapportiniDettaglioTipi.CATEGORIA_MATERIALE + "'",
+                "r." + Rapportini.DATA_RAPPORTINO + ", r." + Rapportini.ID + ", " + RigheRapportino.ORDINAMENTO)
+                .replace("select d.*,", "select d.*, r." + Rapportini.DATA_RAPPORTINO + ","), null);
         db.close();
 
         for (int i=0;i<rapportini.size();i++){
@@ -1249,11 +1249,12 @@ public class ConsuntivoXLS {
         c.setCellStyle(cs);
 
         c = riga.createCell(1);
-        c.setCellValue(val.getAsString("nomeutente") + " " + val.getAsString("cognomeutente"));// CODICE ARTICOLO
+        c.setCellValue(RigheRapportino.testo(val, RigheRapportino.NOME_UTENTE));
         c.setCellStyle(cs);
 
         c = riga.createCell(2);
-        c.setCellValue(pfa.app.econtab.RapportinoDettaglioModActivity.titoloRiga(ctx, val));
+        String orari = RigheRapportino.orari(val);
+        c.setCellValue(RigheRapportino.testo(val, RigheRapportino.DESCRIZIONE_TIPO) + (orari.isEmpty() ? "" : " " + orari));
         c.setCellStyle(cs);
 
         c = riga.createCell(3);
@@ -1262,18 +1263,20 @@ public class ConsuntivoXLS {
 
 
         c = riga.createCell(4);
-        oreTotRApportini = oreTotRApportini+ val.getAsDouble("ore_operatore");
-        c.setCellValue(val.getAsDouble("ore_operatore"));
+        double ore = RigheRapportino.oreUomo(val);
+        double costoOrario = RigheRapportino.costoUnitario(val);
+        oreTotRApportini = oreTotRApportini + ore;
+        c.setCellValue(ore);
         c.setCellType(Cell.CELL_TYPE_NUMERIC);
         c.setCellStyle(cs);
 
         c = riga.createCell(5);
-        c.setCellValue(Utility.arrotonda(val.getAsDouble("costo_operatore"), 2));
+        c.setCellValue(Utility.arrotonda(costoOrario, 2));
         c.setCellType(Cell.CELL_TYPE_NUMERIC);
         c.setCellStyle(currencyCellStyle);
 
         c = riga.createCell(6);
-        double tot = val.getAsDouble("costo_operatore")  * val.getAsDouble("ore_operatore");
+        double tot = costoOrario * ore;
         String cellaQta = "E" + (rowCountRapportini + 1);
         String cellaPrezzo = "F" + (rowCountRapportini + 1);
         c.setCellFormula("PRODUCT(" + cellaQta + ":" + cellaPrezzo + ")");
