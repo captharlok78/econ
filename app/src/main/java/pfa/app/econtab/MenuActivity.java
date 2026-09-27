@@ -826,7 +826,7 @@ public class MenuActivity extends EConTabActivity {
         layout.setPadding(dp16, dp16, dp16, 0);
 
         android.widget.EditText etAttuale = campoPassword("Password attuale");
-        android.widget.EditText etNuova = campoPassword("Nuova password (almeno 6 caratteri)");
+        android.widget.EditText etNuova = campoPassword("Nuova password (almeno " + pfa.app.econtab.utils.CambioPassword.LUNGHEZZA_MINIMA + " caratteri)");
         android.widget.EditText etConferma = campoPassword("Conferma nuova password");
         layout.addView(etAttuale);
         layout.addView(etNuova);
@@ -845,52 +845,28 @@ public class MenuActivity extends EConTabActivity {
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(btn -> {
             String attuale = etAttuale.getText().toString();
             String nuova = etNuova.getText().toString();
-            if (attuale.isEmpty()) {
-                etAttuale.setError("Inserisci la password attuale");
+            String errore = pfa.app.econtab.utils.CambioPassword.errore(attuale, nuova, etConferma.getText().toString());
+            if (errore != null) {
+                Utility.mostraDialog("Cambia password", errore, this, "OK");
                 return;
             }
-            if (nuova.length() < 6) {
-                etNuova.setError("La password deve essere di almeno 6 caratteri");
-                return;
-            }
-            if (!nuova.equals(etConferma.getText().toString())) {
-                etConferma.setError("Le password non coincidono");
-                return;
-            }
-
             btn.setEnabled(false);
-            MercuryApiClient.getInstance(this).getService()
-                    .changePassword(new MercuryApiService.ChangePasswordRequest(attuale, nuova))
-                    .enqueue(new Callback<MercuryApiService.ChangePasswordResponse>() {
-                        @Override
-                        public void onResponse(Call<MercuryApiService.ChangePasswordResponse> call,
-                                               Response<MercuryApiService.ChangePasswordResponse> response) {
-                            if (isFinishing() || isDestroyed()) return;
-                            if (response.isSuccessful() && response.body() != null) {
-                                TokenManager tm = TokenManager.getInstance(MenuActivity.this);
-                                if (tm.hasCredenzialiRicordami()) {
-                                    tm.saveCredenzialiRicordami(tm.getEmailRicordami(), nuova);
-                                }
-                                tvPassword.setText(formattaPassword(response.body().password));
-                                dialog.dismiss();
-                                Toast.makeText(MenuActivity.this, "Password aggiornata.", Toast.LENGTH_LONG).show();
-                            } else {
-                                btn.setEnabled(true);
-                                Utility.mostraDialog("Cambia password",
-                                        MercuryApiClient.messaggioErrore(response, "Errore dal server"),
-                                        MenuActivity.this, "OK");
-                            }
-                        }
+            pfa.app.econtab.utils.CambioPassword.invia(this, attuale, nuova, new pfa.app.econtab.utils.CambioPassword.Esito() {
+                @Override
+                public void fatto(MercuryApiService.PasswordProfilo password) {
+                    if (isFinishing() || isDestroyed()) return;
+                    tvPassword.setText(formattaPassword(password));
+                    dialog.dismiss();
+                    Toast.makeText(MenuActivity.this, "Password aggiornata.", Toast.LENGTH_LONG).show();
+                }
 
-                        @Override
-                        public void onFailure(Call<MercuryApiService.ChangePasswordResponse> call, Throwable t) {
-                            if (isFinishing() || isDestroyed()) return;
-                            btn.setEnabled(true);
-                            Utility.mostraDialog("Errore di rete",
-                                    "La password si cambia solo con il server raggiungibile.\n" + t.getMessage(),
-                                    MenuActivity.this, "OK");
-                        }
-                    });
+                @Override
+                public void errore(String messaggio) {
+                    if (isFinishing() || isDestroyed()) return;
+                    btn.setEnabled(true);
+                    Utility.mostraDialog("Cambia password", messaggio, MenuActivity.this, "OK");
+                }
+            });
         });
     }
 

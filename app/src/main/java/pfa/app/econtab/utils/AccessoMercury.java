@@ -62,7 +62,7 @@ public final class AccessoMercury {
                         } else if (response.code() == 401) {
                             esito.rifiutato("Le credenziali salvate non sono più valide: accedi di nuovo.");
                         } else if (response.code() == 403) {
-                            esito.rifiutato("Licenza scaduta o non abilitata.");
+                            esito.rifiutato(MercuryApiClient.messaggioErrore(response, "Accesso non consentito"));
                         } else {
                             esito.erroreRete("Errore server (HTTP " + response.code() + ").");
                         }
@@ -75,8 +75,18 @@ public final class AccessoMercury {
                 });
     }
 
-    /** Apre la sincronizzazione di avvio, che al termine porta al menu (nessun ritorno alla schermata precedente). */
+    /**
+     * Apre la sincronizzazione di avvio, che al termine porta al menu (nessun ritorno alla schermata precedente).
+     * Con la password scaduta all'ultimo login (e la rete disponibile) prima si deve cambiarla: il server non accetta
+     * altre chiamate. Senza rete si prosegue con i dati del dispositivo e il cambio si chiede alla prossima apertura.
+     */
     public static void apriAllineamento(Context ctx) {
+        if (TokenManager.getInstance(ctx).isPasswordScaduta() && Utility.isOnline(ctx)) {
+            Intent cambio = new Intent(ctx, pfa.app.econtab.CambioPasswordActivity.class);
+            cambio.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            ctx.startActivity(cambio);
+            return;
+        }
         Intent intent = new Intent(ctx, SincronizzazioneActivity.class);
         intent.putExtra(SincronizzazioneActivity.EXTRA_MODE, SincronizzazioneActivity.MODE_AVVIO);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

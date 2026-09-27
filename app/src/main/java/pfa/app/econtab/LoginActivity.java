@@ -320,7 +320,7 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
                         } else {
                             String msg;
                             if (response.code() == 401) msg = "Email o password errata.";
-                            else if (response.code() == 403) msg = "Licenza scaduta o non abilitata.";
+                            else if (response.code() == 403) msg = MercuryApiClient.messaggioErrore(response, "Accesso non consentito");
                             else if (response.code() >= 500) msg = "Errore server (HTTP " + response.code() + ").";
                             else msg = "Accesso fallito (HTTP " + response.code() + ").";
                             Utility.mostraDialog("Accesso Mercury", msg, LoginActivity.this, "OK");
@@ -536,8 +536,9 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
                 etCodice.setError("Inserisci il codice");
                 return;
             }
-            if (nuovaPassword.length() < 6) {
-                etNuovaPassword.setError("La password deve essere di almeno 6 caratteri");
+            if (nuovaPassword.length() < pfa.app.econtab.utils.CambioPassword.LUNGHEZZA_MINIMA) {
+                etNuovaPassword.setError("La password deve essere di almeno "
+                        + pfa.app.econtab.utils.CambioPassword.LUNGHEZZA_MINIMA + " caratteri");
                 return;
             }
             if (!nuovaPassword.equals(confermaPassword)) {

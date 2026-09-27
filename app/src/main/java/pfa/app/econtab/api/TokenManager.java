@@ -29,6 +29,7 @@ public class TokenManager {
     private static final String KEY_MODULI     = "moduli_abilitati";
     private static final String KEY_DITTE      = "ditte_abilitate";
     private static final String KEY_PACCHETTI  = "pacchetti_assegnati";
+    private static final String KEY_PASSWORD_SCADUTA = "password_scaduta";
     private static final String KEY_RICORDA_EMAIL    = "ricorda_email";
     private static final String KEY_RICORDA_PASSWORD  = "ricorda_password";
 
@@ -82,6 +83,7 @@ public class TokenManager {
                 .putString(KEY_NOME_DITTA, nomeDitta)
                 .putString(KEY_NOME,       response.nome)
                 .putString(KEY_COGNOME,    response.cognome)
+                .putBoolean(KEY_PASSWORD_SCADUTA, response.passwordScaduta)
                 .apply();
         saveModuli(response.moduli);
         savePacchetti(response.pacchetti);
@@ -244,6 +246,7 @@ public class TokenManager {
                 .remove(KEY_MODULI)
                 .remove(KEY_PACCHETTI)
                 .remove(KEY_DITTE)
+                .remove(KEY_PASSWORD_SCADUTA)
                 .apply();
         clearCredenzialiRicordami();
     }
@@ -277,5 +280,14 @@ public class TokenManager {
 
     public boolean hasCredenzialiRicordami() {
         return prefs.contains(KEY_RICORDA_PASSWORD);
+    }
+
+    /** Password scaduta all'ultimo login: l'app chiede il cambio prima dell'allineamento (CambioPasswordActivity). */
+    public boolean isPasswordScaduta() {
+        return prefs.getBoolean(KEY_PASSWORD_SCADUTA, false);
+    }
+
+    public void setPasswordScaduta(boolean scaduta) {
+        prefs.edit().putBoolean(KEY_PASSWORD_SCADUTA, scaduta).apply();
     }
 }

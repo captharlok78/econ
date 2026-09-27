@@ -271,6 +271,13 @@
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_configurazione"></activity>
         <activity
+            android:name=".CambioPasswordActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:windowSoftInputMode="adjustResize"
+            android:label="Cambia password"></activity>
+        <activity
             android:name=".LoginActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize"
