@@ -60,13 +60,6 @@ public interface MercuryApiService {
     @GET("api/auth/moduli")
     Call<ModuliResponse> getModuli();
 
-    /**
-     * Cambia la ditta attiva: riemette un JWT per la ditta scelta (deve essere tra
-     * quelle abilitate per l'utente) senza richiedere di nuovo la password.
-     */
-    @POST("api/auth/switch-ditta")
-    Call<LoginResponse> switchDitta(@Body SwitchDittaRequest request);
-
     /** Recupero password step 1: il server invia il codice per email (non lo restituisce mai) */
     @POST("api/auth/forgot-password")
     Call<ForgotPasswordResponse> forgotPassword(@Body ForgotPasswordRequest request);
@@ -140,19 +133,6 @@ public interface MercuryApiService {
         public LoginRequest(String email, String password, Integer idDitta, String deviceSerial) {
             this.email        = email;
             this.password     = password;
-            this.idDitta      = idDitta;
-            this.deviceSerial = deviceSerial;
-            this.appCommit    = pfa.app.econtab.BuildConfig.GIT_COMMIT;
-        }
-    }
-
-    class SwitchDittaRequest {
-        public int idDitta;
-        @SerializedName("device_serial")
-        public String deviceSerial;
-        public String appCommit;
-
-        public SwitchDittaRequest(int idDitta, String deviceSerial) {
             this.idDitta      = idDitta;
             this.deviceSerial = deviceSerial;
             this.appCommit    = pfa.app.econtab.BuildConfig.GIT_COMMIT;
