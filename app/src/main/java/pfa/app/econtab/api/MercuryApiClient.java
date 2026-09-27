@@ -89,4 +89,23 @@ public class MercuryApiClient {
     private static String ensureTrailingSlash(String url) {
         return url.endsWith("/") ? url : url + "/";
     }
+
+    /**
+     * Messaggio "error" della risposta JSON di errore del server ({"error": "..."}), altrimenti il testo di riserva
+     * con il codice HTTP.
+     */
+    public static String messaggioErrore(retrofit2.Response<?> response, String riserva) {
+        try {
+            if (response.errorBody() != null) {
+                com.google.gson.JsonObject json = com.google.gson.JsonParser
+                        .parseString(response.errorBody().string()).getAsJsonObject();
+                if (json.has("error") && !json.get("error").isJsonNull()) {
+                    return json.get("error").getAsString();
+                }
+            }
+        } catch (Exception ignored) {
+            // corpo non JSON: si usa il testo di riserva
+        }
+        return riserva + " (HTTP " + response.code() + ").";
+    }
 }

@@ -67,13 +67,17 @@ public interface MercuryApiService {
     @POST("api/auth/switch-ditta")
     Call<LoginResponse> switchDitta(@Body SwitchDittaRequest request);
 
-    /** Recupero password step 1: genera e restituisce il codice temporaneo */
+    /** Recupero password step 1: il server invia il codice per email (non lo restituisce mai) */
     @POST("api/auth/forgot-password")
     Call<ForgotPasswordResponse> forgotPassword(@Body ForgotPasswordRequest request);
 
     /** Recupero password step 2: imposta la nuova password tramite il codice */
     @POST("api/auth/reset-password")
     Call<ResetPasswordResponse> resetPassword(@Body ResetPasswordRequest request);
+
+    /** Cambio password dell'utente collegato: vale per l'account, quindi anche per il portale (richiede JWT) */
+    @POST("api/auth/change-password")
+    Call<ChangePasswordResponse> changePassword(@Body ChangePasswordRequest request);
 
     // ── Sincronizzazione ──────────────────────────────────────────────────
 
@@ -196,6 +200,19 @@ public interface MercuryApiService {
         public String email;
         public DittaProfilo ditta;
         public LicenzaProfilo licenza;
+        public PasswordProfilo password;
+    }
+
+    /** Scadenza della password dell'account secondo la ditta */
+    class PasswordProfilo {
+        /** Mesi di validità impostati dalla ditta, -1 = non scade */
+        public int durataMesi;
+        /** Formato "Y-m-d", data dell'ultimo cambio */
+        public String cambiataIl;
+        /** Formato "Y-m-d", null se non scade */
+        public String scadenza;
+        /** Negativo se scaduta, null se non scade */
+        public Integer giorniRimanenti;
     }
 
     class CatalogoResponse {
@@ -319,7 +336,6 @@ public interface MercuryApiService {
 
     class ForgotPasswordResponse {
         public String message;
-        public String resetCode;
         public int    expiresIn;
     }
 
@@ -338,5 +354,21 @@ public interface MercuryApiService {
     class ResetPasswordResponse {
         public String message;
         public String error;
+    }
+
+    class ChangePasswordRequest {
+        public String oldPassword;
+        public String newPassword;
+
+        public ChangePasswordRequest(String oldPassword, String newPassword) {
+            this.oldPassword = oldPassword;
+            this.newPassword = newPassword;
+        }
+    }
+
+    class ChangePasswordResponse {
+        public String message;
+        public String error;
+        public PasswordProfilo password;
     }
 }

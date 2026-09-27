@@ -669,7 +669,9 @@ public class MenuActivity extends EConTabActivity {
         TextView tvDitta     = contenuto.findViewById(R.id.tvProfiloDitta);
         TextView tvVersioni  = contenuto.findViewById(R.id.tvProfiloVersioni);
         TextView tvLicenza   = contenuto.findViewById(R.id.tvProfiloLicenza);
+        TextView tvPassword  = contenuto.findViewById(R.id.tvProfiloPassword);
         ImageView ivLogo     = contenuto.findViewById(R.id.ivProfiloLogo);
+        contenuto.findViewById(R.id.btnProfiloCambiaPassword).setOnClickListener(b -> apriCambioPassword(tvPassword));
 
         // Logo e dati ditta arrivano dal sync di download e sono in locale: il modale li mostra anche offline
         android.graphics.Bitmap logo = pfa.app.econtab.utils.DittaLocale.getLogo(this);
@@ -683,6 +685,7 @@ public class MenuActivity extends EConTabActivity {
         tvDitta.setText(dittaLocale != null ? "Ditta: " + dittaLocale.ragioneSociale + dettagliDitta(dittaLocale) : "");
         tvVersioni.setText("Versioni: verifica in corso...");
         tvLicenza.setText("Verifica in corso...");
+        tvPassword.setText("Verifica in corso...");
 
         new AlertDialog.Builder(this)
                 .setTitle("Account")
@@ -700,6 +703,7 @@ public class MenuActivity extends EConTabActivity {
                 if (!response.isSuccessful() || response.body() == null) {
                     tvUtente.setText("Impossibile recuperare i dati account.");
                     tvLicenza.setText("");
+                    tvPassword.setText("");
                     return;
                 }
                 MercuryApiService.ProfiloResponse p = response.body();
@@ -707,6 +711,7 @@ public class MenuActivity extends EConTabActivity {
                 tvUtente.setText(nomeCompleto.isEmpty() ? p.email : nomeCompleto + "\n" + p.email);
                 tvDitta.setText(p.ditta != null ? "Ditta: " + p.ditta.nome + dettagliDitta(dittaLocale) : "Nessuna ditta");
                 tvLicenza.setText(formattaLicenza(p.licenza));
+                tvPassword.setText(formattaPassword(p.password));
             }
 
             @Override
@@ -714,6 +719,7 @@ public class MenuActivity extends EConTabActivity {
                 if (isFinishing() || isDestroyed()) return;
                 tvUtente.setText("Errore di rete: impossibile recuperare i dati account.");
                 tvLicenza.setText("");
+                tvPassword.setText("");
             }
         });
 
@@ -788,5 +794,110 @@ public class MenuActivity extends EConTabActivity {
             return "Scaduta il " + licenza.scadenza + " (" + (-giorni) + " giorni fa).";
         }
         return "Scadenza: " + licenza.scadenza + " (" + giorni + " giorni rimanenti).";
+    }
+
+    /** Giorni al cambio della password dell'account, secondo la durata impostata dalla ditta. */
+    private String formattaPassword(MercuryApiService.PasswordProfilo pw) {
+        if (pw == null) {
+            return "";
+        }
+        String cambiata = pw.cambiataIl != null ? "Ultimo cambio: " + pw.cambiataIl + "\n" : "";
+        if (pw.giorniRimanenti == null) {
+            return cambiata + "Non scade.";
+        }
+        int giorni = pw.giorniRimanenti;
+        if (giorni < 0) {
+            return cambiata + "Scaduta il " + pw.scadenza + ": cambiala adesso.";
+        }
+        if (giorni == 0) {
+            return cambiata + "Scade oggi: cambiala adesso.";
+        }
+        return cambiata + "Da cambiare entro il " + pw.scadenza + " (" + giorni + (giorni == 1 ? " giorno)." : " giorni).");
+    }
+
+    /**
+     * Cambio password dell'account: la nuova password vale subito anche per il portale web e per le altre ditte.
+     * Se l'utente ha "Ricordami", aggiorna anche le credenziali salvate (servono al login automatico).
+     */
+    private void apriCambioPassword(TextView tvPassword) {
+        int dp16 = (int) (16 * getResources().getDisplayMetrics().density);
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(dp16, dp16, dp16, 0);
+
+        android.widget.EditText etAttuale = campoPassword("Password attuale");
+        android.widget.EditText etNuova = campoPassword("Nuova password (almeno 6 caratteri)");
+        android.widget.EditText etConferma = campoPassword("Conferma nuova password");
+        layout.addView(etAttuale);
+        layout.addView(etNuova);
+        layout.addView(etConferma);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Cambia password")
+                .setMessage("La nuova password vale per l'app e per il portale web.")
+                .setView(layout)
+                .setPositiveButton("Conferma", null)
+                .setNegativeButton("Annulla", null)
+                .create();
+        dialog.show();
+
+        // Override sul pulsante positivo per non chiudere il dialog sugli errori
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(btn -> {
+            String attuale = etAttuale.getText().toString();
+            String nuova = etNuova.getText().toString();
+            if (attuale.isEmpty()) {
+                etAttuale.setError("Inserisci la password attuale");
+                return;
+            }
+            if (nuova.length() < 6) {
+                etNuova.setError("La password deve essere di almeno 6 caratteri");
+                return;
+            }
+            if (!nuova.equals(etConferma.getText().toString())) {
+                etConferma.setError("Le password non coincidono");
+                return;
+            }
+
+            btn.setEnabled(false);
+            MercuryApiClient.getInstance(this).getService()
+                    .changePassword(new MercuryApiService.ChangePasswordRequest(attuale, nuova))
+                    .enqueue(new Callback<MercuryApiService.ChangePasswordResponse>() {
+                        @Override
+                        public void onResponse(Call<MercuryApiService.ChangePasswordResponse> call,
+                                               Response<MercuryApiService.ChangePasswordResponse> response) {
+                            if (isFinishing() || isDestroyed()) return;
+                            if (response.isSuccessful() && response.body() != null) {
+                                TokenManager tm = TokenManager.getInstance(MenuActivity.this);
+                                if (tm.hasCredenzialiRicordami()) {
+                                    tm.saveCredenzialiRicordami(tm.getEmailRicordami(), nuova);
+                                }
+                                tvPassword.setText(formattaPassword(response.body().password));
+                                dialog.dismiss();
+                                Toast.makeText(MenuActivity.this, "Password aggiornata.", Toast.LENGTH_LONG).show();
+                            } else {
+                                btn.setEnabled(true);
+                                Utility.mostraDialog("Cambia password",
+                                        MercuryApiClient.messaggioErrore(response, "Errore dal server"),
+                                        MenuActivity.this, "OK");
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<MercuryApiService.ChangePasswordResponse> call, Throwable t) {
+                            if (isFinishing() || isDestroyed()) return;
+                            btn.setEnabled(true);
+                            Utility.mostraDialog("Errore di rete",
+                                    "La password si cambia solo con il server raggiungibile.\n" + t.getMessage(),
+                                    MenuActivity.this, "OK");
+                        }
+                    });
+        });
+    }
+
+    private android.widget.EditText campoPassword(String hint) {
+        android.widget.EditText et = new android.widget.EditText(this);
+        et.setHint(hint);
+        et.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        return et;
     }
 }

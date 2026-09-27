@@ -443,7 +443,7 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
 
         new AlertDialog.Builder(this)
                 .setTitle("Recupero password Mercury")
-                .setMessage("Inserisci la tua email per ricevere il codice temporaneo.")
+                .setMessage("Inserisci la tua email: riceverai per email un codice valido un'ora.")
                 .setView(etEmail)
                 .setPositiveButton("Richiedi codice", (dialog, which) -> {
                     String email = etEmail.getText().toString().trim();
@@ -472,10 +472,8 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
                         progress.dismiss();
                         if (isFinishing() || isDestroyed()) return;
                         if (response.isSuccessful() && response.body() != null) {
-                            MercuryApiService.ForgotPasswordResponse body = response.body();
-                            mostraDialogNuovaPassword(email, body.resetCode);
-                        } else if (response.code() == 404) {
-                            Utility.mostraDialog("Recupero password", "Email non trovata.", LoginActivity.this, "OK");
+                            // Il server non dice se l'email esiste e non restituisce il codice: arriva per email
+                            mostraDialogNuovaPassword(email);
                         } else {
                             Utility.mostraDialog("Recupero password",
                                     "Errore dal server (HTTP " + response.code() + ").", LoginActivity.this, "OK");
@@ -491,7 +489,7 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
                 });
     }
 
-    private void mostraDialogNuovaPassword(String email, String codiceRicevuto) {
+    private void mostraDialogNuovaPassword(String email) {
         int dp16 = (int) (16 * getResources().getDisplayMetrics().density);
 
         LinearLayout layout = new LinearLayout(this);
@@ -499,15 +497,14 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
         layout.setPadding(dp16, dp16, dp16, dp16);
 
         TextView tvCodice = new TextView(this);
-        tvCodice.setText("Il tuo codice temporaneo è: " + codiceRicevuto + "\n(valido 1 ora)");
-        tvCodice.setTypeface(tvCodice.getTypeface(), android.graphics.Typeface.BOLD);
+        tvCodice.setText("Se " + email + " è l'email di un account, ti abbiamo inviato un codice (valido 1 ora). "
+                + "Controlla anche la posta indesiderata.");
         tvCodice.setPadding(0, 0, 0, dp16);
         layout.addView(tvCodice);
 
         EditText etCodice = new EditText(this);
         etCodice.setHint("Codice");
         etCodice.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
-        etCodice.setText(codiceRicevuto);
         layout.addView(etCodice);
 
         EditText etNuovaPassword = new EditText(this);
@@ -567,10 +564,7 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
                                 }
                             } else {
                                 btnView.setEnabled(true);
-                                String errMsg = "Errore dal server (HTTP " + response.code() + ").";
-                                if (response.body() != null && response.body().error != null) {
-                                    errMsg = response.body().error;
-                                }
+                                String errMsg = MercuryApiClient.messaggioErrore(response, "Errore dal server");
                                 Utility.mostraDialog("Reset password", errMsg, LoginActivity.this, "OK");
                             }
                         }
