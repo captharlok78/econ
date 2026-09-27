@@ -5,32 +5,47 @@
     android:orientation="vertical"
     android:padding="20dp">
 
-    <ImageView
-        android:id="@+id/ivProfiloLogo"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:layout_marginBottom="12dp"
-        android:adjustViewBounds="true"
-        android:contentDescription="Logo ditta"
-        android:scaleType="fitCenter"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/tvProfiloUtente"
+    <!-- Primo blocco: logo della ditta (se c'e') a sinistra, dati dell'account e della ditta a destra -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:text="…" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-    <TextView
-        android:id="@+id/tvProfiloDitta"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textSize="14sp"
-        android:textColor="#666666"
-        android:text="…" />
+        <ImageView
+            android:id="@+id/ivProfiloLogo"
+            android:layout_width="88dp"
+            android:layout_height="88dp"
+            android:layout_marginEnd="14dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="Logo ditta"
+            android:scaleType="fitCenter"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvProfiloUtente"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:text="…" />
+
+            <TextView
+                android:id="@+id/tvProfiloDitta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="14sp"
+                android:textColor="#666666"
+                android:text="…" />
+        </LinearLayout>
+    </LinearLayout>
 
     <View
         android:layout_width="match_parent"
@@ -86,6 +101,15 @@
         android:layout_marginTop="4dp"
         android:textSize="13sp"
         android:text="…" />
+
+    <!-- Scadenza della password, sotto quella della licenza -->
+    <TextView
+        android:id="@+id/tvProfiloScadenzaPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textSize="13sp"
+        android:text="" />
 
     <View
         android:layout_width="match_parent"

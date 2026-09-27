@@ -675,10 +675,11 @@ public class MenuActivity extends EConTabActivity {
         TextView tvVersioni  = contenuto.findViewById(R.id.tvProfiloVersioni);
         TextView tvLicenza   = contenuto.findViewById(R.id.tvProfiloLicenza);
         TextView tvPassword  = contenuto.findViewById(R.id.tvProfiloPassword);
+        TextView tvScadPw    = contenuto.findViewById(R.id.tvProfiloScadenzaPassword);
         TextView tvPacchetto = contenuto.findViewById(R.id.tvProfiloPacchetto);
         tvPacchetto.setText(nomiPacchetti());
         ImageView ivLogo     = contenuto.findViewById(R.id.ivProfiloLogo);
-        contenuto.findViewById(R.id.btnProfiloCambiaPassword).setOnClickListener(b -> apriCambioPassword(tvPassword));
+        contenuto.findViewById(R.id.btnProfiloCambiaPassword).setOnClickListener(b -> apriCambioPassword(tvPassword, tvScadPw));
 
         // Logo e dati ditta arrivano dal sync di download e sono in locale: il modale li mostra anche offline
         android.graphics.Bitmap logo = pfa.app.econtab.utils.DittaLocale.getLogo(this);
@@ -719,6 +720,7 @@ public class MenuActivity extends EConTabActivity {
                 tvDitta.setText(p.ditta != null ? "Ditta: " + p.ditta.nome + dettagliDitta(dittaLocale) : "Nessuna ditta");
                 tvLicenza.setText(formattaLicenza(p.licenza));
                 tvPassword.setText(formattaPassword(p.password));
+                mostraScadenzaPassword(tvScadPw, p.password);
             }
 
             @Override
@@ -830,6 +832,34 @@ public class MenuActivity extends EConTabActivity {
         return ymd.substring(8, 10) + "/" + ymd.substring(5, 7) + "/" + ymd.substring(0, 4);
     }
 
+    /**
+     * Riga sotto la scadenza della licenza: "Password: da cambiare entro il 27/12/2026 (91 giorni)", in rosso se
+     * scaduta o in scadenza entro 15 giorni.
+     */
+    private void mostraScadenzaPassword(TextView tv, MercuryApiService.PasswordProfilo pw) {
+        if (pw == null) {
+            tv.setText("");
+            return;
+        }
+        String testo;
+        boolean avviso = false;
+        if (pw.giorniRimanenti == null) {
+            testo = "Password: non scade.";
+        } else if (pw.giorniRimanenti < 0) {
+            testo = "Password: scaduta il " + dataIt(pw.scadenza) + ".";
+            avviso = true;
+        } else if (pw.giorniRimanenti == 0) {
+            testo = "Password: scade oggi.";
+            avviso = true;
+        } else {
+            testo = "Password: da cambiare entro il " + dataIt(pw.scadenza) + " (" + pw.giorniRimanenti
+                    + (pw.giorniRimanenti == 1 ? " giorno)." : " giorni).");
+            avviso = pw.giorniRimanenti <= 15;
+        }
+        tv.setText(testo);
+        tv.setTextColor(avviso ? 0xFFC62828 : 0xFF444444);
+    }
+
     /** Giorni al cambio della password dell'account, secondo la durata impostata dalla ditta. */
     private String formattaPassword(MercuryApiService.PasswordProfilo pw) {
         if (pw == null) {
@@ -853,7 +883,7 @@ public class MenuActivity extends EConTabActivity {
      * Cambio password dell'account: la nuova password vale subito anche per il portale web e per le altre ditte.
      * Se l'utente ha "Ricordami", aggiorna anche le credenziali salvate (servono al login automatico).
      */
-    private void apriCambioPassword(TextView tvPassword) {
+    private void apriCambioPassword(TextView tvPassword, TextView tvScadPw) {
         int dp16 = (int) (16 * getResources().getDisplayMetrics().density);
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -890,6 +920,7 @@ public class MenuActivity extends EConTabActivity {
                 public void fatto(MercuryApiService.PasswordProfilo password) {
                     if (isFinishing() || isDestroyed()) return;
                     tvPassword.setText(formattaPassword(password));
+                    mostraScadenzaPassword(tvScadPw, password);
                     dialog.dismiss();
                     Toast.makeText(MenuActivity.this, "Password aggiornata.", Toast.LENGTH_LONG).show();
                 }
