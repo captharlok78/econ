@@ -734,10 +734,11 @@ public class MenuActivity extends EConTabActivity {
 
         final String[] versioneApp = {null};
         final String[] versioneMercury = {null};
+        // "Versioni: app: 1.0.36/27/09/2026 - server: 1.0.42/27/09/2026" (versione / data del rilascio)
         Runnable aggiornaVersioni = () -> {
             String app = versioneApp[0] != null ? versioneApp[0] : "n.d.";
             String srv = versioneMercury[0] != null ? versioneMercury[0] : "n.d.";
-            tvVersioni.setText("Versione app: " + app + "   ·   Versione server: " + srv);
+            tvVersioni.setText("Versioni: app: " + app + " - server: " + srv);
         };
 
         api.getVersioneApp(pfa.app.econtab.BuildConfig.GIT_COMMIT).enqueue(new Callback<MercuryApiService.VersionResponse>() {
@@ -746,8 +747,8 @@ public class MenuActivity extends EConTabActivity {
                                    Response<MercuryApiService.VersionResponse> response) {
                 if (isFinishing() || isDestroyed()) return;
                 if (response.isSuccessful() && response.body() != null && response.body().versione != null) {
-                    versioneApp[0] = response.body().versione;
-                    pfa.app.econtab.utils.VersioneApp.salva(MenuActivity.this, versioneApp[0]);
+                    pfa.app.econtab.utils.VersioneApp.salva(MenuActivity.this, response.body().versione);
+                    versioneApp[0] = conData(response.body());
                     aggiornaVersioni.run();
                 }
             }
@@ -764,7 +765,7 @@ public class MenuActivity extends EConTabActivity {
                                    Response<MercuryApiService.VersionResponse> response) {
                 if (isFinishing() || isDestroyed()) return;
                 if (response.isSuccessful() && response.body() != null && response.body().versione != null) {
-                    versioneMercury[0] = response.body().versione;
+                    versioneMercury[0] = conData(response.body());
                     aggiornaVersioni.run();
                 }
             }
@@ -823,6 +824,11 @@ public class MenuActivity extends EConTabActivity {
             }
         }
         return android.text.TextUtils.join(", ", validi.isEmpty() ? altri : validi);
+    }
+
+    /** "1.0.36/27/09/2026": versione e data del rilascio (solo versione con server che non mandano la data). */
+    private static String conData(MercuryApiService.VersionResponse v) {
+        return v.data != null ? v.versione + "/" + dataIt(v.data) : v.versione;
     }
 
     /** Data dal server ("2026-12-31") in formato italiano ("31/12/2026"); altrimenti il testo com'e'. */

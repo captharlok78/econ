@@ -310,6 +310,8 @@ public interface MercuryApiService {
         public String commit;
         /** true se il commit inviato corrisponde esattamente a un rilascio registrato. */
         public boolean esatta;
+        /** Data del rilascio, "Y-m-d" (null con server vecchi). */
+        public String data;
     }
 
     class ForgotPasswordRequest {
