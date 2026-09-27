@@ -113,6 +113,22 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "collegamenti",             "Collegamenti" },
     };
 
+    /** Tabelle scaricate dal server (senza la voce dei dati ditta, che non e' una tabella): utils.DatiLocali. */
+    public static java.util.List<String> tabelleScaricate() {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        for (String[] t : TABELLE) {
+            if (!TABELLA_DITTA.equals(t[0])) out.add(t[0]);
+        }
+        return out;
+    }
+
+    /** Tabelle le cui modifiche locali (in_server = 0) si inviano al server: utils.DatiLocali. */
+    public static java.util.List<String> tabelleInviate() {
+        java.util.List<String> out = new java.util.ArrayList<>();
+        for (String[] t : TABELLE_UPLOAD) out.add(t[0]);
+        return out;
+    }
+
     // ── Tabelle UPLOAD (app → Mercury): solo quelle con in_server e PK ────────
     private static final String[][] TABELLE_UPLOAD = {
         { "anagrafica",               "Clienti" },
@@ -296,6 +312,9 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             finish();
             return;
         }
+        if (!verificaDatiLocali()) {
+            return; // in attesa della scelta dell'utente
+        }
         if (!pfa.app.econtab.utils.Utility.isOnline(this)) {
             setStatus("Nessuna connessione: si lavora con i dati già presenti sul dispositivo.", true);
             mostraContinua();
@@ -303,6 +322,54 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             return;
         }
         uiHandler.postDelayed(() -> avviaSincronizzazione(null), 300);
+    }
+
+    /**
+     * I dati sul dispositivo devono essere dell'account e della ditta collegati (utils.DatiLocali): se no si svuotano e
+     * si riscarica tutto. Con modifiche non inviate dell'altro account si chiede prima (non si possono inviare con
+     * l'account attuale: finirebbero nella ditta sbagliata).
+     *
+     * @return true se si puo' proseguire subito, false se si aspetta la risposta dell'utente
+     */
+    private boolean verificaDatiLocali() {
+        String corrente = pfa.app.econtab.utils.DatiLocali.accountCorrente(this);
+        String proprietario = pfa.app.econtab.utils.DatiLocali.proprietario(this);
+        if (corrente == null || corrente.equals(proprietario)) {
+            return true;
+        }
+        int nonInviate = pfa.app.econtab.utils.DatiLocali.modificheNonInviate(this);
+        if (nonInviate == 0) {
+            pfa.app.econtab.utils.DatiLocali.svuota(this);
+            pfa.app.econtab.utils.DatiLocali.segna(this, corrente);
+            setStatus("Dati del dispositivo di un altro account o ditta rimossi: si riscarica tutto.", false);
+            return true;
+        }
+        if (proprietario == null) {
+            // app precedente a questo controllo, con modifiche da inviare: si presume lo stesso account
+            pfa.app.econtab.utils.DatiLocali.segna(this, corrente);
+            return true;
+        }
+        new android.app.AlertDialog.Builder(this)
+                .setTitle("Dati di un altro account")
+                .setMessage("Sul dispositivo ci sono " + nonInviate + " modifiche non ancora inviate fatte con un altro account "
+                        + "o in un'altra ditta. Non si possono inviare con l'account attuale.\n\n"
+                        + "Per conservarle esci e accedi con l'account precedente per inviarle; "
+                        + "per continuare vanno eliminate insieme agli altri dati del dispositivo.")
+                .setCancelable(false)
+                .setPositiveButton("Elimina e continua", (d, w) -> {
+                    pfa.app.econtab.utils.DatiLocali.svuota(this);
+                    pfa.app.econtab.utils.DatiLocali.segna(this, corrente);
+                    avviaAllineamento();
+                })
+                .setNegativeButton("Esci", (d, w) -> {
+                    TokenManager.getInstance(this).clearToken();
+                    Intent intent = new Intent(this, LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                })
+                .show();
+        return false;
     }
 
     private void mostraContinua() {
