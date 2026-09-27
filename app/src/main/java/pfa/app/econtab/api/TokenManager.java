@@ -30,6 +30,7 @@ public class TokenManager {
     private static final String KEY_DITTE      = "ditte_abilitate";
     private static final String KEY_PACCHETTI  = "pacchetti_assegnati";
     private static final String KEY_PASSWORD_SCADUTA = "password_scaduta";
+    private static final String KEY_FUNZIONALITA = "funzionalita_abilitate";
     private static final String KEY_RICORDA_EMAIL    = "ricorda_email";
     private static final String KEY_RICORDA_PASSWORD  = "ricorda_password";
 
@@ -86,6 +87,7 @@ public class TokenManager {
                 .putBoolean(KEY_PASSWORD_SCADUTA, response.passwordScaduta)
                 .apply();
         saveModuli(response.moduli);
+        saveFunzionalita(response.funzionalita);
         savePacchetti(response.pacchetti);
         saveDitte(response.ditte);
     }
@@ -180,6 +182,25 @@ public class TokenManager {
         return new java.util.ArrayList<>(java.util.Arrays.asList(csv.split(",")));
     }
 
+    /**
+     * Salva le funzionalita' dell'app concesse per il ruolo (FunzionalitaApp). Se null (server vecchio) non tocca il
+     * valore salvato.
+     */
+    public void saveFunzionalita(java.util.List<String> funzionalita) {
+        if (funzionalita == null) {
+            return;
+        }
+        prefs.edit().putString(KEY_FUNZIONALITA, android.text.TextUtils.join(",", funzionalita)).apply();
+    }
+
+    /** Funzionalita' concessa; se il server non ne ha mai mandate (server vecchio) tutto e' consentito. */
+    public boolean haFunzionalita(String codice) {
+        if (!prefs.contains(KEY_FUNZIONALITA)) {
+            return true;
+        }
+        return java.util.Arrays.asList(prefs.getString(KEY_FUNZIONALITA, "").split(",")).contains(codice);
+    }
+
     /** true se non è mai arrivata dal server una lista moduli (nessuna restrizione nota). */
     public boolean moduliMaiRicevuti() {
         return !prefs.contains(KEY_MODULI);
@@ -247,6 +268,7 @@ public class TokenManager {
                 .remove(KEY_PACCHETTI)
                 .remove(KEY_DITTE)
                 .remove(KEY_PASSWORD_SCADUTA)
+                .remove(KEY_FUNZIONALITA)
                 .apply();
         clearCredenzialiRicordami();
     }

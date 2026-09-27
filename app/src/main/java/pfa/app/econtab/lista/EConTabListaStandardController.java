@@ -146,6 +146,10 @@ public class EConTabListaStandardController {
         View buttonNuovo = host.findViewById(R.id.buttonnuovo);
         if (buttonNuovo != null) {
             buttonNuovo.setOnClickListener(v -> definizione.onNuovoClick(host));
+            String funzionalita = definizione.funzionalitaNuovo();
+            if (funzionalita != null && !pfa.app.econtab.utils.FunzionalitaApp.ha(host.getContext(), funzionalita)) {
+                buttonNuovo.setVisibility(View.GONE);
+            }
         }
         TextView headerTitolo = host.findViewById(R.id.headerTitolo);
         if (headerTitolo != null) {

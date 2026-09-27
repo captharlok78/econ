@@ -149,6 +149,11 @@ public class CantieriListaFragment extends EConTabListaStandardFragment {
         }
 
         @Override
+        public String funzionalitaNuovo() {
+            return pfa.app.econtab.utils.FunzionalitaApp.CANTIERI_CREA;
+        }
+
+        @Override
         public void onNuovoClick(EConTabListaStandardController.Host host) {
             Intent intent = new Intent(host.getContext(), CantieriDettaglioModActivity.class);
             if (cliente != 0) {

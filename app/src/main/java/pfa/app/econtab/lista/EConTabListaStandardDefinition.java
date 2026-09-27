@@ -34,6 +34,14 @@ public abstract class EConTabListaStandardDefinition {
     public abstract void onNuovoClick(EConTabListaStandardController.Host host);
 
     /**
+     * Funzionalita' dell'app richiesta per il pulsante "+" (FunzionalitaApp, es. CLIENTI.CREA): senza, il pulsante non
+     * compare. null = sempre visibile.
+     */
+    public String funzionalitaNuovo() {
+        return null;
+    }
+
+    /**
      * false nasconde indietro/titolo nella testata standard, mostrando solo filtro/nuovo:
      * usato dai moduli incorporati altrove (es. Cantieri come tab di un cliente), dove
      * indietro/titolo sarebbero ridondanti/sbagliati rispetto al contenitore.

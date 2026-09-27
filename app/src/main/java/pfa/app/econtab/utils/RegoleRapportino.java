@@ -32,8 +32,10 @@ import pfa.app.econtab.db.table.Utenti;
  * pianificate su quel cantiere nella settimana; ogni altro operatore mette ore solo su se stesso.</li>
  * <li>Rapportino senza cantiere (solo cliente, §9.6.1 dello studio): il coordinatore sceglie se stesso e i membri di
  * tutte le squadre attive che coordina, gli altri solo se stessi.</li>
+ * <li>Senza la funzionalita' RAPPORTINI.ALTRI del pacchetto (FunzionalitaApp) ognuno mette ore solo su se stesso.</li>
  * </ul>
- * Le regole valgono solo nell'app: il server controlla soltanto che cantiere e operatori siano della ditta.
+ * Le regole valgono solo nell'app: il server controlla che cantiere e operatori siano della ditta e, con
+ * RAPPORTINI.ALTRI, l'autore del rapportino.
  */
 public final class RegoleRapportino {
 
@@ -47,20 +49,24 @@ public final class RegoleRapportino {
         /** 0 se l'elenco operatori non e' ancora stato scaricato (serve una sincronizzazione). */
         public final int idUtenteDitta;
         public final boolean amministratore;
+        /** Funzionalita' RAPPORTINI.ALTRI del pacchetto: senza, righe solo per se stessi. */
+        public final boolean altri;
 
-        Utente(int idUtenteDitta, boolean amministratore) {
+        Utente(int idUtenteDitta, boolean amministratore, boolean altri) {
             this.idUtenteDitta = idUtenteDitta;
             this.amministratore = amministratore;
+            this.altri = altri;
         }
     }
 
     public static Utente utenteCorrente(DbInterno db, Context ctx) {
         ContentValues ut = db.getRecord("Select * from " + Utenti.NOME_TABELLA + " where " + Utenti.ID_UTENTE + "="
                 + Sessione.getIdOperatore(ctx));
+        boolean altri = FunzionalitaApp.ha(ctx, FunzionalitaApp.RAPPORTINI_ALTRI);
         if (ut == null) {
-            return new Utente(0, false);
+            return new Utente(0, false, altri);
         }
-        return new Utente(intero(ut, Utenti.ID_UTENTE_DITTA), intero(ut, Utenti.AMMINISTRATORE) == 1);
+        return new Utente(intero(ut, Utenti.ID_UTENTE_DITTA), intero(ut, Utenti.AMMINISTRATORE) == 1, altri);
     }
 
     /** Primo e ultimo istante (yyyyMMddHHmmss) della settimana, da lunedi a domenica, che contiene la data. */
@@ -141,7 +147,11 @@ public final class RegoleRapportino {
         Set<Integer> pianificati = interi(db, "select id_utente_ditta from (" + sqlPianificati(sett) + ") where id_cantiere=" + idCantiere);
 
         Set<Integer> ammessi = null; // null = tutti (amministratore)
-        if (!utente.amministratore) {
+        if (!utente.altri) {
+            // senza RAPPORTINI.ALTRI nel pacchetto: solo se stessi, anche l'amministratore
+            ammessi = new HashSet<Integer>();
+            ammessi.add(utente.idUtenteDitta);
+        } else if (!utente.amministratore) {
             ammessi = new HashSet<Integer>();
             ammessi.add(utente.idUtenteDitta);
             ammessi.addAll(interi(db, "select m." + SquadreMembri.ID_UTENTE_DITTA + " from " + SquadreMembri.NOME_TABELLA + " m"

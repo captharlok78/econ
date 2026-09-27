@@ -337,6 +337,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         }
         TokenManager tm = TokenManager.getInstance(this);
         tm.saveModuli(resp.body().moduli);
+        tm.saveFunzionalita(resp.body().funzionalita);
         tm.savePacchetti(resp.body().pacchetti);
     }
 

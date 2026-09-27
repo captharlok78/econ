@@ -103,6 +103,11 @@ public class ClientiActivity extends EConTabListaStandardActivity {
         }
 
         @Override
+        public String funzionalitaNuovo() {
+            return pfa.app.econtab.utils.FunzionalitaApp.CLIENTI_CREA;
+        }
+
+        @Override
         public void onNuovoClick(EConTabListaStandardController.Host host) {
             Intent intent = new Intent(host.getContext(), ClientiDettaglioModActivity.class);
             ((EConTabActivity) host.getContext()).apriFinestraInserimento(intent, 1, new Anagrafica());

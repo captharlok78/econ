@@ -267,6 +267,11 @@ public class RapportiniActivity extends EConTabListaStandardActivity {
         }
 
         @Override
+        public String funzionalitaNuovo() {
+            return pfa.app.econtab.utils.FunzionalitaApp.RAPPORTINI_CREA;
+        }
+
+        @Override
         public void onNuovoClick(EConTabListaStandardController.Host host) {
             // I cantieri ammessi dipendono dalla data scelta nel rapportino: il controllo e' nella testata
             Intent intent = new Intent(host.getContext(), RapportinoDettaglioModActivity.class);

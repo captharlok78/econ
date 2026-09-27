@@ -404,8 +404,8 @@ public class MenuActivity extends EConTabActivity {
 
     /**
      * Una riga sotto la barra in alto con i cantieri pianificati oggi per l'utente collegato (dalla pianificazione
-     * scaricata in sync), e la data di oggi nella barra blu. Riga nascosta se l'elenco operatori non e' ancora stato
-     * scaricato.
+     * scaricata in sync), e la data di oggi nella barra blu. Riga nascosta senza la funzionalita' DASHBOARD.OGGI o se
+     * l'elenco operatori non e' ancora stato scaricato.
      */
     private void aggiornaOggi() {
         Calendar oggi = Calendar.getInstance();
@@ -418,6 +418,11 @@ public class MenuActivity extends EConTabActivity {
         View riga = findViewById(R.id.rigaOggi);
         TextView tv = findViewById(R.id.textOggi);
         if (riga == null || tv == null) return;
+        // pannello "Cantieri di oggi": funzionalita' DASHBOARD.OGGI del pacchetto per il ruolo
+        if (!pfa.app.econtab.utils.FunzionalitaApp.ha(this, pfa.app.econtab.utils.FunzionalitaApp.DASHBOARD_OGGI)) {
+            riga.setVisibility(View.GONE);
+            return;
+        }
         pfa.app.econtab.utils.RegoleRapportino.Utente utente = utenteCorrente();
         if (utente == null || utente.idUtenteDitta == 0) {
             riga.setVisibility(View.GONE);

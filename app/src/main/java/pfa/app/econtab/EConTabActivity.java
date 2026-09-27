@@ -558,6 +558,13 @@ public abstract class EConTabActivity extends FragmentActivity {
      */
     public void apriFinestraInserimento(Intent intent, int resultCode, AbstractTable tabella) {
         System.out.println("EConTab: EConTabActivity apriFinestraInserimento");
+        // Nuovi clienti, cantieri e rapportini solo con la funzionalita' del pacchetto (il server li rifiuterebbe)
+        if (!pfa.app.econtab.utils.FunzionalitaApp.puoInserire(this, tabella)) {
+            Utility.mostraDialog("Non consentito",
+                    "La tua licenza non consente questo inserimento per il tuo ruolo. Chiedi all'amministratore della ditta.",
+                    this, "OK");
+            return;
+        }
         DbInterno db = new DbInterno(this);
         if (tabella.controllaMaxInserimentiLicenza(db)) {
             if (resultCode > 0) {

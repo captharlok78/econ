@@ -150,6 +150,8 @@ public interface MercuryApiService {
         public java.util.List<String> moduli;
         /** Pacchetti licenza assegnati all'utente nella ditta, con stato e scadenza. */
         public java.util.List<PacchettoInfo> pacchetti;
+        /** Funzionalita' dell'app concesse per il ruolo, es. ["CLIENTI.CREA","DASHBOARD.OGGI"] (null da server vecchi) */
+        public java.util.List<String> funzionalita;
         /** true = password scaduta secondo la ditta: va cambiata prima di continuare (le altre API rispondono 401) */
         public boolean passwordScaduta;
         public PasswordProfilo password;
@@ -158,6 +160,7 @@ public interface MercuryApiService {
     /** GET api/auth/moduli: moduli app e pacchetti dell'utente nella ditta del token (chiamato a ogni apertura). */
     class ModuliResponse {
         public java.util.List<String> moduli;
+        public java.util.List<String> funzionalita;
         public java.util.List<PacchettoInfo> pacchetti;
     }
 
