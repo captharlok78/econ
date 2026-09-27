@@ -679,7 +679,6 @@ public class MenuActivity extends EConTabActivity {
         TextView tvPacchetto = contenuto.findViewById(R.id.tvProfiloPacchetto);
         tvPacchetto.setText(nomiPacchetti());
         ImageView ivLogo     = contenuto.findViewById(R.id.ivProfiloLogo);
-        contenuto.findViewById(R.id.btnProfiloCambiaPassword).setOnClickListener(b -> apriCambioPassword(tvPassword, tvScadPw));
 
         // Logo e dati ditta arrivano dal sync di download e sono in locale: il modale li mostra anche offline
         android.graphics.Bitmap logo = pfa.app.econtab.utils.DittaLocale.getLogo(this);
@@ -695,11 +694,14 @@ public class MenuActivity extends EConTabActivity {
         tvLicenza.setText("Verifica in corso...");
         tvPassword.setText("Verifica in corso...");
 
-        new AlertDialog.Builder(this)
+        // Cambia password in basso a sinistra (pulsante neutro), Chiudi a destra; il neutro non chiude il riquadro
+        AlertDialog finestra = new AlertDialog.Builder(this)
                 .setTitle("Account")
                 .setView(contenuto)
+                .setNeutralButton("Cambia password", null)
                 .setPositiveButton("Chiudi", null)
                 .show();
+        finestra.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(b -> apriCambioPassword(tvPassword, tvScadPw));
 
         MercuryApiService api = MercuryApiClient.getInstance(this).getService();
 
@@ -737,7 +739,7 @@ public class MenuActivity extends EConTabActivity {
         Runnable aggiornaVersioni = () -> {
             String app = versioneApp[0] != null ? versioneApp[0] : "n.d.";
             String srv = versioneMercury[0] != null ? versioneMercury[0] : "n.d.";
-            tvVersioni.setText("Versione app: " + app + "\nVersione server: " + srv);
+            tvVersioni.setText("Versione app: " + app + "   ·   Versione server: " + srv);
         };
 
         api.getVersioneApp(pfa.app.econtab.BuildConfig.GIT_COMMIT).enqueue(new Callback<MercuryApiService.VersionResponse>() {
