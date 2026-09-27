@@ -31,6 +31,7 @@ public class TokenManager {
     private static final String KEY_PACCHETTI  = "pacchetti_assegnati";
     private static final String KEY_PASSWORD_SCADUTA = "password_scaduta";
     private static final String KEY_FUNZIONALITA = "funzionalita_abilitate";
+    private static final String KEY_PIANIFICAZIONE = "ditta_usa_pianificazione";
     private static final String KEY_RICORDA_EMAIL    = "ricorda_email";
     private static final String KEY_RICORDA_PASSWORD  = "ricorda_password";
 
@@ -88,6 +89,7 @@ public class TokenManager {
                 .apply();
         saveModuli(response.moduli);
         saveFunzionalita(response.funzionalita);
+        savePianificazione(response.pianificazione);
         savePacchetti(response.pacchetti);
         saveDitte(response.ditte);
     }
@@ -193,6 +195,22 @@ public class TokenManager {
         prefs.edit().putString(KEY_FUNZIONALITA, android.text.TextUtils.join(",", funzionalita)).apply();
     }
 
+    /** La ditta usa la pianificazione (licenza con il modulo Pianificazione). null (server vecchio): non tocca. */
+    public void savePianificazione(Boolean pianificazione) {
+        if (pianificazione == null) {
+            return;
+        }
+        prefs.edit().putBoolean(KEY_PIANIFICAZIONE, pianificazione).apply();
+    }
+
+    /**
+     * true se la ditta usa la pianificazione: solo allora i rapportini di chi non e' amministratore sono limitati ai
+     * cantieri pianificati (RegoleRapportino). Se il server non l'ha mai detto, si' (comportamento precedente).
+     */
+    public boolean dittaUsaPianificazione() {
+        return prefs.getBoolean(KEY_PIANIFICAZIONE, true);
+    }
+
     /** Funzionalita' concessa; se il server non ne ha mai mandate (server vecchio) tutto e' consentito. */
     public boolean haFunzionalita(String codice) {
         if (!prefs.contains(KEY_FUNZIONALITA)) {
@@ -269,6 +287,7 @@ public class TokenManager {
                 .remove(KEY_DITTE)
                 .remove(KEY_PASSWORD_SCADUTA)
                 .remove(KEY_FUNZIONALITA)
+                .remove(KEY_PIANIFICAZIONE)
                 .apply();
         clearCredenzialiRicordami();
     }

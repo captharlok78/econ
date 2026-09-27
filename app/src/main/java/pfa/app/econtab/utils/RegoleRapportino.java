@@ -27,7 +27,8 @@ import pfa.app.econtab.db.table.Utenti;
  * <ul>
  * <li>Amministratore ditta: qualsiasi cantiere e qualsiasi operatore della ditta.</li>
  * <li>Gli altri: solo i cantieri su cui sono pianificati nella settimana (blocco personale, oppure blocco di una
- * squadra attiva di cui sono coordinatore o membro, senza esserne esclusi).</li>
+ * squadra attiva di cui sono coordinatore o membro, senza esserne esclusi). Se la ditta non usa la pianificazione (nessuna
+ * licenza con il modulo Pianificazione, es. Econ Mini) tutti i cantieri della ditta.</li>
  * <li>Nelle righe il coordinatore sceglie se stesso e i membri delle squadre attive che coordina e che sono
  * pianificate su quel cantiere nella settimana; ogni altro operatore mette ore solo su se stesso.</li>
  * <li>Rapportino senza cantiere (solo cliente, §9.6.1 dello studio): il coordinatore sceglie se stesso e i membri di
@@ -51,11 +52,14 @@ public final class RegoleRapportino {
         public final boolean amministratore;
         /** Funzionalita' RAPPORTINI.ALTRI del pacchetto: senza, righe solo per se stessi. */
         public final boolean altri;
+        /** La ditta usa la pianificazione: solo allora cantieri e operatori sono limitati ai pianificati. */
+        public final boolean pianificazione;
 
-        Utente(int idUtenteDitta, boolean amministratore, boolean altri) {
+        Utente(int idUtenteDitta, boolean amministratore, boolean altri, boolean pianificazione) {
             this.idUtenteDitta = idUtenteDitta;
             this.amministratore = amministratore;
             this.altri = altri;
+            this.pianificazione = pianificazione;
         }
     }
 
@@ -63,10 +67,11 @@ public final class RegoleRapportino {
         ContentValues ut = db.getRecord("Select * from " + Utenti.NOME_TABELLA + " where " + Utenti.ID_UTENTE + "="
                 + Sessione.getIdOperatore(ctx));
         boolean altri = FunzionalitaApp.ha(ctx, FunzionalitaApp.RAPPORTINI_ALTRI);
+        boolean pianificazione = pfa.app.econtab.api.TokenManager.getInstance(ctx).dittaUsaPianificazione();
         if (ut == null) {
-            return new Utente(0, false, altri);
+            return new Utente(0, false, altri, pianificazione);
         }
-        return new Utente(intero(ut, Utenti.ID_UTENTE_DITTA), intero(ut, Utenti.AMMINISTRATORE) == 1, altri);
+        return new Utente(intero(ut, Utenti.ID_UTENTE_DITTA), intero(ut, Utenti.AMMINISTRATORE) == 1, altri, pianificazione);
     }
 
     /** Primo e ultimo istante (yyyyMMddHHmmss) della settimana, da lunedi a domenica, che contiene la data. */
@@ -123,7 +128,7 @@ public final class RegoleRapportino {
      */
     public static ArrayList<Object> cantieriDisponibili(DbInterno db, Utente utente, long data, int idCantiereSempreIncluso) {
         String filtro = "";
-        if (!utente.amministratore) {
+        if (!utente.amministratore && utente.pianificazione) {
             filtro = " and (" + Cantieri.NOME_TABELLA + "." + Cantieri.ID_CANTIERE + " in (select id_cantiere from ("
                     + sqlPianificati(settimana(data)) + ") where id_utente_ditta=" + utente.idUtenteDitta + ")"
                     + " or " + Cantieri.NOME_TABELLA + "." + Cantieri.ID_CANTIERE + "=" + idCantiereSempreIncluso + ")";
@@ -158,7 +163,7 @@ public final class RegoleRapportino {
                     + " inner join " + Squadre.NOME_TABELLA + " s on s." + Squadre.ID_SQUADRA + "=m." + SquadreMembri.ID_SQUADRA
                     + " where s." + Squadre.ID_COORDINATORE + "=" + utente.idUtenteDitta + " and s." + Squadre.ATTIVA + "=1"
                     + " and s." + Squadre.ID_DITTA + "=" + Sessione.getDittaSelezionata()
-                    + (idCantiere <= 0 ? "" // senza cantiere: tutte le squadre attive che coordina
+                    + (idCantiere <= 0 || !utente.pianificazione ? "" // senza cantiere o senza pianificazione: tutte le squadre attive che coordina
                     : " and exists (select 1 from " + PianificazioneAssegnazioni.NOME_TABELLA + " pa where pa."
                     + PianificazioneAssegnazioni.ID_SQUADRA + "=s." + Squadre.ID_SQUADRA + " and pa."
                     + PianificazioneAssegnazioni.ID_CANTIERE + "=" + idCantiere + " and pa." + PianificazioneAssegnazioni.DATA

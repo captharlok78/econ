@@ -152,6 +152,8 @@ public interface MercuryApiService {
         public java.util.List<PacchettoInfo> pacchetti;
         /** Funzionalita' dell'app concesse per il ruolo, es. ["CLIENTI.CREA","DASHBOARD.OGGI"] (null da server vecchi) */
         public java.util.List<String> funzionalita;
+        /** La ditta usa la pianificazione (null da server vecchi = si') */
+        public Boolean pianificazione;
         /** true = password scaduta secondo la ditta: va cambiata prima di continuare (le altre API rispondono 401) */
         public boolean passwordScaduta;
         public PasswordProfilo password;
@@ -161,6 +163,7 @@ public interface MercuryApiService {
     class ModuliResponse {
         public java.util.List<String> moduli;
         public java.util.List<String> funzionalita;
+        public Boolean pianificazione;
         public java.util.List<PacchettoInfo> pacchetti;
     }
 
