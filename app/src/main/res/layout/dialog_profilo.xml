@@ -107,15 +107,6 @@
         android:textSize="13sp"
         android:text="…" />
 
-    <!-- Scadenza della password, sotto quella della licenza -->
-    <TextView
-        android:id="@+id/tvProfiloScadenzaPassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:textSize="13sp"
-        android:text="" />
-
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

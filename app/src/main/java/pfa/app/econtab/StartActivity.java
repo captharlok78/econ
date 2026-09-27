@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.content.pm.PackageInfo;
 import android.util.Base64;
 import android.view.MotionEvent;
 import android.widget.TextView;
@@ -45,12 +44,20 @@ public class StartActivity extends EConTabActivity {
         }
     }
 
+    /**
+     * Versione assegnata dal server a questa build (VersioneApp), non il versionName del manifest: quella salvata
+     * subito, poi quella aggiornata appena il server risponde (se la schermata e' ancora sulla versione).
+     */
     private void mostraVersioneReale() {
-        try {
-            PackageInfo pinfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-            ((TextView) findViewById(R.id.textViewVersione)).setText("v " + pinfo.versionName);
-        } catch (Exception ignored) {
-        }
+        TextView tv = findViewById(R.id.textViewVersione);
+        if (tv == null) return;
+        String iniziale = pfa.app.econtab.utils.VersioneApp.etichetta(this);
+        tv.setText(iniziale);
+        pfa.app.econtab.utils.VersioneApp.aggiorna(this, versione -> {
+            if (!isFinishing() && iniziale.contentEquals(tv.getText())) {
+                tv.setText("v " + versione);
+            }
+        });
     }
 
     private boolean hasRequiredPermissions() {
