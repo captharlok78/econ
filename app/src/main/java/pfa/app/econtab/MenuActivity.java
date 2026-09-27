@@ -798,9 +798,9 @@ public class MenuActivity extends EConTabActivity {
         }
         int giorni = licenza.giorniRimanenti != null ? licenza.giorniRimanenti : 0;
         if (giorni < 0) {
-            return "Scaduta il " + licenza.scadenza + " (" + (-giorni) + " giorni fa).";
+            return "Scaduta il " + dataIt(licenza.scadenza) + " (" + (-giorni) + " giorni fa).";
         }
-        return "Scadenza: " + licenza.scadenza + " (" + giorni + " giorni rimanenti).";
+        return "Scadenza: " + dataIt(licenza.scadenza) + " (" + giorni + " giorni rimanenti).";
     }
 
     /**
@@ -822,23 +822,31 @@ public class MenuActivity extends EConTabActivity {
         return android.text.TextUtils.join(", ", validi.isEmpty() ? altri : validi);
     }
 
+    /** Data dal server ("2026-12-31") in formato italiano ("31/12/2026"); altrimenti il testo com'e'. */
+    private static String dataIt(String ymd) {
+        if (ymd == null || !ymd.matches("\\d{4}-\\d{2}-\\d{2}.*")) {
+            return ymd;
+        }
+        return ymd.substring(8, 10) + "/" + ymd.substring(5, 7) + "/" + ymd.substring(0, 4);
+    }
+
     /** Giorni al cambio della password dell'account, secondo la durata impostata dalla ditta. */
     private String formattaPassword(MercuryApiService.PasswordProfilo pw) {
         if (pw == null) {
             return "";
         }
-        String cambiata = pw.cambiataIl != null ? "Ultimo cambio: " + pw.cambiataIl + "\n" : "";
+        String cambiata = pw.cambiataIl != null ? "Ultimo cambio: " + dataIt(pw.cambiataIl) + "\n" : "";
         if (pw.giorniRimanenti == null) {
             return cambiata + "Non scade.";
         }
         int giorni = pw.giorniRimanenti;
         if (giorni < 0) {
-            return cambiata + "Scaduta il " + pw.scadenza + ": cambiala adesso.";
+            return cambiata + "Scaduta il " + dataIt(pw.scadenza) + ": cambiala adesso.";
         }
         if (giorni == 0) {
             return cambiata + "Scade oggi: cambiala adesso.";
         }
-        return cambiata + "Da cambiare entro il " + pw.scadenza + " (" + giorni + (giorni == 1 ? " giorno)." : " giorni).");
+        return cambiata + "Da cambiare entro il " + dataIt(pw.scadenza) + " (" + giorni + (giorni == 1 ? " giorno)." : " giorni).");
     }
 
     /**
