@@ -734,11 +734,16 @@ public class MenuActivity extends EConTabActivity {
 
         final String[] versioneApp = {null};
         final String[] versioneMercury = {null};
-        // "Versioni: app: 1.0.36/27/09/2026 - server: 1.0.42/27/09/2026" (versione / data del rilascio)
+        // "Versioni: [tablet] 1.0.37 | 27/09/2026 - [server] 1.0.42 | 27/09/2026" (versione | data del rilascio)
         Runnable aggiornaVersioni = () -> {
             String app = versioneApp[0] != null ? versioneApp[0] : "n.d.";
             String srv = versioneMercury[0] != null ? versioneMercury[0] : "n.d.";
-            tvVersioni.setText("Versioni: app: " + app + " - server: " + srv);
+            android.text.SpannableStringBuilder t = new android.text.SpannableStringBuilder("Versioni: ");
+            aggiungiIcona(t, tvVersioni, R.drawable.ic_versione_tablet, "app");
+            t.append(" ").append(app).append("  -  ");
+            aggiungiIcona(t, tvVersioni, R.drawable.ic_versione_server, "server");
+            t.append(" ").append(srv);
+            tvVersioni.setText(t);
         };
 
         api.getVersioneApp(pfa.app.econtab.BuildConfig.GIT_COMMIT).enqueue(new Callback<MercuryApiService.VersionResponse>() {
@@ -826,9 +831,24 @@ public class MenuActivity extends EConTabActivity {
         return android.text.TextUtils.join(", ", validi.isEmpty() ? altri : validi);
     }
 
-    /** "1.0.36/27/09/2026": versione e data del rilascio (solo versione con server che non mandano la data). */
+    /** "1.0.37 | 27/09/2026": versione e data del rilascio (solo versione con server che non mandano la data). */
     private static String conData(MercuryApiService.VersionResponse v) {
-        return v.data != null ? v.versione + "/" + dataIt(v.data) : v.versione;
+        return v.data != null ? v.versione + " | " + dataIt(v.data) : v.versione;
+    }
+
+    /** Icona grande quanto il testo al posto di una parola (la parola resta per l'accessibilita'). */
+    private void aggiungiIcona(android.text.SpannableStringBuilder t, TextView tv, int icona, String parola) {
+        android.graphics.drawable.Drawable d = androidx.core.content.ContextCompat.getDrawable(this, icona);
+        if (d == null) {
+            t.append(parola);
+            return;
+        }
+        int lato = Math.round(tv.getTextSize() * 1.25f);
+        d.setBounds(0, 0, lato, lato);
+        int inizio = t.length();
+        t.append(parola);
+        t.setSpan(new android.text.style.ImageSpan(d, android.text.style.ImageSpan.ALIGN_BOTTOM), inizio, t.length(),
+                android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
     /** Data dal server ("2026-12-31") in formato italiano ("31/12/2026"); altrimenti il testo com'e'. */
