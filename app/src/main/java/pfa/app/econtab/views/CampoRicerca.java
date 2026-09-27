@@ -99,13 +99,29 @@ public class CampoRicerca extends AutoCompleteTextView {
                 if (ascoltatore != null) ascoltatore.selezioneCambiata(CampoRicerca.this, null);
             }
         });
-        // con minimo 0 (elenchi corti, es. gli ordini del cantiere) si apre l'elenco toccando il campo
+        // con minimo 0 (elenchi corti, es. gli ordini del cantiere) si apre l'elenco toccando il campo: al primo tocco
+        // il campo prende il focus (onClick non arriva), ai successivi arriva il click
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (minimoLettere == 0 && isEnabled()) showDropDown();
+                if (minimoLettere == 0 && isEnabled()) mostraElenco();
             }
         });
+        setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean haFocus) {
+                if (haFocus && minimoLettere == 0 && isEnabled() && getWindowToken() != null) mostraElenco();
+            }
+        });
+    }
+
+    /**
+     * Apre l'elenco con tutte le voci che corrispondono al testo attuale (tutte se vuoto): il filtro riempie l'elenco e,
+     * finito, lo mostra (AutoCompleteTextView.onFilterComplete); showDropDown da solo aprirebbe un elenco vuoto.
+     */
+    public void mostraElenco() {
+        performFiltering(getText(), 0);
+        showDropDown();
     }
 
     public void setMinimoLettere(int minimo) {

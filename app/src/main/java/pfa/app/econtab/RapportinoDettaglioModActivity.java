@@ -234,7 +234,10 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity {
         }
     }
 
-    /** Cantieri ammessi del cliente scelto (tutti se nessun cliente). */
+    /**
+     * Cantieri ammessi del cliente scelto (tutti se nessun cliente). Con il cliente scelto l'elenco e' corto: si apre
+     * toccando il campo, senza scrivere; senza cliente si cerca scrivendo almeno 3 lettere.
+     */
     private void aggiornaElencoCantieri() {
         int cliente = campoCliente.getIdScelto();
         List<CampoRicerca.Voce> voci = new ArrayList<CampoRicerca.Voce>();
@@ -246,6 +249,19 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity {
                     RigheRapportino.testo(c, Cantieri.NOME) + (cliente == 0 && !rs.isEmpty() ? " - " + rs : ""), c));
         }
         campoCantiere.setVoci(voci);
+        campoCantiere.setMinimoLettere(cliente > 0 ? 0 : 3);
+        campoCantiere.setHint(cliente <= 0 ? getString(R.string.cerca_3_lettere)
+                : voci.isEmpty() ? "Nessun cantiere per questo cliente" : "Tocca per scegliere (" + voci.size() + ")");
+    }
+
+    /** Apre l'elenco del campo (dopo la scelta del cliente o del cantiere), se c'e' qualcosa da scegliere. */
+    private void apriElenco(CampoRicerca campo) {
+        if (!modificabile || campo.getScelta() != null || campo.getVoci().isEmpty()) return;
+        campo.post(() -> {
+            if (isFinishing() || isDestroyed() || !campo.isShown()) return;
+            campo.requestFocus();
+            campo.mostraElenco();
+        });
     }
 
     /** Ordini aperti del cantiere scelto, o di tutti i cantieri ammessi (del cliente scelto); il salvato resta sceglibile. */
@@ -272,6 +288,7 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity {
             db.close();
         }
         campoOrdine.setVoci(voci);
+        campoOrdine.setHint(voci.isEmpty() ? "Nessun ordine aperto" : "Tocca per scegliere (" + voci.size() + ")");
     }
 
     private void impostaAscoltatori() {
@@ -288,6 +305,7 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity {
                 aggiornaElencoCantieri();
                 aggiornaElencoOrdini(0);
                 aggiornaInviaMail();
+                if (voce != null) apriElenco(campoCantiere); // i cantieri del cliente appena scelto
             }
         });
         campoCantiere.setAscoltatore(new CampoRicerca.Ascoltatore() {
@@ -306,6 +324,7 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity {
                     campoOrdine.seleziona(null);
                 }
                 aggiornaElencoOrdini(0);
+                if (voce != null) apriElenco(campoOrdine); // gli ordini aperti del cantiere, se ce ne sono
             }
         });
         campoOrdine.setAscoltatore(new CampoRicerca.Ascoltatore() {
