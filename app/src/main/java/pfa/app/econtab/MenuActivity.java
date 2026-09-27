@@ -675,6 +675,8 @@ public class MenuActivity extends EConTabActivity {
         TextView tvVersioni  = contenuto.findViewById(R.id.tvProfiloVersioni);
         TextView tvLicenza   = contenuto.findViewById(R.id.tvProfiloLicenza);
         TextView tvPassword  = contenuto.findViewById(R.id.tvProfiloPassword);
+        TextView tvPacchetto = contenuto.findViewById(R.id.tvProfiloPacchetto);
+        tvPacchetto.setText(nomiPacchetti());
         ImageView ivLogo     = contenuto.findViewById(R.id.ivProfiloLogo);
         contenuto.findViewById(R.id.btnProfiloCambiaPassword).setOnClickListener(b -> apriCambioPassword(tvPassword));
 
@@ -799,6 +801,25 @@ public class MenuActivity extends EConTabActivity {
             return "Scaduta il " + licenza.scadenza + " (" + (-giorni) + " giorni fa).";
         }
         return "Scadenza: " + licenza.scadenza + " (" + giorni + " giorni rimanenti).";
+    }
+
+    /**
+     * Pacchetti di licenza assegnati all'utente nella ditta (salvati al login e a ogni apertura), es. "Econ Mini": prima
+     * quelli validi; se nessuno e' valido, i nomi con il loro stato (es. "Cantieri (Scaduta)").
+     */
+    private String nomiPacchetti() {
+        java.util.List<MercuryApiService.PacchettoInfo> pacchetti = TokenManager.getInstance(this).getPacchetti();
+        java.util.List<String> validi = new ArrayList<>();
+        java.util.List<String> altri = new ArrayList<>();
+        for (MercuryApiService.PacchettoInfo p : pacchetti) {
+            if (p == null || p.nome == null) continue;
+            if (p.valido) {
+                if (!validi.contains(p.nome)) validi.add(p.nome);
+            } else {
+                altri.add(p.nome + (p.stato != null ? " (" + p.stato + ")" : ""));
+            }
+        }
+        return android.text.TextUtils.join(", ", validi.isEmpty() ? altri : validi);
     }
 
     /** Giorni al cambio della password dell'account, secondo la durata impostata dalla ditta. */

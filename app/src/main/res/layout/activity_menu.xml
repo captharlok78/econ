@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="#FFFFFF">
 
-    <!-- Barra superiore: utente (sinistra) + logo -->
+    <!-- Barra superiore: utente (sinistra), data di oggi e logo -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
@@ -62,16 +62,6 @@
             android:src="@drawable/logo_econtab"
             android:scaleType="fitCenter"
             android:adjustViewBounds="true" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:text="Econ"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.08" />
 
     </LinearLayout>
 
