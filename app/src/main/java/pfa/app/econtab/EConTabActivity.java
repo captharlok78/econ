@@ -558,8 +558,10 @@ public abstract class EConTabActivity extends FragmentActivity {
      */
     public void apriFinestraInserimento(Intent intent, int resultCode, AbstractTable tabella) {
         System.out.println("EConTab: EConTabActivity apriFinestraInserimento");
-        // Nuovi clienti, cantieri e rapportini solo con la funzionalita' del pacchetto (il server li rifiuterebbe)
-        if (!pfa.app.econtab.utils.FunzionalitaApp.puoInserire(this, tabella)) {
+        // Nuovi clienti, cantieri, listini, preventivi, ordini e rapportini solo con la funzionalita' CREA del pacchetto
+        // (il server li rifiuterebbe); per i preventivi il tipo (ordine o preventivo) arriva nell'intent
+        if (!pfa.app.econtab.utils.FunzionalitaApp.puoInserire(this, tabella,
+                intent != null ? intent.getStringExtra(pfa.app.econtab.db.table.Preventivi.TIPO) : null)) {
             Utility.mostraDialog("Non consentito",
                     "La tua licenza non consente questo inserimento per il tuo ruolo. Chiedi all'amministratore della ditta.",
                     this, "OK");
@@ -623,6 +625,11 @@ public abstract class EConTabActivity extends FragmentActivity {
     public void confermaCancellazione(final AbstractTable tabella, final ContentValues val, final boolean reload) {
         // TODO Auto-generated method stub
         System.out.println("EConTab: EConTabActivity confermaCancellazione ENTER");
+        // Clienti, cantieri, listini, preventivi, ordini e rapportini: solo con la funzionalita' ELIMINA del pacchetto
+        if (!pfa.app.econtab.utils.FunzionalitaApp.puoEliminare(this, tabella, val)) {
+            Utility.mostraDialog("Non consentito", getString(R.string.eliminazione_non_consentita), this, "OK");
+            return;
+        }
         Utility.mostraConfermaCancellazioneDialog(this, new DialogInterface.OnClickListener() {
 
             @Override

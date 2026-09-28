@@ -5,10 +5,15 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import pfa.app.econtab.db.DbInterno;
+import pfa.app.econtab.utils.FunzionalitaApp;
 import pfa.app.econtab.utils.Utility;
 
 public abstract class EConTabDettaglioActivity extends EConTabActivity {
@@ -20,6 +25,9 @@ public abstract class EConTabDettaglioActivity extends EConTabActivity {
 	private int modalita = INSERIMENTO;
 
     private boolean chiudiAlSalvataggio = true;
+
+	/** Record esistente senza la funzionalita' MODIFICA del modulo (RUOLI_E_CRUD.md): si consulta soltanto. */
+	private boolean solaLettura = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +55,50 @@ public abstract class EConTabDettaglioActivity extends EConTabActivity {
 			headerTitolo.setText(getTitoloDettaglio());
 		}
 		System.out.println("EConTab: EConTabDettaglioActivity onCreate EXIT");
+	}
+
+	/**
+	 * Dopo onCreate del modulo (campi gia' valorizzati): un record esistente senza la funzionalita' MODIFICA del modulo
+	 * (moduloFunzionalita()) va in sola lettura: campi disattivati e niente Salva. Il server rifiuterebbe comunque la
+	 * modifica nella sincronizzazione.
+	 */
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		if (getModalita() == MODIFICA && !FunzionalitaApp.puoModificare(this, moduloFunzionalita())) {
+			solaLettura = true;
+			disattivaCampi(findViewById(android.R.id.content));
+			View salva = findViewById(R.id.button_salva);
+			if (salva != null) {
+				salva.setVisibility(View.GONE);
+			}
+			Toast.makeText(this, getString(R.string.sola_lettura_licenza), Toast.LENGTH_LONG).show();
+		}
+	}
+
+	/**
+	 * Modulo delle funzionalita' CRUD della maschera (FunzionalitaApp.CLIENTI, ...), da sovrascrivere; null = nessun
+	 * controllo (le maschere con regole proprie, es. il rapportino, le applicano da sole).
+	 */
+	protected String moduloFunzionalita() {
+		return null;
+	}
+
+	/** La maschera e' in sola lettura per la licenza (vedi onPostCreate). */
+	protected boolean isSolaLettura() {
+		return solaLettura;
+	}
+
+	private static void disattivaCampi(View v) {
+		if (v instanceof EditText || v instanceof Spinner || v instanceof CompoundButton) {
+			v.setEnabled(false);
+		}
+		if (v instanceof ViewGroup) {
+			ViewGroup g = (ViewGroup) v;
+			for (int i = 0; i < g.getChildCount(); i++) {
+				disattivaCampi(g.getChildAt(i));
+			}
+		}
 	}
 
 	/**
@@ -85,6 +137,10 @@ public abstract class EConTabDettaglioActivity extends EConTabActivity {
 
 	public void salva(View v) {
 		System.out.println("EConTab: EConTabDettaglioActivity salva ENTER");
+		if (solaLettura) {
+			Toast.makeText(this, getString(R.string.sola_lettura_licenza), Toast.LENGTH_LONG).show();
+			return;
+		}
 		if (getMessaggioConfermaSalvataggio() != null) {
 			mostraDialogSalvataggio();
 		} else {

@@ -432,4 +432,10 @@ public class PreventiviDettaglioModActivity extends EConTabDettaglioActivity imp
 		System.out.println("EConTab: PreventiviDettaglioModActivity getMessaggioConfermaSalvataggio EXIT");
         return super.getMessaggioConfermaSalvataggio();
     }
+	/** Preventivo o ordine, secondo il tipo del documento aperto. */
+	@Override
+	protected String moduloFunzionalita() {
+		return pfa.app.econtab.utils.FunzionalitaApp.moduloPreventivo(spinnerTipo != null ? spinnerTipo.getValue() : null);
+	}
+
 }

@@ -67,6 +67,8 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity {
     /** Stato attuale (null se gli stati non sono ancora scaricati). */
     private ContentValues stato = null;
     private boolean modificabile = true;
+    /** Rapportino esistente e ruolo senza RAPPORTINI.MODIFICA: sola lettura qualunque sia lo stato. */
+    private boolean senzaLicenzaModifica = false;
 
     private final ArrayList<Object> righe = new ArrayList<Object>();
     /** Id delle righe gia' salvate e tolte dalla tabella: si cancellano al salvataggio. */
@@ -117,7 +119,10 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity {
                 idCantiere = RigheRapportino.intero(ultimo, Rapportini.ID_CANTIERE);
             }
         }
-        modificabile = RegoleRapportino.isModificabile(stato);
+        // stato modificabile e, per un rapportino esistente, la funzionalita' MODIFICA del pacchetto per il ruolo
+        senzaLicenzaModifica = testata != null
+                && !pfa.app.econtab.utils.FunzionalitaApp.puoModificare(this, pfa.app.econtab.utils.FunzionalitaApp.RAPPORTINI);
+        modificabile = RegoleRapportino.isModificabile(stato) && !senzaLicenzaModifica;
         caricaClienti(db);
         db.close();
 
@@ -658,6 +663,7 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity {
     }
 
     private String controlla(DbInterno db) {
+        if (senzaLicenzaModifica) return getString(R.string.sola_lettura_licenza);
         if (!modificabile) return getString(R.string.rapportino_non_modificabile, RigheRapportino.testo(stato, StatiDocumento.NOME));
         if (campoCliente.getIdScelto() == 0 && campoCantiere.getIdScelto() == 0 && campoOrdine.getIdScelto() == 0) {
             return getString(R.string.errore_riferimento_rapportino);

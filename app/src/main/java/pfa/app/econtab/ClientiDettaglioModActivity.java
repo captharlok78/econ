@@ -128,4 +128,9 @@ public class ClientiDettaglioModActivity extends EConTabDettaglioActivity {
 		return super.eseguiAggiornamento(db);
 	}
 
+	@Override
+	protected String moduloFunzionalita() {
+		return pfa.app.econtab.utils.FunzionalitaApp.CLIENTI;
+	}
+
 }

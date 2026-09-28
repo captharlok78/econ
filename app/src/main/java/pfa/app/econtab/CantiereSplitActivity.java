@@ -904,7 +904,7 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 					intent.putExtra(Cantieri.ID_CANTIERE, cantiere);
 					intent.putExtra(Preventivi.TIPO, Preventivi.TIPO_PREVENTIVO);
 					((AlertDialog)listaPreventivi.getTag()).cancel();
-					startActivityForResult(intent, 2);
+					apriFinestraInserimento(intent, 2, new Preventivi()); // con il controllo di PREVENTIVI.CREA
 
 				} else {
 					idPreventivoSelezionato = listaIdPreventivi.get(i - 1);

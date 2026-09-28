@@ -184,6 +184,12 @@ public class CodiciArticoliActivity extends EConTabListaStandardActivity {
         }
 
         @Override
+        public String funzionalitaNuovo() {
+            return pfa.app.econtab.utils.FunzionalitaApp.codice(pfa.app.econtab.utils.FunzionalitaApp.LISTINI,
+                    pfa.app.econtab.utils.FunzionalitaApp.CREA);
+        }
+
+        @Override
         public void onNuovoClick(EConTabListaStandardController.Host host) {
             Intent intent = new Intent(host.getContext(), CodiceArticoloModActivity.class);
             if (!spinnerFornitore.getValue().equals("")) {

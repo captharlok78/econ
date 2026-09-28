@@ -359,4 +359,9 @@ public class CantieriDettaglioModActivity extends EConTabDettaglioActivity imple
     private void mostraDialogSalvataggioSuper(){
         super.mostraDialogSalvataggio();
     }
+	@Override
+	protected String moduloFunzionalita() {
+		return pfa.app.econtab.utils.FunzionalitaApp.CANTIERI;
+	}
+
 }

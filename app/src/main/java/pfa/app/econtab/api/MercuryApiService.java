@@ -187,6 +187,8 @@ public interface MercuryApiService {
         public String nome;
         public String cognome;
         public String email;
+        /** Ruolo nella ditta (es. "Coordinatore"), null da server vecchi */
+        public String ruolo;
         public DittaProfilo ditta;
         public LicenzaProfilo licenza;
         public PasswordProfilo password;

@@ -242,6 +242,14 @@ public class PreventiviListaFragment extends EConTabListaStandardFragment {
     }
 
     private void _eseguiTrasformazione(ContentValues val) {
+        // l'ordine nasce dal preventivo: serve ORDINI.CREA del pacchetto (il server lo rifiuterebbe)
+        if (!pfa.app.econtab.utils.FunzionalitaApp.ha(getActivity(), pfa.app.econtab.utils.FunzionalitaApp.codice(
+                pfa.app.econtab.utils.FunzionalitaApp.ORDINI, pfa.app.econtab.utils.FunzionalitaApp.CREA))) {
+            pfa.app.econtab.utils.Utility.mostraDialog("Non consentito",
+                    "La tua licenza non consente questo inserimento per il tuo ruolo. Chiedi all'amministratore della ditta.",
+                    getActivity(), "OK");
+            return;
+        }
         DbInterno db = new DbInterno(getActivity());
         try {
             db.getReadableDatabase().beginTransaction();
@@ -362,6 +370,12 @@ public class PreventiviListaFragment extends EConTabListaStandardFragment {
         @Override
         public String getTitolo() {
             return getTitoloModulo();
+        }
+
+        @Override
+        public String funzionalitaNuovo() {
+            return pfa.app.econtab.utils.FunzionalitaApp.codice(
+                    pfa.app.econtab.utils.FunzionalitaApp.moduloPreventivo(getTipo()), pfa.app.econtab.utils.FunzionalitaApp.CREA);
         }
 
         @Override

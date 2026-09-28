@@ -553,6 +553,8 @@
     <string name="utente_obbligatorio">Scegli l\'utente della manodopera</string>
     <string name="articolo_obbligatorio">Scegli l\'articolo dal listino</string>
     <string name="tipi_riga_non_scaricati">I tipi di riga dei rapportini non sono ancora stati scaricati: esegui una sincronizzazione.</string>
+    <string name="sola_lettura_licenza">Sola lettura: la tua licenza non consente di modificare questi dati per il tuo ruolo.</string>
+    <string name="eliminazione_non_consentita">La tua licenza non consente di eliminare questi dati per il tuo ruolo. Chiedi all\'amministratore della ditta.</string>
     <string name="rapportino_non_modificabile">Rapportino nello stato \"%1$s\": non modificabile</string>
     <string name="rapportino_non_cancellabile">Rapportino nello stato \"%1$s\": non cancellabile</string>
     <string name="conferma_rapportino">Confermare il rapportino?</string>

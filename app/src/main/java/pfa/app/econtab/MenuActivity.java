@@ -717,7 +717,9 @@ public class MenuActivity extends EConTabActivity {
                 }
                 MercuryApiService.ProfiloResponse p = response.body();
                 String nomeCompleto = ((p.nome == null ? "" : p.nome) + " " + (p.cognome == null ? "" : p.cognome)).trim();
-                tvUtente.setText(nomeCompleto.isEmpty() ? p.email : nomeCompleto + "\n" + p.email);
+                // ruolo accanto al nome, cosi' ognuno sa con quale ruolo lavora (RUOLI_E_CRUD.md)
+                String ruolo = p.ruolo == null || p.ruolo.trim().isEmpty() ? "" : " · " + p.ruolo.trim();
+                tvUtente.setText(nomeCompleto.isEmpty() ? p.email + ruolo : nomeCompleto + ruolo + "\n" + p.email);
                 tvDitta.setText(p.ditta != null ? "Ditta: " + p.ditta.nome + dettagliDitta(dittaLocale) : "Nessuna ditta");
                 tvLicenza.setText(formattaLicenza(p.licenza));
                 tvPassword.setText(formattaPassword(p.password));
