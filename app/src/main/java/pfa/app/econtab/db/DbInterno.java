@@ -65,7 +65,7 @@ import pfa.app.econtab.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECONTAB.db";
 	public static final String DATABASE_NAME_ZIP = ".econtab.db";
-	public static final int SCHEMA_VERSION = 26;
+	public static final int SCHEMA_VERSION = 27;
 
 	private Context cont = null;
 
@@ -436,6 +436,30 @@ public class DbInterno extends SQLiteOpenHelper {
 				// listino si riscarica per ricevere gli id degli articoli
 				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
 				pfa.app.econtab.utils.CatalogoLocale.cancella(getContext());
+			}
+		}
+
+		// Schema 27 (ANAGRAFICHE_CODICI_E_SYNC.md): attivo su clienti, cantieri, preventivi/ordini e rapportini, codice del
+		// cliente; da qui il server manda solo i dati del perimetro e la lista "fuori". Download completo una tantum per
+		// ricevere i campi nuovi (i record non ancora inviati restano: il download non li sovrascrive).
+		if (oldVersion<27){
+			if (oldVersion<newVersion){
+				String[][] colonne = {
+						{Anagrafica.NOME_TABELLA, Anagrafica.CODICE, "TEXT"},
+						{Anagrafica.NOME_TABELLA, AbstractTable.ATTIVO, "INTEGER DEFAULT 1"},
+						{Cantieri.NOME_TABELLA, AbstractTable.ATTIVO, "INTEGER DEFAULT 1"},
+						{Preventivi.NOME_TABELLA, AbstractTable.ATTIVO, "INTEGER DEFAULT 1"},
+						{Rapportini.NOME_TABELLA, AbstractTable.ATTIVO, "INTEGER DEFAULT 1"},
+				};
+				for (String[] c : colonne) {
+					if (!getTableColumns(db, c[0]).contains(c[1])) {
+						db.execSQL("ALTER TABLE " + c[0] + " ADD COLUMN " + c[1] + " " + c[2]);
+					}
+				}
+				// il codice da vedere era il codice esterno: si parte da quello, come sul server
+				db.execSQL("UPDATE " + Anagrafica.NOME_TABELLA + " SET " + Anagrafica.CODICE + " = " + Anagrafica.CODICE_ESTERNO
+						+ " WHERE " + Anagrafica.CODICE + " IS NULL");
+				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
 			}
 		}
 	}

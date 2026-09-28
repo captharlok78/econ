@@ -57,6 +57,7 @@ public class Preventivi extends AbstractTable {
 		aggiungiCampo(DATA, DATE);
 		aggiungiCampo(TITOLO, TEXT);
 		aggiungiCampo(NOTE, TEXT);
+		aggiungiCampo(ATTIVO, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

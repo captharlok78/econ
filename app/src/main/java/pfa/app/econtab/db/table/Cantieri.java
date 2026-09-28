@@ -41,6 +41,7 @@ public class Cantieri extends AbstractTable {
 		aggiungiCampo(ID_LINEA, INTEGER);
 		aggiungiCampo(ID_PLACCA, INTEGER);
 		aggiungiCampo(NOTE, TEXT);
+		aggiungiCampo(ATTIVO, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

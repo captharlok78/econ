@@ -45,7 +45,7 @@ public class ClientiDettaglioModActivity extends EConTabDettaglioActivity {
 		db.close();
 		if (val != null) {
 			setText(R.id.editText_ragionesociale, val.getAsString(Anagrafica.RAGIONE_SOCIALE));
-			setText(R.id.editText_codice, val.getAsString(Anagrafica.CODICE_ESTERNO));
+			setText(R.id.editText_codice, val.getAsString(Anagrafica.CODICE));
 			setText(R.id.editText_indirizzo, val.getAsString(Anagrafica.INDIRIZZO));
 			setText(R.id.editText_cap, val.getAsString(Anagrafica.CAP));
 			setText(R.id.editText_citta, val.getAsString(Anagrafica.CITTA));
@@ -75,7 +75,7 @@ public class ClientiDettaglioModActivity extends EConTabDettaglioActivity {
 		Anagrafica tabella = new Anagrafica();
 		ContentValues val = tabella.getValoriLogInserimento(db);
 		val.put(Anagrafica.RAGIONE_SOCIALE, getTesto(R.id.editText_ragionesociale));
-		val.put(Anagrafica.CODICE_ESTERNO, getTesto(R.id.editText_codice));
+		val.put(Anagrafica.CODICE, getTesto(R.id.editText_codice));
 		val.put(Anagrafica.INDIRIZZO, getTesto(R.id.editText_indirizzo));
 		val.put(Anagrafica.CAP, getTesto(R.id.editText_cap));
 		val.put(Anagrafica.CITTA, getTesto(R.id.editText_citta));
@@ -106,7 +106,7 @@ public class ClientiDettaglioModActivity extends EConTabDettaglioActivity {
 		Anagrafica tabella = new Anagrafica();
 		ContentValues val = tabella.getValoriLogModifica(db);
 		val.put(Anagrafica.RAGIONE_SOCIALE, getTesto(R.id.editText_ragionesociale));
-		val.put(Anagrafica.CODICE_ESTERNO, getTesto(R.id.editText_codice));
+		val.put(Anagrafica.CODICE, getTesto(R.id.editText_codice));
 		val.put(Anagrafica.INDIRIZZO, getTesto(R.id.editText_indirizzo));
 		val.put(Anagrafica.CAP, getTesto(R.id.editText_cap));
 		val.put(Anagrafica.CITTA, getTesto(R.id.editText_citta));

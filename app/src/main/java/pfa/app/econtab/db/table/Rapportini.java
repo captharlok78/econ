@@ -47,6 +47,7 @@ public class Rapportini extends AbstractTable {
         aggiungiCampo(DATA_RAPPORTINO, DATE);
         aggiungiCampo(NOTE, TEXT);
 
+		aggiungiCampo(ATTIVO, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

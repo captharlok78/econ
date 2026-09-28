@@ -166,6 +166,14 @@ public class SyncWorker extends Worker {
                 applyDeletions(ctx, delResp.body());
             }
 
+            // 2b. Perimetro: toglie i dati usciti (disattivati, chiusi) e i documenti vecchi (ANAGRAFICHE_CODICI_E_SYNC.md)
+            DbInterno dbPer = new DbInterno(ctx);
+            try {
+                SyncUtil.applicaPerimetro(dbPer.getWritableDatabase(), dl);
+            } finally {
+                dbPer.close();
+            }
+
             // 3. Carica modifiche locali (INSERT/UPDATE/DELETE). Unita' di misura: solo quelle del server.
             DbInterno dbUm = new DbInterno(ctx);
             SyncUtil.allineaUnitaMisura(dbUm.getWritableDatabase());

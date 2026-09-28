@@ -260,6 +260,19 @@ public interface MercuryApiService {
          * Struttura risposta Mercury: { "syncTimestamp": "...", "tables": { "cantieri": [...] } }
          */
         public Map<String, List<JsonObject>> tables;
+        /** Righe uscite dal perimetro dell'app (schema 27): da togliere in locale senza rimandarle al server. */
+        public List<Fuori> fuori;
+        /** Perimetro dell'app (schema 27): giorni di storico dei documenti; null da server vecchi. */
+        public Perimetro perimetro;
+
+        public static class Fuori {
+            public String tabella;
+            public long id;
+        }
+
+        public static class Perimetro {
+            public int giorni;
+        }
     }
 
     class DeletedResponse {

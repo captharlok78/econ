@@ -27,7 +27,10 @@ public class Anagrafica extends AbstractTable {
 	public static final String TIPO_CF = "tipo_cf";
 	public static final String NOTE = "note";
 	public static final String CODICE_IVA = "codice_iva";
+    /** Codice del gestionale della ditta (allineamenti). */
     public static final String CODICE_ESTERNO = "codice_esterno";
+    /** Codice per riconoscere il cliente (colonna "Cod."), schema 27. */
+    public static final String CODICE = "codice";
 
 	public Anagrafica() {
 		setNomeTabella(NOME_TABELLA);
@@ -49,6 +52,8 @@ public class Anagrafica extends AbstractTable {
 		aggiungiCampo(NOTE, TEXT);
 		aggiungiCampo(CODICE_IVA, TEXT);
         aggiungiCampo(CODICE_ESTERNO, TEXT);
+		aggiungiCampo(CODICE, TEXT);
+		aggiungiCampo(ATTIVO, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

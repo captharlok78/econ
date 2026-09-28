@@ -463,4 +463,66 @@ public final class SyncUtil {
         }
         return colonne;
     }
+
+    // ── Perimetro dell'app (ANAGRAFICHE_CODICI_E_SYNC.md §2.3, schema 27) ───────────────────────────────────────
+
+    /** Documento senza modifiche da inviare (testata e righe gia' sul server): solo questi si tolgono in locale. */
+    private static String inviato(String alias, String pk, String tabellaRighe, String fkRighe) {
+        return alias + ".in_server = 1 AND NOT EXISTS (SELECT 1 FROM " + tabellaRighe + " r WHERE r." + fkRighe + " = "
+                + alias + "." + pk + " AND coalesce(r.in_server, 0) = 0)";
+    }
+
+    /**
+     * Applica il perimetro ricevuto con il download: toglie le righe "fuori" (disattivate, chiuse e vecchie) e i documenti
+     * invecchiati (rapportini non in bozza e preventivi/ordini chiusi piu' vecchi dei giorni di storico), con le loro righe.
+     * Cancella direttamente, senza record_eliminati: sul server restano. Le righe con modifiche non ancora inviate
+     * restano finche' non sono sul server. Senza perimetro (server vecchio) non fa niente.
+     */
+    public static void applicaPerimetro(SQLiteDatabase db, pfa.app.econtab.api.MercuryApiService.SyncDownloadResponse dl) {
+        if (dl == null || dl.perimetro == null) {
+            return;
+        }
+        String rap = pfa.app.econtab.db.table.Rapportini.NOME_TABELLA;
+        String rapDett = pfa.app.econtab.db.table.RapportiniDettaglio.NOME_TABELLA;
+        String prev = pfa.app.econtab.db.table.Preventivi.NOME_TABELLA;
+        String prevDett = pfa.app.econtab.db.table.PreventiviDettaglio.NOME_TABELLA;
+        db.beginTransaction();
+        try {
+            if (dl.fuori != null) {
+                for (pfa.app.econtab.api.MercuryApiService.SyncDownloadResponse.Fuori f : dl.fuori) {
+                    String id = String.valueOf(f.id);
+                    if ("anagrafica".equals(f.tabella)) {
+                        db.execSQL("DELETE FROM anagrafica WHERE id_anagrafica = ? AND in_server = 1", new Object[]{id});
+                    } else if ("cantieri".equals(f.tabella)) {
+                        // con il cantiere escono i suoi preventivi/ordini (restano i rapportini: hanno il loro perimetro)
+                        togliDocumenti(db, prev, "id_preventivo", prevDett, "id_preventivo", "p.id_cantiere = " + f.id);
+                        db.execSQL("DELETE FROM cantieri WHERE id_cantiere = ? AND in_server = 1", new Object[]{id});
+                    } else if (prev.equals(f.tabella)) {
+                        togliDocumenti(db, prev, "id_preventivo", prevDett, "id_preventivo", "p.id_preventivo = " + f.id);
+                    } else if (rap.equals(f.tabella)) {
+                        togliDocumenti(db, rap, "id", rapDett, "id_rapportino", "p.id = " + f.id);
+                    }
+                }
+            }
+            // eta': stessi giorni del server
+            java.util.Calendar c = java.util.Calendar.getInstance();
+            c.add(java.util.Calendar.DATE, -Math.max(dl.perimetro.giorni, 1));
+            long limite = (c.get(java.util.Calendar.YEAR) * 10000L + (c.get(java.util.Calendar.MONTH) + 1) * 100L
+                    + c.get(java.util.Calendar.DAY_OF_MONTH)) * 1000000L;
+            togliDocumenti(db, rap, "id", rapDett, "id_rapportino", "p.data_rapportino < " + limite
+                    + " AND NOT EXISTS (SELECT 1 FROM stati_documento s WHERE s.id = p.id_stato AND s.iniziale = 1)");
+            togliDocumenti(db, prev, "id_preventivo", prevDett, "id_preventivo", "p.data < " + limite + " AND p.stato = 'C'");
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    /** Toglie i documenti (alias p) che soddisfano la condizione e non hanno modifiche da inviare, con le loro righe. */
+    private static void togliDocumenti(SQLiteDatabase db, String tabella, String pk, String tabellaRighe, String fkRighe, String condizione) {
+        String scelti = "SELECT p." + pk + " FROM " + tabella + " p WHERE (" + condizione + ") AND "
+                + inviato("p", pk, tabellaRighe, fkRighe);
+        db.execSQL("DELETE FROM " + tabellaRighe + " WHERE " + fkRighe + " IN (" + scelti + ")");
+        db.execSQL("DELETE FROM " + tabella + " WHERE " + pk + " IN (" + scelti + ")");
+    }
 }

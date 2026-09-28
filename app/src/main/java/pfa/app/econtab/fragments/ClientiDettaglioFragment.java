@@ -46,7 +46,7 @@ public class ClientiDettaglioFragment extends EConTabFragment {
 			}
 
 			setText(R.id.editText_ragionesociale, val.getAsString(Anagrafica.RAGIONE_SOCIALE), v);
-			setText(R.id.editText_codice, val.getAsString(Anagrafica.CODICE_ESTERNO), v);
+			setText(R.id.editText_codice, val.getAsString(Anagrafica.CODICE), v);
 			setText(R.id.editText_indirizzo, val.getAsString(Anagrafica.INDIRIZZO), v);
 			setText(R.id.editText_cap, val.getAsString(Anagrafica.CAP), v);
 			setText(R.id.editText_citta, val.getAsString(Anagrafica.CITTA), v);

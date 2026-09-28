@@ -576,6 +576,16 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             Log.w(TAG, "Errore eliminazioni", e);
         }
 
+        // Perimetro: toglie i dati usciti (disattivati, chiusi) e i documenti vecchi (ANAGRAFICHE_CODICI_E_SYNC.md)
+        DbInterno dbPer = new DbInterno(this);
+        try {
+            pfa.app.econtab.utils.SyncUtil.applicaPerimetro(dbPer.getWritableDatabase(), dl);
+        } catch (Exception e) {
+            Log.w(TAG, "Errore perimetro", e);
+        } finally {
+            dbPer.close();
+        }
+
         if (dl.syncTimestamp != null) salvaUltimaSync(dl.syncTimestamp);
         uiHandler.post(this::aggiornaEtichettaUltimaSync);
         setStatus("Download completato ✓", false);

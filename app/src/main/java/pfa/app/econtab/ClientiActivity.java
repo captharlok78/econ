@@ -77,13 +77,13 @@ public class ClientiActivity extends EConTabListaStandardActivity {
         @Override
         public QueryPagina costruisciQuery(String testoFiltro, boolean ordinaPerRecenti) {
             return FiltriHelper.likeMultiCampo(Anagrafica.NOME_TABELLA, testoFiltro,
-                    Anagrafica.RAGIONE_SOCIALE, Anagrafica.INDIRIZZO, Anagrafica.CITTA, Anagrafica.CODICE_ESTERNO);
+                    Anagrafica.RAGIONE_SOCIALE, Anagrafica.INDIRIZZO, Anagrafica.CITTA, Anagrafica.CODICE);
         }
 
         @Override
         public List<ColonnaLista> getColonne() {
             return Arrays.asList(
-                    new ColonnaLista(Anagrafica.CODICE_ESTERNO, "Cod.", 14),
+                    new ColonnaLista(Anagrafica.CODICE, "Cod.", 14),
                     new ColonnaLista(Anagrafica.RAGIONE_SOCIALE, "Ragione sociale", 32, true),
                     new ColonnaLista(Anagrafica.INDIRIZZO, "Via", 24),
                     new ColonnaLista(Anagrafica.CITTA, "Città", 20),

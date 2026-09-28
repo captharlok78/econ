@@ -55,6 +55,8 @@ public abstract class AbstractTable {
 	public static final String ID_OPERATORE_MOD = "id_operatore_mod";
 	public static final String DATA_MOD = "data_mod";
 	public static final String IN_SERVER = "in_server";
+	/** 1 = attivo (clienti, cantieri, preventivi/ordini, rapportini: ANAGRAFICHE_CODICI_E_SYNC.md); i disattivati il server li toglie dall'app. */
+	public static final String ATTIVO = "attivo";
 
 	public static final String ID_DITTA = "id_ditta";
 
