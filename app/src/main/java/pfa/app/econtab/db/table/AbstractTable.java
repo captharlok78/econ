@@ -235,6 +235,10 @@ public abstract class AbstractTable {
 				if (campo.equals(ID_OPERATORE_INS)) {
 					val.put(campo, VALORE_PRIMO_ID);
 				}
+				// i record nuovi nascono attivi (sul server attivo=0 vorrebbe dire disattivato)
+				if (campo.equals(ATTIVO)) {
+					val.put(campo, 1);
+				}
 				if (campo.equals(DATA_INS)) {
 					val.put(campo, Utility.dataToNumber(Calendar.getInstance()));
 				}

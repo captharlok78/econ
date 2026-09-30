@@ -14,6 +14,10 @@ public class Linee extends AbstractTable {
 	public static final String ID_LINEA = "id_linea";
 	public static final String ID_COSTRUTTORE = "id_costruttore";
 	public static final String NOME_LINEA = "nome_linea";
+	/** Schema 30: linea della ditta (0 = catalogo generale), GESTIONE_RAPPORTINI.md §14. */
+	public static final String ID_DITTA = "id_ditta";
+	/** Linea "Generica" del costruttore Generico (server: CatalogoBase). */
+	public static final String NOME_GENERICA = "Generica";
 
 	public Linee() {
 		setNomeTabella(NOME_TABELLA);
@@ -22,6 +26,7 @@ public class Linee extends AbstractTable {
 		aggiungiCampo(ID_LINEA, INTEGER);
 		aggiungiCampo(ID_COSTRUTTORE, INTEGER);
 		aggiungiCampo(NOME_LINEA, TEXT);
+		aggiungiCampo(ID_DITTA, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

@@ -30,8 +30,20 @@ public final class FaIcone {
 	public static final String ELIMINA = "";     // trash-alt
 	public static final String PIU = "";         // plus
 	public static final String MENO = "";        // minus
+	public static final String MAPPA = "\uf5a0";        // map-marked-alt
+	public static final String TELEFONO = "\uf095";     // phone
+	public static final String EMAIL = "\uf0e0";        // envelope
+	public static final String PRINCIPALE = "\uf005";   // star
+	public static final String AUTOMATICO = "\uf0e7";   // bolt
+	public static final String ELENCO = "\uf03a";       // list
+	// Sezioni delle schede (STANDARD_GRAFICO.md)
+	public static final String CLIENTE = "\uf007";      // user
+	public static final String INDIRIZZO = "\uf3c5";    // map-marker-alt
+	public static final String REFERENTI = "\uf2b9";    // address-book
+	public static final String FATTURAZIONE = "\uf570"; // file-invoice-dollar
 	// Livelli del menu del cantiere
 	public static final String PREVENTIVO = "";  // file-invoice
+	public static final String CASCO = "\uf807";       // hard-hat: cantiere di un indirizzo (giallo = c'e', verde = da creare)
 	public static final String CANTIERE = "";    // building
 	public static final String UNITA = "";       // home
 	public static final String AREA = "";        // layer-group
@@ -47,6 +59,23 @@ public final class FaIcone {
 			typeface = ResourcesCompat.getFont(context.getApplicationContext(), R.font.fa_solid_900);
 		}
 		return typeface;
+	}
+
+	/**
+	 * Icona azione dello standard grafico (STANDARD_GRAFICO.md): TextView con il glifo, grigia, senza cerchio, area di tocco
+	 * 44dp; tooltip e descrizione per l'accessibilita'.
+	 */
+	public static TextView azione(Context ctx, String glifo, String tooltip, android.view.View.OnClickListener azione) {
+		TextView tv = new TextView(ctx);
+		applica(tv, glifo, tooltip);
+		tv.setContentDescription(tooltip);
+		int lato = Math.round(44 * ctx.getResources().getDisplayMetrics().density);
+		tv.setLayoutParams(new android.widget.LinearLayout.LayoutParams(lato, lato));
+		tv.setOnClickListener(azione);
+		android.util.TypedValue sfondo = new android.util.TypedValue();
+		ctx.getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, sfondo, true);
+		tv.setBackgroundResource(sfondo.resourceId);
+		return tv;
 	}
 
 	/** Trasforma la TextView in un'icona: glifo, font, colore di default, centrata; tooltip se non nullo. */

@@ -48,15 +48,15 @@
                         android:layout_height="wrap_content" />
                 </LinearLayout>
 
-                <ImageButton
+                <!-- Modifica a icona dello standard grafico (FaIcone.MODIFICA, impostata da ClientiDettaglioFragment) -->
+                <TextView
                     android:id="@+id/button_edit"
-                    style="@style/bottoneListaGrande"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:background="@drawable/bg_bottone_rotondo"
-                    android:onClick="modifica"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/modifica" />
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:onClick="modifica" />
             </RelativeLayout>
             <LinearLayout
                 android:id="@+id/riga_cod"
@@ -327,6 +327,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </LinearLayout>
+        
+            <!-- Dati di fatturazione, in fondo ai dati principali (ClientiDettaglioFragment.mostraFatturazione) -->
+            <LinearLayout
+                android:id="@+id/fatturazione"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
         </LinearLayout>
     </ScrollView>
 

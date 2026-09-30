@@ -155,6 +155,38 @@
             android:inputType="textCapSentences|textMultiLine"
             android:maxLength="255" />
 
+        <!-- firma del cliente (GESTIONE_RAPPORTINI.md §13): anteprima, il tocco la mostra grande -->
+        <LinearLayout
+            android:id="@+id/riga_firma"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margine"
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:onClick="firma"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/img_firma"
+                android:layout_width="wrap_content"
+                android:layout_height="56dp"
+                android:adjustViewBounds="true"
+                android:background="#FFFFFF"
+                android:contentDescription="Firma del cliente"
+                android:maxWidth="240dp"
+                android:padding="4dp" />
+
+            <TextView
+                android:id="@+id/text_firma"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:textColor="#546E7A"
+                android:textSize="15sp" />
+        </LinearLayout>
+
         <!-- riga 4: nuove righe -->
         <LinearLayout
             android:id="@+id/pulsanti_righe"
@@ -234,9 +266,25 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
-        <!-- Firma e Invia mail: presenti, per ora senza azione (§8.8, §8.9) -->
+        <!-- Stampa con il modello della ditta (§15) -->
+        <Button
+            android:id="@+id/button_stampa"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="1dp"
+            android:layout_marginEnd="1dp"
+            android:backgroundTint="#E0E0E0"
+            android:onClick="stampa"
+            android:text="Stampa"
+            android:textColor="#1565C0"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <!-- Firma del cliente (§13); Invia mail nascosto finche' non c'e' l'invio (§8.9) -->
         <Button
             android:id="@+id/button_firma"
+            android:onClick="firma"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -250,6 +298,7 @@
 
         <Button
             android:id="@+id/button_invia_mail"
+            android:visibility="gone"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"

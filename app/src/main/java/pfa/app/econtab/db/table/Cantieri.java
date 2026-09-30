@@ -24,6 +24,9 @@ public class Cantieri extends AbstractTable {
 	public static final String CAP = "cap";
 	public static final String ID_LINEA = "id_linea";
 	public static final String ID_PLACCA = "id_placca";
+	public static final String CIVICO = "civico";
+	/** Indirizzo del cliente da cui e' nato il cantiere (schema 28). */
+	public static final String ID_CLIENTE_INDIRIZZO = "id_cliente_indirizzo";
 	public static final String NOTE = "note";
 
 	public Cantieri() {
@@ -41,6 +44,8 @@ public class Cantieri extends AbstractTable {
 		aggiungiCampo(ID_LINEA, INTEGER);
 		aggiungiCampo(ID_PLACCA, INTEGER);
 		aggiungiCampo(NOTE, TEXT);
+		aggiungiCampo(CIVICO, TEXT);
+		aggiungiCampo(ID_CLIENTE_INDIRIZZO, INTEGER);
 		aggiungiCampo(ATTIVO, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);

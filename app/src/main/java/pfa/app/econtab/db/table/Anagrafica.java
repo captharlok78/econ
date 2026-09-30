@@ -31,6 +31,11 @@ public class Anagrafica extends AbstractTable {
     public static final String CODICE_ESTERNO = "codice_esterno";
     /** Codice per riconoscere il cliente (colonna "Cod."), schema 27. */
     public static final String CODICE = "codice";
+    /** Fatturazione (schema 28). */
+    public static final String PEC = "pec";
+    public static final String CODICE_SDI = "codice_sdi";
+    public static final String TIPO_AZIENDA = "G";
+    public static final String TIPO_PERSONA_FISICA = "F";
 
 	public Anagrafica() {
 		setNomeTabella(NOME_TABELLA);
@@ -53,6 +58,8 @@ public class Anagrafica extends AbstractTable {
 		aggiungiCampo(CODICE_IVA, TEXT);
         aggiungiCampo(CODICE_ESTERNO, TEXT);
 		aggiungiCampo(CODICE, TEXT);
+		aggiungiCampo(PEC, TEXT);
+		aggiungiCampo(CODICE_SDI, TEXT);
 		aggiungiCampo(ATTIVO, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
@@ -63,22 +70,32 @@ public class Anagrafica extends AbstractTable {
 		aggiungiCampoChiave(ID_ANAGRAFICA);
 	}
 
+	/**
+	 * Un cliente usato da cantieri o rapportini non si elimina: si disattiva dal form del cliente (GESTIONE_CLIENTI.md C1;
+	 * il server rifiuterebbe comunque l'eliminazione).
+	 */
 	@Override
 	public boolean cancellazionePossibile(DbInterno db, ContentValues val, Context ctx) {
-		// TODO Auto-generated method stub
-		ArrayList<Object> cantieri = db.eseguiSelect("Select count(*) as numero from " + Cantieri.NOME_TABELLA + " where "
-				+ Cantieri.ID_ANAGRAFICA + "=" + val.getAsInteger(Anagrafica.ID_ANAGRAFICA), null);
-		if (cantieri.size() > 0) {
-			ContentValues cant = (ContentValues) cantieri.get(0);
-			if (cant.getAsInteger("numero") > 0) {
-				String messaggio = ctx.getString(R.string.cancellazione_non_possibile_cliente, cant.getAsString("numero"));
-				Utility.mostraDialog(ctx.getString(R.string.attenzione), messaggio, ctx, "OK");
-				return false;
-			}
+		int id = val.getAsInteger(Anagrafica.ID_ANAGRAFICA);
+		int cantieri = conta(db, "SELECT count(*) AS numero FROM " + Cantieri.NOME_TABELLA + " WHERE " + Cantieri.ID_ANAGRAFICA + " = " + id);
+		int rapportini = conta(db, "SELECT count(*) AS numero FROM " + Rapportini.NOME_TABELLA + " WHERE " + Rapportini.ID_CLIENTE + " = " + id);
+		if (cantieri > 0 || rapportini > 0) {
+			String usato = (cantieri > 0 ? cantieri + (cantieri == 1 ? " cantiere" : " cantieri") : "")
+					+ (cantieri > 0 && rapportini > 0 ? " e " : "")
+					+ (rapportini > 0 ? rapportini + (rapportini == 1 ? " rapportino" : " rapportini") : "");
+			Utility.mostraDialog(ctx.getString(R.string.attenzione), "Il cliente è usato da " + usato
+					+ ": non si può eliminare. Per toglierlo dagli elenchi disattivalo (Modifica cliente, casella Attivo).", ctx, "OK");
+			return false;
 		}
 		return super.cancellazionePossibile(db, val, ctx);
 	}
 
+	private static int conta(DbInterno db, String sql) {
+		ArrayList<Object> r = db.eseguiSelect(sql, null);
+		if (r.isEmpty()) return 0;
+		Integer n = ((ContentValues) r.get(0)).getAsInteger("numero");
+		return n == null ? 0 : n;
+	}
 
 	@Override
 	protected int getMassimoNumeroRecordLicenzaGratis() {

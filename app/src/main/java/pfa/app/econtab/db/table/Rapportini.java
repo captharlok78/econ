@@ -27,6 +27,16 @@ public class Rapportini extends AbstractTable {
     public static final String ID_STATO = "id_stato";
     public static final String DATA_RAPPORTINO = "data_rapportino";
     public static final String NOTE = "note";
+    /** Numero per ditta e anno (schema 32, NUMERAZIONE_DOCUMENTI.md): lo da' il server alla conferma, qui solo si legge. */
+    public static final String NUMERO = "numero";
+    public static final String ANNO = "anno";
+    /**
+     * Firma del cliente (schema 29, GESTIONE_RAPPORTINI.md §13): PNG in base64 (FirmaActivity), nome di chi firma, quando.
+     * Vuota = non firmato; il server non cancella mai una firma per una vuota in arrivo.
+     */
+    public static final String FIRMA = "firma";
+    public static final String FIRMA_NOME = "firma_nome";
+    public static final String FIRMA_DATA = "firma_data";
 
 
     public static final String PATH_EXPORT_RAPPORTINI = "rapportini";
@@ -46,6 +56,11 @@ public class Rapportini extends AbstractTable {
         aggiungiCampo(ID_STATO, INTEGER);
         aggiungiCampo(DATA_RAPPORTINO, DATE);
         aggiungiCampo(NOTE, TEXT);
+        aggiungiCampo(NUMERO, INTEGER);
+        aggiungiCampo(ANNO, INTEGER);
+        aggiungiCampo(FIRMA, TEXT);
+        aggiungiCampo(FIRMA_NOME, TEXT);
+        aggiungiCampo(FIRMA_DATA, DATE);
 
 		aggiungiCampo(ATTIVO, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
@@ -57,6 +72,13 @@ public class Rapportini extends AbstractTable {
 		aggiungiCampoChiave(ID);
 	}
 
+
+    /** "12/2026", oppure "" se il rapportino non ha ancora il numero (bozza, o confermato sul tablet e non ancora inviato). */
+    public static String numeroDocumento(ContentValues r) {
+        Integer n = r != null ? r.getAsInteger(NUMERO) : null;
+        Integer a = r != null ? r.getAsInteger(ANNO) : null;
+        return n != null && n > 0 ? n + "/" + (a != null ? a : "") : "";
+    }
 
     /** Ultimo rapportino dell'autore (id_utente_ditta), per proporre gli stessi riferimenti in un rapportino nuovo. */
     public ContentValues getUltimoRapportinoOperatore(DbInterno dbcl, int idUtenteDitta) {

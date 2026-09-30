@@ -13,13 +13,12 @@ import java.util.Locale;
 import pfa.app.econtab.db.DbInterno;
 import pfa.app.econtab.db.table.Anagrafica;
 import pfa.app.econtab.db.table.Cantieri;
-import pfa.app.econtab.fragments.CantieriListaFragment;
+import pfa.app.econtab.fragments.ClienteElencoFragment;
 import pfa.app.econtab.fragments.ClientiDettaglioFragment;
 
 public class ClientiDettaglioActivity extends EConTabFragmentActivity {
 
 	int tabselezionata = 0;
-	CantieriListaFragment fragmentCantieri = null;
 	/**
 	 * The {@link androidx.core.view.PagerAdapter} that will provide
 	 * fragments for each of the sections. We use a
@@ -62,53 +61,33 @@ public class ClientiDettaglioActivity extends EConTabFragmentActivity {
 			super(fm);
 		}
 
+		/** Linguette (GESTIONE_CLIENTI.md §6.8): Dati principali (con la fatturazione), Indirizzi/Cantieri, Referenti. */
 		@Override
 		public Fragment getItem(int position) {
-			// getItem is called to instantiate the fragment for the given page.
-			// Return a DummySectionFragment (defined as a static inner class
-			// below) with the page number as its lone argument.
+			Bundle arg = getIntent().getExtras() != null ? new Bundle(getIntent().getExtras()) : new Bundle();
 			if (position == 0) {
 				ClientiDettaglioFragment fragment = new ClientiDettaglioFragment();
-				fragment.setArguments(getIntent().getExtras());
+				fragment.setArguments(arg);
 				return fragment;
 			}
-
-			if (position == 1) {
-				fragmentCantieri = null;
-				fragmentCantieri = new CantieriListaFragment();
-				fragmentCantieri.setArguments(getIntent().getExtras());
-				return fragmentCantieri;
-			}
-			
-
-			return null;
+			ClienteElencoFragment fragment = new ClienteElencoFragment();
+			arg.putInt(ClienteElencoFragment.ARG_TIPO, position == 1 ? ClienteElencoFragment.INDIRIZZI_CANTIERI : ClienteElencoFragment.REFERENTI);
+			fragment.setArguments(arg);
+			return fragment;
 		}
 
 		@Override
 		public int getCount() {
-			// Show 3 total pages.
-			return 2;
+			return TITOLI.length;
 		}
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			Locale l = Locale.getDefault();
-			switch (position) {
-			case 0:
-				return getString(R.string.title_section1_clienti)
-						.toUpperCase(l);
-			case 1:
-				return getString(R.string.title_section2_clienti)
-						.toUpperCase(l);
-			case 2:
-				return getString(R.string.title_section3_clienti)
-						.toUpperCase(l);
-			
-
-			}
-			return null;
+			return TITOLI[position].toUpperCase(Locale.getDefault());
 		}
 	}
+
+	private static final String[] TITOLI = {"Dati principali", "Indirizzi/Cantieri", "Referenti"};
 
 	public void modifica(View v) {
 		System.out.println("EConTab: ClientiDettaglioActivity modifica ENTER");
@@ -147,14 +126,6 @@ public class ClientiDettaglioActivity extends EConTabFragmentActivity {
 			}
 		}
 		System.out.println("EConTab: ClientiDettaglioActivity onActivityResult EXIT");
-	}
-
-	@Override
-	protected void aggiornaDopoCancellazione() {
-		// TODO Auto-generated method stub
-		if (fragmentCantieri != null) {
-			fragmentCantieri.ricerca();
-		}
 	}
 
 }

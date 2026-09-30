@@ -13,7 +13,7 @@
         android:orientation="vertical"
         android:padding="@dimen/margine">
 
-        <!-- Articolo: tab Listino / Nuovo articolo (disattivata finche' non c'e' la libreria della ditta, §8.6) -->
+        <!-- Articolo: tab Listino / Nuovo articolo (§14) -->
         <LinearLayout
             android:id="@+id/sezione_articolo"
             android:layout_width="match_parent"
@@ -43,67 +43,337 @@
                     android:layout_weight="1"
                     android:layout_marginStart="1dp"
                     android:backgroundTint="#E0E0E0"
-                    android:enabled="false"
                     android:text="@string/nuovo_articolo"
-                    android:textColor="#9E9E9E" />
+                    android:textColor="#1565C0" />
             </LinearLayout>
 
+            <!-- tab Listino: articolo del catalogo (filtro costruttore e linea, ricerca da 3 lettere) -->
             <LinearLayout
+                android:id="@+id/pannello_listino"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margine"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:layout_marginTop="@dimen/margine"
+                    android:orientation="horizontal">
 
-                    <TextView
-                        style="@style/TestoIntestazione"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="@string/costruttore" />
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                    <Spinner
-                        android:id="@+id/spinner_costruttore"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        <TextView
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/costruttore" />
+
+                        <Spinner
+                            android:id="@+id/spinner_costruttore"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/margine"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/linea" />
+
+                        <Spinner
+                            android:id="@+id/spinner_linea"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="0dp"
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="@dimen/margine"
-                    android:orientation="vertical">
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="@string/articolo" />
 
-                    <TextView
-                        style="@style/TestoIntestazione"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/linea" />
-
-                    <Spinner
-                        android:id="@+id/spinner_linea"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-                </LinearLayout>
+                <pfa.app.econtab.views.CampoRicerca
+                    android:id="@+id/campo_articolo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/cerca_3_lettere" />
             </LinearLayout>
 
-            <TextView
-                style="@style/TestoIntestazione"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margine"
-                android:text="@string/articolo" />
-
-            <pfa.app.econtab.views.CampoRicerca
-                android:id="@+id/campo_articolo"
+            <!--
+              tab Nuovo articolo (GESTIONE_RAPPORTINI.md §14): visibile solo alla ditta che lo crea. Settore, costruttore
+              e linea con un valore proposto e il "+" per aggiungerne uno; codice (se vuoto lo genera l'app), barcode, prezzo di
+              vendita, descrizione, foto. Utente (chi compila), quantita', unita' di misura, costo e note sono quelli della riga.
+            -->
+            <LinearLayout
+                android:id="@+id/pannello_nuovo_articolo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/cerca_3_lettere" />
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Settore" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <Spinner
+                                android:id="@+id/spinner_nuovo_settore"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1" />
+
+                            <!-- "+" a icona (FaIcone, PopupRigaRapportino): aggiunge una voce della ditta -->
+                            <TextView
+                                android:id="@+id/button_piu_settore"
+                                android:layout_width="44dp"
+                                android:layout_height="44dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/margine"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Costruttore" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <Spinner
+                                android:id="@+id/spinner_nuovo_costruttore"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1" />
+
+                            <!-- "+" a icona (FaIcone, PopupRigaRapportino): aggiunge una voce della ditta -->
+                            <TextView
+                                android:id="@+id/button_piu_costruttore"
+                                android:layout_width="44dp"
+                                android:layout_height="44dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/margine"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Linea" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <Spinner
+                                android:id="@+id/spinner_nuovo_linea"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1" />
+
+                            <!-- "+" a icona (FaIcone, PopupRigaRapportino): aggiunge una voce della ditta -->
+                            <TextView
+                                android:id="@+id/button_piu_linea"
+                                android:layout_width="44dp"
+                                android:layout_height="44dp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Codice articolo" />
+
+                        <EditText
+                            android:id="@+id/edit_nuovo_codice"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Automatico"
+                            android:inputType="textCapCharacters|textNoSuggestions"
+                            android:maxLength="50" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/margine"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Barcode" />
+
+                        <EditText
+                            android:id="@+id/edit_nuovo_barcode"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Facoltativo"
+                            android:inputType="textNoSuggestions"
+                            android:maxLength="50" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/sezione_nuovo_prezzo_vendita"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="@dimen/margine"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/TestoIntestazione"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Prezzo di vendita €" />
+
+                        <EditText
+                            android:id="@+id/edit_nuovo_prezzo_vendita"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Facoltativo"
+                            android:inputType="numberDecimal" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="Descrizione *" />
+
+                <EditText
+                    android:id="@+id/edit_nuovo_descrizione"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Es. Cavo FG16OR16 3x2,5 mm²"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:maxLength="255"
+                    android:maxLines="3" />
+
+                <!-- foto dell'articolo (base64 sull'articolo) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/img_nuovo_foto"
+                        android:layout_width="96dp"
+                        android:layout_height="72dp"
+                        android:background="#ECEFF1"
+                        android:contentDescription="Foto dell'articolo"
+                        android:scaleType="centerCrop" />
+
+                    <Button
+                        android:id="@+id/button_nuovo_foto"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/margine"
+                        android:backgroundTint="#E0E0E0"
+                        android:text="Scatta foto"
+                        android:textAllCaps="false"
+                        android:textColor="#1565C0" />
+
+                    <!-- immagine gia' sul tablet (galleria, download dal web): JPEG, PNG, WebP -->
+                    <Button
+                        android:id="@+id/button_scegli_immagine"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/margine"
+                        android:backgroundTint="#E0E0E0"
+                        android:text="Scegli immagine"
+                        android:textAllCaps="false"
+                        android:textColor="#1565C0" />
+
+                    <Button
+                        android:id="@+id/button_togli_foto"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/margine"
+                        android:backgroundTint="#E0E0E0"
+                        android:text="Togli"
+                        android:textAllCaps="false"
+                        android:textColor="#C62828"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <CheckBox
+                    android:id="@+id/check_nuovo_listino_ditta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:checked="true"
+                    android:text="Aggiungi al mio listino" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout

@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.content.Intent;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -82,6 +83,12 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity {
     /** Stato a cui porta il salvataggio in corso (Salva: lo stesso o l'iniziale; Conferma: Confermato). */
     private int idStatoDestino = 0;
 
+    /** Firma fatta in questa sessione e non ancora salvata (null = invariata), GESTIONE_RAPPORTINI.md §13. */
+    private String firmaNuova = null;
+    private String firmaNuovaNome = null;
+    private long firmaNuovaData = 0;
+    private static final int RICHIESTA_FIRMA = 77;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_rapportino_dettaglio_mod);
@@ -132,15 +139,37 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity {
         campoCantiere.selezionaId(idCantiere);
         aggiornaElencoOrdini(idOrdine);
         campoOrdine.selezionaId(idOrdine);
+        if (testata != null) {
+            // riferimenti che non sono sul tablet (es. cantiere disattivato, fuori dal perimetro dell'app): si mostrano come
+            // tali e il salvataggio li lascia com'erano, invece di azzerarli anche sul server
+            tieniSeAssente(campoCliente, idCliente, "Cliente");
+            tieniSeAssente(campoCantiere, idCantiere, "Cantiere");
+            tieniSeAssente(campoOrdine, idOrdine, "Ordine");
+        }
 
         impostaAscoltatori();
         applicaStato();
         aggiornaInviaMail();
+        mostraFirma();
+    }
+
+    /** Se il riferimento salvato non e' tra le voci del tablet, lo seleziona con un testo che lo spiega (l'id resta). */
+    private static void tieniSeAssente(CampoRicerca campo, int id, String cosa) {
+        if (id > 0 && campo.getIdScelto() == 0) {
+            campo.seleziona(new CampoRicerca.Voce(id, cosa + " n. " + id + " (non sul tablet)", new ContentValues()));
+        }
     }
 
     @Override
     protected String getTitoloDettaglio() {
-        return getString(getModalita() == INSERIMENTO ? R.string.nuovo_rapportino : R.string.rapportino);
+        if (getModalita() == INSERIMENTO) return getString(R.string.nuovo_rapportino);
+        // "Rapportino 12/2026" (numero dato dal server alla conferma, NUMERAZIONE_DOCUMENTI.md)
+        DbInterno db = new DbInterno(this);
+        ContentValues r = db.getRecord("select " + Rapportini.NUMERO + ", " + Rapportini.ANNO + " from " + Rapportini.NOME_TABELLA
+                + " where " + Rapportini.ID + "=" + getIDModifica());
+        db.close();
+        String numero = Rapportini.numeroDocumento(r);
+        return getString(R.string.rapportino) + (numero.isEmpty() ? "" : " " + numero);
     }
 
     @Override
@@ -568,6 +597,11 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity {
     @Override
     public void salva(View v) {
         idStatoDestino = stato != null ? RigheRapportino.intero(stato, StatiDocumento.ID) : 0;
+        // appena firmato dal cliente: passa a "Firmato dal cliente" se dallo stato attuale si puo' (es. da Confermato)
+        if (firmaNuova != null) {
+            int firmato = idStatoFirmatoAmmesso(idStatoDestino);
+            if (firmato != 0) idStatoDestino = firmato;
+        }
         eseguiSalvataggio();
     }
 
@@ -693,6 +727,156 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity {
         val.put(Rapportini.ID_ORDINE, ordine != null ? ordine.id : 0);
         val.put(Rapportini.ID_STATO, idStatoDestino);
         val.put(Rapportini.NOTE, editNote.getText().toString().trim());
+        if (firmaNuova != null) {
+            val.put(Rapportini.FIRMA, firmaNuova);
+            val.put(Rapportini.FIRMA_NOME, firmaNuovaNome);
+            val.put(Rapportini.FIRMA_DATA, firmaNuovaData);
+        }
+    }
+
+    // ── Stampa (GESTIONE_RAPPORTINI.md §15) ─────────────────────────────────────────────────────────────────────
+
+    /** Stampa il rapportino salvato con il modello della ditta; con modifiche non salvate chiede di salvare prima. */
+    public void stampa(View v) {
+        if (testata == null || modificato) {
+            Toast.makeText(this, "Salva il rapportino prima di stamparlo.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        pfa.app.econtab.stampa.StampaRapportino.stampa(this, getIDModifica());
+    }
+
+    // ── Firma del cliente (GESTIONE_RAPPORTINI.md §13) ──────────────────────────────────────────────────────────
+
+    /** Firma attuale: quella appena fatta o quella salvata; stringa vuota se il rapportino non e' firmato. */
+    private String firmaAttuale() {
+        if (firmaNuova != null) return firmaNuova;
+        return testata != null ? RigheRapportino.testo(testata, Rapportini.FIRMA) : "";
+    }
+
+    /**
+     * Si firma se si puo' modificare il rapportino; se e' bloccato (es. Confermato) solo la prima volta, come sul server:
+     * la firma del cliente arriva di solito dopo la conferma. Senza RAPPORTINI.MODIFICA solo la si guarda.
+     */
+    /**
+     * Id dello stato "Firmato dal cliente" se dallo stato idDa il passaggio e' ammesso per l'utente, altrimenti 0. Da Bozza
+     * non si puo': il rapportino firmato e poi confermato ci arriva dal server (secondo passo alla sincronizzazione).
+     */
+    private int idStatoFirmatoAmmesso(int idDa) {
+        DbInterno db = new DbInterno(this);
+        ContentValues firmato = RegoleRapportino.statoPerCodice(db, StatiDocumento.CODICE_FIRMATO);
+        int id = firmato != null ? RigheRapportino.intero(firmato, StatiDocumento.ID) : 0;
+        boolean ammesso = id != 0 && id != idDa && idDa > 0 && RegoleRapportino.passaggioAmmesso(db, idDa, id, utente);
+        db.close();
+        return ammesso ? id : 0;
+    }
+
+    private boolean puoFirmare() {
+        return !senzaLicenzaModifica && (modificabile || firmaAttuale().isEmpty());
+    }
+
+    /** Pulsante Firma: se c'e' gia' la firma la mostra (con "Firma di nuovo" se si puo'), altrimenti apre la firma. */
+    public void firma(View v) {
+        if (firmaAttuale().isEmpty()) {
+            if (puoFirmare()) apriFirma();
+            return;
+        }
+        android.widget.ImageView img = new android.widget.ImageView(this);
+        img.setImageBitmap(bitmapFirma(firmaAttuale()));
+        img.setAdjustViewBounds(true);
+        img.setBackgroundColor(android.graphics.Color.WHITE);
+        int p = Math.round(16 * getResources().getDisplayMetrics().density);
+        img.setPadding(p, p, p, p);
+        androidx.appcompat.app.AlertDialog.Builder b = new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle(testoFirma())
+                .setView(img)
+                .setNegativeButton("Chiudi", null);
+        if (puoFirmare()) b.setPositiveButton("Firma di nuovo", (d, w) -> apriFirma());
+        b.show();
+    }
+
+    private void apriFirma() {
+        Intent intent = new Intent(this, FirmaActivity.class);
+        String nome = firmaNuova != null ? firmaNuovaNome : (testata != null ? RigheRapportino.testo(testata, Rapportini.FIRMA_NOME) : "");
+        intent.putExtra(FirmaActivity.EXTRA_NOME, nome);
+        CampoRicerca.Voce cliente = campoCliente.getScelta();
+        intent.putExtra(FirmaActivity.EXTRA_TITOLO, "Firma del cliente" + (cliente != null ? " — " + RigheRapportino.testo(cliente.dati, Anagrafica.RAGIONE_SOCIALE) : ""));
+        startActivityForResult(intent, RICHIESTA_FIRMA);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // foto del nuovo articolo chiesta dalla finestra della riga (§14)
+        if (pfa.app.econtab.views.PopupRigaRapportino.risultatoFoto(requestCode, resultCode, data)) return;
+        if (requestCode != RICHIESTA_FIRMA || resultCode != RESULT_OK || data == null) return;
+        firmaNuova = data.getStringExtra(FirmaActivity.EXTRA_FIRMA);
+        firmaNuovaNome = data.getStringExtra(FirmaActivity.EXTRA_NOME);
+        firmaNuovaData = Utility.dataToNumber(java.util.Calendar.getInstance());
+        if (!modificabile && testata != null) {
+            // rapportino bloccato: si salva subito solo la firma (Salva non c'e')
+            DbInterno db = new DbInterno(this);
+            Rapportini tabella = new Rapportini();
+            ContentValues val = tabella.getValoriLogModifica(db);
+            val.put(Rapportini.FIRMA, firmaNuova);
+            val.put(Rapportini.FIRMA_NOME, firmaNuovaNome);
+            val.put(Rapportini.FIRMA_DATA, firmaNuovaData);
+            int idAttuale = stato != null ? RigheRapportino.intero(stato, StatiDocumento.ID) : 0;
+            int firmato = idStatoFirmatoAmmesso(idAttuale);
+            if (firmato != 0) val.put(Rapportini.ID_STATO, firmato);
+            ContentValues where = new ContentValues();
+            where.put(Rapportini.ID, getIDModifica());
+            tabella.aggiornaRecord(db, val, where);
+            testata.putAll(val);
+            if (firmato != 0) stato = RegoleRapportino.stato(db, firmato);
+            db.close();
+            firmaNuova = null;
+            setResult(RESULT_OK);
+            if (firmato != 0) applicaStato();
+            Toast.makeText(this, firmato != 0 ? "Firma salvata: rapportino firmato dal cliente." : "Firma salvata.", Toast.LENGTH_SHORT).show();
+        } else {
+            modificato = true;
+        }
+        mostraFirma();
+    }
+
+    /** Anteprima della firma sotto le note e testo del pulsante; il pulsante c'e' se si puo' firmare o guardare la firma. */
+    private void mostraFirma() {
+        String firma = firmaAttuale();
+        View riga = findViewById(R.id.riga_firma);
+        android.widget.Button pulsante = findViewById(R.id.button_firma);
+        pulsante.setVisibility(puoFirmare() || !firma.isEmpty() ? View.VISIBLE : View.GONE);
+        if (firma.isEmpty()) {
+            riga.setVisibility(View.GONE);
+            pulsante.setText(R.string.firma);
+            return;
+        }
+        riga.setVisibility(View.VISIBLE);
+        ((android.widget.ImageView) findViewById(R.id.img_firma)).setImageBitmap(bitmapFirma(firma));
+        String avviso = "";
+        if (firmaNuova != null && modificabile) {
+            boolean diventaFirmato = idStatoFirmatoAmmesso(stato != null ? RigheRapportino.intero(stato, StatiDocumento.ID) : 0) != 0;
+            avviso = diventaFirmato ? " — con Salva il rapportino passa a «Firmato dal cliente»" : " (da salvare)";
+        }
+        ((TextView) findViewById(R.id.text_firma)).setText(testoFirma() + avviso);
+        pulsante.setText("Firmato ✓");
+    }
+
+    /** "Firmato da Mario Rossi il 30/09/2026 10:40". */
+    private String testoFirma() {
+        String nome = firmaNuova != null ? firmaNuovaNome : RigheRapportino.testo(testata, Rapportini.FIRMA_NOME);
+        Long quando = firmaNuova != null ? Long.valueOf(firmaNuovaData) : (testata != null ? testata.getAsLong(Rapportini.FIRMA_DATA) : null);
+        String q = "" + (quando != null ? quando : "");
+        String data = q.length() == 14 ? Utility.numberToData(quando) + " " + q.substring(8, 10) + ":" + q.substring(10, 12) : "";
+        return "Firmato" + (nome == null || nome.isEmpty() ? "" : " da " + nome) + (data.isEmpty() ? "" : " il " + data);
+    }
+
+    private static android.graphics.Bitmap bitmapFirma(String base64) {
+        try {
+            byte[] png = android.util.Base64.decode(base64, android.util.Base64.DEFAULT);
+            return android.graphics.BitmapFactory.decodeByteArray(png, 0, png.length);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     /**

@@ -13,6 +13,10 @@ public class Costruttori extends AbstractTable {
 	public static final String ID_COSTRUTTORE = "id_costruttore";
 	public static final String SIGLA_METEL = "sigla_metel";
 	public static final String RAGIONE_SOCIALE = "ragione_sociale";
+	/** Schema 30: costruttore della ditta (0 = catalogo generale), GESTIONE_RAPPORTINI.md §14. */
+	public static final String ID_DITTA = "id_ditta";
+	/** Costruttore "Generico" del catalogo generale (server: CatalogoBase), proposto negli articoli nuovi. */
+	public static final String SIGLA_GENERICO = "GEN";
 
 	public Costruttori() {
 		System.out.println("EConTab: Costruttori CONSTRUCTOR ENTER");
@@ -22,6 +26,7 @@ public class Costruttori extends AbstractTable {
 		aggiungiCampo(ID_COSTRUTTORE, INTEGER);
 		aggiungiCampo(SIGLA_METEL, TEXT);
 		aggiungiCampo(RAGIONE_SOCIALE, TEXT);
+		aggiungiCampo(ID_DITTA, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

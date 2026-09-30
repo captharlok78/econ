@@ -56,7 +56,7 @@ public final class RigheRapportino {
                 + " left join " + Utenti.NOME_TABELLA + " ut on ut." + Utenti.ID_UTENTE_DITTA + "=d." + RapportiniDettaglio.ID_UTENTE_MANODOPERA
                 + " and d." + RapportiniDettaglio.ID_UTENTE_MANODOPERA + ">0"
                 + " left join " + Listini.NOME_TABELLA + " l on l." + Listini.ID + "=d." + RapportiniDettaglio.ID_LISTINO
-                + " and d." + RapportiniDettaglio.ID_LISTINO + ">0"
+                + " and d." + RapportiniDettaglio.ID_LISTINO + "<>0"
                 + " left join " + PreventiviDettaglio.NOME_TABELLA + " pd on pd." + PreventiviDettaglio.ID_PREVENTIVO_DETTAGLIO
                 + "=d." + RapportiniDettaglio.ID_PREVENTIVO_DETTAGLIO + " and d." + RapportiniDettaglio.ID_PREVENTIVO_DETTAGLIO + "<>0"
                 + (joinExtra != null ? " " + joinExtra : "")
@@ -101,7 +101,8 @@ public final class RigheRapportino {
         }
 
         int idListino = intero(riga, RapportiniDettaglio.ID_LISTINO);
-        ContentValues l = idListino > 0 ? db.getRecord("select * from " + Listini.NOME_TABELLA + " where " + Listini.ID + "=" + idListino) : null;
+        // anche negativo: articolo nuovo della ditta non ancora inviato al server (§14)
+        ContentValues l = idListino != 0 ? db.getRecord("select * from " + Listini.NOME_TABELLA + " where " + Listini.ID + "=" + idListino) : null;
         riga.put(CODICE_ARTICOLO, l != null ? l.getAsString(Listini.CODICE_ARTICOLO) : "");
         riga.put(DESCRIZIONE_ARTICOLO, l != null ? l.getAsString(Listini.DESCRIZIONE) : "");
         if (l != null && l.getAsDouble(Listini.PRZ_ULTIMO_ACQUISTO) != null) {

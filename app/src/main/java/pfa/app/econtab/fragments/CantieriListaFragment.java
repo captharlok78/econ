@@ -45,6 +45,9 @@ public class CantieriListaFragment extends EConTabListaStandardFragment {
     protected EConTabListaStandardDefinition creaDefinizione() {
         if (getArguments() != null) {
             cliente = getArguments().getInt(Anagrafica.ID_ANAGRAFICA);
+        } else if (getActivity() != null && getActivity().getIntent() != null) {
+            // lista aperta dalla scheda cliente ("Cantieri del cliente"): il cliente arriva nell'intent
+            cliente = getActivity().getIntent().getIntExtra(Anagrafica.ID_ANAGRAFICA, 0);
         }
         return new CantieriDefinition();
     }

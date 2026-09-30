@@ -501,7 +501,7 @@
     <string name="nessun_ordine">Nessun ordine</string>
     <string name="nessun_cantiere_rapportino">Nella settimana di questa data non risulti pianificato su nessun cantiere: puoi fare il rapportino solo per un cliente, oppure controlla la data o sincronizza la pianificazione.</string>
     <string name="operatori_non_scaricati">L\'elenco degli operatori della ditta non è ancora stato scaricato: esegui una sincronizzazione.</string>
-    <string name="ore_uomo">Ore-uomo</string>
+    <string name="ore_uomo">Totale ore</string>
     <string name="pianificato">pianificato</string>
     <string name="solo_ore_proprie">Puoi registrare ore solo su te stesso</string>
     <string name="costo_euro">Costo €</string>

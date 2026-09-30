@@ -19,6 +19,13 @@ public class Listini extends AbstractTable {
 	public static final String PRZ_ULTIMO_ACQUISTO = "prz_ultimo_acquisto";
 	public static final String PRZ_LISTINO = "prz_listino";
 	public static final String SCONTO = "sconto";
+	/** Schema 30 (GESTIONE_RAPPORTINI.md §14): articolo della ditta (0 = catalogo generale), barcode, foto base64, settore. */
+	public static final String ID_DITTA = "id_ditta";
+	public static final String BARCODE = "barcode";
+	public static final String FOTO = "foto";
+	/** 1 = proposto nella ricerca del listino; 0 = articolo usato solo nella riga in cui e' nato. */
+	public static final String NEL_LISTINO = "nel_listino";
+	public static final String ID_SETTORE = "id_settore";
 
 	public Listini() {
 		setNomeTabella(NOME_TABELLA);
@@ -31,6 +38,11 @@ public class Listini extends AbstractTable {
 		aggiungiCampo(PRZ_ULTIMO_ACQUISTO, NUMERIC);
 		aggiungiCampo(PRZ_LISTINO, NUMERIC);
 		aggiungiCampo(SCONTO, NUMERIC);
+		aggiungiCampo(ID_DITTA, INTEGER);
+		aggiungiCampo(BARCODE, TEXT);
+		aggiungiCampo(FOTO, TEXT);
+		aggiungiCampo(NEL_LISTINO, INTEGER);
+		aggiungiCampo(ID_SETTORE, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

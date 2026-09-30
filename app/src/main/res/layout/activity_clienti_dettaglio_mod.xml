@@ -21,9 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/footer_dettaglio"
-            android:layout_below="@+id/header"
-
-             >
+            android:layout_below="@+id/header" >
 
             <LinearLayout
                 android:id="@+id/campi"
@@ -34,14 +32,25 @@
                 android:layout_margin="8dp"
                 android:padding="10dp" >
 
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:id="@+id/textView_ragionesociale"
+                <include android:id="@+id/sezione_principali" layout="@layout/sezione_standard" />
+
+                <RadioGroup
+                    android:id="@+id/radio_tipo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/ragione_sociale"
-                     />
-
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+                    <RadioButton android:id="@+id/radio_tipo_azienda" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" android:text="Azienda / ente" />
+                    <RadioButton android:id="@+id/radio_tipo_persona" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="16dp" android:text="Persona fisica" />
+                </RadioGroup>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="3" android:orientation="vertical" android:layout_marginEnd="6dp">
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Ragione sociale / nome e cognome" />
                 <EditText
                     android:id="@+id/editText_ragionesociale"
                     android:layout_width="match_parent"
@@ -50,280 +59,70 @@
                     android:background="@drawable/bg_input_outline"
                     android:paddingStart="8dp"
                     android:paddingEnd="8dp"
-                    android:ems="10"
-                    android:maxLength="100"
-                    android:nextFocusRight="@+id/editText_codice"
-                    />
-
+                    android:maxLength="100" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="6dp">
                 <TextView
-                    android:layout_marginTop="10dp"
                     style="@style/TestoIntestazione"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/codice"
-                    android:id="@+id/textView_codice" />
+                    android:layout_marginTop="10dp"
+                    android:text="@string/codice" />
                 <EditText
                     android:id="@+id/editText_codice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:minHeight="40dp"
-                    android:background="@drawable/bg_input_outline"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:ems="10"
-                    android:maxLength="7"
-                    android:nextFocusRight="@+id/editText_indirizzo"
-                    />
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:id="@+id/textView_indirizzo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/indirizzo"
-                     />
-
-                <EditText
-                    android:id="@+id/editText_indirizzo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="40dp"
                     android:background="@drawable/bg_input_outline"
                     android:paddingStart="8dp"
                     android:paddingEnd="8dp"
-                    android:ems="10"
-                    android:maxLength="255"
-                    android:nextFocusRight="@+id/editText_cap"
-                    />
-
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:id="@+id/textView_capcittaprov"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/cap_citta_provincia"
-                     />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
-
-                    <EditText
-                        android:id="@+id/editText_cap"
-                        android:layout_width="0sp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.25"
-                        android:layout_marginEnd="4dp"
-                        android:minHeight="40dp"
-                        android:background="@drawable/bg_input_outline"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:ems="10"
-                        android:inputType="number"
-                        android:maxLength="5"
-                        android:singleLine="true"
-                        android:nextFocusForward="@+id/editText_citta"
-                        android:nextFocusDown="@+id/editText_citta"
-                        android:nextFocusUp="@+id/editText_citta"
-                        android:nextFocusRight="@+id/editText_citta"
-                        />
-
-                    <EditText
-                        android:id="@+id/editText_citta"
-                        android:layout_width="0sp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.6"
-                        android:layout_marginEnd="4dp"
-                        android:minHeight="40dp"
-                        android:background="@drawable/bg_input_outline"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:ems="10"
-                        android:maxLength="70"
-                        android:singleLine="true"
-                        android:nextFocusRight="@+id/editText_provincia"
-                        />
-
-                    <EditText
-                        android:id="@+id/editText_provincia"
-                        android:layout_width="0sp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.15"
-                        android:minHeight="40dp"
-                        android:background="@drawable/bg_input_outline"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:ems="10"
-                        android:maxLength="2"
-                        android:singleLine="true"
-                        android:nextFocusRight="@+id/editText_cf"
-                        />
-                </LinearLayout>
-
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:id="@+id/textView_cf"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/codice_fiscale"
-                     />
-
-                <EditText
-                    android:id="@+id/editText_cf"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="40dp"
-                    android:background="@drawable/bg_input_outline"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:ems="10"
-                    android:maxLength="16"
-                    android:singleLine="true"
-                    android:nextFocusRight="@+id/editText_partitaiva"
-                    />
-
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:id="@+id/textView_partitaiva"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/partita_iva"
-                     />
-
-                <EditText
-                    android:id="@+id/editText_partitaiva"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="40dp"
-                    android:background="@drawable/bg_input_outline"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:ems="10"
-                    android:maxLength="50"
-                    android:singleLine="true"
-                    android:nextFocusRight="@+id/editText_cellulare1"
-                    />
-
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:id="@+id/textView_cellulari"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="@string/cellulari"
-                     />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
-
-                    <EditText
-                        android:id="@+id/editText_cellulare1"
-                        android:layout_width="0sp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:layout_marginEnd="4dp"
-                        android:minHeight="40dp"
-                        android:background="@drawable/bg_input_outline"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:ems="10"
-                        android:inputType="text"
-                        android:maxLength="20"
-                        android:singleLine="true"
-                        android:nextFocusRight="@+id/editText_cellulare2"/>
-
-                    <EditText
-                        android:id="@+id/editText_cellulare2"
-                        android:layout_width="0sp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:minHeight="40dp"
-                        android:background="@drawable/bg_input_outline"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:ems="10"
-                        android:maxLength="20"
-                        android:inputType="text"
-                        android:singleLine="true"
-                        android:nextFocusRight="@+id/editText_telefono"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/lineartelefonomail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
-
-                    <LinearLayout
-                        android:id="@+id/lineartelefono"
-                        android:layout_width="0sp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:layout_marginEnd="4dp"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            style="@style/TestoIntestazione"
-                            android:id="@+id/textView_telefono"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/telefono"
-                             />
-
-                        <EditText
-                            android:id="@+id/editText_telefono"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:minHeight="40dp"
-                            android:background="@drawable/bg_input_outline"
-                            android:paddingStart="8dp"
-                            android:paddingEnd="8dp"
-                            android:ems="10"
-                            android:maxLength="20"
-                            android:singleLine="true"
-                            android:nextFocusRight="@+id/editText_mail"
-                            />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/linearmail"
-                        android:layout_width="0sp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            style="@style/TestoIntestazione"
-                            android:id="@+id/textView_iva"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="@string/iva"
-                             />
-
-                        <pfa.app.econtab.views.EConTabSpinner
-                            android:id="@+id/spinner_iva"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-
-                            />
-
+                    android:maxLength="20" />
                     </LinearLayout>
                 </LinearLayout>
-
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="6dp">
                 <TextView
                     style="@style/TestoIntestazione"
-                    android:id="@+id/textView_mail"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="@string/mail"
-                     />
-
+                    android:text="Telefono" />
+                <EditText
+                    android:id="@+id/editText_telefono"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:maxLength="20"
+                    android:inputType="phone" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="6dp">
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Cellulare" />
+                <EditText
+                    android:id="@+id/editText_cellulare1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:maxLength="20"
+                    android:inputType="phone" />
+                    </LinearLayout>
+                </LinearLayout>
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Email" />
                 <EditText
                     android:id="@+id/editText_mail"
                     android:layout_width="match_parent"
@@ -332,35 +131,218 @@
                     android:background="@drawable/bg_input_outline"
                     android:paddingStart="8dp"
                     android:paddingEnd="8dp"
-                    android:ems="10"
-                    android:inputType="textEmailAddress"
-                    android:maxLength="50"
-                    android:singleLine="true"
-                    android:nextFocusRight="@+id/editText_note"/>
-
+                    android:maxLength="150"
+                    android:inputType="textEmailAddress" />
                 <TextView
                     style="@style/TestoIntestazione"
-                    android:id="@+id/textView_note"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="@string/note"
-                     />
-
+                    android:text="Note" />
                 <EditText
                     android:id="@+id/editText_note"
-                    android:gravity="top"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="40dp"
                     android:background="@drawable/bg_input_outline"
                     android:paddingStart="8dp"
                     android:paddingEnd="8dp"
-                    android:paddingTop="8dp"
-                    android:ems="10"
-                    android:minLines="2"
                     android:maxLength="255"
-                    android:nextFocusRight="@+id/editText_ragionesociale"
-                    />
+                    android:inputType="textMultiLine"
+                    android:minLines="2" />
+                <CheckBox
+                    android:id="@+id/checkBox_attivo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:checked="true"
+                    android:text="Attivo (disattivato: esce dal tablet alla prossima sincronizzazione)" />
+                <LinearLayout android:id="@+id/sezione_sede" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                <include android:id="@+id/sezione_sede_titolo" layout="@layout/sezione_standard" />
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="6dp">
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Via / piazza" />
+                <EditText
+                    android:id="@+id/editText_indirizzo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:inputType="textCapWords"
+                    android:maxLength="150" />
+                    </LinearLayout>
+                    <!-- civico separato, come negli indirizzi dei clienti e nei cantieri (GESTIONE_CLIENTI.md §6) -->
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="0.3" android:orientation="vertical" android:layout_marginEnd="6dp">
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Civico" />
+                <EditText
+                    android:id="@+id/editText_civico"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:inputType="textCapCharacters"
+                    android:maxLength="15" />
+                    </LinearLayout>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="6dp">
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="CAP" />
+                <EditText
+                    android:id="@+id/editText_cap"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:maxLength="10"
+                    android:inputType="number" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="3" android:orientation="vertical" android:layout_marginEnd="6dp">
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Città" />
+                <EditText
+                    android:id="@+id/editText_citta"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:maxLength="70" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="6dp">
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Prov." />
+                <EditText
+                    android:id="@+id/editText_provincia"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:maxLength="2"
+                    android:inputType="textCapCharacters" />
+                    </LinearLayout>
+                </LinearLayout>
+                    <TextView style="@style/TestoIntestazione" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Gli altri indirizzi si aggiungono dalla scheda del cliente, linguetta Indirizzi." />
+                </LinearLayout>
+                <include android:id="@+id/sezione_fatturazione" layout="@layout/sezione_standard" />
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="6dp">
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Partita IVA" />
+                <EditText
+                    android:id="@+id/editText_partitaiva"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:maxLength="50" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="6dp">
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Codice fiscale" />
+                <EditText
+                    android:id="@+id/editText_cf"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:maxLength="16"
+                    android:inputType="textCapCharacters" />
+                    </LinearLayout>
+                </LinearLayout>
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/iva" />
+                <pfa.app.econtab.views.EConTabSpinner
+                    android:id="@+id/spinner_iva"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="2" android:orientation="vertical" android:layout_marginEnd="6dp">
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="PEC" />
+                <EditText
+                    android:id="@+id/editText_pec"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:maxLength="150"
+                    android:inputType="textEmailAddress" />
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical" android:layout_marginEnd="6dp">
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Codice SDI" />
+                <EditText
+                    android:id="@+id/editText_sdi"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="40dp"
+                    android:background="@drawable/bg_input_outline"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:maxLength="7"
+                    android:inputType="textCapCharacters" />
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
         </ScrollView>
 
@@ -371,5 +353,4 @@
             android:layout_alignParentBottom="true"
             layout="@layout/footer_dett" />
     </RelativeLayout>
-
 </FrameLayout>

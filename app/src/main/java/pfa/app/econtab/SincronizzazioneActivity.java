@@ -72,6 +72,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { TABELLA_DITTA,              "Dati ditta e logo" },   // non e' una tabella: vedi sincronizzaDitta()
         { SyncUtil.TABELLA_OPERATORI, "Operatori" },
         { "anagrafica",               "Clienti" },
+        { "clienti_indirizzi",        "Indirizzi clienti" },
+        { "clienti_referenti",        "Referenti clienti" },
         { "cantieri",                 "Cantieri" },
         { "aree",                     "Aree" },
         { "unita",                    "Unità" },
@@ -99,6 +101,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "composizioni_cantiere",    "Composizioni Cantiere" },
         { "listini",                  "Listini" },
         { "costruttori",              "Costruttori" },
+        { "settori_articolo",         "Settori articoli" },
+        { "modelli_stampa",           "Modelli di stampa" },
         { "manodopera",               "Manodopera" },
         { "categorie_generali",       "Categorie Generali" },
         { "categorie_componenti",     "Categorie Componenti" },
@@ -131,7 +135,17 @@ public class SincronizzazioneActivity extends AppCompatActivity {
 
     // ── Tabelle UPLOAD (app → Mercury): solo quelle con in_server e PK ────────
     private static final String[][] TABELLE_UPLOAD = {
+        // Catalogo per primo (GESTIONE_RAPPORTINI.md §14): le righe dei rapportini possono usare un articolo appena creato.
+        // Ordine dei vincoli FK: settori, costruttori → linee → listini/placche → placche_moduli
+        { "settori_articolo",         "Settori articoli" },
+        { "costruttori",              "Costruttori" },
+        { "linee",                    "Linee" },
+        { "listini",                  "Listini" },
+        { "placche",                  "Placche" },
+        { "placche_moduli",           "Moduli Placche" },
         { "anagrafica",               "Clienti" },
+        { "clienti_indirizzi",        "Indirizzi clienti" },
+        { "clienti_referenti",        "Referenti clienti" },
         { "cantieri",                 "Cantieri" },
         { "unita",                    "Unità" },
         { "aree",                     "Aree" },
@@ -147,18 +161,14 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "collegamenti",             "Collegamenti" },
         { "relazioni",                "Relazioni" },
         { "foto",                     "Foto" },
-        // Catalogo: ordine rispetta i vincoli FK (costruttori → linee → listini/placche → placche_moduli)
-        { "costruttori",              "Costruttori" },
-        { "linee",                    "Linee" },
-        { "listini",                  "Listini" },
-        { "placche",                  "Placche" },
-        { "placche_moduli",           "Moduli Placche" },
     };
 
     // PK per tabella (null = PK composita, va sempre in INSERT)
     private static String pkCol(String tabella) {
         switch (tabella) {
             case "anagrafica":               return "id_anagrafica";
+            case "clienti_indirizzi":        return "id";
+            case "clienti_referenti":        return "id";
             case "cantieri":                 return "id_cantiere";
             case "unita":                    return "id_unita";
             case "aree":                     return "id_area";
@@ -174,7 +184,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             case "foto":                     return "id_foto";
             case "costruttori":              return "id_costruttore";
             case "linee":                    return "id_linea";
-            case "listini":                  return null; // PK stringa: codice_articolo → sempre INSERT
+            case "listini":                  return "id"; // schema 30: id negativo = articolo nuovo della ditta (§14)
+            case "settori_articolo":         return "id";
             case "placche":                  return "id_placca";
             case "placche_moduli":           return "id_placca_modulo";
             default:                         return null; // PK composita
@@ -185,6 +196,10 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     private static final String[][] FK_CHILDREN = {
         {"anagrafica",        "id_anagrafica",    "cantieri",               "id_anagrafica"},
         {"anagrafica",        "id_anagrafica",   "rapportini",            "id_cliente"},
+        // indirizzi e referenti dei clienti (schema 28)
+        {"anagrafica",        "id_anagrafica",   "clienti_indirizzi",     "id_anagrafica"},
+        {"anagrafica",        "id_anagrafica",   "clienti_referenti",     "id_anagrafica"},
+        {"clienti_indirizzi", "id",              "cantieri",              "id_cliente_indirizzo"},
         {"cantieri",          "id_cantiere",      "unita",                  "id_cantiere"},
         {"cantieri",          "id_cantiere",      "preventivi",             "id_cantiere"},
         {"cantieri",          "id_cantiere",      "rapportini",             "id_cantiere"},
@@ -217,6 +232,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         {"costruttori", "id_costruttore", "linee",         "id_costruttore"},
         {"costruttori", "id_costruttore", "listini",       "id_costruttore"},
         {"linee",       "id_linea",       "listini",       "id_linea"},
+        {"settori_articolo", "id",        "listini",       "id_settore"},
+        {"listini",     "id",             "rapportini_dettaglio", "id_listino"},
         {"linee",       "id_linea",       "placche",       "id_linea"},
         {"placche",     "id_placca",      "placche_moduli","id_placca"},
     };
@@ -273,7 +290,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             btnSincronizza.setVisibility(android.view.View.GONE);
             aggiornaEtichettaUltimaSync();
         } else if (MODE_UPLOAD.equals(syncMode)) {
-            textSyncTitle.setText("Carica su server");
+            textSyncTitle.setText("Carica su server e scarica gli aggiornamenti");
             btnSincronizza.setText("CARICA SU SERVER");
             textLastSync.setVisibility(android.view.View.GONE);
         } else {
@@ -409,6 +426,15 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         tm.savePacchetti(resp.body().pacchetti);
     }
 
+    /** Anche nelle sincronizzazioni manuali: i pacchetti cambiati nel pannello valgono subito (utils.PermessiServer). */
+    private void aggiornaPermessi() {
+        try {
+            pfa.app.econtab.utils.PermessiServer.leggi(this);
+        } catch (Exception e) {
+            Log.w(TAG, "Permessi non riletti: " + e.getMessage());
+        }
+    }
+
     public void chiudi(View v) {
         if (MODE_AVVIO.equals(syncMode)) {
             vaiAlMenu();
@@ -477,8 +503,12 @@ public class SincronizzazioneActivity extends AppCompatActivity {
                 if (!redirectingToLogin) runUploadSync(api);
                 if (!redirectingToLogin) runDownloadSync(api);
             } else if (MODE_UPLOAD.equals(syncMode)) {
+                aggiornaPermessi();
+                // dopo l'invio si scarica: il tablet vede subito cosa ha fatto il server (id, stato cambiato dal portale...)
                 runUploadSync(api);
+                if (!redirectingToLogin) runDownloadSync(api);
             } else {
+                aggiornaPermessi();
                 runDownloadSync(api);
             }
         } catch (Exception e) {
@@ -1068,6 +1098,11 @@ public class SincronizzazioneActivity extends AppCompatActivity {
                 r.isUpload = true;
                 righeUpload.put(entry[0], r);
             }
+            aggiungiIntestazione("↓  Aggiornamenti da Mercury", Color.parseColor("#1565C0"));
+            for (String[] entry : TABELLE) {
+                RigaTabella r = creaRiga(inflater, entry[0], entry[1]);
+                righe.put(entry[0], r);
+            }
         } else {
             aggiungiIntestazione("↓  Dati da scaricare da Mercury", Color.parseColor("#1565C0"));
             for (String[] entry : TABELLE) {
@@ -1208,7 +1243,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     private void incrementaTabelleCompletate() {
         tabelleCompletate++;
         final int completate = tabelleCompletate;
-        final int totale     = MODE_UPLOAD.equals(syncMode) ? TABELLE_UPLOAD.length : TABELLE.length;
+        final int totale     = MODE_UPLOAD.equals(syncMode) ? TABELLE_UPLOAD.length + TABELLE.length : TABELLE.length;
         uiHandler.post(() -> {
             progressGlobale.setProgress((int)(completate * 100.0 / totale));
             String attuale = textTabelleProgress.getText().toString();
@@ -1317,7 +1352,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         pk.put("foto",                 "id_foto = "                 + chiaveRecord);
         pk.put("foto_elementi",        "id_foto_elemento = "        + chiaveRecord);
         pk.put("linee",                "id_linea = "                + chiaveRecord);
-        pk.put("listini",              "id_listino = "              + chiaveRecord);
+        pk.put("listini",              "id = "                      + chiaveRecord);
+        pk.put("settori_articolo",     "id = "                      + chiaveRecord);
         pk.put("locali",               "id_locale = "               + chiaveRecord);
         pk.put("manodopera",           "id_manodopera = "           + chiaveRecord);
         pk.put("placche",              "id_placca = "               + chiaveRecord);

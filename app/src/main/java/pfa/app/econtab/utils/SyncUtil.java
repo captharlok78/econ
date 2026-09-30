@@ -23,7 +23,7 @@ public final class SyncUtil {
      * rimasti da vecchie versioni dell'app non restano in giro.
      */
     private static final String[] TABELLE_ELENCO_COMPLETO = { "unita_misura", "rapportini_dettaglio_tipi", "stati_documento",
-            "stati_documento_transizioni" };
+            "stati_documento_transizioni", "modelli_stampa" };
 
     /** Tabelle locali con una colonna unita' di misura (chiave esterna verso unita_misura sul server). */
     private static final String[] TABELLE_CON_UNITA_MISURA = { "elementi", "componenti", "elementi_cantiere",
@@ -147,6 +147,7 @@ public final class SyncUtil {
         { "rapportini_dettaglio_tipi",   "id" },
         { "stati_documento",             "id" },
         { "stati_documento_transizioni", "id" },
+        { "modelli_stampa",              "id" },
     };
 
     /** Chiave primaria delle tabelle sola lettura, null per le altre. */
@@ -188,7 +189,7 @@ public final class SyncUtil {
     private SyncUtil() {}
 
     /** Colonne data dell'app: numeri yyyyMMddHHmmss (14 cifre), non testo. */
-    private static final String[] COLONNE_DATA = {"data", "data_ins", "data_mod", "data_rapportino"};
+    private static final String[] COLONNE_DATA = {"data", "data_ins", "data_mod", "data_rapportino", "firma_data"};
     private static final Pattern DATA_TESTO = Pattern.compile("^(\\d{4})-(\\d{2})-(\\d{2})[ T](\\d{2}):(\\d{2}):(\\d{2}).*");
 
     /**
@@ -492,7 +493,14 @@ public final class SyncUtil {
                 for (pfa.app.econtab.api.MercuryApiService.SyncDownloadResponse.Fuori f : dl.fuori) {
                     String id = String.valueOf(f.id);
                     if ("anagrafica".equals(f.tabella)) {
+                        // con il cliente escono i suoi indirizzi e referenti (senza modifiche da inviare)
+                        if (esisteTabella(db, "clienti_indirizzi")) {
+                            db.execSQL("DELETE FROM clienti_referenti WHERE id_anagrafica = ? AND in_server = 1", new Object[]{id});
+                            db.execSQL("DELETE FROM clienti_indirizzi WHERE id_anagrafica = ? AND in_server = 1", new Object[]{id});
+                        }
                         db.execSQL("DELETE FROM anagrafica WHERE id_anagrafica = ? AND in_server = 1", new Object[]{id});
+                    } else if ("clienti_indirizzi".equals(f.tabella) || "clienti_referenti".equals(f.tabella)) {
+                        db.execSQL("DELETE FROM " + f.tabella + " WHERE id = ? AND in_server = 1", new Object[]{id});
                     } else if ("cantieri".equals(f.tabella)) {
                         // con il cantiere escono i suoi preventivi/ordini (restano i rapportini: hanno il loro perimetro)
                         togliDocumenti(db, prev, "id_preventivo", prevDett, "id_preventivo", "p.id_cantiere = " + f.id);
@@ -515,6 +523,12 @@ public final class SyncUtil {
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
+        }
+    }
+
+    private static boolean esisteTabella(SQLiteDatabase db, String tabella) {
+        try (Cursor c = db.rawQuery("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?", new String[]{tabella})) {
+            return c.moveToFirst();
         }
     }
 

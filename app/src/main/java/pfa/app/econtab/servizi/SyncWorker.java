@@ -55,7 +55,14 @@ public class SyncWorker extends Worker {
      * L'ordine rispecchia le dipendenze FK (genitori prima dei figli).
      */
     private static final String[][] SYNC_TABLES = {
+        // catalogo della ditta (GESTIONE_RAPPORTINI.md §14): prima dei documenti che lo usano
+        {"settori_articolo",       "id"},
+        {"costruttori",            "id_costruttore"},
+        {"linee",                  "id_linea"},
+        {"listini",                "id"},
         {"anagrafica",             "id_anagrafica"},
+        {"clienti_indirizzi",      "id"},
+        {"clienti_referenti",      "id"},
         {"cantieri",               "id_cantiere"},
         {"unita",                  "id_unita"},
         {"aree",                   "id_area"},
@@ -81,6 +88,10 @@ public class SyncWorker extends Worker {
     private static final String[][] FK_CHILDREN = {
         {"anagrafica",        "id_anagrafica",   "cantieri",              "id_anagrafica"},
         {"anagrafica",        "id_anagrafica",   "rapportini",            "id_cliente"},
+        // indirizzi e referenti dei clienti (schema 28)
+        {"anagrafica",        "id_anagrafica",   "clienti_indirizzi",     "id_anagrafica"},
+        {"anagrafica",        "id_anagrafica",   "clienti_referenti",     "id_anagrafica"},
+        {"clienti_indirizzi", "id",              "cantieri",              "id_cliente_indirizzo"},
         {"cantieri",          "id_cantiere",     "unita",                 "id_cantiere"},
         {"cantieri",          "id_cantiere",     "preventivi",            "id_cantiere"},
         {"cantieri",          "id_cantiere",     "rapportini",            "id_cantiere"},
@@ -98,6 +109,11 @@ public class SyncWorker extends Worker {
         {"preventivi",        "id_preventivo",   "rapportini",            "id_ordine"},
         {"rapportini",        "id",              "rapportini_dettaglio",  "id_rapportino"},
         {"preventivi_dettaglio", "id_preventivo_dettaglio", "rapportini_dettaglio", "id_preventivo_dettaglio"},
+        {"costruttori",       "id_costruttore",  "linee",                 "id_costruttore"},
+        {"costruttori",       "id_costruttore",  "listini",               "id_costruttore"},
+        {"linee",             "id_linea",        "listini",               "id_linea"},
+        {"settori_articolo",  "id",              "listini",               "id_settore"},
+        {"listini",           "id",              "rapportini_dettaglio",  "id_listino"},
         // FK intra-tabella e verso tabelle composite
         {"elementi_cantiere", "id_elemento_cant","componenti_cantiere",   "id_elemento_cavo"},
         {"elementi_cantiere", "id_elemento_cant","componenti_cantiere",   "id_elemento_tubo"},

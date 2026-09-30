@@ -188,6 +188,11 @@ public class TokenManager {
      * Salva le funzionalita' dell'app concesse per il ruolo (FunzionalitaApp). Se null (server vecchio) non tocca il
      * valore salvato.
      */
+    /** Moduli e funzionalita' salvati, per capire se una nuova lettura dal server ha cambiato qualcosa (utils.PermessiServer). */
+    public String improntaPermessi() {
+        return prefs.getString(KEY_MODULI, "") + "|" + prefs.getString(KEY_FUNZIONALITA, "");
+    }
+
     public void saveFunzionalita(java.util.List<String> funzionalita) {
         if (funzionalita == null) {
             return;

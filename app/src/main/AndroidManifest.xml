@@ -75,6 +75,16 @@
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_clienti_dettaglio_mod"></activity>
         <activity
+            android:name=".ClienteIndirizzoModActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize"
+            android:label="Indirizzo del cliente"></activity>
+        <activity
+            android:name=".ClienteReferenteModActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize"
+            android:label="Referente del cliente"></activity>
+        <activity
             android:name=".IvaDettaglioActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize"
@@ -299,6 +309,13 @@
             android:exported="true"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_rapportini"></activity>
+        <!-- firma del cliente a schermo intero (GESTIONE_RAPPORTINI.md §13) -->
+        <activity
+            android:name=".FirmaActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:windowSoftInputMode="adjustPan|stateHidden"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".RapportinoDettaglioModActivity"
             android:exported="true"

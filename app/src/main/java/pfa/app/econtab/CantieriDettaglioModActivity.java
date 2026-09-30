@@ -74,6 +74,18 @@ public class CantieriDettaglioModActivity extends EConTabDettaglioActivity imple
 			}
 			dbcl.close();
 
+			// cantiere da un indirizzo del cliente (GESTIONE_CLIENTI.md §6): extra ClientiIndirizzi.EXTRA_INDIRIZZO
+			idIndirizzoCliente = getIntent().getIntExtra(EXTRA_INDIRIZZO, 0);
+			if (idIndirizzoCliente != 0) {
+				DbInterno dbi = new DbInterno(this);
+				ContentValues w = new ContentValues();
+				w.put(pfa.app.econtab.db.table.ClientiIndirizzi.ID, idIndirizzoCliente);
+				ContentValues ind = dbi.getRecord(new pfa.app.econtab.db.table.ClientiIndirizzi(), w);
+				dbi.close();
+				if (ind != null) {
+					codicecliente = ind.getAsInteger(pfa.app.econtab.db.table.ClientiIndirizzi.ID_ANAGRAFICA);
+				}
+			}
 			if (codicecliente != 0) {
 				DbInterno db = new DbInterno(this);
 				ContentValues where = new ContentValues();
@@ -82,10 +94,10 @@ public class CantieriDettaglioModActivity extends EConTabDettaglioActivity imple
 				db.close();
 				setText(R.id.editText_cliente, val.getAsString(Anagrafica.RAGIONE_SOCIALE));
 				edit_cliente.setTextColor(Color.BLACK);
-				setText(R.id.editText_indirizzo, val.getAsString(Anagrafica.INDIRIZZO));
-				setText(R.id.editText_cap, val.getAsString(Anagrafica.CAP));
-				setText(R.id.editText_citta, val.getAsString(Anagrafica.CITTA));
-				setText(R.id.editText_provincia, val.getAsString(Anagrafica.PROVINCIA));
+				// cantiere "libero" dalla scheda cliente: solo il cliente, nome e indirizzo si scrivono a mano
+				if (!getIntent().getBooleanExtra(EXTRA_LIBERO, false)) {
+					impostaIndirizzoCliente(val, idIndirizzoCliente);
+				}
 
 				((EditText) findViewById(R.id.editText_cantiere)).requestFocus();
 
@@ -128,6 +140,7 @@ public class CantieriDettaglioModActivity extends EConTabDettaglioActivity imple
 
 			setText(R.id.editText_cantiere, val.getAsString(Cantieri.NOME));
 			setText(R.id.editText_indirizzo, val.getAsString(Cantieri.INDIRIZZO));
+			setText(R.id.editText_civico, val.getAsString(Cantieri.CIVICO));
 			setText(R.id.editText_cap, val.getAsString(Cantieri.CAP));
 			setText(R.id.editText_citta, val.getAsString(Cantieri.CITTA));
 			setText(R.id.editText_provincia, val.getAsString(Cantieri.PROVINCIA));
@@ -152,8 +165,10 @@ public class CantieriDettaglioModActivity extends EConTabDettaglioActivity imple
 		Cantieri cant = new Cantieri();
 		ContentValues val = cant.getValoriLogInserimento(db);
 		val.put(Cantieri.ID_ANAGRAFICA, codicecliente);
+		val.put(Cantieri.ID_CLIENTE_INDIRIZZO, idIndirizzoCliente);
 		val.put(Cantieri.NOME, getTesto(R.id.editText_cantiere));
 		val.put(Cantieri.INDIRIZZO, getTesto(R.id.editText_indirizzo));
+		val.put(Cantieri.CIVICO, getTesto(R.id.editText_civico));
 		val.put(Cantieri.CITTA, getTesto(R.id.editText_citta));
 		val.put(Cantieri.CAP, getTesto(R.id.editText_cap));
 		val.put(Cantieri.PROVINCIA, getTesto(R.id.editText_provincia));
@@ -235,6 +250,7 @@ public class CantieriDettaglioModActivity extends EConTabDettaglioActivity imple
 
 		val.put(Cantieri.NOME, getTesto(R.id.editText_cantiere));
 		val.put(Cantieri.INDIRIZZO, getTesto(R.id.editText_indirizzo));
+		val.put(Cantieri.CIVICO, getTesto(R.id.editText_civico));
 		val.put(Cantieri.CITTA, getTesto(R.id.editText_citta));
 		val.put(Cantieri.CAP, getTesto(R.id.editText_cap));
 		val.put(Cantieri.PROVINCIA, getTesto(R.id.editText_provincia));
@@ -269,6 +285,57 @@ public class CantieriDettaglioModActivity extends EConTabDettaglioActivity imple
 		}
 	}
 
+	/** Extra: id dell'indirizzo del cliente da cui nasce il cantiere (resta collegato). */
+	public static final String EXTRA_INDIRIZZO = "id_cliente_indirizzo";
+	/** Extra: true = cantiere libero del cliente, senza nome e indirizzo proposti (scheda cliente, tabella Cantieri). */
+	public static final String EXTRA_LIBERO = "cantiere_libero";
+	private int idIndirizzoCliente = 0;
+	/** Nome del cantiere proposto in automatico: se l'utente non l'ha toccato, cambiando cliente si aggiorna. */
+	private String nomeProposto = "";
+
+	/**
+	 * Indirizzo del cantiere dal cliente: dall'indirizzo indicato (idIndirizzo) oppure dalla sede principale, con via e
+	 * civico separati; senza indirizzi (dati non ancora sincronizzati) quello scritto sul cliente.
+	 */
+	private void impostaIndirizzoCliente(ContentValues cliente, int idIndirizzo) {
+		// nome proposto = ragione sociale (cantiere alla sede del cliente), solo se vuoto o ancora quello proposto prima
+		String nome = getTesto(R.id.editText_cantiere);
+		if (nome.isEmpty() || nome.equals(nomeProposto)) {
+			String rs = cliente.getAsString(Anagrafica.RAGIONE_SOCIALE);
+			nomeProposto = rs == null ? "" : (rs.length() > 100 ? rs.substring(0, 100) : rs);
+			setText(R.id.editText_cantiere, nomeProposto);
+		}
+		DbInterno db = new DbInterno(this);
+		String t = pfa.app.econtab.db.table.ClientiIndirizzi.NOME_TABELLA;
+		java.util.ArrayList<Object> r = db.eseguiSelect("SELECT * FROM " + t + " WHERE "
+				+ (idIndirizzo != 0 ? "id = " + idIndirizzo : "id_anagrafica = " + cliente.getAsInteger(Anagrafica.ID_ANAGRAFICA) + " AND principale = 1")
+				+ " LIMIT 1", null);
+		db.close();
+		if (!r.isEmpty()) {
+			ContentValues i = (ContentValues) r.get(0);
+			setText(R.id.editText_indirizzo, i.getAsString(pfa.app.econtab.db.table.ClientiIndirizzi.INDIRIZZO));
+			setText(R.id.editText_civico, i.getAsString(pfa.app.econtab.db.table.ClientiIndirizzi.CIVICO));
+			setText(R.id.editText_cap, i.getAsString(pfa.app.econtab.db.table.ClientiIndirizzi.CAP));
+			setText(R.id.editText_citta, i.getAsString(pfa.app.econtab.db.table.ClientiIndirizzi.CITTA));
+			setText(R.id.editText_provincia, i.getAsString(pfa.app.econtab.db.table.ClientiIndirizzi.PROVINCIA));
+			String descr = i.getAsString(pfa.app.econtab.db.table.ClientiIndirizzi.DESCRIZIONE);
+			// da un indirizzo come Cantieri::daIndirizzo: descrizione dell'indirizzo, altrimenti "cliente — città"
+			String citta = i.getAsString(pfa.app.econtab.db.table.ClientiIndirizzi.CITTA);
+			if (idIndirizzo != 0 && getTesto(R.id.editText_cantiere).equals(nomeProposto)) {
+				String n = descr != null && !descr.isEmpty() ? descr
+						: nomeProposto + (citta == null || citta.isEmpty() ? "" : " — " + citta);
+				nomeProposto = n.length() > 100 ? n.substring(0, 100) : n;
+				setText(R.id.editText_cantiere, nomeProposto);
+			}
+			return;
+		}
+		setText(R.id.editText_indirizzo, cliente.getAsString(Anagrafica.INDIRIZZO));
+		setText(R.id.editText_civico, "");
+		setText(R.id.editText_cap, cliente.getAsString(Anagrafica.CAP));
+		setText(R.id.editText_citta, cliente.getAsString(Anagrafica.CITTA));
+		setText(R.id.editText_provincia, cliente.getAsString(Anagrafica.PROVINCIA));
+	}
+
 	public void nuovoCliente(View v) {
 		System.out.println("EConTab: CantieriDettaglioModActivity nuovoCliente");
 		Intent intent = new Intent(this, ClientiDettaglioModActivity.class);
@@ -283,10 +350,8 @@ public class CantieriDettaglioModActivity extends EConTabDettaglioActivity imple
 		ContentValues val = ((EConTabAutoCompleteContentValue) arg0.getItemAtPosition(position)).getContentValue();
 		codicecliente = val.getAsInteger(Anagrafica.ID_ANAGRAFICA);
 		findViewById(R.id.editText_cantiere).requestFocus();
-		setText(R.id.editText_indirizzo, val.getAsString(Anagrafica.INDIRIZZO));
-		setText(R.id.editText_cap, val.getAsString(Anagrafica.CAP));
-		setText(R.id.editText_citta, val.getAsString(Anagrafica.CITTA));
-		setText(R.id.editText_provincia, val.getAsString(Anagrafica.PROVINCIA));
+		idIndirizzoCliente = 0; // altro cliente: niente collegamento all'indirizzo di prima
+		impostaIndirizzoCliente(val, 0);
 
 		edit_cliente.setTextColor(Color.BLACK);
 		System.out.println("EConTab: CantieriDettaglioModActivity onItemClick EXIT");

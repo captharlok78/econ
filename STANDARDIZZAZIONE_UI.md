@@ -239,6 +239,14 @@ estendere `DettaglioTabellaAdapter`, non ricopiare la grafica.
 
 ---
 
+## 5. Sezioni e azioni a icona (28/09/2026)
+
+Regole comuni a portale e app in `../STANDARD_GRAFICO.md`. Nell'app: `sezione_standard.xml` + `utils/SezioneStandard`
+(testata di sezione con icona, titolo e azioni a icona senza cerchio), `FaIcone.azione(...)` per le azioni delle righe,
+stile `TestoSezione`. Primo modulo: scheda e form del cliente (sezioni Cantieri, Indirizzi, Referenti, Fatturazione).
+
+---
+
 ## File chiave (riferimento rapido)
 
 **Liste** (`pfa.app.econtab.lista`): `EConTabListaStandardController.java`,

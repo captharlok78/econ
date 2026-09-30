@@ -47,7 +47,10 @@ public class RapportiniAdapter extends EConTabListViewAdapter  {
     protected void personalizzaView(final int position, EConTabViewHolder viewholder) {
 
         final ContentValues val = (ContentValues) dati.get(position);
-        ((RapportiniViewHolder) viewholder).data_rapportino.setText(Utility.numberToData(val.getAsLong(Rapportini.DATA_RAPPORTINO)));
+        // "N. 12/2026 · 26/09/2026": numero dato dal server alla conferma (NUMERAZIONE_DOCUMENTI.md), solo la data finche' manca
+        String numero = Rapportini.numeroDocumento(val);
+        ((RapportiniViewHolder) viewholder).data_rapportino.setText((numero.isEmpty() ? "" : "N. " + numero + " · ")
+                + Utility.numberToData(val.getAsLong(Rapportini.DATA_RAPPORTINO)));
         ((RapportiniViewHolder) viewholder).data_rapportino.setTag(position);
 
         // badge dello stato (nome e colore da stati_documento; assente se gli stati non sono ancora scaricati)
@@ -79,8 +82,8 @@ public class RapportiniAdapter extends EConTabListViewAdapter  {
         // cantiere e ordine facoltativi (il rapportino puo' essere solo per il cliente)
         String nomeCantiere = val.getAsString("nome_cantiere") != null ? val.getAsString("nome_cantiere") : "";
         String testoOrdine = nomeCantiere;
-        if (val.getAsString(Preventivi.NUMERO) != null && val.getAsLong("data_ordine") != null) {
-            testoOrdine = context.getResources().getString(R.string.ordine_num_del, val.getAsString(Preventivi.NUMERO), Utility.numberToDataShort(val.getAsLong("data_ordine")))
+        if (val.getAsString("numero_ordine") != null && val.getAsLong("data_ordine") != null) {
+            testoOrdine = context.getResources().getString(R.string.ordine_num_del, val.getAsString("numero_ordine"), Utility.numberToDataShort(val.getAsLong("data_ordine")))
                     + " - " + val.getAsString(Preventivi.TITOLO) + (nomeCantiere.isEmpty() ? "" : " (" + nomeCantiere + ")");
         }
         ((RapportiniViewHolder) viewholder).ordine.setText(testoOrdine);

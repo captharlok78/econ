@@ -92,6 +92,21 @@
                     android:nextFocusRight="@+id/editText_cap"/>
 
                 <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margine"
+                    android:text="Civico" />
+
+                <EditText
+                    android:id="@+id/editText_civico"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="5"
+                    android:maxLength="15"
+                    android:nextFocusRight="@+id/editText_cap"/>
+
+                <TextView
                     android:id="@+id/textView_capcittaprov"
                     style="@style/TestoIntestazione"
                     android:layout_width="wrap_content"

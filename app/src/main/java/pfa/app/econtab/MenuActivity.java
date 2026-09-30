@@ -281,6 +281,8 @@ public class MenuActivity extends EConTabActivity {
 
         aggiornaOggi();
         verificaConnessioneServer();
+        // pacchetti cambiati nel pannello: il menu si aggiorna subito (al massimo ogni 30 secondi, in background)
+        pfa.app.econtab.utils.PermessiServer.aggiorna(this, this::costruisciGriglia);
 
         SharedPreferences pref = getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE);
         String dataultimaVerifica = pref.getString("DATA_VERIFICA_AGGIORNAMERNTI", "01/01/1970");

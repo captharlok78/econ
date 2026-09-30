@@ -17,6 +17,8 @@ import pfa.app.econtab.db.table.Anagrafica;
 import pfa.app.econtab.db.table.Aree;
 import pfa.app.econtab.db.table.AssCodiciLinee;
 import pfa.app.econtab.db.table.Cantieri;
+import pfa.app.econtab.db.table.ClientiIndirizzi;
+import pfa.app.econtab.db.table.ClientiReferenti;
 import pfa.app.econtab.db.table.CategorieComponenti;
 import pfa.app.econtab.db.table.CategorieGenerali;
 import pfa.app.econtab.db.table.Collegamenti;
@@ -65,7 +67,7 @@ import pfa.app.econtab.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECONTAB.db";
 	public static final String DATABASE_NAME_ZIP = ".econtab.db";
-	public static final int SCHEMA_VERSION = 27;
+	public static final int SCHEMA_VERSION = 32;
 
 	private Context cont = null;
 
@@ -104,6 +106,8 @@ public class DbInterno extends SQLiteOpenHelper {
 		db.execSQL(new Composizioni().getSQL_create());
 		db.execSQL(new ComposizioniCantiere().getSQL_create());
 		db.execSQL(new Costruttori().getSQL_create());
+		db.execSQL(new pfa.app.econtab.db.table.SettoriArticolo().getSQL_create());
+		db.execSQL(new pfa.app.econtab.db.table.ModelliStampa().getSQL_create());
 		db.execSQL(new Elementi().getSQL_create());
 		db.execSQL(new ElementiCantiere().getSQL_create());
 		db.execSQL(new Foto().getSQL_create());
@@ -128,6 +132,8 @@ public class DbInterno extends SQLiteOpenHelper {
         db.execSQL(new Relazioni().getSQL_create());
         db.execSQL(new Rapportini().getSQL_create());
         db.execSQL(new RapportiniDettaglio().getSQL_create());
+        db.execSQL(new ClientiIndirizzi().getSQL_create());
+        db.execSQL(new ClientiReferenti().getSQL_create());
         creaTabelleSquadreERapportini(db);
 
         db.execSQL(new Utenti().getSQL_create());
@@ -460,6 +466,81 @@ public class DbInterno extends SQLiteOpenHelper {
 				db.execSQL("UPDATE " + Anagrafica.NOME_TABELLA + " SET " + Anagrafica.CODICE + " = " + Anagrafica.CODICE_ESTERNO
 						+ " WHERE " + Anagrafica.CODICE + " IS NULL");
 				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
+			}
+		}
+
+		// Schema 28 (GESTIONE_CLIENTI.md §6): indirizzi e referenti dei clienti, PEC e codice SDI, civico del cantiere e
+		// indirizzo del cliente da cui nasce. Download completo una tantum per ricevere indirizzi, referenti e civici.
+		if (oldVersion<28){
+			if (oldVersion<newVersion){
+				db.execSQL(new ClientiIndirizzi().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
+				db.execSQL(new ClientiReferenti().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
+				String[][] colonne = {
+						{Anagrafica.NOME_TABELLA, Anagrafica.PEC, "TEXT"},
+						{Anagrafica.NOME_TABELLA, Anagrafica.CODICE_SDI, "TEXT"},
+						{Cantieri.NOME_TABELLA, Cantieri.CIVICO, "TEXT"},
+						{Cantieri.NOME_TABELLA, Cantieri.ID_CLIENTE_INDIRIZZO, "INTEGER DEFAULT 0"},
+				};
+				for (String[] c : colonne) {
+					if (!getTableColumns(db, c[0]).contains(c[1])) {
+						db.execSQL("ALTER TABLE " + c[0] + " ADD COLUMN " + c[1] + " " + c[2]);
+					}
+				}
+				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
+			}
+		}
+		// Schema 32: numero dei rapportini (NUMERAZIONE_DOCUMENTI.md), dato dal server; arriva con il download
+		if (oldVersion<32){
+			if (oldVersion<newVersion){
+				for (String col : new String[] { Rapportini.NUMERO, Rapportini.ANNO }) {
+					if (!getTableColumns(db, Rapportini.NOME_TABELLA).contains(col)) {
+						db.execSQL("ALTER TABLE " + Rapportini.NOME_TABELLA + " ADD COLUMN " + col + " INTEGER");
+					}
+				}
+			}
+		}
+		// Schema 31: modelli di stampa (GESTIONE_RAPPORTINI.md §15), arrivano interi con il prossimo download
+		if (oldVersion<31){
+			if (oldVersion<newVersion){
+				db.execSQL(new pfa.app.econtab.db.table.ModelliStampa().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
+			}
+		}
+		// Schema 30: articoli della ditta dal rapportino (GESTIONE_RAPPORTINI.md §14): settori, catalogo come libreria,
+		// barcode e foto degli articoli; i settori arrivano sempre interi (server: SEMPRE_COMPLETE)
+		if (oldVersion<30){
+			if (oldVersion<newVersion){
+				db.execSQL(new pfa.app.econtab.db.table.SettoriArticolo().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
+				String[][] colonne = {
+						{Listini.NOME_TABELLA, Listini.ID_DITTA, "INTEGER DEFAULT 0"},
+						{Listini.NOME_TABELLA, Listini.BARCODE, "TEXT"},
+						{Listini.NOME_TABELLA, Listini.FOTO, "TEXT"},
+						{Listini.NOME_TABELLA, Listini.NEL_LISTINO, "INTEGER DEFAULT 1"},
+						{Listini.NOME_TABELLA, Listini.ID_SETTORE, "INTEGER DEFAULT 0"},
+						{Costruttori.NOME_TABELLA, Costruttori.ID_DITTA, "INTEGER DEFAULT 0"},
+						{Linee.NOME_TABELLA, Linee.ID_DITTA, "INTEGER DEFAULT 0"},
+				};
+				for (String[] c : colonne) {
+					if (!getTableColumns(db, c[0]).contains(c[1])) {
+						db.execSQL("ALTER TABLE " + c[0] + " ADD COLUMN " + c[1] + " " + c[2]);
+					}
+				}
+				// il catalogo si riscarica intero: gli articoli prendono settore, ditta e "nel listino"
+				pfa.app.econtab.utils.CatalogoLocale.cancella(getContext());
+			}
+		}
+		// Schema 29: firma del cliente sul rapportino (GESTIONE_RAPPORTINI.md §13); nessuna firma da scaricare, niente download completo
+		if (oldVersion<29){
+			if (oldVersion<newVersion){
+				String[][] colonne = {
+						{Rapportini.NOME_TABELLA, Rapportini.FIRMA, "TEXT"},
+						{Rapportini.NOME_TABELLA, Rapportini.FIRMA_NOME, "TEXT"},
+						{Rapportini.NOME_TABELLA, Rapportini.FIRMA_DATA, "DATE"},
+				};
+				for (String[] c : colonne) {
+					if (!getTableColumns(db, c[0]).contains(c[1])) {
+						db.execSQL("ALTER TABLE " + c[0] + " ADD COLUMN " + c[1] + " " + c[2]);
+					}
+				}
 			}
 		}
 	}

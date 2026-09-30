@@ -188,7 +188,8 @@ public class RapportiniActivity extends EConTabListaStandardActivity {
                     + Rapportini.ID_CLIENTE + " else " + Cantieri.NOME_TABELLA + "." + Cantieri.ID_ANAGRAFICA + " end)";
 
             String select = Rapportini.NOME_TABELLA + ".*, " + Anagrafica.NOME_TABELLA + "." + Anagrafica.RAGIONE_SOCIALE + ", "
-                    + Preventivi.NOME_TABELLA + "." + Preventivi.NUMERO + ", "
+                    // alias: "numero" e' quello del rapportino (NUMERAZIONE_DOCUMENTI.md), non dell'ordine
+                    + Preventivi.NOME_TABELLA + "." + Preventivi.NUMERO + " as numero_ordine, "
                     + Preventivi.NOME_TABELLA + "." + Preventivi.TITOLO + ", "
                     + Preventivi.NOME_TABELLA + "." + Preventivi.DATA + " as data_ordine, "
                     + Cantieri.NOME_TABELLA + "." + Cantieri.NOME + " as nome_cantiere, "
