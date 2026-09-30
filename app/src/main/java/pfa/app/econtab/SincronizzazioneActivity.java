@@ -424,6 +424,13 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         tm.saveFunzionalita(resp.body().funzionalita);
         tm.savePianificazione(resp.body().pianificazione);
         tm.savePacchetti(resp.body().pacchetti);
+        // versione del server per il piede delle stampe (GESTIONE_RAPPORTINI.md §15)
+        try {
+            Response<MercuryApiService.VersionResponse> v = api.getVersioneMercury().execute();
+            if (v.isSuccessful() && v.body() != null) pfa.app.econtab.utils.VersioneApp.salvaServer(this, v.body().versione);
+        } catch (Exception ignored) {
+            // resta quella salvata
+        }
     }
 
     /** Anche nelle sincronizzazioni manuali: i pacchetti cambiati nel pannello valgono subito (utils.PermessiServer). */

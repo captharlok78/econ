@@ -193,6 +193,7 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
                 if (isFinishing() || isDestroyed()) return;
                 if (response.isSuccessful() && response.body() != null && response.body().versione != null) {
                     versioneMercuryTesto = "Mercury v" + response.body().versione;
+                    pfa.app.econtab.utils.VersioneApp.salvaServer(LoginActivity.this, response.body().versione);
                     aggiornaTestoVersioni();
                 }
             }

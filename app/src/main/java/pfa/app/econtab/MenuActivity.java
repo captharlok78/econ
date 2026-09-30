@@ -775,6 +775,7 @@ public class MenuActivity extends EConTabActivity {
                 if (isFinishing() || isDestroyed()) return;
                 if (response.isSuccessful() && response.body() != null && response.body().versione != null) {
                     versioneMercury[0] = conData(response.body());
+                    pfa.app.econtab.utils.VersioneApp.salvaServer(MenuActivity.this, response.body().versione);
                     aggiornaVersioni.run();
                 }
             }

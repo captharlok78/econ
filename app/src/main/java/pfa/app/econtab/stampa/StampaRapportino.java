@@ -133,6 +133,15 @@ public final class StampaRapportino {
         rap.put("firmato", !firma.isEmpty());
         c.put("rapportino", rap);
 
+        // chi ha fatto il rapportino: nome e recapiti (operatori scaricati sul tablet)
+        Map<String, Object> op = new LinkedHashMap<>();
+        ContentValues ut = db.getRecord("select * from " + pfa.app.econtab.db.table.Utenti.NOME_TABELLA + " where "
+                + pfa.app.econtab.db.table.Utenti.ID_UTENTE_DITTA + "=" + RigheRapportino.intero(r, Rapportini.ID_UTENTE_DITTA));
+        op.put("nome", ut != null ? RegoleRapportino.nome(ut) : RegoleRapportino.nomeOperatore(db, RigheRapportino.intero(r, Rapportini.ID_UTENTE_DITTA)));
+        op.put("email", ut != null ? RigheRapportino.testo(ut, pfa.app.econtab.db.table.Utenti.E_MAIL) : "");
+        op.put("telefono", ut != null ? RigheRapportino.testo(ut, pfa.app.econtab.db.table.Utenti.TELEFONO) : "");
+        c.put("operatore", op);
+
         ContentValues cl = db.getRecord("select * from " + Anagrafica.NOME_TABELLA + " where " + Anagrafica.ID_ANAGRAFICA + "="
                 + RigheRapportino.intero(r, Rapportini.ID_CLIENTE));
         if (cl != null) {
@@ -204,6 +213,9 @@ public final class StampaRapportino {
         c.put("totali", totali);
         Map<String, Object> st = new LinkedHashMap<>();
         st.put("data_ora", new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.ITALY).format(new Date()));
+        // "1.0.48 / 1.0.44": versione del server (ultima vista) / versione di questa app
+        String server = pfa.app.econtab.utils.VersioneApp.server(ctx), app = pfa.app.econtab.utils.VersioneApp.salvata(ctx);
+        st.put("versione", (server != null ? server : "?") + " / " + (app != null ? app : pfa.app.econtab.BuildConfig.VERSION_NAME));
         c.put("stampa", st);
         return c;
     }
@@ -218,6 +230,9 @@ public final class StampaRapportino {
         m.put("provincia", d != null && d.provincia != null ? d.provincia : "");
         m.put("partita_iva", d != null && d.partitaIva != null ? d.partitaIva : "");
         m.put("codice_fiscale", d != null && d.codiceFiscale != null ? d.codiceFiscale : "");
+        m.put("telefono", d != null && d.telefono != null ? d.telefono : "");
+        m.put("cellulare", d != null && d.cellulare != null ? d.cellulare : "");
+        m.put("email", d != null && d.email != null ? d.email : "");
         m.put("note_rapportini", d != null && d.noteRapportini != null ? d.noteRapportini : "");
         File logo = DittaLocale.getFileLogo(ctx);
         String dataUri = "";

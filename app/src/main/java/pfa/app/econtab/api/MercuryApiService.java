@@ -232,6 +232,10 @@ public interface MercuryApiService {
         public String cap;
         public String codiceFiscale;
         public String partitaIva;
+        /** Recapiti della ditta per l'intestazione delle stampe (server 1.0.49+, null prima). */
+        public String telefono;
+        public String cellulare;
+        public String email;
         public String noteRapportini;
         public String notePreventivi;
         public String noteOrdini;

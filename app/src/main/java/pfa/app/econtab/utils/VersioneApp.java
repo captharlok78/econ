@@ -33,6 +33,16 @@ public final class VersioneApp {
         return BuildConfig.GIT_COMMIT.equals(p.getString(PREF_COMMIT, "")) ? p.getString(PREF_VERSIONE, null) : null;
     }
 
+    /** Versione del server (Mercury) vista l'ultima volta, per il piede delle stampe; null se mai letta. */
+    public static String server(Context ctx) {
+        return prefs(ctx).getString("VERSIONE_SERVER", null);
+    }
+
+    public static void salvaServer(Context ctx, String versione) {
+        if (versione == null || versione.isEmpty()) return;
+        prefs(ctx).edit().putString("VERSIONE_SERVER", versione).apply();
+    }
+
     public static void salva(Context ctx, String versione) {
         if (versione == null || versione.isEmpty()) return;
         prefs(ctx).edit().putString(PREF_VERSIONE, versione).putString(PREF_COMMIT, BuildConfig.GIT_COMMIT).apply();
