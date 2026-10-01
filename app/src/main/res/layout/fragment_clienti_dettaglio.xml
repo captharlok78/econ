@@ -12,7 +12,7 @@
 
         <LinearLayout
             android:id="@+id/campi"
-            style="@style/EConTabLinearLayoutMaster"
+            style="@style/EconLinearLayoutMaster"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -217,13 +217,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" >
 
-                    <pfa.app.econtab.views.EConTabTelefonoLayout
+                    <com.ncfsistemi.econ.views.EconTelefonoLayout
                         android:id="@+id/editText_cellulare1"
                         android:layout_width="0sp"
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5" />
 
-                    <pfa.app.econtab.views.EConTabTelefonoLayout
+                    <com.ncfsistemi.econ.views.EconTelefonoLayout
                         android:id="@+id/editText_cellulare2"
                         android:layout_width="0sp"
                         android:layout_height="wrap_content"
@@ -258,7 +258,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/telefono" />
 
-                        <pfa.app.econtab.views.EConTabTelefonoLayout
+                        <com.ncfsistemi.econ.views.EconTelefonoLayout
                             android:id="@+id/editText_telefono"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
@@ -301,7 +301,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/mail" />
 
-                <pfa.app.econtab.views.EConTabMailLayout
+                <com.ncfsistemi.econ.views.EconMailLayout
                     android:id="@+id/editText_mail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />

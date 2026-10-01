@@ -44,15 +44,15 @@
             android:layout_marginTop="10dp"
             android:orientation="horizontal">
 
-            <pfa.app.econtab.views.EConTabSpinner
-                android:id="@+id/econtabSpinner_filtroAnno"
+            <com.ncfsistemi.econ.views.EconSpinner
+                android:id="@+id/econSpinner_filtroAnno"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
                 android:layout_height="wrap_content" />
 
-            <pfa.app.econtab.views.EConTabSpinner
-                android:id="@+id/econtabSpinner_filtroStato"
+            <com.ncfsistemi.econ.views.EconSpinner
+                android:id="@+id/econSpinner_filtroStato"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content" />

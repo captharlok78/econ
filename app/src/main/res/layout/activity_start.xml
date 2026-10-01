@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <pfa.app.econtab.views.AtomView
+    <com.ncfsistemi.econ.views.AtomView
         android:id="@+id/atomView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

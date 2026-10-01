@@ -15,7 +15,7 @@
 
     <fragment
         android:id="@+id/fragment1"
-        android:name="pfa.app.econtab.fragments.PreventiviListaFragment"
+        android:name="com.ncfsistemi.econ.fragments.PreventiviListaFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"

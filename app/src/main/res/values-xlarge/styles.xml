@@ -21,18 +21,18 @@
 
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
        
-        <item name="android:buttonStyle">@style/EConTabButton</item>
+        <item name="android:buttonStyle">@style/EconButton</item>
         <item name="android:editTextStyle">@style/EditTextStyle</item>
         <item name="android:textViewStyle">@style/Testo</item>
         <!--
-        <item name="@android:attr/actionBarStyle">@style/EConTabActionBarStyle</item>
-        <item name="@android:attr/actionBarTabTextStyle">@style/EConTabActionBarTabTextStyle</item>
-        <item name="@android:attr/listViewStyle">@style/EConTabBackgroundLista</item>
-        <item name="@android:attr/expandableListViewStyle">@style/EConTabBackgroundListaEspandibile</item>
-        <item name="@android:attr/scrollViewStyle">@style/EConTabScrollView</item>
+        <item name="@android:attr/actionBarStyle">@style/EconActionBarStyle</item>
+        <item name="@android:attr/actionBarTabTextStyle">@style/EconActionBarTabTextStyle</item>
+        <item name="@android:attr/listViewStyle">@style/EconBackgroundLista</item>
+        <item name="@android:attr/expandableListViewStyle">@style/EconBackgroundListaEspandibile</item>
+        <item name="@android:attr/scrollViewStyle">@style/EconScrollView</item>
         <item name="@android:attr/windowBackground">@drawable/sfondo_app</item>
         <item name="@android:attr/autoCompleteTextViewStyle">@style/AutocompleteEditTextStyle</item>
-        <item name="@android:attr/actionBarTabBarStyle">@style/EConTabActionBarTabBarStyle</item>
+        <item name="@android:attr/actionBarTabBarStyle">@style/EconActionBarTabBarStyle</item>
         -->
     </style>
 
@@ -68,10 +68,10 @@
         <item name="android:textSize">27sp</item>
     </style>
 
-    <style name="EConTabButton" parent="@android:style/Widget.Button">
+    <style name="EconButton" parent="@android:style/Widget.Button">
         <item name="android:textSize">20sp</item>
         <item name="android:layout_height">80px</item>
-        <item name="android:background">@drawable/button_econtab</item>
+        <item name="android:background">@drawable/button_econ</item>
     </style>
 
     <style name="bottoneLista">
@@ -84,7 +84,7 @@
         <item name="android:layout_width">44sp</item>
     </style>
 
-    <style name="EConTabActionBarTabTextStyle" parent="@android:style/Widget.Holo.Light.ActionBar.TabText.Inverse">
+    <style name="EconActionBarTabTextStyle" parent="@android:style/Widget.Holo.Light.ActionBar.TabText.Inverse">
         <item name="android:textSize">20sp</item>
         <item name="android:textColor">@android:color/holo_blue_dark</item>
     </style>

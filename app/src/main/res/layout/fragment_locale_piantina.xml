@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-            <pfa.app.econtab.views.EConTabPiantinaFrameLayout
+            <com.ncfsistemi.econ.views.EconPiantinaFrameLayout
                 android:id="@+id/root"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -20,7 +20,7 @@
                         android:layout_width="@dimen/altezza_campo_doppia"
                         android:layout_height="@dimen/altezza_campo_doppia"
                         android:layout_alignParentTop="true"
-                        android:background="@drawable/button_econtab_trasparente"
+                        android:background="@drawable/button_econ_trasparente"
                         android:src="@drawable/lista_elementi"
                         android:layout_toLeftOf="@+id/button_cestino"
                         android:scaleType="fitXY"
@@ -49,19 +49,19 @@
                         android:layout_marginTop="@dimen/altezza_campo"
                          >
 
-                        <pfa.app.econtab.views.EConTabPiantinaGridView
+                        <com.ncfsistemi.econ.views.EconPiantinaGridView
                             android:id="@+id/gridView_piantina"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_gravity="center_horizontal"
                             android:background="@android:color/transparent"
                             android:numColumns="10" >
-                        </pfa.app.econtab.views.EConTabPiantinaGridView>
+                        </com.ncfsistemi.econ.views.EconPiantinaGridView>
                     </FrameLayout>
 
                     
                 </RelativeLayout>
-            </pfa.app.econtab.views.EConTabPiantinaFrameLayout>
+            </com.ncfsistemi.econ.views.EconPiantinaFrameLayout>
       
              <RelativeLayout
         android:id="@+id/tasti"
@@ -69,7 +69,7 @@
         android:layout_height="wrap_content"
        
         android:layout_alignParentTop="true"
-        android:background="@drawable/bg_econtab_biancosfumato">
+        android:background="@drawable/bg_econ_biancosfumato">
 
         <HorizontalScrollView
             android:id="@+id/scroll_tasti"
@@ -156,7 +156,7 @@
 
     <RelativeLayout
         android:id="@+id/popup_lista_elementi"
-        android:background="@drawable/bg_econtab_popup_trasparente"
+        android:background="@drawable/bg_econ_popup_trasparente"
         android:layout_width="match_parent"
         android:layout_centerInParent="true"
         android:layout_margin="@dimen/altezza_campo_doppia"

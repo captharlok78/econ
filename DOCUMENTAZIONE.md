@@ -1,12 +1,12 @@
-# Documentazione EConTab - Applicazione Android
+# Documentazione Econ - Applicazione Android
 
 ## Informazioni Generali
 
 ### Nome Applicazione
-**EConTab** (RV.App)
+**Econ** (RV.App)
 
 ### Package
-`pfa.app.econtab`
+`com.ncfsistemi.econ`
 
 ### Versione
 - **Version Code**: 108
@@ -54,10 +54,10 @@ L'applicazione richiede i seguenti permessi Android:
 
 ### Struttura del Progetto
 
-#### Package Principale: `pfa.app.econtab`
+#### Package Principale: `com.ncfsistemi.econ`
 L'applicazione è organizzata in diversi package:
 
-1. **Package principale** (`pfa.app.econtab`)
+1. **Package principale** (`com.ncfsistemi.econ`)
    - Contiene 173 file Java
    - Activity principali e logica di business
 
@@ -71,7 +71,7 @@ L'applicazione è organizzata in diversi package:
    - Gestione sessione, licenze, download
 
 4. **Package `servizi`** - Servizi
-   - `EConTabService` - Servizio in background per sincronizzazione
+   - `EconService` - Servizio in background per sincronizzazione
 
 5. **Package `server`**
    - Gestione comunicazione con server remoto
@@ -80,7 +80,7 @@ L'applicazione è organizzata in diversi package:
 6. **Package Esterni**:
    - `com.android.vending.billing.util` - Gestione billing Google Play
    - `com.polites.android` - Libreria per zoom/gesture su immagini
-   - `pfa.app.general.simplecropimage` - Crop immagini
+   - `com.ncfsistemi.general.simplecropimage` - Crop immagini
 
 ---
 
@@ -186,7 +186,7 @@ Gestione licenze:
 - Registrazione utente obbligatoria
 
 ### 11. Sincronizzazione Cloud
-**Service**: `EConTabService`
+**Service**: `EconService`
 
 Sistema di sincronizzazione con server cloud:
 - Download dati iniziali (listino base)
@@ -204,7 +204,7 @@ Funzionalità immagini:
 - Icone elementi e componenti
 
 ### 13. Utilità Aggiuntive
-- **File Chooser**: `EConTabFileChooserActivity`
+- **File Chooser**: `EconFileChooserActivity`
 - **SQL Manager**: `SqlManagerActivity` - Gestione database per debug
 - **Crash Handler**: `CrashActivity` - Gestione errori
 - **Finestre Popup**:
@@ -358,14 +358,13 @@ public static final String DL_WEB_SERVICE = "sincronizzatore";
 - Database: Interno all'app (SQLite)
 - Immagini elementi: Directory privata app
 - Icone componenti: Directory privata app
-- Backup: ECONTAB/backup (storage esterno)
+- Backup ed esportazioni: `files/ECON/backup` e `files/ECON` (area privata dell'app, dal 01/10/2026; condivisi con FileProvider)
 - Accettazione TAC: File privato `tac.dat`
 
 ### SharedPreferences
 Nome: `APP_NAME` (definito in `Utility`)
 
 Preferenze salvate:
-- `ECONTAB_REG` - Stato registrazione
 - `PERINIZIARE` - Flag prima apertura
 - `DATA_VERIFICA_AGGIORNAMERNTI` - Ultima verifica aggiornamenti
 
@@ -401,7 +400,7 @@ Controllato da `Globals.DEBUG_MODE`:
 
 ## Activity Popup
 
-Alcune Activity utilizzano tema popup (`@style/EConTabPopup`):
+Alcune Activity utilizzano tema popup (`@style/EconPopup`):
 - `FinestraElementiActivity`
 - `FinestraComponentiActivity`
 - `FinestraListinoBaseActivity`
@@ -414,7 +413,7 @@ Alcune Activity utilizzano tema popup (`@style/EConTabPopup`):
 - `CollegamentiElementoActivity`
 - `FinestraLocaliPreferitiActivity`
 - `ElementoDettaglioActivity`
-- `EConTabFileChooserActivity`
+- `EconFileChooserActivity`
 - `ConfigurazioneGenActivity`
 - `ComposizioneLiberaActivity`
 - `AssCodiciLineeActivity`
@@ -440,7 +439,7 @@ Package: `com.polites.android`
 - Touch listener personalizzato
 
 ### Simple Crop Image
-Package: `pfa.app.general.simplecropimage`
+Package: `com.ncfsistemi.general.simplecropimage`
 - `CropImage` - Activity per crop immagini
 - `CropImageView` - View personalizzata
 - Rotazione immagini
@@ -493,8 +492,8 @@ File: `res/values/strings.xml`
 
 ### Temi
 - `@style/AppTheme` - Tema principale
-- `@style/EConTabPopup` - Tema finestre popup
-- `@style/EConTabPopupNoAnimation` - Popup senza animazioni
+- `@style/EconPopup` - Tema finestre popup
+- `@style/EconPopupNoAnimation` - Popup senza animazioni
 
 ---
 
@@ -557,7 +556,7 @@ Features:
 
 ### Output
 - APK: `app/build/outputs/apk/release/app-release.apk`
-- Package: `pfa.app.econtab`
+- Package: `com.ncfsistemi.econ`
 
 ### Distribuzione
 - Google Play Store
@@ -582,7 +581,7 @@ Features:
 - Debug struttura dati
 
 ### Backup/Restore
-- Backup manuale database in `ECONTAB/backup`
+- Backup manuale database in `ECON/backup` (area privata dell'app)
 - Restore da file backup
 - Sincronizzazione cloud come backup
 

@@ -29,11 +29,11 @@
                    
                     android:text="@string/tipo" />
 
-                <pfa.app.econtab.views.EConTabSpinner
-                    android:id="@+id/econtabSpinner_tipo"
+                <com.ncfsistemi.econ.views.EconSpinner
+                    android:id="@+id/econSpinner_tipo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
-                </pfa.app.econtab.views.EConTabSpinner>
+                </com.ncfsistemi.econ.views.EconSpinner>
                 <LinearLayout
                     android:id="@+id/linear_numero_data"
                     android:layout_width="match_parent"
@@ -78,11 +78,11 @@
                             android:layout_marginTop="@dimen/margine"
                             android:text="@string/data" />
 
-                        <pfa.app.econtab.views.EConTabCalendario
-                            android:id="@+id/econtabCaledanrio_data"
+                        <com.ncfsistemi.econ.views.EconCalendario
+                            android:id="@+id/econCaledanrio_data"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" >
-                        </pfa.app.econtab.views.EConTabCalendario>
+                        </com.ncfsistemi.econ.views.EconCalendario>
                     </LinearLayout>
                 </LinearLayout>
                 
@@ -129,11 +129,11 @@
                     android:layout_marginTop="@dimen/margine"
                     android:text="@string/cantiere" />
 
-                <pfa.app.econtab.views.EConTabSpinner
-                    android:id="@+id/econtabSpinner_cantiere"
+                <com.ncfsistemi.econ.views.EconSpinner
+                    android:id="@+id/econSpinner_cantiere"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" >
-                </pfa.app.econtab.views.EConTabSpinner>
+                </com.ncfsistemi.econ.views.EconSpinner>
 
                 <TextView
                     android:id="@+id/textView_indirizzo"
@@ -187,11 +187,11 @@
                             android:layout_marginTop="@dimen/margine"
                             android:text="@string/stato" />
 
-                        <pfa.app.econtab.views.EConTabSpinner
-                            android:id="@+id/econtabSpinner_stato"
+                        <com.ncfsistemi.econ.views.EconSpinner
+                            android:id="@+id/econSpinner_stato"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" >
-                        </pfa.app.econtab.views.EConTabSpinner>
+                        </com.ncfsistemi.econ.views.EconSpinner>
                     </LinearLayout>
                     
                     <LinearLayout

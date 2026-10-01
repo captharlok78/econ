@@ -36,7 +36,7 @@
     <string name="messaggio_creazione_report">Creazione report in corso…</string>
     <string name="messaggio_sostituzione_scatola_relazioni">La scatola può essere sostituita solamente con una delle stesse dimensioni perchè sono presenti relazioni e/o collegamenti</string>
     <string name="messaggio_eliminazione_frutto_relazioni">Per eliminare il componente è necessario eliminare prima le relazioni</string>
-    <string name="messaggio_backup_ok">Backup database completato nella cartella ECONTAB/backup</string>
+    <string name="messaggio_backup_ok">Backup database completato nella cartella ECON/backup</string>
     <string name="messaggio_backup_ko">Backup database non riuscito</string>
     <string name="messaggio_ripristino_ok">Ripristino  completato</string>
     <string name="messaggio_ripristino_ko">Ripristino database non riuscito</string>

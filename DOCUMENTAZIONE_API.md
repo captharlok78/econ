@@ -1,4 +1,7 @@
-# Documentazione API - EConTab Android App
+# Documentazione API - Econ Android App
+
+> **Documento storico.** Descrive le API del vecchio editore (sincronizzatore, licenze, versione), tolte dall'app il
+> 01/10/2026 (EDITORE_E_FIRMA.md). Le API attuali sono quelle del server Econ (`/api/...`, MODERNIZZAZIONE_SYNC.md).
 
 ## Informazioni Generali
 
@@ -261,12 +264,12 @@ GET /license/attivazioneFull?action=C&ID=<ID_ENCRYPTED>
 
 **Formato ID**:
 ```
-URLEncode(Encrypt("APP_NAME|ECONTAB_REG|DEVICE_ID|CODICE_FULL"))
+URLEncode(Encrypt("APP_NAME|REG|DEVICE_ID|CODICE_FULL"))
 ```
 
 Dove:
 - `APP_NAME`: Nome applicazione
-- `ECONTAB_REG`: Codice registrazione utente
+- `REG`: Codice registrazione utente
 - `DEVICE_ID`: Android ID dispositivo
 - `CODICE_FULL`: Codice licenza Full
 
@@ -321,7 +324,7 @@ GET /mobileapp/version?type=Android
 
 ### 7. Download Database Iniziale (Deprecato)
 
-#### **POST** `/TOBECHANGEDdownloadEConTabDb.asmx/downloadDati`
+#### **POST** `/TOBECHANGEDdownloadEconDb.asmx/downloadDati`
 
 Download listino base iniziale (NON PIÙ USATO).
 
@@ -851,7 +854,7 @@ parametri.put("dataSincroSitesQuotes", "20240101000000");
 
 // Chiamata API
 String url = "http://147.93.127.131:5151/sincronizzatore";
-Object result = inviaRichiesta("syncDownload", "pfa.app.econtab/syncDownload",
+Object result = inviaRichiesta("syncDownload", "com.ncfsistemi.econ/syncDownload",
                                 url, parametri);
 
 // Elaborazione risposta

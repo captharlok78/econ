@@ -49,7 +49,7 @@ public class ZoomAnimation implements Animation {
 	 */
 	@Override
 	public boolean update(GestureImageView view, long time) {
-		System.out.println("EConTab: ZoomAnimation update ENTER");
+		System.out.println("Econ: ZoomAnimation update ENTER");
 		if(firstFrame) {
 			firstFrame = false;
 			
@@ -104,7 +104,7 @@ public class ZoomAnimation implements Animation {
 				}
 			}
 
-			System.out.println("EConTab: ZoomAnimation update EXIT (1)");
+			System.out.println("Econ: ZoomAnimation update EXIT (1)");
 
 			return true;
 		}
@@ -119,14 +119,14 @@ public class ZoomAnimation implements Animation {
 				zoomAnimationListener.onComplete();
 			}
 
-			System.out.println("EConTab: ZoomAnimation update EXIT (2)");
+			System.out.println("Econ: ZoomAnimation update EXIT (2)");
 
 			return false;
 		}
 	}
 	
 	public void reset() {
-		System.out.println("EConTab: ZoomAnimation reset");
+		System.out.println("Econ: ZoomAnimation reset");
 		firstFrame = true;
 		totalTime = 0;
 	}

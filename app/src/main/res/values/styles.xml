@@ -21,18 +21,18 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
 
 
-        <item name="android:buttonStyle">@style/EConTabButton</item>
+        <item name="android:buttonStyle">@style/EconButton</item>
         <item name="android:editTextStyle">@style/EditTextStyle</item>
         <item name="android:textViewStyle">@style/Testo</item>
         <!--
-      	<item name="@android:attr/actionBarStyle">@style/EConTabActionBarStyle</item>
-        <item name="@android:attr/actionBarTabTextStyle">@style/EConTabActionBarTabTextStyle</item>
-        <item name="@android:attr/listViewStyle">@style/EConTabBackgroundLista</item>
-        <item name="@android:attr/expandableListViewStyle">@style/EConTabBackgroundListaEspandibile</item>
-        <item name="@android:attr/scrollViewStyle">@style/EConTabScrollView</item>
+      	<item name="@android:attr/actionBarStyle">@style/EconActionBarStyle</item>
+        <item name="@android:attr/actionBarTabTextStyle">@style/EconActionBarTabTextStyle</item>
+        <item name="@android:attr/listViewStyle">@style/EconBackgroundLista</item>
+        <item name="@android:attr/expandableListViewStyle">@style/EconBackgroundListaEspandibile</item>
+        <item name="@android:attr/scrollViewStyle">@style/EconScrollView</item>
         <item name="@android:attr/windowBackground">@drawable/sfondo_app</item>
         <item name="@android:attr/autoCompleteTextViewStyle">@style/AutocompleteEditTextStyle</item>
-        <item name="@android:attr/actionBarTabBarStyle">@style/EConTabActionBarTabBarStyle</item>
+        <item name="@android:attr/actionBarTabBarStyle">@style/EconActionBarTabBarStyle</item>
         -->
     </style>
 
@@ -114,10 +114,10 @@
         <item name="android:textColor">@android:color/holo_blue_dark</item>
     </style>
 
-    <style name="EConTabButton" parent="@android:style/Widget.Button">
+    <style name="EconButton" parent="@android:style/Widget.Button">
         <item name="android:textSize">13sp</item>
         <item name="android:layout_height">80px</item>
-        <item name="android:background">@drawable/button_econtab</item>
+        <item name="android:background">@drawable/button_econ</item>
     </style>
 
     <style name="bottoneLista">
@@ -141,20 +141,20 @@
         <item name="android:textSize">14sp</item>
     </style>
 
-    <style name="EConTabActionBarStyle" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+    <style name="EconActionBarStyle" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
         <!--
         <item name="@android:attr/backgroundStacked">#cceeeded</item>
         -->
     </style>
 
 
-    <style name="EConTabActionBarTabTextStyle" parent="@android:style/Widget.Holo.Light.ActionBar.TabText.Inverse">
+    <style name="EconActionBarTabTextStyle" parent="@android:style/Widget.Holo.Light.ActionBar.TabText.Inverse">
         <item name="android:textSize">12sp</item>
          <item name="android:textColor">@android:color/holo_blue_dark</item>
     </style>
 
 
-    <style name="EConTabActionBarTabBarStyle" parent="@android:style/Widget.Holo.Light.ActionBar.TabBar">
+    <style name="EconActionBarTabBarStyle" parent="@android:style/Widget.Holo.Light.ActionBar.TabBar">
        <item name="android:divider">@drawable/divider_tab</item>
         <item name="android:showDividers">middle</item>
 
@@ -162,25 +162,25 @@
 
     </style>
 
-	<style name="EConTabBackgroundLista" parent="@android:style/Widget.Holo.Light.ListView">
+	<style name="EconBackgroundLista" parent="@android:style/Widget.Holo.Light.ListView">
 	    <item name="android:background">@android:drawable/editbox_background_normal</item>
 	    <item name="android:scrollbarStyle">outsideOverlay</item>
 	    <item name="android:fastScrollEnabled">true</item>
 	    </style>
 
-	<style name="EConTabBackgroundListaEspandibile" parent="@android:style/Widget.Holo.Light.ExpandableListView">
+	<style name="EconBackgroundListaEspandibile" parent="@android:style/Widget.Holo.Light.ExpandableListView">
 	    <item name="android:background">@android:drawable/editbox_background_normal</item>
 	    <item name="android:scrollbarStyle">outsideOverlay</item>
 	</style>
 
-	<style name="EConTabLinearLayoutMaster">
+	<style name="EconLinearLayoutMaster">
 	     <item name="android:divider">@android:drawable/divider_horizontal_bright</item>
            <item name="android:padding">@dimen/margine</item>
            <item name="android:showDividers">middle</item>
 
 	</style>
 
-	<style name="EConTabScrollView" parent="@android:style/Widget.Holo.Light.ScrollView">
+	<style name="EconScrollView" parent="@android:style/Widget.Holo.Light.ScrollView">
 	    <item name="android:scrollbarStyle">outsideOverlay</item>
 	</style>
 
@@ -188,13 +188,13 @@
 	    <item name="android:textStyle">bold</item>
 	</style>
 
-	<style name="EConTabPopup" parent="AppTheme">
+	<style name="EconPopup" parent="AppTheme">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowIsTranslucent">false</item>
 	</style>
 
-	<style name="EConTabPopupNoAnimation" parent="EConTabPopup">
+	<style name="EconPopupNoAnimation" parent="EconPopup">
 	</style>
 
     <style name="animationnormal">

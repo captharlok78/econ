@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    File che l'app puo' passare ad altre app (aprire o inviare un'esportazione, scattare una foto), sempre con un
+    permesso temporaneo (SICUREZZA_E_PRIVACY.md, S5): solo la cartella privata files/ECON e le foto temporanee.
+-->
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <external-path name="external_files" path="."/>
+    <files-path name="econ" path="ECON/" />
+    <external-files-path name="foto" path="Pictures/" />
 </paths>

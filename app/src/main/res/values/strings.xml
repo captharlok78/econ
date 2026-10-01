@@ -36,7 +36,7 @@
     <string name="messaggio_creazione_report">Creazione report in corso...</string>
     <string name="messaggio_sostituzione_scatola_relazioni">La scatola incassata può essere sostituita solo con una delle stesse dimensioni perché sono presenti collegamenti e/o connessioni</string>
     <string name="messaggio_eliminazione_frutto_relazioni">Per eliminare il componente è necessario eliminare prima le Connessioni</string>
-    <string name="messaggio_backup_ok">Backup del database completato nella cartella ECONTAB/backup</string>
+    <string name="messaggio_backup_ok">Backup del database completato nella cartella ECON/backup</string>
     <string name="messaggio_backup_ko">Backup del database non riuscito</string>
     <string name="messaggio_ripristino_ok">Ripristino del database completato</string>
     <string name="messaggio_ripristino_ko">Ripristino del database non riuscito</string>

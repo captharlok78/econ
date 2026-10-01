@@ -61,11 +61,11 @@
                             android:layout_marginTop="@dimen/margine"
                             android:text="@string/linea_standard" />
 
-                        <pfa.app.econtab.views.EConTabSpinner
-                            android:id="@+id/econtabSpinner_linea"
+                        <com.ncfsistemi.econ.views.EconSpinner
+                            android:id="@+id/econSpinner_linea"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" >
-                        </pfa.app.econtab.views.EConTabSpinner>
+                        </com.ncfsistemi.econ.views.EconSpinner>
                     </LinearLayout>
 
                     <LinearLayout
@@ -83,11 +83,11 @@
                             android:layout_marginTop="@dimen/margine"
                             android:text="@string/placca_standard" />
 
-                        <pfa.app.econtab.views.EConTabSpinner
-                            android:id="@+id/econtabSpinner_placca"
+                        <com.ncfsistemi.econ.views.EconSpinner
+                            android:id="@+id/econSpinner_placca"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" >
-                        </pfa.app.econtab.views.EConTabSpinner>
+                        </com.ncfsistemi.econ.views.EconSpinner>
                     </LinearLayout>
                 </LinearLayout>
 

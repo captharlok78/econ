@@ -2,8 +2,8 @@
 <!--
     Barra azioni standard della form filtri: Cerca | Reset filtri | Ultimi N. E' identica
     (per default) in ogni modulo, incluso via <include> dentro il rispettivo cardFiltri.
-    "Ultimi N" e' gestito interamente da EConTabListaStandardController: visibile solo se
-    la EConTabListaStandardDefinition del modulo fornisce un getOrdineRecenti() non nullo -
+    "Ultimi N" e' gestito interamente da EconListaStandardController: visibile solo se
+    la EconListaStandardDefinition del modulo fornisce un getOrdineRecenti() non nullo -
     un modulo non deve toccare questo XML per mostrarlo/nasconderlo, basta sovrascrivere
     (o non sovrascrivere) quel metodo.
 -->

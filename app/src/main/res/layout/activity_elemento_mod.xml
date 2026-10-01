@@ -56,7 +56,7 @@
                             android:id="@+id/imageButtonIcona"
                             android:layout_width="@dimen/larghezza_icona_con_padding"
                             android:layout_height="@dimen/larghezza_icona_con_padding"
-                            android:background="@drawable/button_econtab_bianco"
+                            android:background="@drawable/button_econ_bianco"
 
                             android:onClick="azioniIcona"
                             android:scaleType="fitCenter"
@@ -183,11 +183,11 @@
                         android:layout_marginTop="@dimen/margine"
                         android:text="@string/linea" />
 
-                    <pfa.app.econtab.views.EConTabSpinner
-                        android:id="@+id/econtabSpinner_linea"
+                    <com.ncfsistemi.econ.views.EconSpinner
+                        android:id="@+id/econSpinner_linea"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" >
-                    </pfa.app.econtab.views.EConTabSpinner>
+                    </com.ncfsistemi.econ.views.EconSpinner>
                 </LinearLayout>
                 <LinearLayout
                     android:id="@+id/linear_placca_sel"
@@ -204,11 +204,11 @@
                         android:layout_marginTop="@dimen/margine"
                         android:text="@string/placca" />
 
-                    <pfa.app.econtab.views.EConTabSpinner
-                        android:id="@+id/econtabSpinner_placca"
+                    <com.ncfsistemi.econ.views.EconSpinner
+                        android:id="@+id/econSpinner_placca"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" >
-                    </pfa.app.econtab.views.EConTabSpinner>
+                    </com.ncfsistemi.econ.views.EconSpinner>
                 </LinearLayout>
                 </LinearLayout>
                 <LinearLayout
@@ -231,11 +231,11 @@
                             android:layout_marginTop="@dimen/margine"
                             android:text="@string/unita_misura" />
 
-                        <pfa.app.econtab.views.EConTabSpinner
-                            android:id="@+id/econtabSpinner_udm"
+                        <com.ncfsistemi.econ.views.EconSpinner
+                            android:id="@+id/econSpinner_udm"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" >
-                        </pfa.app.econtab.views.EConTabSpinner>
+                        </com.ncfsistemi.econ.views.EconSpinner>
                     </LinearLayout>
 
                     <Space
@@ -288,11 +288,11 @@
                             android:layout_marginTop="@dimen/margine"
                             android:text="@string/tubo" />
 
-                        <pfa.app.econtab.views.EConTabSpinner
-                            android:id="@+id/econtabSpinner_tubo"
+                        <com.ncfsistemi.econ.views.EconSpinner
+                            android:id="@+id/econSpinner_tubo"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" >
-                        </pfa.app.econtab.views.EConTabSpinner>
+                        </com.ncfsistemi.econ.views.EconSpinner>
                     </LinearLayout>
 
                     <Space
@@ -345,11 +345,11 @@
                             android:layout_marginTop="@dimen/margine"
                             android:text="@string/cavo" />
 
-                        <pfa.app.econtab.views.EConTabSpinner
-                            android:id="@+id/econtabSpinner_cavo"
+                        <com.ncfsistemi.econ.views.EconSpinner
+                            android:id="@+id/econSpinner_cavo"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" >
-                        </pfa.app.econtab.views.EConTabSpinner>
+                        </com.ncfsistemi.econ.views.EconSpinner>
                     </LinearLayout>
 
                     <Space

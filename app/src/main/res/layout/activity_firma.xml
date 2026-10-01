@@ -34,7 +34,7 @@
         android:background="#BDBDBD"
         android:padding="1dp">
 
-        <pfa.app.econtab.views.FirmaView
+        <com.ncfsistemi.econ.views.FirmaView
             android:id="@+id/firma_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />

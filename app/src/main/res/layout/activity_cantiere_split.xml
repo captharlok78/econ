@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true" />
 
-    <pfa.app.econtab.views.EConTabSplitPaneLayout
+    <com.ncfsistemi.econ.views.EconSplitPaneLayout
         xmlns:spl="http://schemas.android.com/apk/res-auto"
         android:id="@+id/split"
         android:layout_width="wrap_content"
@@ -37,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-    </pfa.app.econtab.views.EConTabSplitPaneLayout>
+    </com.ncfsistemi.econ.views.EconSplitPaneLayout>
 
     <LinearLayout
         android:orientation="horizontal"
@@ -54,7 +54,7 @@
             android:id="@+id/button_nuovo_elem"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/button_econtab_semitrasparente"
+            android:background="@drawable/button_econ_semitrasparente"
             android:gravity="center_horizontal" >
 
             <!-- "+" dello standard grafico (FaIcone.PIU, impostato in CantiereSplitActivity) -->

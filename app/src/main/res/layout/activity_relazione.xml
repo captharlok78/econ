@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_econtab_popup"
+    android:background="@drawable/bg_econ_popup"
     android:padding="@dimen/margine"
     tools:context=".CollegamentoActivity" >
 
@@ -48,7 +48,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_bottone"
-                android:background="@drawable/bg_econtab_bordo_blu"
+                android:background="@drawable/bg_econ_bordo_blu"
                 android:orientation="vertical"
                 android:paddingBottom="@dimen/padding_drag"
                 android:paddingLeft="@dimen/padding_drag"
@@ -72,11 +72,11 @@
                     android:layout_height="wrap_content"
                     android:text="@string/locale" />
 
-                <pfa.app.econtab.views.EConTabSpinner
+                <com.ncfsistemi.econ.views.EconSpinner
                     android:id="@+id/spinnerLocaleA"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
-                </pfa.app.econtab.views.EConTabSpinner>
+                </com.ncfsistemi.econ.views.EconSpinner>
 
                 <TextView
                     android:id="@+id/textView_elementoA"
@@ -85,11 +85,11 @@
                     android:layout_height="wrap_content"
                     android:text="@string/elemento" />
 
-                <pfa.app.econtab.views.EConTabSpinner
+                <com.ncfsistemi.econ.views.EconSpinner
                     android:id="@+id/spinnerElementoA"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
-                </pfa.app.econtab.views.EConTabSpinner>
+                </com.ncfsistemi.econ.views.EconSpinner>
 
                 <TextView
                     android:id="@+id/textView_componenteA"
@@ -98,11 +98,11 @@
                     android:layout_height="wrap_content"
                     android:text="@string/componente" />
 
-                <pfa.app.econtab.views.EConTabSpinner
+                <com.ncfsistemi.econ.views.EconSpinner
                     android:id="@+id/spinnerComponenteA"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
-                </pfa.app.econtab.views.EConTabSpinner>
+                </com.ncfsistemi.econ.views.EconSpinner>
             </LinearLayout>
 
                 <LinearLayout
@@ -110,7 +110,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/margine"
-                    android:background="@drawable/bg_econtab_bordo_blu"
+                    android:background="@drawable/bg_econ_bordo_blu"
                     android:orientation="vertical"
                     android:layout_below="@id/linearElementoA"
                     android:paddingBottom="@dimen/padding_drag"
@@ -135,11 +135,11 @@
                         android:layout_height="wrap_content"
                         android:text="@string/locale" />
 
-                    <pfa.app.econtab.views.EConTabSpinner
+                    <com.ncfsistemi.econ.views.EconSpinner
                         android:id="@+id/spinnerLocaleB"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" >
-                    </pfa.app.econtab.views.EConTabSpinner>
+                    </com.ncfsistemi.econ.views.EconSpinner>
 
                     <TextView
                         android:id="@+id/textView_elementoB"
@@ -148,11 +148,11 @@
                         android:layout_height="wrap_content"
                         android:text="@string/elemento" />
 
-                    <pfa.app.econtab.views.EConTabSpinner
+                    <com.ncfsistemi.econ.views.EconSpinner
                         android:id="@+id/spinnerElementoB"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" >
-                    </pfa.app.econtab.views.EConTabSpinner>
+                    </com.ncfsistemi.econ.views.EconSpinner>
 
                     <TextView
                         android:id="@+id/textView_componenteB"
@@ -161,11 +161,11 @@
                         android:layout_height="wrap_content"
                         android:text="@string/componente" />
 
-                    <pfa.app.econtab.views.EConTabSpinner
+                    <com.ncfsistemi.econ.views.EconSpinner
                         android:id="@+id/spinnerComponenteB"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" >
-                    </pfa.app.econtab.views.EConTabSpinner>
+                    </com.ncfsistemi.econ.views.EconSpinner>
                 </LinearLayout>
 
             </RelativeLayout>

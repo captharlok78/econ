@@ -24,13 +24,13 @@
                 android:layout_weight="0.85"
                 android:padding="@dimen/margine" >
 
-                <pfa.app.econtab.views.EConTabPiantinaGridView
+                <com.ncfsistemi.econ.views.EconPiantinaGridView
                     android:id="@+id/gridView_piantina"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@android:color/transparent"
                     android:numColumns="10" >
-                </pfa.app.econtab.views.EConTabPiantinaGridView>
+                </com.ncfsistemi.econ.views.EconPiantinaGridView>
             </FrameLayout>
 
             <HorizontalScrollView

@@ -73,7 +73,7 @@
                 android:layout_marginEnd="8dp"
                 android:text="@string/data" />
 
-            <pfa.app.econtab.views.EConTabCalendario
+            <com.ncfsistemi.econ.views.EconCalendario
                 android:id="@+id/edit_data"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -98,7 +98,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/cliente" />
 
-                <pfa.app.econtab.views.CampoRicerca
+                <com.ncfsistemi.econ.views.CampoRicerca
                     android:id="@+id/campo_cliente"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -118,7 +118,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/cantiere" />
 
-                <pfa.app.econtab.views.CampoRicerca
+                <com.ncfsistemi.econ.views.CampoRicerca
                     android:id="@+id/campo_cantiere"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -138,7 +138,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/ordine" />
 
-                <pfa.app.econtab.views.CampoRicerca
+                <com.ncfsistemi.econ.views.CampoRicerca
                     android:id="@+id/campo_ordine"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />

@@ -3,7 +3,7 @@
     Testata standard, identica in ogni modulo lista (Clienti/Cantieri/Preventivi/Ordini/...):
     indietro | titolo | filtro | nuovo. Riusata via <include> cosi' una modifica qui si
     propaga automaticamente a tutti i moduli. Titolo e pulsanti sono impostati/agganciati
-    interamente da EConTabListaStandardController (nessun android:onClick qui, tranne
+    interamente da EconListaStandardController (nessun android:onClick qui, tranne
     "indietro" che risolve sempre sull'Activity ospitante, anche quando questa testata e'
     inclusa dentro il layout di un Fragment).
 -->

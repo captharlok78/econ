@@ -1,4 +1,4 @@
-# Standardizzazione UI dei moduli EConTab
+# Standardizzazione UI dei moduli Econ
 
 Log di lavoro e stato architetturale dell'iniziativa "elimina la duplicazione grafica/di
 codice tra i moduli, estraendo dei padri condivisi". Aggiornato al 2026-09-18. Leggere
@@ -24,18 +24,18 @@ Ci sono **due iniziative distinte**, entrambe nello stesso spirito:
 
 ## 1. Liste/ricerca — COMPLETATA
 
-Architettura in `app/src/main/java/pfa/app/econtab/lista/`:
+Architettura in `app/src/main/java/com/ncfsistemi/econ/lista/`:
 
-- `EConTabListaStandardController` — stato e logica condivisi (paginazione, ordinamento,
+- `EconListaStandardController` — stato e logica condivisi (paginazione, ordinamento,
   ricerca, "ultimi N"), comunica con l'Activity/Fragment ospitante tramite l'interfaccia
   `Host` (così la stessa logica funziona sia per Activity a schermo intero sia per Fragment
   incorporati, es. Cantieri dentro `ClientiDettaglioActivity`).
-- `EConTabListaStandardDefinition` — classe astratta, una per modulo: query (`costruisciQuery`),
+- `EconListaStandardDefinition` — classe astratta, una per modulo: query (`costruisciQuery`),
   colonne, azione click riga, titolo, `getOrdineRecenti()` (ordine per "Ultimi N": `null` =
   pulsante nascosto).
-- `EConTabListaStandardActivity` / `EConTabListaStandardFragment` — host sottili che
+- `EconListaStandardActivity` / `EconListaStandardFragment` — host sottili che
   delegano al controller.
-- `EConTabListaStandardAdapter`, `ColonnaLista`, `QueryPagina`, `FiltriHelper`.
+- `EconListaStandardAdapter`, `ColonnaLista`, `QueryPagina`, `FiltriHelper`.
 - `DbInterno.eseguiSelectPaginato(...)` — helper di paginazione SQL condiviso (nuovo).
 
 Layout condivisi via `<include>` (uno per tutti i moduli, MAI ricopiati):
@@ -63,7 +63,7 @@ non nuova migrazione.
 ### Cosa c'era prima
 
 Le pagine di modifica/inserimento (le `*Mod*Activity`, 19+ moduli) erano tutte costruite
-sullo stesso schema (`EConTabDettaglioActivity` + layout con `ScrollView` + `footer_dett.xml`
+sullo stesso schema (`EconDettaglioActivity` + layout con `ScrollView` + `footer_dett.xml`
 in fondo con Annulla/Salva) ma:
 - nessun header/titolo visibile (action bar nascosta ovunque nell'app);
 - `EditText` senza bordo, sfondo grigio uniforme, spaziatura minima (`@dimen/margine` = 5dp);
@@ -81,13 +81,13 @@ al file stesso:
 - **`header_dettaglio_standard.xml`** (nuovo) — stessa barra blu `#1565C0` degli altri
   header, ma solo `indietro | titolo` (niente filtro/nuovo, non serve in un dettaglio). Il
   pulsante indietro usa `onClick="annulla"`.
-- **`EConTabActivity.annulla(View)`** (nuovo, alias di `indietro()`) — permette al pulsante
+- **`EconActivity.annulla(View)`** (nuovo, alias di `indietro()`) — permette al pulsante
   indietro dell'header di funzionare su QUALSIASI Activity dell'app: nelle pagine di
-  modifica (`EConTabDettaglioActivity`) è già sovrascritto per impostare
+  modifica (`EconDettaglioActivity`) è già sovrascritto per impostare
   `RESULT_CANCELED`; nelle pagine di sola visualizzazione (che non estendono
-  `EConTabDettaglioActivity`) usa semplicemente `finish()`. Questo è ciò che rende l'header
+  `EconDettaglioActivity`) usa semplicemente `finish()`. Questo è ciò che rende l'header
   riusabile in entrambi i contesti senza duplicare il layout.
-- **`EConTabDettaglioActivity.getTitoloDettaglio()`** (nuovo hook, default `null`) — il
+- **`EconDettaglioActivity.getTitoloDettaglio()`** (nuovo hook, default `null`) — il
   modulo lo sovrascrive per impostare il titolo (es. `"Nuovo cliente"` / `"Modifica
   cliente"` in base a `getModalita()`). Se `null` o se il layout non include
   `headerTitolo`, non succede nulla: **l'adozione è incrementale, un modulo alla volta,
@@ -97,7 +97,7 @@ al file stesso:
   testo bianco), stessa gerarchia visiva di "Reset filtri"/"Cerca" nelle liste. **Essendo
   condiviso, questo miglioramento è già visibile in tutti i 19+ moduli di dettaglio senza
   bisogno di toccarli uno per uno.**
-- **`EConTabDettaglioActivity`** — sfondo dello `scroll` cambiato da `#eeeded` a `#F5F5F5`
+- **`EconDettaglioActivity`** — sfondo dello `scroll` cambiato da `#eeeded` a `#F5F5F5`
   (uniforme con le liste), sempre condiviso da tutti i moduli.
 
 Applicato per intero (header + card + input bordati + titolo dinamico) solo su:
@@ -166,14 +166,14 @@ Per ciascuno, la ricetta (già rodata su Clienti) è:
 4. Build (`./gradlew installDebug --offline`), verifica dal vivo su tablet, commit+push.
 
 **Nessun modulo oltre Clienti ha una vista di sola visualizzazione a tab** (verificato con
-`grep -rl "extends EConTabFragmentActivity"` → solo `ClientiDettaglioActivity`), quindi il
+`grep -rl "extends EconFragmentActivity"` → solo `ClientiDettaglioActivity`), quindi il
 punto 2 dell'elenco iniziale ("visualizzazione") riguarda SOLO Clienti ed è già concluso.
 Gli altri moduli vanno dalla lista diretti al Mod (modifica), quindi per loro serve solo il
 trattamento "modifica/inserimento" sopra descritto.
 
 ### Domanda architetturale aperta (da decidere, non ancora presa)
 
-Per le liste è stato creato un vero "padre" Java (`EConTabListaStandardController` +
+Per le liste è stato creato un vero "padre" Java (`EconListaStandardController` +
 `Definition`) perché la logica (query, paginazione, ordinamento) era genuinamente comune.
 Per il dettaglio, invece, i form sono molto eterogenei (join, autocomplete, spinner,
 logica di business per riga) — **il valore comune è quasi solo la GRAFICA** (header,
@@ -205,7 +205,7 @@ adapter. Ora e' un componente standard:
 
 Verificato dal vivo su tablet: apertura preventivo, pannello bianco, cambio selezione. Rimosso il
 vecchio `list_item_menucantiere.xml`. Nessun altro modulo usa oggi un pannello laterale
-(`EConTabSplitPaneLayout` e' usato solo da `activity_cantiere_split.xml`): un futuro modulo con menu
+(`EconSplitPaneLayout` e' usato solo da `activity_cantiere_split.xml`): un futuro modulo con menu
 laterale deve riusare questi file, non ricopiarli.
 
 ---
@@ -249,14 +249,14 @@ stile `TestoSezione`. Primo modulo: scheda e form del cliente (sezioni Cantieri,
 
 ## File chiave (riferimento rapido)
 
-**Liste** (`pfa.app.econtab.lista`): `EConTabListaStandardController.java`,
-`EConTabListaStandardDefinition.java`, `EConTabListaStandardActivity.java`,
-`EConTabListaStandardFragment.java`, `EConTabListaStandardAdapter.java`,
+**Liste** (`com.ncfsistemi.econ.lista`): `EconListaStandardController.java`,
+`EconListaStandardDefinition.java`, `EconListaStandardActivity.java`,
+`EconListaStandardFragment.java`, `EconListaStandardAdapter.java`,
 `ColonnaLista.java`, `QueryPagina.java`, `FiltriHelper.java`.
 Layout: `header_lista_standard.xml`, `filtri_azioni_standard.xml`.
 
-**Dettaglio**: `EConTabDettaglioActivity.java` (hook `getTitoloDettaglio()`),
-`EConTabActivity.java` (metodo `annulla(View)`).
+**Dettaglio**: `EconDettaglioActivity.java` (hook `getTitoloDettaglio()`),
+`EconActivity.java` (metodo `annulla(View)`).
 Layout: `header_dettaglio_standard.xml`, `footer_dett.xml`.
 Prototipo completo: `ClientiDettaglioModActivity.java` +
 `activity_clienti_dettaglio_mod.xml` (modifica/inserimento);

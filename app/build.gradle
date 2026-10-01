@@ -21,8 +21,7 @@ android {
     buildToolsVersion '35.0.0'
 
     defaultConfig {
-        // ID dell'app (EDITORE_E_FIRMA.md): non si cambia piu' dopo la pubblicazione. Il namespace del codice Java resta
-        // pfa.app.econtab (interno, non visibile).
+        // ID dell'app (EDITORE_E_FIRMA.md): non si cambia piu' dopo la pubblicazione; il package Java e' lo stesso
         applicationId "com.ncfsistemi.econ"
         minSdkVersion 26
         targetSdkVersion 34
@@ -45,18 +44,22 @@ android {
         buildConfigField "String", "EDITORE_TELEFONO_ASSISTENZA", '"041 4061548"'
     }
 
-    namespace 'pfa.app.econtab'
+    namespace 'com.ncfsistemi.econ'
 
     buildFeatures {
         buildConfig true
     }
 
     buildTypes {
+        // HTTP in chiaro solo nelle build di sviluppo (server di prova in rete locale); la release vuole https
+        // (SICUREZZA_E_PRIVACY.md, S1)
         debug {
             debuggable true
             minifyEnabled false
+            manifestPlaceholders = [httpInChiaro: "true"]
         }
         release {
+            manifestPlaceholders = [httpInChiaro: "false"]
             debuggable false   // ERA true — corretto per sicurezza
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.txt'
@@ -96,7 +99,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.14.0'
 
     // ── Background sync: WorkManager ───────────────────────────────────────
-    // Sostituisce: android.app.Service manuale (EConTabService)
+    // Sostituisce: android.app.Service manuale (EconService)
     implementation 'androidx.work:work-runtime:2.11.2'
 
     // ── Sicurezza token JWT in SharedPreferences ───────────────────────────

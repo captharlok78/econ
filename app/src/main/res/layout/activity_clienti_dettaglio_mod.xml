@@ -301,7 +301,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:text="@string/iva" />
-                <pfa.app.econtab.views.EConTabSpinner
+                <com.ncfsistemi.econ.views.EconSpinner
                     android:id="@+id/spinner_iva"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />

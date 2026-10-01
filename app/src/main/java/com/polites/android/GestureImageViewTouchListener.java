@@ -174,18 +174,18 @@ public class GestureImageViewTouchListener implements OnTouchListener {
 
 		calculateBoundaries();
 
-		System.out.println("EConTab: GestureImageViewTouchListener BUILT");
+		System.out.println("Econ: GestureImageViewTouchListener BUILT");
 	}
 
 	private void startFling() {
-		System.out.println("EConTab: startFling");
+		System.out.println("Econ: startFling");
 		flingAnimation.setVelocityX(flingListener.getVelocityX());
 		flingAnimation.setVelocityY(flingListener.getVelocityY());
 		image.animationStart(flingAnimation);
 	}
 
 	private void startZoom(MotionEvent e) {
-		System.out.println("EConTab: startZoom ENTER");
+		System.out.println("Econ: startZoom ENTER");
 		inZoom = true;
 		zoomAnimation.reset();
 
@@ -257,7 +257,7 @@ public class GestureImageViewTouchListener implements OnTouchListener {
 		zoomAnimation.setZoom(zoomTo);
 		image.animationStart(zoomAnimation);
 
-		System.out.println("EConTab: startZoom EXIT");
+		System.out.println("Econ: startZoom EXIT");
 	}
 
 	private void stopAnimations() {
@@ -267,7 +267,7 @@ public class GestureImageViewTouchListener implements OnTouchListener {
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 
-		System.out.println("EConTab: onTouch ENTER");
+		System.out.println("Econ: onTouch ENTER");
 
 		if (!inZoom) {
 
@@ -346,14 +346,14 @@ public class GestureImageViewTouchListener implements OnTouchListener {
 			}
 		}
 
-		System.out.println("EConTab: onTouch EXIT");
+		System.out.println("Econ: onTouch EXIT");
 
 		return true;
 	}
 
 	protected void handleUp() {
 
-		System.out.println("EConTab: handleUp ENTER");
+		System.out.println("Econ: handleUp ENTER");
 
 		multiTouch = false;
 
@@ -391,12 +391,12 @@ public class GestureImageViewTouchListener implements OnTouchListener {
 
 		image.redraw();
 
-		System.out.println("EConTab: handleUp EXIT");
+		System.out.println("Econ: handleUp EXIT");
 	}
 
 	protected void handleScale(float scale, float x, float y) {
 
-		System.out.println("EConTab: handleScale ENTER");
+		System.out.println("Econ: handleScale ENTER");
 
 		currentScale = scale;
 
@@ -421,12 +421,12 @@ public class GestureImageViewTouchListener implements OnTouchListener {
 
 		image.redraw();
 
-		System.out.println("EConTab: handleScale EXIT");
+		System.out.println("Econ: handleScale EXIT");
 	}
 
 	protected boolean handleDrag(float x, float y) {
 
-		System.out.println("EConTab: handleDrag ENTER");
+		System.out.println("Econ: handleDrag ENTER");
 
 		current.x = x;
 		current.y = y;
@@ -457,13 +457,13 @@ public class GestureImageViewTouchListener implements OnTouchListener {
 			}
 		}
 
-		System.out.println("EConTab: handleDrag EXIT");
+		System.out.println("Econ: handleDrag EXIT");
 
 		return false;
 	}
 
 	public void reset() {
-		System.out.println("EConTab: reset ENTER");
+		System.out.println("Econ: reset ENTER");
 		currentScale = startingScale;
 		next.x = centerX;
 		next.y = centerY;
@@ -471,7 +471,7 @@ public class GestureImageViewTouchListener implements OnTouchListener {
 		image.setScale(currentScale);
 		image.setPosition(next.x, next.y);
 		image.redraw();
-		System.out.println("EConTab: reset EXIT");
+		System.out.println("Econ: reset EXIT");
 	}
 
 	public float getMaxScale() {
@@ -511,7 +511,7 @@ public class GestureImageViewTouchListener implements OnTouchListener {
 	}
 
 	protected void boundCoordinates() {
-		System.out.println("EConTab: boundCoordinates ENTER");
+		System.out.println("Econ: boundCoordinates ENTER");
 		if (next.x < boundaryLeft) {
 			next.x = boundaryLeft;
 		} else if (next.x > boundaryRight) {
@@ -523,11 +523,11 @@ public class GestureImageViewTouchListener implements OnTouchListener {
 		} else if (next.y > boundaryBottom) {
 			next.y = boundaryBottom;
 		}
-		System.out.println("EConTab: boundCoordinates EXIT");
+		System.out.println("Econ: boundCoordinates EXIT");
 	}
 
 	protected void calculateBoundaries() {
-		System.out.println("EConTab: calculateBoundaries ENTER");
+		System.out.println("Econ: calculateBoundaries ENTER");
 		int effectiveWidth = Math.round((float) imageWidth * currentScale);
 		int effectiveHeight = Math.round((float) imageHeight * currentScale);
 
@@ -545,6 +545,6 @@ public class GestureImageViewTouchListener implements OnTouchListener {
 			boundaryTop = centerY - diff;
 			boundaryBottom = centerY + diff;
 		}
-		System.out.println("EConTab: calculateBoundaries EXIT");
+		System.out.println("Econ: calculateBoundaries EXIT");
 	}
 }

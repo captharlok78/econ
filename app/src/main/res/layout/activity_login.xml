@@ -144,12 +144,12 @@
                     android:layout_height="wrap_content"
                     android:text="Accesso locale" />
 
-                <pfa.app.econtab.views.EConTabSpinner
-                    android:id="@+id/econtabSpinnerUtenti"
+                <com.ncfsistemi.econ.views.EconSpinner
+                    android:id="@+id/econSpinnerUtenti"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/margine" >
-                </pfa.app.econtab.views.EConTabSpinner>
+                </com.ncfsistemi.econ.views.EconSpinner>
 
                 <EditText
                     android:id="@+id/editTextPassword"

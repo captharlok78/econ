@@ -44,7 +44,7 @@
     </LinearLayout>
 
     <!--
-        Testata tabella: popolata a runtime da EConTabListaStandardController a partire
+        Testata tabella: popolata a runtime da EconListaStandardController a partire
         dalle colonne del modulo. Visibile solo a ricerca avviata, come barraPaginazione.
     -->
     <LinearLayout

@@ -38,7 +38,7 @@ public class Animator extends Thread {
 		
 		running = true;
 
-		System.out.println("EConTab: Animator Thread START");
+		System.out.println("Econ: Animator Thread START");
 
 		while(running) {
 				
@@ -78,7 +78,7 @@ public class Animator extends Thread {
 	}
 
 	public void play(Animation transformer) {
-		System.out.println("EConTab: Animator play");
+		System.out.println("Econ: Animator play");
 		if(active) {
 			cancel();
 		}

@@ -55,7 +55,7 @@
                     android:imeOptions="actionSearch"
                     android:singleLine="true" />
 
-                <pfa.app.econtab.views.EConTabSpinner
+                <com.ncfsistemi.econ.views.EconSpinner
                     android:id="@+id/spinner_periodo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

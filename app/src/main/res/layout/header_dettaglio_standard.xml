@@ -3,7 +3,7 @@
     Testata standard delle pagine di dettaglio/modifica (edit/inserimento), identica per
     stile alla testata delle liste (header_lista_standard.xml): stessa barra blu, stesso
     pulsante indietro. Qui non servono i pulsanti filtro/nuovo (non e' una lista), solo il
-    titolo, impostato da EConTabDettaglioActivity a partire da getTitoloDettaglio() del
+    titolo, impostato da EconDettaglioActivity a partire da getTitoloDettaglio() del
     modulo - un modulo che non fornisce headerTitolo o non sovrascrive quel metodo non viene
     toccato, quindi l'adozione e' incrementale modulo per modulo.
 -->

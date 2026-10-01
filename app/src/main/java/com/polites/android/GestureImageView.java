@@ -121,7 +121,7 @@ public class GestureImageView extends ImageView {
 
 		initImage();
 
-		System.out.println("EConTab: GestureImageView (1) BUILT");
+		System.out.println("Econ: GestureImageView (1) BUILT");
 	}
 
 	public GestureImageView(Context context) {
@@ -129,13 +129,13 @@ public class GestureImageView extends ImageView {
 		setScaleType(ScaleType.CENTER_INSIDE);
 		initImage();
 
-		System.out.println("EConTab: GestureImageView (2) BUILT");
+		System.out.println("Econ: GestureImageView (2) BUILT");
 	}
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-		System.out.println("EConTab: onMeasure ENTER");
+		System.out.println("Econ: onMeasure ENTER");
 
 		if (drawable != null) {
 			int orientation = getResources().getConfiguration().orientation;
@@ -164,15 +164,15 @@ public class GestureImageView extends ImageView {
 
 		setMeasuredDimension(displayWidth, displayHeight);
 
-		System.out.println("EConTab: onMeasure displayWidth " + displayWidth + ", displayHeight " + displayHeight);
+		System.out.println("Econ: onMeasure displayWidth " + displayWidth + ", displayHeight " + displayHeight);
 
-		System.out.println("EConTab: onMeasure EXIT");
+		System.out.println("Econ: onMeasure EXIT");
 	}
 
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
-		System.out.println("EConTab: onLayout");
+		System.out.println("Econ: onLayout");
 		if (changed || !layout) {
 			setupCanvas(displayWidth, displayHeight, getResources().getConfiguration().orientation);
 		}
@@ -180,7 +180,7 @@ public class GestureImageView extends ImageView {
 
 	protected void setupCanvas(int measuredWidth, int measuredHeight, int orientation) {
 
-		System.out.println("EConTab: setupCanvas ENTER");
+		System.out.println("Econ: setupCanvas ENTER");
 
 		if (deviceOrientation != orientation) {
 			layout = false;
@@ -250,27 +250,27 @@ public class GestureImageView extends ImageView {
 
 			layout = true;
 
-			System.out.println("EConTab: setupCanvas EXIT");
+			System.out.println("Econ: setupCanvas EXIT");
 		}
 	}
 
 	protected void computeCropScale(int imageWidth, int imageHeight, int measuredWidth, int measuredHeight) {
-		System.out.println("EConTab: computeCropScale");
+		System.out.println("Econ: computeCropScale");
 		fitScaleHorizontal = (float) measuredWidth / (float) imageWidth;
 		fitScaleVertical = (float) measuredHeight / (float) imageHeight;
 	}
 
 	protected void computeStartingScale(int imageWidth, int imageHeight, int measuredWidth, int measuredHeight) {
-		System.out.println("EConTab: computeStartingScale ENTER");
+		System.out.println("Econ: computeStartingScale ENTER");
 		switch (getScaleType()) {
 		case CENTER:
-			System.out.println("EConTab: computeStartingScale CENTER");
+			System.out.println("Econ: computeStartingScale CENTER");
 			// Center the image in the view, but perform no scaling.
 			startingScale = 1.0f;
 			break;
 
 		case CENTER_CROP:
-			System.out.println("EConTab: computeStartingScale CENTER_CROP");
+			System.out.println("Econ: computeStartingScale CENTER_CROP");
 			// Scale the image uniformly (maintain the image's aspect ratio) so
 			// that both dimensions
 			// (width and height) of the image will be equal to or larger than
@@ -279,7 +279,7 @@ public class GestureImageView extends ImageView {
 			break;
 
 		case CENTER_INSIDE:
-			System.out.println("EConTab: computeStartingScale CENTER_INSIDE");
+			System.out.println("Econ: computeStartingScale CENTER_INSIDE");
 			// Scale the image uniformly (maintain the image's aspect ratio) so
 			// that both dimensions
 			// (width and height) of the image will be equal to or less than the
@@ -295,36 +295,36 @@ public class GestureImageView extends ImageView {
 
 			break;
 		}
-		System.out.println("EConTab: computeStartingScale EXIT");
+		System.out.println("Econ: computeStartingScale EXIT");
 	}
 
 	protected boolean isRecycled() {
-		System.out.println("EConTab: isRecycled ENTER");
+		System.out.println("Econ: isRecycled ENTER");
 		if (drawable != null && drawable instanceof BitmapDrawable) {
 			Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
 			if (bitmap != null) {
-				System.out.println("EConTab: isRecycled EXIT (1)");
+				System.out.println("Econ: isRecycled EXIT (1)");
 				return bitmap.isRecycled();
 			}
 		}
-		System.out.println("EConTab: isRecycled EXIT (2)");
+		System.out.println("Econ: isRecycled EXIT (2)");
 		return false;
 	}
 
 	protected void recycle() {
-		System.out.println("EConTab: recycle ENTER");
+		System.out.println("Econ: recycle ENTER");
 		if (recycle && drawable != null && drawable instanceof BitmapDrawable) {
 			Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
 			if (bitmap != null) {
 				bitmap.recycle();
 			}
 		}
-		System.out.println("EConTab: recycle EXIT");
+		System.out.println("Econ: recycle EXIT");
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		System.out.println("EConTab: onDraw ENTER");
+		System.out.println("Econ: onDraw ENTER");
 		if (layout) {
 			if (drawable != null && !isRecycled()) {
 				canvas.save();
@@ -350,7 +350,7 @@ public class GestureImageView extends ImageView {
 				drawLock.release();
 			}
 		}
-		System.out.println("EConTab: onDraw EXIT");
+		System.out.println("Econ: onDraw EXIT");
 	}
 
 	/**
@@ -359,13 +359,13 @@ public class GestureImageView extends ImageView {
 	 * @throws InterruptedException
 	 */
 	public boolean waitForDraw(long timeout) throws InterruptedException {
-		System.out.println("EConTab: waitForDraw");
+		System.out.println("Econ: waitForDraw");
 		return drawLock.tryAcquire(timeout, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
 	protected void onAttachedToWindow() {
-		System.out.println("EConTab: onAttachedToWindow");
+		System.out.println("Econ: onAttachedToWindow");
 		animator = new Animator(this, "GestureImageViewAnimator");
 		animator.start();
 
@@ -377,14 +377,14 @@ public class GestureImageView extends ImageView {
 	}
 
 	public void animationStart(Animation animation) {
-		System.out.println("EConTab: animationStart");
+		System.out.println("Econ: animationStart");
 		if (animator != null) {
 			animator.play(animation);
 		}
 	}
 
 	public void animationStop() {
-		System.out.println("EConTab: animationStop");
+		System.out.println("Econ: animationStop");
 		if (animator != null) {
 			animator.cancel();
 		}
@@ -392,7 +392,7 @@ public class GestureImageView extends ImageView {
 
 	@Override
 	protected void onDetachedFromWindow() {
-		System.out.println("EConTab: onDetachedFromWindow");
+		System.out.println("Econ: onDetachedFromWindow");
 		if (animator != null) {
 			animator.finish();
 		}
@@ -404,7 +404,7 @@ public class GestureImageView extends ImageView {
 	}
 
 	protected void initImage() {
-		System.out.println("EConTab: initImage");
+		System.out.println("Econ: initImage");
 		if (this.drawable != null) {
 			this.drawable.setAlpha(alpha);
 			this.drawable.setFilterBitmap(true);
@@ -420,20 +420,20 @@ public class GestureImageView extends ImageView {
 	}
 
 	public void setImageBitmap(Bitmap image) {
-		System.out.println("EConTab: setImageBitmap");
+		System.out.println("Econ: setImageBitmap");
 		this.drawable = new BitmapDrawable(getResources(), image);
 		initImage();
 	}
 
 	@Override
 	public void setImageDrawable(Drawable drawable) {
-		System.out.println("EConTab: setImageDrawable");
+		System.out.println("Econ: setImageDrawable");
 		this.drawable = drawable;
 		initImage();
 	}
 
 	public void setImageResource(int id) {
-		System.out.println("EConTab: setImageResource");
+		System.out.println("Econ: setImageResource");
 		if (this.drawable != null) {
 			this.recycle();
 		}
@@ -526,7 +526,7 @@ public class GestureImageView extends ImageView {
 	}
 
 	public void reset() {
-		System.out.println("EConTab: reset");
+		System.out.println("Econ: reset");
 		x = centerX;
 		y = centerY;
 		scaleAdjust = startingScale;
@@ -571,7 +571,7 @@ public class GestureImageView extends ImageView {
 
 	@Override
 	public void setImageURI(Uri mUri) {
-		System.out.println("EConTab: setImageURI");
+		System.out.println("Econ: setImageURI");
 		if ("content".equals(mUri.getScheme())) {
 			try {
 				String[] orientationColumn = { MediaStore.Images.Media.ORIENTATION };
@@ -656,7 +656,7 @@ public class GestureImageView extends ImageView {
 
 	@Override
 	public void setAdjustViewBounds(boolean adjustViewBounds) {
-		System.out.println("EConTab: setAdjustViewBounds");
+		System.out.println("Econ: setAdjustViewBounds");
 		if (strict) {
 			throw new UnsupportedOperationException("Not supported");
 		}
@@ -665,7 +665,7 @@ public class GestureImageView extends ImageView {
 
 	@Override
 	public void setImageLevel(int level) {
-		System.out.println("EConTab: setImageLevel");
+		System.out.println("Econ: setImageLevel");
 		if (strict) {
 			throw new UnsupportedOperationException("Not supported");
 		}
@@ -674,7 +674,7 @@ public class GestureImageView extends ImageView {
 
 	@Override
 	public void setImageMatrix(Matrix matrix) {
-		System.out.println("EConTab: setImageMatrix");
+		System.out.println("Econ: setImageMatrix");
 		if (strict) {
 			throw new UnsupportedOperationException("Not supported");
 		}
@@ -682,7 +682,7 @@ public class GestureImageView extends ImageView {
 
 	@Override
 	public void setImageState(int[] state, boolean merge) {
-		System.out.println("EConTab: setImageState");
+		System.out.println("Econ: setImageState");
 		if (strict) {
 			throw new UnsupportedOperationException("Not supported");
 		}
@@ -690,7 +690,7 @@ public class GestureImageView extends ImageView {
 
 	@Override
 	public void setSelected(boolean selected) {
-		System.out.println("EConTab: setSelected");
+		System.out.println("Econ: setSelected");
 		if (strict) {
 			throw new UnsupportedOperationException("Not supported");
 		}

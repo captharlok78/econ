@@ -1,7 +1,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_econtab_popup"
+    android:background="@drawable/bg_econ_popup"
     android:padding="@dimen/margine" >
 
     <RelativeLayout
@@ -86,7 +86,7 @@
                     android:id="@+id/editText_etichetta"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_econtab_edit"
+                    android:background="@drawable/bg_econ_edit"
                     android:ems="3"
                     android:inputType="number"
                     android:maxLength="6" />
@@ -110,7 +110,7 @@
                     android:id="@+id/editText_altezza"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_econtab_edit"
+                    android:background="@drawable/bg_econ_edit"
                     android:ems="3"
                     android:inputType="number"
                     android:maxLength="6" />
@@ -135,7 +135,7 @@
                     android:id="@+id/editText_MetriCavo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_econtab_edit"
+                    android:background="@drawable/bg_econ_edit"
                     android:ems="3"
                     android:inputType="number"
                     android:maxLength="6" />
@@ -160,7 +160,7 @@
                     android:id="@+id/editText_MetriTubo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_econtab_edit"
+                    android:background="@drawable/bg_econ_edit"
                     android:ems="3"
                     android:inputType="number"
                     android:maxLength="6" />

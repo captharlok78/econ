@@ -1,4 +1,4 @@
-# Analisi Compatibilità Cross-Platform — EConTab Android App
+# Analisi Compatibilità Cross-Platform — Econ Android App
 
 **Data analisi**: 2026-05-09  
 **App attuale**: Android nativa in Java  
@@ -48,7 +48,7 @@
 
 | Componente | Dettaglio |
 |-----------|-----------|
-| Database | SQLite locale (`ECONTAB.db`, schema version 20) |
+| Database | SQLite locale (`ECON.db`, schema version 20) |
 | Sincronizzazione | SOAP web service (ksoap2) |
 | Billing | Google Play Billing v6.0.1 + legacy IabHelper |
 | Export | Apache POI 3.7 (formato XLS) |
@@ -178,7 +178,7 @@
 
 ## 5. Raccomandazione
 
-### Flutter è la scelta ottimale per EConTab
+### Flutter è la scelta ottimale per Econ
 
 **Motivazioni specifiche per questa app**:
 
@@ -187,7 +187,7 @@
 3. **Gestione stato complessa** — Riverpod o BLoC gestiscono bene la complessità dell'app
 4. **Tipizzazione** — Dart tipizzato è più simile a Java rispetto a JS
 5. **Liste performanti** — `ListView.builder` / `GridView` ottimizzati meglio del bridge RN
-6. **Custom views** — Tutti gli elementi personalizzati (EConTabElemento*, piantina) sono riproducibili con Widget + CustomPainter
+6. **Custom views** — Tutti gli elementi personalizzati (EconElemento*, piantina) sono riproducibili con Widget + CustomPainter
 
 ---
 
@@ -275,7 +275,7 @@
 Il `DbInterno.java` usa `SQLiteOpenHelper` con `onUpgrade()` per le migrazioni. In Flutter con `sqflite` il pattern è identico (parametro `version` + callback `onUpgrade`). Lo schema attuale alla version 20 va migrato con la stessa logica.
 
 ### Piantina Interattiva
-`EConTabPiantinaImageView` usa `Canvas.drawBitmap()`, `Canvas.drawRect()`, gestione touch per posizionare elementi sulla planimetria. In Flutter si replica con `CustomPainter` + `GestureDetector`. La libreria `com.polites.android` per zoom/pan si sostituisce con `InteractiveViewer` built-in in Flutter.
+`EconPiantinaImageView` usa `Canvas.drawBitmap()`, `Canvas.drawRect()`, gestione touch per posizionare elementi sulla planimetria. In Flutter si replica con `CustomPainter` + `GestureDetector`. La libreria `com.polites.android` per zoom/pan si sostituisce con `InteractiveViewer` built-in in Flutter.
 
 ### SOAP Calls
 `Sincronizzatore.java` usa ksoap2. In Flutter non esiste un client SOAP diretto maturo; la soluzione è usare `http` package con XML building/parsing manuale oppure valutare una migrazione verso REST API sul server (se fattibile su Mercury server).

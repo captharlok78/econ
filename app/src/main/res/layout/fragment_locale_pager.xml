@@ -1,9 +1,9 @@
-<pfa.app.econtab.views.EConTabLocaleViewPager xmlns:android="http://schemas.android.com/apk/res/android"
+<com.ncfsistemi.econ.views.EconLocaleViewPager xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/pager"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <pfa.app.econtab.views.EConTabPagerTabStrip
+    <com.ncfsistemi.econ.views.EconPagerTabStrip
         android:id="@+id/pager_title_strip"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -11,4 +11,4 @@
       	
          />
 
-</pfa.app.econtab.views.EConTabLocaleViewPager>
+</com.ncfsistemi.econ.views.EconLocaleViewPager>

@@ -105,7 +105,7 @@
                     android:layout_marginTop="@dimen/margine"
                     android:text="@string/articolo" />
 
-                <pfa.app.econtab.views.CampoRicerca
+                <com.ncfsistemi.econ.views.CampoRicerca
                     android:id="@+id/campo_articolo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -19,11 +19,11 @@
             android:layout_height="wrap_content"
             android:text="@string/fornitore" />
 
-        <pfa.app.econtab.views.EConTabSpinner
-            android:id="@+id/econtabSpinnerFornitore"
+        <com.ncfsistemi.econ.views.EconSpinner
+            android:id="@+id/econSpinnerFornitore"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
-        </pfa.app.econtab.views.EConTabSpinner>
+        </com.ncfsistemi.econ.views.EconSpinner>
     </LinearLayout>
 
     <LinearLayout
@@ -39,11 +39,11 @@
             android:layout_height="wrap_content"
             android:text="@string/linea" />
 
-        <pfa.app.econtab.views.EConTabSpinner
-            android:id="@+id/econtabSpinnerLinea"
+        <com.ncfsistemi.econ.views.EconSpinner
+            android:id="@+id/econSpinnerLinea"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
-        </pfa.app.econtab.views.EConTabSpinner>
+        </com.ncfsistemi.econ.views.EconSpinner>
     </LinearLayout>
     <TextView
         android:id="@+id/textView_linea_originale"

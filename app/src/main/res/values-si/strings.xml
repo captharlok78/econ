@@ -36,7 +36,7 @@
     <string name="messaggio_creazione_report">වාර්තා නිර්මාණය කරමින්…</string>
     <string name="messaggio_sostituzione_scatola_relazioni">සබැඳි සහ/හෝ සම්බන්ධතා පවතින නිසා ප්ලග් බේස් එකම මානයකින් පමණක් ප්‍රතිස්ථාපනය කළ හැක</string>
     <string name="messaggio_eliminazione_frutto_relazioni">සංරචකය මකා දැමීමට ඔබ මුලින්ම සම්බන්ධතා මකා දැමිය යුතුය</string>
-    <string name="messaggio_backup_ok">ECONTAB\\ උපස්ථ ෆෝල්ඩරය තුළ දත්ත සමුදා උපස්ථය සම්පූර්ණ කර ඇත</string>
+    <string name="messaggio_backup_ok">ECON/backup උපස්ථ ෆෝල්ඩරය තුළ දත්ත සමුදා උපස්ථය සම්පූර්ණ කර ඇත</string>
     <string name="messaggio_backup_ko">දත්ත සමුදාය උපස්ථ කිරීම අසාර්ථක විය</string>
     <string name="messaggio_ripristino_ok">දත්ත සමුදා ප්‍රතිසාධනය සම්පූර්ණයි</string>
     <string name="messaggio_ripristino_ko">දත්ත සමුදාය ප්‍රතිසාධනය අසාර්ථක විය</string>

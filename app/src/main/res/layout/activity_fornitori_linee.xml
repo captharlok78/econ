@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Fornitori/Linee (Listini, livello 1): resta su ExpandableListView/adapter raggruppato
-    proprio (EConTabExpListViewAdapter), non sul controller condiviso degli altri moduli -
+    proprio (EconExpListViewAdapter), non sul controller condiviso degli altri moduli -
     i gruppi (Costruttori) e le relative Linee non sono righe piatte. Adotta comunque la
     stessa testata standard e lo stesso stile di form filtri/paginazione degli altri moduli,
     paginando per Costruttore (gruppo), non per riga.

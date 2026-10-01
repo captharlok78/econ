@@ -67,7 +67,7 @@
         <!--
             Testata tabella: fissa sopra la lista (non scorre, è un sibling della
             ListView, non un header interno). Popolata a runtime da
-            EConTabListaStandardController a partire dalle colonne del modulo (stessa
+            EconListaStandardController a partire dalle colonne del modulo (stessa
             lista di colonne usata per le righe, così non possono disallinearsi).
             Visibile solo a ricerca avviata, come barraPaginazione.
         -->

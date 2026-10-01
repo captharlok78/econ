@@ -3,7 +3,7 @@
     android:id="@+id/LinearLayout1"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_econtab_bordo_bianco"
+    android:background="@drawable/bg_econ_bordo_bianco"
     android:orientation="vertical"
     android:paddingBottom="@dimen/padding_bottone"
     android:layout_marginBottom="@dimen/padding_bottone"

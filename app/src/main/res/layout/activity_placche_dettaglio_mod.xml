@@ -29,11 +29,11 @@
                     android:layout_height="wrap_content"
                     android:text="@string/linea" />
 
-                <pfa.app.econtab.views.EConTabSpinner
-                    android:id="@+id/econtabSpinner_linea"
+                <com.ncfsistemi.econ.views.EconSpinner
+                    android:id="@+id/econSpinner_linea"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" >
-                </pfa.app.econtab.views.EConTabSpinner>
+                </com.ncfsistemi.econ.views.EconSpinner>
 
                 <TextView
                     android:id="@+id/textView_placca"

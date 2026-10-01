@@ -13,7 +13,7 @@
     android:layout_height="0dp"
     android:visibility="gone">
 
-    <!-- Nascosto: richiesto da EConTabActivity per indietro() -->
+    <!-- Nascosto: richiesto da EconActivity per indietro() -->
     <TextView
         android:id="@+id/textViewIndietro"
         android:layout_width="0dp"
