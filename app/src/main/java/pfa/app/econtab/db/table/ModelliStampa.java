@@ -14,6 +14,8 @@ public class ModelliStampa extends AbstractTable {
 	public static final String CONTENUTO = "contenuto";
 	public static final String PREDEFINITO = "predefinito";
 	public static final String ORDINE = "ordine";
+	/** Schema 33: tipologia del modello (tipologie_modello); la ditta non c'e' piu' (sceglie il modello in ditte_modelli_stampa). */
+	public static final String ID_TIPOLOGIA = "id_tipologia";
 
 	public static final String DOC_RAPPORTINO = "rapportino";
 
@@ -27,6 +29,7 @@ public class ModelliStampa extends AbstractTable {
 		aggiungiCampo(PREDEFINITO, INTEGER);
 		aggiungiCampo(ATTIVO, INTEGER);
 		aggiungiCampo(ORDINE, INTEGER);
+		aggiungiCampo(ID_TIPOLOGIA, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

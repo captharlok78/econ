@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Linguetta "Gestione elettrica" della scheda del cantiere (GESTIONE_ELETTRICA.md), solo con il modulo ELETTRICO:
+    linea e placca standard del cantiere e, sotto, le associazioni (RelazioniListaFragment nel contenitore).
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
+
+    <include
+        android:id="@+id/sezione_impianto"
+        layout="@layout/sezione_standard" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/TestoIntestazioneNoPadding"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/linea_standard" />
+
+            <TextView
+                android:id="@+id/editText_linea"
+                style="@style/DatoValore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/TestoIntestazioneNoPadding"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/placca_standard" />
+
+            <TextView
+                android:id="@+id/editText_placca"
+                style="@style/DatoValore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <include
+        android:id="@+id/sezione_associazioni"
+        layout="@layout/sezione_standard" />
+
+    <FrameLayout
+        android:id="@+id/contenitore_associazioni"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>

@@ -249,6 +249,8 @@
     <string name="mail">Indirizzo e-mail</string>
     <string name="manodopera">Manodopera</string>
     <string name="materiale">Materiale</string>
+    <string name="materiali">Materiali</string>
+    <string name="gestione_elettrica">Gestione elettrica</string>
     <string name="menu">Menu</string>
     <string name="metri">Metri</string>
     <string name="metri_tot">Metri tot.</string>

@@ -67,7 +67,7 @@ import pfa.app.econtab.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECONTAB.db";
 	public static final String DATABASE_NAME_ZIP = ".econtab.db";
-	public static final int SCHEMA_VERSION = 32;
+	public static final int SCHEMA_VERSION = 33;
 
 	private Context cont = null;
 
@@ -108,6 +108,8 @@ public class DbInterno extends SQLiteOpenHelper {
 		db.execSQL(new Costruttori().getSQL_create());
 		db.execSQL(new pfa.app.econtab.db.table.SettoriArticolo().getSQL_create());
 		db.execSQL(new pfa.app.econtab.db.table.ModelliStampa().getSQL_create());
+		db.execSQL(new pfa.app.econtab.db.table.TipologieModello().getSQL_create());
+		db.execSQL(new pfa.app.econtab.db.table.DitteModelliStampa().getSQL_create());
 		db.execSQL(new Elementi().getSQL_create());
 		db.execSQL(new ElementiCantiere().getSQL_create());
 		db.execSQL(new Foto().getSQL_create());
@@ -487,6 +489,17 @@ public class DbInterno extends SQLiteOpenHelper {
 					}
 				}
 				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
+			}
+		}
+		// Schema 33: tipologie di modello e modello della ditta per documento (GESTIONE_RAPPORTINI.md §16); arrivano interi
+		if (oldVersion<33){
+			if (oldVersion<newVersion){
+				db.execSQL(new pfa.app.econtab.db.table.TipologieModello().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
+				db.execSQL(new pfa.app.econtab.db.table.DitteModelliStampa().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
+				if (!getTableColumns(db, pfa.app.econtab.db.table.ModelliStampa.NOME_TABELLA).contains(pfa.app.econtab.db.table.ModelliStampa.ID_TIPOLOGIA)) {
+					db.execSQL("ALTER TABLE " + pfa.app.econtab.db.table.ModelliStampa.NOME_TABELLA + " ADD COLUMN "
+							+ pfa.app.econtab.db.table.ModelliStampa.ID_TIPOLOGIA + " INTEGER DEFAULT 0");
+				}
 			}
 		}
 		// Schema 32: numero dei rapportini (NUMERAZIONE_DOCUMENTI.md), dato dal server; arriva con il download

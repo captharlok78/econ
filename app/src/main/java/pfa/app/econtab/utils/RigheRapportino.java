@@ -26,6 +26,8 @@ public final class RigheRapportino {
     public static final String CATEGORIA = "categoria";
     public static final String ORDINE_TIPO = "ordine_tipo";
     public static final String CODICE_UNITA = "codice_unita";
+    /** Descrizione dell'unita' di misura (es. "Ore"), per le stampe. */
+    public static final String DESCRIZIONE_UNITA = "descrizione_unita";
     public static final String MINUTI_PER_UNITA = "minuti_per_unita";
     public static final String NOME_UTENTE = "nome_utente";
     public static final String COSTO_ORARIO = "costo_orario";
@@ -44,6 +46,7 @@ public final class RigheRapportino {
         return "select d.*, t." + RapportiniDettaglioTipi.CODICE + " as " + CODICE_TIPO + ", t." + RapportiniDettaglioTipi.DESCRIZIONE
                 + " as " + DESCRIZIONE_TIPO + ", t." + RapportiniDettaglioTipi.CATEGORIA + " as " + CATEGORIA + ", t."
                 + RapportiniDettaglioTipi.ORDINE + " as " + ORDINE_TIPO + ", u." + UnitaMisura.UNITA_MISURA + " as " + CODICE_UNITA
+                + ", u." + UnitaMisura.NOME + " as " + DESCRIZIONE_UNITA
                 + ", u." + UnitaMisura.MINUTI_PER_UNITA + " as " + MINUTI_PER_UNITA
                 + ", trim(coalesce(ut." + Utenti.NOME + ",'') || ' ' || coalesce(ut." + Utenti.COGNOME + ",'')) as " + NOME_UTENTE
                 + ", ut." + Utenti.COSTO_ORARIO + " as " + COSTO_ORARIO
@@ -89,6 +92,7 @@ public final class RigheRapportino {
         ContentValues u = db.getRecord("select * from " + UnitaMisura.NOME_TABELLA + " where " + UnitaMisura.ID + "="
                 + intero(riga, RapportiniDettaglio.ID_UNITA_MISURA));
         riga.put(CODICE_UNITA, u != null ? u.getAsString(UnitaMisura.UNITA_MISURA) : "");
+        riga.put(DESCRIZIONE_UNITA, u != null ? u.getAsString(UnitaMisura.NOME) : "");
         riga.put(MINUTI_PER_UNITA, u != null && u.getAsInteger(UnitaMisura.MINUTI_PER_UNITA) != null ? u.getAsInteger(UnitaMisura.MINUTI_PER_UNITA) : 0);
 
         int idUtente = intero(riga, RapportiniDettaglio.ID_UTENTE_MANODOPERA);

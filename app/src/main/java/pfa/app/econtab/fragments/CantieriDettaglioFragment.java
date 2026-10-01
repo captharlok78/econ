@@ -1,6 +1,7 @@
 package pfa.app.econtab.fragments;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,97 +9,79 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
+import pfa.app.econtab.CantieriDettaglioModActivity;
+import pfa.app.econtab.EConTabActivity;
 import pfa.app.econtab.R;
 import pfa.app.econtab.db.DbInterno;
-import pfa.app.econtab.db.Join;
 import pfa.app.econtab.db.table.Anagrafica;
 import pfa.app.econtab.db.table.Cantieri;
-import pfa.app.econtab.db.table.Costruttori;
-import pfa.app.econtab.db.table.Linee;
-import pfa.app.econtab.db.table.Placche;
+import pfa.app.econtab.utils.FaIcone;
+import pfa.app.econtab.utils.FunzionalitaApp;
+import pfa.app.econtab.utils.SezioneStandard;
 import pfa.app.econtab.utils.Utility;
 
+/**
+ * Linguetta "Dati cantiere" della scheda del cantiere, standard grafico (STANDARD_GRAFICO.md): sezione con modifica e
+ * mappa a icona, dati in sola lettura. Linea e placca standard sono nella linguetta "Gestione elettrica"
+ * (CantiereElettricoFragment, GESTIONE_ELETTRICA.md).
+ */
 public class CantieriDettaglioFragment extends EConTabFragment {
 	private int cantiere = 0;
+	private String luogo = "";
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
-		View v = super.onCreateView(inflater, container, savedInstanceState);
-		v = inflater.inflate(R.layout.fragment_cantieri_dettaglio, container, false);
+		super.onCreateView(inflater, container, savedInstanceState);
+		View v = inflater.inflate(R.layout.fragment_cantieri_dettaglio, container, false);
 		cantiere = getArguments().getInt(Cantieri.ID_CANTIERE);
-		v.findViewById(R.id.buttonMappa).setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				String indirizzo = getTesto(R.id.editText_indirizzo) + "," + getTesto(R.id.editText_citta);
-
-				Utility.mostraMappa(getActivity(), indirizzo);
-			}
-		});
-
+		View sezione = v.findViewById(R.id.sezione_dati);
+		SezioneStandard.imposta(sezione, FaIcone.CANTIERE, getString(R.string.dati_cantiere));
+		if (FunzionalitaApp.puoModificare(getActivity(), FunzionalitaApp.CANTIERI)) {
+			SezioneStandard.azione(sezione, FaIcone.MODIFICA, getString(R.string.modifica), x -> {
+				Intent intent = new Intent(getActivity(), CantieriDettaglioModActivity.class);
+				intent.putExtra("ID", cantiere);
+				((EConTabActivity) getActivity()).apriFinestraModifica(intent, 1);
+			});
+		}
+		SezioneStandard.azione(sezione, FaIcone.MAPPA, "Mappa", x -> Utility.mostraMappa(getActivity(), luogo));
 		return v;
-
 	}
 
 	@Override
 	public void onResume() {
-		// TODO Auto-generated method stub
 		super.onResume();
 		refresh();
 	}
 
 	public void refresh() {
 		DbInterno db = new DbInterno(getActivity());
-
-		Cantieri cant = new Cantieri();
-		Anagrafica ana = new Anagrafica();
-		Linee linee = new Linee();
-		Placche placche = new Placche();
-        Costruttori costruttori = new Costruttori();
-
-		Join join1 = new Join(cant.getNomeTabella(), ana.getNomeTabella());
-		join1.addCampiDiJoin(Cantieri.ID_ANAGRAFICA, Anagrafica.ID_ANAGRAFICA);
-
-		Join join2 = new Join(cant.getNomeTabella(), linee.getNomeTabella(), Join.LEFT_JOIN);
-		join2.addCampiDiJoin(Cantieri.ID_LINEA, Linee.ID_LINEA);
-
-		Join join3 = new Join(cant.getNomeTabella(), placche.getNomeTabella(), Join.LEFT_JOIN);
-		join3.addCampiDiJoin(Cantieri.ID_PLACCA, Placche.ID_PLACCA);
-
-        Join join4 = new Join(Linee.NOME_TABELLA, Costruttori.NOME_TABELLA, Join.LEFT_JOIN);
-        join4.addCampiDiJoin(Linee.ID_COSTRUTTORE, Costruttori.ID_COSTRUTTORE);
-
-		String SQL = "Select " + cant.getNomeCampoTabella("*") + "," + ana.getNomeCampoTabella(Anagrafica.RAGIONE_SOCIALE) + ","+costruttori.getNomeCampoTabella(Costruttori.RAGIONE_SOCIALE)+" as ragsoc_costruttore,"
-				+ linee.getNomeCampoTabella(Linee.NOME_LINEA) + "," + placche.getNomeCampoTabella(Placche.NOME_PLACCA) + " from "
-				+ cant.getNomeTabella() + join1.getSQLJoin() + join2.getSQLJoin() + join3.getSQLJoin() + join4.getSQLJoin()+ " where "
-				+ cant.getNomeCampoTabella(Cantieri.ID_CANTIERE) + " = " + cantiere;
-
-		ArrayList<Object> records = db.eseguiSelect(SQL, null);
-
-		ContentValues val = null;
-
+		String sql = "SELECT c.*, a." + Anagrafica.RAGIONE_SOCIALE + " FROM " + Cantieri.NOME_TABELLA + " c LEFT JOIN "
+				+ Anagrafica.NOME_TABELLA + " a ON a." + Anagrafica.ID_ANAGRAFICA + " = c." + Cantieri.ID_ANAGRAFICA
+				+ " WHERE c." + Cantieri.ID_CANTIERE + " = " + cantiere;
+		ArrayList<Object> records = db.eseguiSelect(sql, null);
 		db.close();
-
-		if (records.size() > 0) {
-			val = (ContentValues) records.get(0);
-		}
 		View v = getView();
-		if (val != null) {
-			setText(R.id.editText_ragionesociale, val.getAsString(Anagrafica.RAGIONE_SOCIALE), v);
-			setText(R.id.editText_cantiere, val.getAsString(Cantieri.NOME), v);
-			setText(R.id.editText_indirizzo, val.getAsString(Cantieri.INDIRIZZO), v);
-			setText(R.id.editText_cap, val.getAsString(Cantieri.CAP), v);
-			setText(R.id.editText_citta, val.getAsString(Cantieri.CITTA), v);
-			setText(R.id.editText_provincia, val.getAsString(Cantieri.PROVINCIA), v);
-            if (val.getAsString("ragsoc_costruttore")!=null){
-                setText(R.id.editText_linea, val.getAsString("ragsoc_costruttore")+" - "+val.getAsString(Linee.NOME_LINEA), v);
-            }
-
-			setText(R.id.editText_placca, val.getAsString(Placche.NOME_PLACCA), v);
-			setText(R.id.editText_note, val.getAsString(Cantieri.NOTE), v);
+		if (v == null || records.isEmpty()) {
+			return;
 		}
+		ContentValues val = (ContentValues) records.get(0);
+		String via = (testo(val, Cantieri.INDIRIZZO) + " " + testo(val, Cantieri.CIVICO)).trim();
+		String paese = (testo(val, Cantieri.CAP) + " " + testo(val, Cantieri.CITTA)
+				+ (testo(val, Cantieri.PROVINCIA).isEmpty() ? "" : " (" + testo(val, Cantieri.PROVINCIA) + ")")).trim();
+		luogo = (via + ", " + paese).trim();
+		setText(R.id.editText_cantiere, valore(testo(val, Cantieri.NOME)), v);
+		setText(R.id.editText_ragionesociale, valore(testo(val, Anagrafica.RAGIONE_SOCIALE)), v);
+		setText(R.id.editText_indirizzo, valore(via), v);
+		setText(R.id.editText_luogo, valore(paese), v);
+		setText(R.id.editText_note, valore(testo(val, Cantieri.NOTE)), v);
 	}
 
+	private static String valore(String s) {
+		return s.isEmpty() ? "—" : s;
+	}
+
+	private static String testo(ContentValues v, String campo) {
+		String s = v.getAsString(campo);
+		return s == null ? "" : s.trim();
+	}
 }

@@ -102,7 +102,9 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "listini",                  "Listini" },
         { "costruttori",              "Costruttori" },
         { "settori_articolo",         "Settori articoli" },
+        { "tipologie_modello",        "Tipologie di modello" },
         { "modelli_stampa",           "Modelli di stampa" },
+        { "ditte_modelli_stampa",     "Modelli della ditta" },
         { "manodopera",               "Manodopera" },
         { "categorie_generali",       "Categorie Generali" },
         { "categorie_componenti",     "Categorie Componenti" },
@@ -617,6 +619,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         DbInterno dbPer = new DbInterno(this);
         try {
             pfa.app.econtab.utils.SyncUtil.applicaPerimetro(dbPer.getWritableDatabase(), dl);
+            pfa.app.econtab.utils.SyncUtil.salvaGiorniStorico(this, dl);
         } catch (Exception e) {
             Log.w(TAG, "Errore perimetro", e);
         } finally {

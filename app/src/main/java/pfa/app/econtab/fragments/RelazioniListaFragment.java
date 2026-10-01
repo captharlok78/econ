@@ -358,7 +358,10 @@ public class RelazioniListaFragment extends EConTabFragment implements OnItemCli
         ContentValues item = (ContentValues) lista.getItemAtPosition(info.position);
         menu.setHeaderTitle(getString(R.string.relazione));
         menu.add(Menu.NONE, 100, Menu.NONE, getString(R.string.modifica));
-        menu.add(Menu.NONE, 200, Menu.NONE, getString(R.string.elimina));
+        // elimina solo con ELETTRICO.ELIMINA (GESTIONE_ELETTRICA.md)
+        if (pfa.app.econtab.utils.FunzionalitaApp.puoEliminare(getActivity(), new pfa.app.econtab.db.table.Relazioni(), item)) {
+            menu.add(Menu.NONE, 200, Menu.NONE, getString(R.string.elimina));
+        }
 
         //devo fare così perchè altrimenti usa il listener di default dell'activity e potrebbe non chiamare onContextItemSelected
         MenuItem.OnMenuItemClickListener listener = new MenuItem.OnMenuItemClickListener() {

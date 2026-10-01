@@ -10,6 +10,10 @@ import pfa.app.econtab.db.table.Cantieri;
 import pfa.app.econtab.db.table.Listini;
 import pfa.app.econtab.db.table.Preventivi;
 import pfa.app.econtab.db.table.Rapportini;
+import pfa.app.econtab.db.table.Aree;
+import pfa.app.econtab.db.table.Locali;
+import pfa.app.econtab.db.table.Relazioni;
+import pfa.app.econtab.db.table.Unita;
 
 /**
  * Funzionalità dell'app concesse dal pacchetto per il ruolo (PACCHETTI_E_FUNZIONALITA.md, RUOLI_E_CRUD.md): arrivano dal
@@ -35,12 +39,28 @@ public final class FunzionalitaApp {
     public static final String PREVENTIVI = "PREVENTIVI";
     public static final String ORDINI = "ORDINI";
     public static final String RAPPORTINI = "RAPPORTINI";
+    /** Gestione elettrica del cantiere (unita', aree, locali, associazioni): pacchetto a parte (GESTIONE_ELETTRICA.md). */
+    public static final String ELETTRICO = "ELETTRICO";
 
     public static final String CREA = "CREA";
     public static final String MODIFICA = "MODIFICA";
     public static final String ELIMINA = "ELIMINA";
 
     private FunzionalitaApp() {
+    }
+
+    /**
+     * Modulo dell'app concesso (pacchetti della persona, con LEGGI per il suo ruolo). Se il server non ha mai mandato i
+     * moduli (server vecchio) e' tutto concesso, come nel menu.
+     */
+    public static boolean haModulo(Context ctx, String modulo) {
+        TokenManager tm = TokenManager.getInstance(ctx);
+        return tm.moduliMaiRicevuti() || tm.getModuli().contains(modulo);
+    }
+
+    /** Preventivi o ordini nell'app: senza nessuno dei due la scheda del cantiere non mostra la scelta del documento. */
+    public static boolean haPreventiviOOrdini(Context ctx) {
+        return haModulo(ctx, PREVENTIVI) || haModulo(ctx, ORDINI);
     }
 
     public static boolean ha(Context ctx, String codice) {
@@ -61,6 +81,7 @@ public final class FunzionalitaApp {
         if (tabella instanceof Cantieri) return CANTIERI;
         if (tabella instanceof Listini) return LISTINI;
         if (tabella instanceof Rapportini) return RAPPORTINI;
+        if (tabella instanceof Unita || tabella instanceof Aree || tabella instanceof Locali || tabella instanceof Relazioni) return ELETTRICO;
         if (tabella instanceof Preventivi) {
             String tipo = record != null ? record.getAsString(Preventivi.TIPO) : null;
             return moduloPreventivo(tipo);

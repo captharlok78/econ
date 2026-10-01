@@ -111,6 +111,10 @@ public class CantieriDettaglioModActivity extends EConTabDettaglioActivity imple
 		spinner_placca.setTabella(new Placche());
 		spinner_placca.setMessaggioDisabilitato(getString(R.string.errore_selezione_linea));
 		spinner_linea.setSpinnerCollegato(spinner_placca);
+		// linea e placca standard: solo con la gestione elettrica (GESTIONE_ELETTRICA.md); nascoste, i valori restano
+		if (!pfa.app.econtab.utils.FunzionalitaApp.haModulo(this, pfa.app.econtab.utils.FunzionalitaApp.ELETTRICO)) {
+			findViewById(R.id.linear_linea_placca).setVisibility(View.GONE);
+		}
 		System.out.println("EConTab: CantieriDettaglioModActivity onCreate EXIT");
 	}
 

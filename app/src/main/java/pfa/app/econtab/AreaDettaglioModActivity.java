@@ -114,4 +114,10 @@ public class AreaDettaglioModActivity extends EConTabDettaglioActivity {
 		return super.getMessaggioConfermaSalvataggio();
 	}
 
+
+	/** Gestione elettrica del cantiere (GESTIONE_ELETTRICA.md): senza ELETTRICO.MODIFICA la maschera e' in sola lettura. */
+	@Override
+	protected String moduloFunzionalita() {
+		return pfa.app.econtab.utils.FunzionalitaApp.ELETTRICO;
+	}
 }

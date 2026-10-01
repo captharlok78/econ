@@ -186,6 +186,7 @@ public class SyncWorker extends Worker {
             DbInterno dbPer = new DbInterno(ctx);
             try {
                 SyncUtil.applicaPerimetro(dbPer.getWritableDatabase(), dl);
+                SyncUtil.salvaGiorniStorico(ctx, dl);
             } finally {
                 dbPer.close();
             }

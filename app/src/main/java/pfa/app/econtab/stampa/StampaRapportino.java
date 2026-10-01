@@ -98,14 +98,17 @@ public final class StampaRapportino {
         web.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
     }
 
-    /** Modelli attivi per la ditta, nell'ordine in cui proporli: della ditta (predefinito per primo), poi lo standard. */
+    /**
+     * Modelli attivi del rapportino nell'ordine in cui proporli, come il server (GESTIONE_RAPPORTINI.md §16): quello scelto
+     * dalla ditta (ditte_modelli_stampa), poi il predefinito, poi gli altri.
+     */
     public static List<ContentValues> modelli(DbInterno db) {
+        String d = pfa.app.econtab.db.table.DitteModelliStampa.NOME_TABELLA;
         List<ContentValues> ris = new ArrayList<>();
-        for (Object o : db.eseguiSelect("select * from " + ModelliStampa.NOME_TABELLA + " where " + ModelliStampa.DOCUMENTO + "='"
-                + ModelliStampa.DOC_RAPPORTINO + "' and coalesce(" + ModelliStampa.ATTIVO + ",1)=1 and (coalesce(" + ModelliStampa.ID_DITTA
-                + ",0)=0 or " + ModelliStampa.ID_DITTA + "=" + Sessione.getDittaSelezionata() + ") order by case when coalesce("
-                + ModelliStampa.ID_DITTA + ",0)=0 then 1 else 0 end, " + ModelliStampa.PREDEFINITO + " desc, " + ModelliStampa.ORDINE
-                + ", " + ModelliStampa.NOME, null)) {
+        for (Object o : db.eseguiSelect("select m.* from " + ModelliStampa.NOME_TABELLA + " m where m." + ModelliStampa.DOCUMENTO + "='"
+                + ModelliStampa.DOC_RAPPORTINO + "' and coalesce(m." + ModelliStampa.ATTIVO + ",1)=1 order by case when exists (select 1 from " + d
+                + " x where x.id_modello = m.id and x.documento = m.documento and x.id_ditta = " + Sessione.getDittaSelezionata()
+                + ") then 0 else 1 end, m." + ModelliStampa.PREDEFINITO + " desc, m." + ModelliStampa.ORDINE + ", m." + ModelliStampa.NOME, null)) {
             ris.add((ContentValues) o);
         }
         return ris;
@@ -185,7 +188,10 @@ public final class StampaRapportino {
             riga.put("codice", RigheRapportino.testo(d, RigheRapportino.CODICE_ARTICOLO));
             riga.put("utente", RigheRapportino.testo(d, RigheRapportino.NOME_UTENTE));
             riga.put("quantita", numero(q));
-            riga.put("um", RigheRapportino.testo(d, RigheRapportino.CODICE_UNITA));
+            // descrizione dell'unita' di misura (es. "Ore", "Minuti"), come il server; il codice resta in um_codice
+            String descrUm = RigheRapportino.testo(d, RigheRapportino.DESCRIZIONE_UNITA);
+            riga.put("um", descrUm.isEmpty() ? RigheRapportino.testo(d, RigheRapportino.CODICE_UNITA) : descrUm);
+            riga.put("um_codice", RigheRapportino.testo(d, RigheRapportino.CODICE_UNITA));
             riga.put("ore", materiale ? "" : oreMinuti(minuti));
             String inizio = RigheRapportino.testo(d, RapportiniDettaglio.ORA_INIZIO), fine = RigheRapportino.testo(d, RapportiniDettaglio.ORA_FINE);
             riga.put("orario", inizio.isEmpty() && fine.isEmpty() ? "" : (inizio.isEmpty() ? "?" : inizio) + "–" + (fine.isEmpty() ? "?" : fine));
@@ -204,9 +210,14 @@ public final class StampaRapportino {
         c.put("viaggi", viaggi);
         c.put("materiali", materiali);
         Map<String, Object> totali = new LinkedHashMap<>();
-        totali.put("ore_lavoro", oreMinuti(minutiLavoro));
-        totali.put("ore_viaggio", oreMinuti(minutiViaggio));
-        totali.put("totale_ore", oreMinuti(minutiLavoro + minutiViaggio));
+        // totali in ore (anche le righe in minuti), con la descrizione dell'unita' OR
+        totali.put("ore_lavoro", numero(minutiLavoro / 60));
+        totali.put("ore_viaggio", numero(minutiViaggio / 60));
+        totali.put("totale_ore", numero((minutiLavoro + minutiViaggio) / 60));
+        ContentValues unitaOre = db.getRecord("select " + pfa.app.econtab.db.table.UnitaMisura.NOME + " from " + pfa.app.econtab.db.table.UnitaMisura.NOME_TABELLA
+                + " where " + pfa.app.econtab.db.table.UnitaMisura.UNITA_MISURA + "='" + pfa.app.econtab.db.table.UnitaMisura.CODICE_ORE + "'");
+        String umOre = unitaOre != null ? RigheRapportino.testo(unitaOre, pfa.app.econtab.db.table.UnitaMisura.NOME) : "";
+        totali.put("um_ore", umOre.isEmpty() ? "Ore" : umOre);
         totali.put("materiali", materiali.size());
         totali.put("ha_viaggi", !viaggi.isEmpty());
         totali.put("ha_materiali", !materiali.isEmpty());

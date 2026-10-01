@@ -57,13 +57,14 @@
             android:background="@drawable/button_econtab_semitrasparente"
             android:gravity="center_horizontal" >
 
-            <ImageView
-                style="@style/bottoneListaGrande"
+            <!-- "+" dello standard grafico (FaIcone.PIU, impostato in CantiereSplitActivity) -->
+            <TextView
+                android:id="@+id/icona_nuovo_elem"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
                 android:layout_gravity="center_vertical"
-                android:layout_marginRight="@dimen/margine"
                 android:clickable="false"
-                android:contentDescription="+"
-                android:src="@drawable/ic_azione_nuovo" />
+                android:contentDescription="+" />
 
             <TextView
                 android:id="@+id/nuovo_elemento"

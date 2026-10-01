@@ -48,6 +48,7 @@ public final class FaIcone {
 	public static final String UNITA = "";       // home
 	public static final String AREA = "";        // layer-group
 	public static final String LOCALE = "";      // door-open
+	public static final String IMPIANTO = "\uf1e6";    // plug: gestione elettrica del cantiere
 
 	private static Typeface typeface;
 

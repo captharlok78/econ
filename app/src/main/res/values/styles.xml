@@ -61,6 +61,14 @@
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">#1C2A3A</item>
     </style>
+    <!-- Valore di un dato in sola lettura dello standard grafico (etichetta TestoIntestazioneNoPadding sopra) -->
+    <style name="DatoValore" parent="AppTheme">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#212121</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:textIsSelectable">true</item>
+    </style>
     <style name="TestoIntestazioneNoPadding" parent="TestoPiccolo">
         <item name="android:textColor">@android:color/holo_blue_dark</item>
         <item name="android:ellipsize">marquee</item>

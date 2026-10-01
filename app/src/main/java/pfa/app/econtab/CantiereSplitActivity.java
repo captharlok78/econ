@@ -182,6 +182,11 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 
 	private boolean modificheBloccate = false;
 
+	/** Moduli della persona: preventivi/ordini (scelta del documento in alto) e gestione elettrica (GESTIONE_ELETTRICA.md). */
+	private boolean documenti = true;
+	private boolean elettrico = true;
+	private boolean menuRidottoGestito = false;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		System.out.println("EConTab: CantiereSplitActivity onCreate ENTER");
@@ -190,18 +195,21 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 
 		setContentView(R.layout.activity_cantiere_split);
 		cantiere = getIntent().getIntExtra(Cantieri.ID_CANTIERE, 0);
-		idPreventivoSelezionato = getIntent().getIntExtra(Preventivi.ID_PREVENTIVO, 0);
+		documenti = pfa.app.econtab.utils.FunzionalitaApp.haPreventiviOOrdini(this);
+		elettrico = pfa.app.econtab.utils.FunzionalitaApp.haModulo(this, pfa.app.econtab.utils.FunzionalitaApp.ELETTRICO);
+		idPreventivoSelezionato = documenti ? getIntent().getIntExtra(Preventivi.ID_PREVENTIVO, 0) : 0;
 		// se non ho nessun preventivo seleionato prendo l'ultimo ordine ed eventualmente l'ultimo preventivo per
 		// questocantiere
-		if (idPreventivoSelezionato == 0) {
+		if (idPreventivoSelezionato == 0 && documenti) {
 			DbInterno db = new DbInterno(this);
 			ContentValues whereOrd = new ContentValues();
 			whereOrd.put(Preventivi.ID_CANTIERE, cantiere);
 			whereOrd.put(Preventivi.TIPO, Preventivi.TIPO_ORDINE);
 			whereOrd.put(Preventivi.STATO, Preventivi.STATO_APERTO);
 
-			ArrayList<Object> ordini = db.eseguiSelect(new Preventivi(), whereOrd, new String[] { Preventivi.DATA + " desc" });
-			if (ordini.size() == 0) {
+			ArrayList<Object> ordini = haModulo(pfa.app.econtab.utils.FunzionalitaApp.ORDINI)
+					? db.eseguiSelect(new Preventivi(), whereOrd, new String[] { Preventivi.DATA + " desc" }) : new ArrayList<Object>();
+			if (ordini.size() == 0 && haModulo(pfa.app.econtab.utils.FunzionalitaApp.PREVENTIVI)) {
 				ContentValues wherePrev = new ContentValues();
 				wherePrev.put(Preventivi.ID_CANTIERE, cantiere);
 				wherePrev.put(Preventivi.TIPO, Preventivi.TIPO_PREVENTIVO);
@@ -211,7 +219,7 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 					ContentValues prev = (ContentValues) preventivi.get(0);
 					idPreventivoSelezionato = prev.getAsInteger(Preventivi.ID_PREVENTIVO);
 				}
-			} else {
+			} else if (ordini.size() > 0) {
 				ContentValues ord = (ContentValues) ordini.get(0);
 				idPreventivoSelezionato = ord.getAsInteger(Preventivi.ID_PREVENTIVO);
 			}
@@ -220,6 +228,9 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 
 		lista = (ListView) findViewById(R.id.lista);
 		pfa.app.econtab.utils.FaIcone.applica((TextView) findViewById(R.id.imageView1), pfa.app.econtab.utils.FaIcone.PREVENTIVO, null);
+		TextView piu = (TextView) findViewById(R.id.icona_nuovo_elem);
+		pfa.app.econtab.utils.FaIcone.applica(piu, pfa.app.econtab.utils.FaIcone.PIU, null);
+		piu.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 22);
 		lista.setOnItemClickListener(this);
 		registerForContextMenu(lista);
 		split = (EConTabSplitPaneLayout) findViewById(R.id.split);
@@ -234,7 +245,13 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 
 		creaMenuCategorie();
 
-		if (idPreventivoSelezionato == 0) {
+		// senza preventivi ne' ordini la scelta del documento non c'e'; senza gestione elettrica niente barra in basso
+		if (!documenti) {
+			findViewById(R.id.preventivo_attivo).setVisibility(View.GONE);
+		}
+		applicaGestioneElettrica();
+
+		if (idPreventivoSelezionato == 0 && documenti) {
 			Toast t = Toast.makeText(this,
 					getString(R.string.attenzione).toUpperCase(Locale.getDefault()) + System.getProperty("line.separator")
 							+ getString(R.string.nessun_preventivo_selezionato_esteso), Toast.LENGTH_LONG);
@@ -275,15 +292,17 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 			return;
 		}
 
-		ContentValues whereUnita = new ContentValues();
-		whereUnita.put(Unita.ID_CANTIERE, cantiere);
-		ArrayList<Object> unita = db.eseguiSelect(new Unita(), whereUnita, new String[] { Unita.ID_UNITA + " desc" });
-
-		Aree tabAree = new Aree();
-		ArrayList<Object> aree = tabAree.getAreeCantiere(db, cantiere);
-
-		Locali tabLocali = new Locali();
-		ArrayList<Object> locali = tabLocali.getLocaliCantiereOrdineAlfabetico(db, cantiere);
+		// unita', aree e locali: solo con la gestione elettrica (GESTIONE_ELETTRICA.md)
+		ArrayList<Object> unita = new ArrayList<Object>();
+		ArrayList<Object> aree = new ArrayList<Object>();
+		ArrayList<Object> locali = new ArrayList<Object>();
+		if (elettrico) {
+			ContentValues whereUnita = new ContentValues();
+			whereUnita.put(Unita.ID_CANTIERE, cantiere);
+			unita = db.eseguiSelect(new Unita(), whereUnita, new String[] { Unita.ID_UNITA + " desc" });
+			aree = new Aree().getAreeCantiere(db, cantiere);
+			locali = new Locali().getLocaliCantiereOrdineAlfabetico(db, cantiere);
+		}
 		db.close();
 
 		_mostraRigaPreventivo(false);
@@ -408,11 +427,6 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 
 	public void modifica(View v) {
 		System.out.println("EConTab: CantiereSplitActivity modifica ENTER");
-		if (v.getId() == R.id.button_edit_cantiere) {
-			Intent intent = new Intent(this, CantieriDettaglioModActivity.class);
-			intent.putExtra("ID", getIntent().getIntExtra(Cantieri.ID_CANTIERE, 0));
-			apriFinestraModifica(intent, 1);
-		}
 		if (v.getId() == R.id.button_edit_unita) {
 			Intent intent = new Intent(this, UnitaDettaglioModActivity.class);
 			intent.putExtra("ID", fragmentPagerUnita.getArguments().getInt(Unita.ID_UNITA));
@@ -438,6 +452,12 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 		super.onResume();
 
 		creaMenu();
+		// menu laterale con il solo cantiere (niente gestione elettrica ne' documento): i dati a tutta larghezza, una volta;
+		// il menu si riapre con la freccia sul divisore
+		if (!menuRidottoGestito && dati != null && dati.size() == 1) {
+			split.collapse();
+		}
+		menuRidottoGestito = true;
 
 		if (tipoElementoSelezionato == PREVENTIVO) {
 			if (fragmentPagerPreventivo == null) {
@@ -479,14 +499,15 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 		wherePrevCant.put(Preventivi.ID_CANTIERE, cantiere);
 		// wherePrevCant.put(Preventivi.STATO, Preventivi.STATO_APERTO);
 		wherePrevCant.put(Preventivi.TIPO, Preventivi.TIPO_PREVENTIVO);
-		ArrayList<Object> listaPrev = db.eseguiSelect(new Preventivi(), wherePrevCant, new String[] { Preventivi.ID_PREVENTIVO + " desc" });
+		ArrayList<Object> listaPrev = haModulo(pfa.app.econtab.utils.FunzionalitaApp.PREVENTIVI)
+				? db.eseguiSelect(new Preventivi(), wherePrevCant, new String[] { Preventivi.ID_PREVENTIVO + " desc" }) : new ArrayList<Object>();
 
 		ContentValues whereOrdCant = new ContentValues();
 		whereOrdCant.put(Preventivi.ID_CANTIERE, cantiere);
 		// whereOrdCant.put(Preventivi.STATO, Preventivi.STATO_APERTO);
 		whereOrdCant.put(Preventivi.TIPO, Preventivi.TIPO_ORDINE);
-		ArrayList<Object> listaOrdini = db
-				.eseguiSelect(new Preventivi(), whereOrdCant, new String[] { Preventivi.ID_PREVENTIVO + " desc" });
+		ArrayList<Object> listaOrdini = haModulo(pfa.app.econtab.utils.FunzionalitaApp.ORDINI)
+				? db.eseguiSelect(new Preventivi(), whereOrdCant, new String[] { Preventivi.ID_PREVENTIVO + " desc" }) : new ArrayList<Object>();
 
 		listaPrev.addAll(listaOrdini);
 
@@ -675,6 +696,7 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 
 			menuinferiore.setVisibility(View.GONE);
 		}
+		applicaGestioneElettrica();
 		System.out.println("EConTab: CantiereSplitActivity onItemClick EXIT");
 	}
 
@@ -794,6 +816,25 @@ public class CantiereSplitActivity extends EConTabActivity implements OnItemClic
 		setText(R.id.nuovo_elemento, getResources().getString(R.string.nuova_unita));
 		findViewById(R.id.button_nuovo_elem).setVisibility(View.VISIBLE);
 		menuinferiore.setVisibility(View.GONE);
+		applicaGestioneElettrica();
+	}
+
+	/**
+	 * Barra in basso ("+ Nuova unita'/area/locale" e categorie del locale): solo con il modulo ELETTRICO; il "+" anche con
+	 * ELETTRICO.CREA (GESTIONE_ELETTRICA.md).
+	 */
+	private void applicaGestioneElettrica() {
+		if (!elettrico) {
+			findViewById(R.id.nuovo_figlio).setVisibility(View.GONE);
+			return;
+		}
+		if (!pfa.app.econtab.utils.FunzionalitaApp.puoInserire(this, new Unita(), null)) {
+			findViewById(R.id.button_nuovo_elem).setVisibility(View.GONE);
+		}
+	}
+
+	private boolean haModulo(String modulo) {
+		return pfa.app.econtab.utils.FunzionalitaApp.haModulo(this, modulo);
 	}
 
 	public void nuovoElemento(View v) {

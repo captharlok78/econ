@@ -23,7 +23,7 @@ public final class SyncUtil {
      * rimasti da vecchie versioni dell'app non restano in giro.
      */
     private static final String[] TABELLE_ELENCO_COMPLETO = { "unita_misura", "rapportini_dettaglio_tipi", "stati_documento",
-            "stati_documento_transizioni", "modelli_stampa" };
+            "stati_documento_transizioni", "modelli_stampa", "tipologie_modello", "ditte_modelli_stampa" };
 
     /** Tabelle locali con una colonna unita' di misura (chiave esterna verso unita_misura sul server). */
     private static final String[] TABELLE_CON_UNITA_MISURA = { "elementi", "componenti", "elementi_cantiere",
@@ -148,6 +148,8 @@ public final class SyncUtil {
         { "stati_documento",             "id" },
         { "stati_documento_transizioni", "id" },
         { "modelli_stampa",              "id" },
+        { "tipologie_modello",           "id" },
+        { "ditte_modelli_stampa",        "id" },
     };
 
     /** Chiave primaria delle tabelle sola lettura, null per le altre. */
@@ -524,6 +526,22 @@ public final class SyncUtil {
         } finally {
             db.endTransaction();
         }
+    }
+
+    /** Chiave (SharedPreferences dell'app) dei giorni di storico della ditta, ricevuti con il perimetro. */
+    public static final String GIORNI_STORICO = "GIORNI_STORICO_APP";
+
+    /** Ricorda i giorni di storico del perimetro, per dirli dove si consulta lo storico (es. scheda del cantiere). */
+    public static void salvaGiorniStorico(android.content.Context ctx, pfa.app.econtab.api.MercuryApiService.SyncDownloadResponse dl) {
+        if (dl != null && dl.perimetro != null) {
+            ctx.getSharedPreferences(Utility.APP_NAME, android.content.Context.MODE_PRIVATE).edit()
+                    .putInt(GIORNI_STORICO, Math.max(dl.perimetro.giorni, 1)).apply();
+        }
+    }
+
+    /** Giorni di storico sul tablet; 0 se non ancora noti (server vecchio o nessuna sync). */
+    public static int giorniStorico(android.content.Context ctx) {
+        return ctx.getSharedPreferences(Utility.APP_NAME, android.content.Context.MODE_PRIVATE).getInt(GIORNI_STORICO, 0);
     }
 
     private static boolean esisteTabella(SQLiteDatabase db, String tabella) {
