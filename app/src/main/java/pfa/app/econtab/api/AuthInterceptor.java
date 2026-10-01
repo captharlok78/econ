@@ -12,16 +12,25 @@ import okhttp3.Response;
 public class AuthInterceptor implements Interceptor {
 
     private final TokenManager tokenManager;
+    private final Context context;
+    private final String baseUrl;
 
-    public AuthInterceptor(Context context) {
+    public AuthInterceptor(Context context, String baseUrl) {
         this.tokenManager = TokenManager.getInstance(context);
+        this.context = context.getApplicationContext();
+        this.baseUrl = baseUrl;
     }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
+        Request original = chain.request();
+        // token che scade entro poco: si rinnova prima della chiamata (RinnovoToken, STATO_SISTEMA_APP.md)
+        String percorso = original.url().encodedPath();
+        if (!percorso.endsWith("/api/auth/login") && !percorso.endsWith("/api/auth/rinnova")) {
+            RinnovoToken.rinnovaSeInScadenza(context, baseUrl);
+        }
         String token = tokenManager.getToken();
 
-        Request original = chain.request();
         Request.Builder builder = original.newBuilder();
 
         if (token != null) {

@@ -67,10 +67,5 @@ public class Manodopera extends AbstractTable {
 		return SQL;
 	}
 
-	@Override
-	protected int getMassimoNumeroRecordLicenzaGratis() {
-		// TODO Auto-generated method stub
-		return 5;
-	}
 
 }

@@ -121,8 +121,4 @@ public class Rapportini extends AbstractTable {
     }
 
 
-    @Override
-    protected int getMassimoNumeroRecordLicenzaGratis() {
-        return 5;
-    }
 }

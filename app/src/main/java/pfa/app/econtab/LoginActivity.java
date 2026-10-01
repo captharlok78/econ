@@ -153,12 +153,8 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
      * Mercury, che non è determinabile offline), così il testo non resta mai vuoto.
      */
     private void caricaVersioni() {
-        try {
-            PackageInfo pinfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-            versioneAppTesto = "App v" + pinfo.versionName;
-        } catch (Exception ignored) {
-            versioneAppTesto = "";
-        }
+        // versione dal registro dei rilasci (salvata), altrimenti l'identificativo della build
+        versioneAppTesto = "App " + pfa.app.econtab.utils.VersioneApp.etichetta(this);
         versioneMercuryTesto = "";
         aggiornaTestoVersioni();
 
@@ -175,7 +171,8 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
                                    retrofit2.Response<MercuryApiService.VersionResponse> response) {
                 if (isFinishing() || isDestroyed()) return;
                 if (response.isSuccessful() && response.body() != null && response.body().versione != null) {
-                    versioneAppTesto = "App v" + response.body().versione;
+                    pfa.app.econtab.utils.VersioneApp.salva(LoginActivity.this, response.body().versione);
+                    versioneAppTesto = "App " + pfa.app.econtab.utils.VersioneApp.etichetta(LoginActivity.this);
                     aggiornaTestoVersioni();
                 }
             }
@@ -194,6 +191,7 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
                 if (response.isSuccessful() && response.body() != null && response.body().versione != null) {
                     versioneMercuryTesto = "Mercury v" + response.body().versione;
                     pfa.app.econtab.utils.VersioneApp.salvaServer(LoginActivity.this, response.body().versione);
+                    pfa.app.econtab.utils.Editore.salva(LoginActivity.this, response.body());
                     aggiornaTestoVersioni();
                 }
             }
@@ -307,11 +305,10 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
                                 tm.clearCredenzialiRicordami();
                             }
 
-                            // Salva email + segna terminale come attivato (il JWT Mercury è l'attivazione)
+                            // Salva l'email (per il campo del login)
                             getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE)
                                     .edit()
                                     .putString("MERCURY_EMAIL", email)
-                                    .putString(pfa.app.econtab.utils.Sessione.CODICE_ATTIVAZIONE, body.token)
                                     .apply();
 
                             // Imposta la sessione in-memory usata dal resto dell'app
@@ -415,13 +412,21 @@ public class LoginActivity extends EConTabActivity implements TextWatcher {
     }
 
     /**
-     * Placeholder: non esiste ancora un flusso di registrazione self-service lato
-     * Mercury. Per ora indirizza l'utente a chi gestisce gli accessi.
+     * Non c'e' una registrazione self-service: l'account lo crea l'amministratore della ditta oppure l'assistenza
+     * dell'editore (utils.Editore), che si puo' contattare da qui.
      */
     public void registrati(View v) {
-        Utility.mostraDialog("Registrati",
-                "La registrazione non è ancora disponibile da qui: contatta l'amministratore di Mercury per farti creare un account.",
-                this, "OK");
+        String telefono = pfa.app.econtab.utils.Editore.telefonoAssistenza(this);
+        String testo = "L'account lo crea l'amministratore della tua ditta. Per un nuovo accesso o per attivare Econ "
+                + "contatta l'assistenza:\n\n" + pfa.app.econtab.utils.Editore.nome(this)
+                + "\n" + pfa.app.econtab.utils.Editore.emailAssistenza(this)
+                + (telefono.isEmpty() ? "" : "\n" + telefono);
+        new android.app.AlertDialog.Builder(this)
+                .setTitle("Registrati")
+                .setMessage(testo)
+                .setPositiveButton("Scrivi", (d, w) -> pfa.app.econtab.utils.Editore.scriviAssistenza(this, "Richiesta di accesso a Econ", ""))
+                .setNegativeButton(R.string.chiudi, null)
+                .show();
     }
 
     /** Avvia il flusso di recupero password Mercury (step 1: inserisci email). */

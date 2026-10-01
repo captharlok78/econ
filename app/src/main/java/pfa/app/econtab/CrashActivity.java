@@ -49,8 +49,7 @@ public class CrashActivity extends Activity {
 	}
 
     public void invia_mail(View view) {
-		String publisher_email_address = "";
-		publisher_email_address = pfa.app.econtab.Globals.PUBLISHER_EMAIL_ADDRESS;
-		Utility.inviaMail(this,publisher_email_address,"ECONTAB CRASH (API"+ Build.VERSION.SDK_INT+ ",MODELLO "+ Build.MODEL+")",testo.getText().toString());
+		// all'assistenza dell'editore (utils.Editore), con i dati del dispositivo e delle versioni
+		pfa.app.econtab.utils.Editore.scriviAssistenza(this, "Econ: errore dell'app", testo.getText().toString());
     }
 }

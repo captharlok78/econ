@@ -6,9 +6,6 @@ import android.os.AsyncTask;
 import android.view.View;
 import android.widget.ImageView;
 
-/**
- * Created by daniele on 07/02/2015.
- */
 public class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
     Context cont = null;
     String dir = "";

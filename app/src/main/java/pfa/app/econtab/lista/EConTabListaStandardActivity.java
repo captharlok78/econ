@@ -45,6 +45,6 @@ public abstract class EConTabListaStandardActivity extends EConTabActivity
     @Override
     protected void onResume() {
         super.onResume();
-        controller.mostraSoloForm();
+        controller.apertura();
     }
 }

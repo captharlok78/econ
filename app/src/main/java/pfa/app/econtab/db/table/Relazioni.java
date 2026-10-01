@@ -6,9 +6,6 @@ import java.util.ArrayList;
 
 import pfa.app.econtab.db.DbInterno;
 
-/**
- * Created by daniele on 12/01/2015.
- */
 public class Relazioni extends AbstractTable {
     public static final String NOME_TABELLA = "relazioni";
 

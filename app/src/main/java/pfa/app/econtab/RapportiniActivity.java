@@ -77,7 +77,7 @@ public class RapportiniActivity extends EConTabListaStandardActivity {
         valoriPeriodo.add(vocePeriodo("6M", getString(R.string.ultimi_6_mesi)));
         valoriPeriodo.add(vocePeriodo("A", getString(R.string.ultimo_anno)));
         valoriPeriodo.add(vocePeriodo("", getString(R.string.sempre)));
-        spinnerPeriodo.setValue("S");
+        spinnerPeriodo.setValue(pfa.app.econtab.utils.PreferenzeDispositivo.periodoRapportini(this));
         spinnerPeriodo.setValoriSpinnerLibero(valoriPeriodo);
     }
 

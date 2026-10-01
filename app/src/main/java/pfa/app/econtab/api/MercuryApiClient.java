@@ -57,8 +57,9 @@ public class MercuryApiClient {
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)
                 .writeTimeout(60, TimeUnit.SECONDS)
-                .addInterceptor(new AuthInterceptor(context))
+                .addInterceptor(new AuthInterceptor(context, ensureTrailingSlash(baseUrl)))
                 .addInterceptor(logger)
+                .authenticator(new RinnovoToken(context, ensureTrailingSlash(baseUrl)))
                 .build();
 
         retrofit = new Retrofit.Builder()

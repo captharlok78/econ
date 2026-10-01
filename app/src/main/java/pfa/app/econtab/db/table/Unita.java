@@ -126,11 +126,6 @@ public class Unita extends AbstractTable {
 		super.aggiornamentoCorrelati(db, val, where);
 	}
 
-	@Override
-	protected int getMassimoNumeroRecordLicenzaGratis() {
-		// TODO Auto-generated method stub
-		return 4;
-	}
 
     @Override
     public boolean cancellazionePossibile(DbInterno db, ContentValues val, Context ctx) {

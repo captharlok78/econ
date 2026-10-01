@@ -21,20 +21,6 @@
         android:titleCondensed="Info"
         android:title="Info"
         android:showAsAction="never"></item>
-    <item android:id="@+id/item_feedback"
-        android:titleCondensed="Info"
-        android:title="Feedback"
-        android:showAsAction="never"></item>
-        <!--
-    <item android:id="@+id/item_sitoweb"
-        android:titleCondensed="econtab.mobi"
-        android:title="econtab.mobi"
-        android:showAsAction="never"></item>
-      -->
-    <item android:id="@+id/item_controlla_aggiornamenti"
-        android:titleCondensed="Controlla aggiornamenti"
-        android:title="Controlla aggiornamenti"
-        android:showAsAction="never"></item>
     <item android:id="@+id/item_cerca_codice"
         android:titleCondensed="Cerca elemento"
         android:title="Cerca elemento per numero"

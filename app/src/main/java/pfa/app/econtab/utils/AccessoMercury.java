@@ -55,7 +55,6 @@ public final class AccessoMercury {
                             app.getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE)
                                     .edit()
                                     .putString("MERCURY_EMAIL", email)
-                                    .putString(Sessione.CODICE_ATTIVAZIONE, body.token)
                                     .apply();
                             Sessione.ripristinaDaToken(app);
                             esito.accesso();

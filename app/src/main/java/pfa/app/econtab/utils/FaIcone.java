@@ -49,6 +49,10 @@ public final class FaIcone {
 	public static final String AREA = "";        // layer-group
 	public static final String LOCALE = "";      // door-open
 	public static final String IMPIANTO = "\uf1e6";    // plug: gestione elettrica del cantiere
+	public static final String IMPOSTAZIONI = "\uf013"; // cog: preferenze
+	public static final String DITTA = "\uf1ad";        // building: dati della ditta
+	public static final String SCARICA = "\uf063";     // arrow-down: scarica da server
+	public static final String CARICA = "\uf062";      // arrow-up: carica su server
 
 	private static Typeface typeface;
 

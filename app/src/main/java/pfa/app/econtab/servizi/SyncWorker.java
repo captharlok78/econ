@@ -202,11 +202,15 @@ public class SyncWorker extends Worker {
 
                 if (upResp.isSuccessful() && upResp.body() != null) {
                     applyIdMappings(ctx, upResp.body());
+                    pfa.app.econtab.utils.UltimeSync.upload(ctx);
                 }
+            } else {
+                pfa.app.econtab.utils.UltimeSync.upload(ctx); // niente da inviare: allineato
             }
 
             // 4. Aggiorna timestamp ultima sincronizzazione
             saveLastSyncTimestamp(ctx, dl.syncTimestamp);
+            pfa.app.econtab.utils.UltimeSync.download(ctx);
 
             Log.i(TAG, "Sync completata. Nuovo timestamp: " + dl.syncTimestamp);
             return Result.success();
@@ -546,19 +550,27 @@ public class SyncWorker extends Worker {
 
     /** Avvia la sync periodica ogni 15 minuti (solo con rete disponibile) */
     public static void schedulePeriodicSync(Context context) {
+        schedulePeriodicSync(context, 15);
+    }
+
+    /**
+     * Sync periodica ogni "minuti" (minimo 15, solo con rete): la imposta Impostazioni › Preferenze del dispositivo
+     * (utils.PreferenzeDispositivo). Sostituisce quella gia' pianificata, cosi' un cambio di intervallo vale subito.
+     */
+    public static void schedulePeriodicSync(Context context, int minuti) {
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();
 
         PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(
-                SyncWorker.class, 15, TimeUnit.MINUTES)
+                SyncWorker.class, Math.max(15, minuti), TimeUnit.MINUTES)
                 .setConstraints(constraints)
                 .build();
 
         WorkManager.getInstance(context)
                 .enqueueUniquePeriodicWork(
                         "mercury_sync",
-                        androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+                        androidx.work.ExistingPeriodicWorkPolicy.UPDATE,
                         request
                 );
     }

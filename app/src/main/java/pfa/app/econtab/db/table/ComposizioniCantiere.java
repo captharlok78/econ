@@ -63,7 +63,7 @@ public class ComposizioniCantiere extends AbstractTable {
 
 		// nelle installazioni server la composizione_cantiere deve viaggiare come un unico record
 		// quindi aggiorno il campo in_server a false
-		if (Sessione.isLicenzaBusiness(db.getContext())) {
+		{ // composizione come un unico record per il server
 			ContentValues whereElemento = new ContentValues();
 			whereElemento.put(ID_ELEMENTO_CANT, val.getAsInteger(ID_ELEMENTO_CANT));
 
@@ -80,7 +80,7 @@ public class ComposizioniCantiere extends AbstractTable {
 
 		// nelle installazioni server la composizione_cantiere deve viaggiare come un unico record
 		// quindi aggiorno il campo in_server a false
-		if (Sessione.isLicenzaBusiness(db.getContext())) {
+		{ // composizione come un unico record per il server
 			ContentValues whereElemento = new ContentValues();
 			whereElemento.put(ID_ELEMENTO_CANT, where.getAsInteger(ID_ELEMENTO_CANT));
 

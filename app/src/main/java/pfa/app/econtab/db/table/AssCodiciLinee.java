@@ -1,8 +1,5 @@
 package pfa.app.econtab.db.table;
 
-/**
- * Created by daniele on 13/01/2018.
- */
 
 public class AssCodiciLinee extends AbstractTable {
     public static final String NOME_TABELLA = "ass_codici_linee";

@@ -213,9 +213,4 @@ public class Cantieri extends AbstractTable {
 		return super.cancellazionePossibile(db, val, ctx);
 	}
 
-	@Override
-	protected int getMassimoNumeroRecordLicenzaGratis() {
-		// TODO Auto-generated method stub
-		return 1;
-	}
 }

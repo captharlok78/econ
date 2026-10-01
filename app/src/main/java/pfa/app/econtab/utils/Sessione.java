@@ -21,14 +21,12 @@ import pfa.app.econtab.server.RecordEliminati;
 /**
  * Classe utilizzata per i dati comuni dell'app. Esiste un'unica istanza di questa classe
  * 
- * @author daniele
  */
 public class Sessione {
 	private static Sessione istanza = null;
 
 	private SimpleDateFormat dateFormat = null;
 	private Calendar calendar = null;
-	private Licenza licenza = null;
 	private int dittaSelezionata = 0;
 	private String nomeDittaSelezionata = null;
 
@@ -36,12 +34,9 @@ public class Sessione {
 	private ContentValues recordOperatore = null;
 	private String dataUltimaSincronizzazione = null;
 
-    private String dataValiditaAbbonamento = null;
 
     private LruCache<String,Bitmap> cacheIcone = null;
 
-    public static final String CHIAVE_ABBONAMENTO = "VLFA"; //Validità licenza full contab
-    public static final String CODICE_ATTIVAZIONE = "CAS"; //Codice attivazione server
 	private int idPreventivoSelezionato=0;
 
 
@@ -85,130 +80,6 @@ public class Sessione {
 
 	public static Calendar getCalendar() {
 		return getIstanza()._getCalendar();
-	}
-
-	private Licenza _getLicenza(Context ctx) {
-		//System.out.println("EConTab: Sessione _getLicenza ENTER");
-        // licenza = new Licenza(Licenza.LIGHT);
-        //return licenza;
-      	if (licenza == null) {
-			try {
-                SharedPreferences pref = ctx.getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE);
-                String lic = pref.getString(CODICE_ATTIVAZIONE, "");
-				//System.out.println("EConTab: Sessione _getLicenza lic " + lic);
-                if (!lic.equals("")){
-					//System.out.println("EConTab: Sessione _getLicenza licenza BUSINESS");
-                    licenza = new Licenza(Licenza.BUSINESS);
-                }
-                else{
-                    //controllo chiave gratis (fino al 31/12/2015 se qualcuno ha il pacchetto econtabkey.app.pfa.econtabkey può usare la versione full)
-                    Calendar today = Calendar.getInstance();
-                    Calendar dataScadenzaGratis = Calendar.getInstance();
-                    dataScadenzaGratis.set(2016,1,1);
-                    if (today.before(dataScadenzaGratis)) {
-						System.out.println("EConTab: Sessione _getLicenza today.before(dataScadenzaGratis)");
-                        Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
-                        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-                        List<ResolveInfo> pkgAppsList = ctx.getPackageManager().queryIntentActivities(mainIntent, 0);
-                        for (int i = 0; i < pkgAppsList.size(); i++) {
-                            ResolveInfo r = pkgAppsList.get(i);
-                            if (r.activityInfo.packageName.equals("econtabkey.app.pfa.econtabkey")) {
-								//System.out.println("EConTab: Sessione _getLicenza licenza FULL");
-                                licenza = new Licenza(Licenza.FULL);
-                            }
-                        }
-                    }
-                    //Per i tablet di PFA è sempre FULL
-                    if (Licenza.getIDdispositivo(ctx).equals("351885062665889") || Licenza.getIDdispositivo(ctx).equals("fc68d750b0c5050e")){
-                       // licenza = new Licenza(Licenza.FULL);
-                    }
-
-                    //se non ho nessuna promozione e non sono PFA
-                    if (licenza==null){
-						//System.out.println("EConTab: Sessione _getLicenza licenza null");
-                        licenza = new Licenza(Licenza.FULL);
-                        //se non ha l'abbonamento attivo allora la licenza è la light
-                        String validitaAbbonamento = _getValiditaAbbonamento(ctx);
-                        if (validitaAbbonamento.equals("")){
-							//System.out.println("EConTab: Sessione _getLicenza licenza LIGHT 1");
-                            licenza = new Licenza((Licenza.LIGHT));
-                        }
-                        else{
-                            long dataValiditaLong = Long.parseLong(validitaAbbonamento);
-                            Calendar dataValiditaCal = Utility.numberToDataCalendar(dataValiditaLong);
-                            Calendar oggi = Calendar.getInstance();
-                            oggi.add(Calendar.DATE,-10);
-
-                            if (oggi.after(dataValiditaCal)){//10 giorni di estensione dell'abbonamento prima di tornare alla licenza Light
-								//System.out.println("EConTab: Sessione _getLicenza licenza LIGHT 2");
-								licenza = new Licenza((Licenza.LIGHT));
-                            }
-                        }
-                    }
-                }
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				licenza = new Licenza(Licenza.LIGHT);
-			}
-
-		}
-		//System.out.println("EConTab: Sessione _getLicenza EXIT");
-		return licenza;
-
-	}
-
-    /**
-     * Funzione per ricaricare la licenza (utile dopo un controllo su App Store)
-     * @param ctx
-     */
-    public static void resettaLicenza(Context ctx){
-		System.out.println("EConTab: Sessione resettaLicenza ENTER");
-        getIstanza().licenza = null;
-        getIstanza().dataValiditaAbbonamento=null;
-        getLicenza(ctx);
-		System.out.println("EConTab: Sessione resettaLicenza EXIT");
-    }
-
-
-	public static Licenza getLicenza(Context ctx) {
-		return getIstanza()._getLicenza(ctx);
-	}
-
-	/**
-	 * Ritorna true se la versione installata � la demo
-	 * 
-	 * @param ctx
-	 * @return
-	 */
-	public static boolean isLicenzaGratis(Context ctx) {
-		//System.out.println("EConTab: Sessione isLicenzaGratis");
-		boolean ret = getIstanza()._getLicenza(ctx).getTipoLicenza() == Licenza.LIGHT;
-		//System.out.println("EConTab: Sessione isLicenzaGratis " + ret);
-		return ret;
-	}
-
-    /**
-     * Ritorna true se la versione installata � la demo
-     *
-     * @param ctx
-     * @return
-     */
-    public static boolean isLicenzaFull(Context ctx) {
-		//System.out.println("EConTab: Sessione isLicenzaFull");
-		boolean ret = getIstanza()._getLicenza(ctx).getTipoLicenza() == Licenza.FULL;
-		//System.out.println("EConTab: Sessione isLicenzaFull " + ret);
-		return ret;
-    }
-
-	/**
-	 * Ritorna true se la versione installata � la server
-	 * 
-	 * @param ctx
-	 * @return
-	 */
-	public static boolean isLicenzaBusiness(Context ctx) {
-		return true;
 	}
 
 	private int _getDittaSelezionata() {
@@ -407,59 +278,6 @@ public class Sessione {
 	}
 
 
-
-    public static String getValiditaAbbonamento(Context context) {
-		System.out.println("EConTab: Sessione getValiditaAbbonamento");
-        // TODO Auto-generated method stub
-        return getIstanza()._getValiditaAbbonamento(context);
-    }
-
-    private String _getValiditaAbbonamento(Context context) {
-		System.out.println("EConTab: Sessione _getValiditaAbbonamento ENTER");
-        // TODO Auto-generated method stub
-        if (dataValiditaAbbonamento == null) {
-			System.out.println("EConTab: Sessione _getValiditaAbbonamento NULL");
-            SharedPreferences pref = context.getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE);
-            String chiaveAbbonamento = pref.getString(CHIAVE_ABBONAMENTO, "");
-			System.out.println("EConTab: Sessione _getValiditaAbbonamento chiaveAbbonamento " + chiaveAbbonamento);
-            if (chiaveAbbonamento.equals("")){
-                dataValiditaAbbonamento = "";
-            }
-            else{
-                //decripto la stringa
-                try{
-                    String[] chiaveSplit = chiaveAbbonamento.split("\\[ECONTAB\\]");
-                    String idDispositivoCript = chiaveSplit[0];
-					System.out.println("EConTab: Sessione _getValiditaAbbonamento idDispositivoCript " + idDispositivoCript);
-                    //se sono sullo stesso dispositivo verifico la data di validità dell'abbonamento
-                    if (Licenza.getIDdispositivo(context).equals(idDispositivoCript)){
-                        String id_abb = chiaveSplit[1];
-                        int stato = Integer.parseInt(chiaveSplit[2]);
-                        long dataProssimoControllo = Long.parseLong(chiaveSplit[3]);
-                        if (id_abb.equals(Licenza.ABBONAMENTO_ANNUALE) && stato==Licenza.ABBONAMENTO_ATTIVO){
-                           dataValiditaAbbonamento = ""+dataProssimoControllo;
-						   System.out.println("EConTab: Sessione _getValiditaAbbonamento dataValiditaAbbonamento " + dataValiditaAbbonamento);
-                        }
-						else
-						{
-							System.out.println("EConTab: Sessione _getValiditaAbbonamento dataValiditaAbbonamento ERROR");
-						}
-                    }
-                 }
-                catch (Exception e){
-					System.out.println("EConTab: Sessione _getValiditaAbbonamento dataValiditaAbbonamento EXCEPTION");
-                }
-            }
-
-            //se qualche controllo non è stato superato imposto a blank (=Licenza Light)
-            if (dataValiditaAbbonamento==null){
-                dataValiditaAbbonamento = "";
-            }
-        }
-		System.out.println("EConTab: Sessione _getValiditaAbbonamento dataValiditaAbbonamento " + dataValiditaAbbonamento);
-		System.out.println("EConTab: Sessione _getValiditaAbbonamento EXIT");
-        return dataValiditaAbbonamento;
-    }
 
     private LruCache<String, Bitmap> _getCacheIcone() {
         if (cacheIcone==null){

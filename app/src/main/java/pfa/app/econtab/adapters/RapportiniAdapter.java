@@ -92,14 +92,9 @@ public class RapportiniAdapter extends EConTabListViewAdapter  {
         ((RapportiniViewHolder) viewholder).note.setText(val.getAsString(Rapportini.NOTE));
         ((RapportiniViewHolder) viewholder).note.setTag(position);
 
-        if (Sessione.isLicenzaBusiness(context)){
-            ((RapportiniViewHolder) viewholder).operatore.setVisibility(View.VISIBLE);
-            ((RapportiniViewHolder) viewholder).operatore.setText(" - "+val.getAsString("nome_operatore")+" "+val.getAsString("cognome_operatore"));
-            ((RapportiniViewHolder) viewholder).operatore.setTag(position);
-        }
-        else{
-            ((RapportiniViewHolder) viewholder).operatore.setVisibility(View.GONE);
-        }
+        ((RapportiniViewHolder) viewholder).operatore.setVisibility(View.VISIBLE);
+        ((RapportiniViewHolder) viewholder).operatore.setText(" - "+val.getAsString("nome_operatore")+" "+val.getAsString("cognome_operatore"));
+        ((RapportiniViewHolder) viewholder).operatore.setTag(position);
         // "Duplica per altri utenti" non c'e' piu': chi ha lavorato si indica con gli operatori di ogni riga, e
         // duplicare il rapportino per altri conterebbe due volte le stesse ore
         ((RapportiniViewHolder) viewholder).buttonDuplica.setVisibility(View.GONE);

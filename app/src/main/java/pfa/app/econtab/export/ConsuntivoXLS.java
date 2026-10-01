@@ -50,9 +50,6 @@ import pfa.app.econtab.db.table.Utenti;
 import pfa.app.econtab.utils.Utility;
 import pfa.app.general.simplecropimage.Util;
 
-/**
- * Created by daniele on 18/02/2015.
- */
 public class ConsuntivoXLS {
 
     private Context ctx = null;

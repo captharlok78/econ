@@ -8,7 +8,6 @@ import android.content.ContentValues;
  * Contiene un ContentValues con ID e DESCRIZIONE
  * L'id serve per sapere la chiave del record selezionato
  * il metodo toString ritorna la descrizione che è quella mostrata nella lista
- * @author Daniele
  *
  */
 public class EConTabAutoCompleteContentValue

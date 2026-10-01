@@ -18,9 +18,6 @@ import pfa.app.econtab.db.DbInterno;
 import pfa.app.econtab.utils.Utility;
 
 
-/**
- * Created by matteo on 09/10/2017.
- */
 
 public class SqlManagerActivity extends EConTabActivity {
     TextView selTabella = null;

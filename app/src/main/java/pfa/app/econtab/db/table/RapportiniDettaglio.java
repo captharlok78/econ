@@ -59,8 +59,4 @@ public class RapportiniDettaglio extends AbstractTable {
                 + ",0) / 60.0 end)";
     }
 
-    @Override
-    protected int getMassimoNumeroRecordLicenzaGratis() {
-        return 20;
-    }
 }

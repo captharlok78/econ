@@ -29,7 +29,6 @@ import android.view.WindowManager.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.vending.billing.util.IabHelper;
 import pfa.app.econtab.api.MercuryApiClient;
 import pfa.app.econtab.api.TokenManager;
 
@@ -47,7 +46,6 @@ import pfa.app.econtab.fragments.EConTabFragment;
 import pfa.app.econtab.server.ConfigurazioneGenActivity;
 import pfa.app.econtab.api.TokenManager;
 import pfa.app.econtab.utils.AsyncTaskExecutorService;
-import pfa.app.econtab.utils.Licenza;
 import pfa.app.econtab.utils.Sessione;
 import pfa.app.econtab.utils.Utility;
 import pfa.app.econtab.views.EConTabSpecialView;
@@ -57,7 +55,6 @@ public abstract class EConTabActivity extends FragmentActivity {
     public static final int NO_BACKGROUND = -1;
     public static final int NO_MENU = -1;
     public static String BASE_64_PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA+aG/tyW2kwzN62qvdaTSIWf4veiQ2l1v/HVTjsdEb4+QMr+lmCX4KUdsEI2VDkxoFZBAnsHEXDaFzjPnlVW4BFVJ6NGukPimRs1AXFR4jAbvV+FkrFyDJbrLOzvt0J7yHoTXUl/8gNO4vrRt3dISYbpill+3BTg7WkSUIw5VrHUkvOW5jvDmsH5PLHvneg4582Q0PsGqilNw07b6vONCDE/HUVDi+l4u1Cthw2zD8hm6b+MNg7KQfqDFKSfYefZy2d9URKJSF4QXuBtZ0Q5sCsCXZjJ6rqIipV2fYa0SDqbiyfV2fESXL8A4jH+dgXEcjlxvLUtsI4nLIT9rvUfQDQIDAQAB";
-    public IabHelper mHelper = null;
     private boolean scalingComplete = false;
     private boolean backgroundComplete = false;
     private boolean sceltaAziendaComplete = false;
@@ -176,18 +173,6 @@ public abstract class EConTabActivity extends FragmentActivity {
                 //System.out.println("EConTab: EConTabActivity onWindowFocusChanged 3");
                 sceltaAziendaComplete = true;
                 DbInterno db = new DbInterno(this);
-                if (!Sessione.isLicenzaBusiness(this)) {
-                    // Se non � licenza server imposto l'id utente di default
-                    Sessione.setIdOperatore(1, this);
-                    ContentValues where = new ContentValues();
-                    where.put(Utenti.ID_UTENTE, -1);
-                    ArrayList<Object> utente = db.eseguiSelect(new Utenti(), where, null);
-                    if (utente.size() > 0) {
-                        ContentValues ut = (ContentValues) utente.get(0);
-                        Sessione.setNomeOperatore(ut.getAsString(Utenti.NOME) + " " + ut.getAsString(Utenti.COGNOME));
-                    }
-
-                }
 
                 //System.out.println("EConTab: EConTabActivity onWindowFocusChanged 4");
 
@@ -263,7 +248,7 @@ public abstract class EConTabActivity extends FragmentActivity {
             getMenuInflater().inflate(getMenuID(), menu);
 
             boolean hasMercuryToken = TokenManager.getInstance(this).hasToken();
-            if (!Sessione.isLicenzaBusiness(this) && !hasMercuryToken) {
+            if (!hasMercuryToken) {
                 try {
                     menu.findItem(R.id.item_logout).setVisible(false);
                     menu.findItem(R.id.item_sinc).setVisible(false);
@@ -319,111 +304,9 @@ public abstract class EConTabActivity extends FragmentActivity {
 
         if (item.getItemId() == R.id.item_about) {
             System.out.println("EConTab: EConTabActivity onOptionsItemSelected item_about");
-            String versionNumber = "";
-            try {
-                versionNumber = getPackageManager().getPackageInfo(getPackageName(), 0).versionName + " build:" + getPackageManager().getPackageInfo(getPackageName(), 0).versionCode ;
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
-            }
-            Utility.mostraDialog(getString(R.string.versione_installata), versionNumber, this, getString(R.string.chiudi));
-        }
-
-        // DL: TODO
-        if(false)
-        {
-            /*
-            if (item.getItemId() == R.id.item_sitoweb) {
-                System.out.println("EConTab: EConTabActivity onOptionsItemSelected item_sitoweb");
-                Utility.apriSito(this, "http://www.econtab.mobi");
-            }
-            */
-            if (item.getItemId() == R.id.item_feedback) {
-                System.out.println("EConTab: EConTabActivity onOptionsItemSelected item_feedback");
-                Account[] acc = Licenza.getGoogleAccount(this);
-                String account = "";
-                if (acc.length > 0) {
-                    account = acc[0].name;
-                }
-
-                String URL = "http://www.econtab.mobi/contatti/?account=" + account + "&model=" + Build.MODEL + "&android=" + Build.VERSION.RELEASE + "(API" + Build.VERSION.SDK_INT + ")";
-           /*try {
-                URL = URLEncoder.encode(URL,"UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }*/
-                Utility.apriSito(this, URL);
-            }
-        }
-        else{
-            /*
-            if (item.getItemId() == R.id.item_sitoweb) {
-                System.out.println("EConTab: EConTabActivity onOptionsItemSelected item_sitoweb (BY-PASS)");
-            }
-            */
-            if (item.getItemId() == R.id.item_feedback) {
-                System.out.println("EConTab: EConTabActivity onOptionsItemSelected item_feedback (BY-PASS)");
-            }
-        }
-
-        if (item.getItemId()==R.id.item_controlla_aggiornamenti){
-            System.out.println("EConTab: EConTabActivity onOptionsItemSelected item_controlla_aggiornamenti");
-            if (Utility.isOnline(this)) {
-                // new class for asynchronous task
-                AsyncTaskExecutorService<Void, Integer, String> task = new AsyncTaskExecutorService<Void, Integer, String>(){
-
-                    @Override
-                    protected String doInBackground(Void unused) {
-                        String resultws = "NO";
-                        try{
-                            String url = pfa.app.econtab.Globals.LICENSE_URL_SERVER + "/mobileapp/version?type=Android";
-                            resultws =  Utility.getStringaDaPaginaWeb(url).toString();
-                        }
-                        catch(Exception e){
-                            e.printStackTrace();
-                        }
-                        System.out.println("EConTab: EConTabActivity doInBackground resultws " + resultws);
-                        return resultws;
-                    }
-
-                    @Override
-                    protected void onPostExecute(String result) {
-                        SharedPreferences.Editor editor = getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE).edit();
-                        editor.putString("DATA_VERIFICA_AGGIORNAMERNTI", Utility.dataToString(Calendar.getInstance()));
-                        editor.apply();
-                        // Guard: non mostrare dialog se l'activity non è più in foreground
-                        if (isFinishing() || isDestroyed()) return;
-                        if (result != null && !result.trim().equals("NO")){
-                            PackageInfo pinfo;
-                            try {
-                                pinfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-                                int versionCode = pinfo.versionCode;
-                                int newVersion = Integer.parseInt(result.trim());
-                                if (newVersion > versionCode){
-                                    Utility.mostraConfermaDialog("", "E' disponibile una nuova versione dell'app. Aggiorna adesso!", EConTabActivity.this, "Aggiorna", "No, grazie", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            if (i==DialogInterface.BUTTON_POSITIVE){
-                                                Utility.aggiornaApp(EConTabActivity.this);
-                                            }
-                                        }
-                                    });
-                                } else {
-                                    Utility.mostraDialog("","Nessun aggiornamento disponibile",EConTabActivity.this,"OK");
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                Utility.mostraDialog("","Nessun aggiornamento disponibile",EConTabActivity.this,"OK");
-                            }
-                        } else {
-                            Utility.mostraDialog("","Nessun aggiornamento disponibile",EConTabActivity.this,"OK");
-                        }
-                    }
-                };
-                task.execute();
-            }
-            else{
-                Utility.mostraDialog("",getString(R.string.connessione_non_disponibile),this,"OK");
-            }
+            Utility.mostraDialog(getString(R.string.versione_installata),
+                    pfa.app.econtab.utils.VersioneApp.etichetta(this) + "\n" + pfa.app.econtab.utils.Editore.nome(this),
+                    this, getString(R.string.chiudi));
         }
 
         if (item.getItemId() == R.id.item_cerca_codice) {
@@ -567,15 +450,11 @@ public abstract class EConTabActivity extends FragmentActivity {
                     this, "OK");
             return;
         }
-        DbInterno db = new DbInterno(this);
-        if (tabella.controllaMaxInserimentiLicenza(db)) {
-            if (resultCode > 0) {
-                startActivityForResult(intent, resultCode);
-            } else {
-                startActivity(intent);
-            }
+        if (resultCode > 0) {
+            startActivityForResult(intent, resultCode);
+        } else {
+            startActivity(intent);
         }
-        db.close();
     }
 
     /**
@@ -613,10 +492,6 @@ public abstract class EConTabActivity extends FragmentActivity {
         TokenManager.getInstance(this).clearToken();
         pfa.app.econtab.utils.DittaLocale.cancella(this);
         pfa.app.econtab.utils.CatalogoLocale.cancella(this);
-        getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE)
-                .edit()
-                .remove(Sessione.CODICE_ATTIVAZIONE)
-                .apply();
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
@@ -709,101 +584,11 @@ public abstract class EConTabActivity extends FragmentActivity {
         impostaTestoAzienda(Sessione.getNomeDittaSelezionata());
         impostaTestoOperatore(Sessione.getNomeOperatore());
 
-        if (isControllaRegistrazione()) {
-            // Il token Mercury è sufficiente come prova di registrazione
-            boolean hasMercuryToken = pfa.app.econtab.api.TokenManager.getInstance(this).hasToken();
-            SharedPreferences pref = getSharedPreferences(Utility.APP_NAME, MODE_PRIVATE);
-            if (!hasMercuryToken && !pref.contains("ECONTAB_REG")) {
-                Intent intent = new Intent(this, LoginActivity.class);
-                startActivity(intent);
-                return;
-            } else if (hasMercuryToken) {
-                // Autenticato via Mercury: salta i controlli licenza legacy
-            } else {
-                String dataultimaVerifica = pref.getString("DATA_VERIFICA", "01/01/1970");
-
-                long ultimaVerificaNumber = Utility.dataToNumber(dataultimaVerifica);
-                Calendar oggi = Calendar.getInstance();
-                oggi.set(Calendar.HOUR_OF_DAY, 0);
-                oggi.set(Calendar.MINUTE, 0);
-                oggi.set(Calendar.SECOND, 0);
-                long oggiNumber = Utility.dataToNumber(oggi);
-
-                if (ultimaVerificaNumber > oggiNumber) {
-                    //imposto la data ultima verifica a ieri per intercettare perchè non può essere nel futuro
-                    Calendar ieri = Calendar.getInstance();
-                    ieri.add(Calendar.DATE, -1);
-                    ieri.set(Calendar.HOUR_OF_DAY, 0);
-                    ieri.set(Calendar.MINUTE, 0);
-                    ieri.set(Calendar.SECOND, 0);
-
-                    ultimaVerificaNumber = Utility.dataToNumber(ieri);
-                }
-
-                // faccio il controllo una volta al giorno
-                if (oggiNumber > ultimaVerificaNumber) {
-                    // intanto imposto il controllo cos� le prossime activity non lo rilanciano
-                    // poi al massimo il servizio lo reimposter� al 01/01/1970 se il controllo non va a buon
-                    // fine
-                    // Toast.makeText(this, "" + oggiNumber + " - " + ultimaVerificaNumber,
-                    // Toast.LENGTH_LONG).show();
-                    Editor editor = pref.edit();
-                    editor.putString("DATA_VERIFICA", Utility.dataToString(Calendar.getInstance()));
-                    editor.apply();
-                    if (Utility.isOnline(this)) {
-                        //  Intent intentService = new Intent(this, EConTabService.class);
-                        //  startService(intentService);
-
-                        //qui verifico anche la scadenza dell'abbonamento direttamente online
-                        Licenza.controllaAbbonamentoOnLine(this);
-                    } else {
-                        String dataValiditaAbbonamento = Sessione.getValiditaAbbonamento(this);
-                        if (!dataValiditaAbbonamento.equals("")) {
-                            Calendar dataValiditaCal = Utility.numberToDataCalendar(Long.parseLong(dataValiditaAbbonamento));
-                            if (Calendar.getInstance().after(dataValiditaCal)) {
-
-                                //dataValiditaCal.add(Calendar.DATE,10);
-                                String messaggio = getString(R.string.messaggio_abbonamento_scaduto);
-                                //   messaggio = messaggio+System.getProperty("line.separator")+ getString(R.string.messaggio_abbonamento_scaduto_2)+" "+Utility.dataToString(dataValiditaCal);
-
-                                String[] opzioni = new String[2];
-                                opzioni[0] = getString(R.string.verifica_adesso) + " (" + getString(R.string.connessione_necessaria) + ")";
-                                opzioni[1] = getString(R.string.rimanda_verifica) + "" + System.getProperty("line.separator") + "(" + getString(R.string.messaggio_abbonamento_scaduto_2) + " " + Utility.dataToString(dataValiditaCal) + ")";
-                                Utility.mostraSelezioneDialog(messaggio, opzioni, this, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        if (i == 0) {
-                                            Intent intent = new Intent(EConTabActivity.this, GestAbbonamentoActivity.class);
-                                            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                                            startActivity(intent);
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Controllo autenticazione: Mercury token oppure utente locale (legacy)
-        if (isControllaLogin()) {
-            boolean hasMercuryToken = pfa.app.econtab.api.TokenManager.getInstance(this).hasToken();
-            if (!hasMercuryToken) {
-                if (Sessione.isLicenzaBusiness(this) && Sessione.getIdOperatore(this) == 0) {
-                    db = new DbInterno(this);
-                    ArrayList<Object> utenti = db.eseguiSelect(
-                            "Select * from " + Utenti.NOME_TABELLA + " where " + Utenti.ID_UTENTE + ">0", null);
-                    db.close();
-                    Intent intent;
-                    if (utenti.size() > 0) {
-                        intent = new Intent(this, LoginActivity.class);
-                    } else {
-                        intent = new Intent(this, ConfigurazioneGenActivity.class);
-                    }
-                    startActivity(intent);
-                }
-            }
+        // Accesso: serve il token di Mercury (le licenze sono sul server, ACCESSI_E_LICENZE.md); senza si va al login
+        if ((isControllaRegistrazione() || isControllaLogin())
+                && !pfa.app.econtab.api.TokenManager.getInstance(this).hasToken()) {
+            startActivity(new Intent(this, LoginActivity.class));
+            return;
         }
 
         System.out.println("EConTab: EConTabActivity onResume EXIT");
@@ -1104,16 +889,6 @@ public abstract class EConTabActivity extends FragmentActivity {
 
         });
         positionAnimator.start();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mHelper != null) {
-            mHelper.dispose();
-        }
-        mHelper = null;
-
     }
 
     public class EConTabAsyncTask extends AsyncTask<Void, Integer, String> {

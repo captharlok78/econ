@@ -45,7 +45,7 @@ public abstract class EConTabListaStandardFragment extends EConTabFragment
     @Override
     public void onResume() {
         super.onResume();
-        controller.mostraSoloForm();
+        controller.apertura();
     }
 
     /** Da richiamare da aggiornaDopoCancellazione() dell'Activity che ospita il fragment. */

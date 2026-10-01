@@ -119,6 +119,26 @@ public interface MercuryApiService {
     @GET("api/version/mercury")
     Call<VersionResponse> getVersioneMercury();
 
+    /** Token nuovo con uno ancora valido (prima della scadenza), stessa risposta del login. */
+    @POST("api/auth/rinnova")
+    Call<LoginResponse> rinnova(@Body java.util.Map<String, Object> dati);
+
+    /** Dati del dispositivo per Sonata › Terminali e stato del terminale sul server (STATO_SISTEMA_APP.md). */
+    @POST("api/auth/terminale")
+    Call<TerminaleResponse> inviaTerminale(@Body java.util.Map<String, Object> dati);
+
+    class TerminaleResponse {
+        public int id;
+        public String nome;
+        public String descrizione;
+        public boolean attivo;
+        public String registrato;
+        public String ultimoAggiornamento;
+        public String ditta;
+        public String utente;
+        public String versioneApp;
+    }
+
     // ── DTO inline ────────────────────────────────────────────────────────
 
     class LoginRequest {
@@ -334,6 +354,11 @@ public interface MercuryApiService {
         public boolean esatta;
         /** Data del rilascio, "Y-m-d" (null con server vecchi). */
         public String data;
+        /** Solo per Mercury: editore, sito ed e-mail di assistenza (utils.Editore), null con server vecchi. */
+        public String editore;
+        public String sito;
+        public String emailAssistenza;
+        public String telefonoAssistenza;
     }
 
     class ForgotPasswordRequest {

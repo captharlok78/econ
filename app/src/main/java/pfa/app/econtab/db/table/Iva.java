@@ -28,9 +28,4 @@ public class Iva extends AbstractTable {
 		return IvaDettaglioActivity.class;
 	}
 
-	@Override
-	protected int getMassimoNumeroRecordLicenzaGratis() {
-		// TODO Auto-generated method stub
-		return 2;
-	}
 }

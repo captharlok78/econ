@@ -12,15 +12,16 @@
         android:orientation="horizontal"
         android:background="#1565C0"
         android:gravity="center_vertical"
-        android:padding="12dp">
+        android:paddingStart="4dp"
+        android:paddingEnd="12dp">
 
+        <!-- indietro come nelle altre testate (header_dettaglio_standard.xml) -->
         <ImageButton
             android:id="@+id/btnIndietro"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@android:drawable/ic_media_previous"
-            android:tint="#FFFFFF"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_back"
             android:onClick="chiudi"
             android:contentDescription="Indietro"/>
 
@@ -365,7 +366,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="ATTIVAZIONE TERMINALE"
+                android:text="TERMINALE"
                 android:textSize="11sp"
                 android:textColor="#757575"
                 android:textStyle="bold"
@@ -401,7 +402,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Stato attivazione"
+                            android:text="Stato sul server"
                             android:textSize="12sp"
                             android:textColor="#757575"/>
                         <TextView
@@ -431,7 +432,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Codice attivazione"
+                            android:text="Registrazione"
                             android:textSize="12sp"
                             android:textColor="#757575"/>
                         <TextView
@@ -457,108 +458,16 @@
                 android:layout_marginBottom="4dp"
                 android:letterSpacing="0.08"/>
 
+            <!-- righe etichetta/valore costruite da StatoSistemaActivity.mostraDispositivo() -->
             <LinearLayout
+                android:id="@+id/boxDispositivo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="#FFFFFF"
                 android:elevation="1dp"
                 android:padding="14dp"
-                android:layout_marginBottom="16dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="10dp">
-                    <View
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
-                        android:layout_marginEnd="10dp"/>
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="ID dispositivo"
-                            android:textSize="12sp"
-                            android:textColor="#757575"/>
-                        <TextView
-                            android:id="@+id/tvDeviceId"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="—"
-                            android:textSize="13sp"
-                            android:textColor="#212121"
-                            android:fontFamily="monospace"/>
-                    </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="10dp">
-                    <View
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
-                        android:layout_marginEnd="10dp"/>
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Versione app"
-                            android:textSize="12sp"
-                            android:textColor="#757575"/>
-                        <TextView
-                            android:id="@+id/tvAppVersion"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="—"
-                            android:textSize="14sp"
-                            android:textColor="#212121"/>
-                    </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-                    <View
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
-                        android:layout_marginEnd="10dp"/>
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Android"
-                            android:textSize="12sp"
-                            android:textColor="#757575"/>
-                        <TextView
-                            android:id="@+id/tvAndroid"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="—"
-                            android:textSize="14sp"
-                            android:textColor="#212121"/>
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
+                android:layout_marginBottom="16dp" />
 
         </LinearLayout>
     </ScrollView>

@@ -36,10 +36,8 @@ public class ClientiDettaglioModActivity extends EConTabDettaglioActivity {
 			// in modifica l'indirizzo si cambia dalla linguetta Indirizzi della scheda
 			findViewById(R.id.sezione_sede).setVisibility(View.GONE);
 		}
-		// per le licenze server non si modifica il codice che arriva dal server (modifica per PFA)
-		if (Sessione.isLicenzaBusiness(this)) {
-			findViewById(R.id.editText_codice).setEnabled(false);
-		}
+		// il codice del cliente arriva dal server: non si modifica dal dispositivo
+		findViewById(R.id.editText_codice).setEnabled(false);
 		((RadioButton) findViewById(R.id.radio_tipo_persona)).setOnCheckedChangeListener((b, persona) -> mostraPartitaIva(!persona));
 	}
 

@@ -86,7 +86,6 @@ import pfa.app.econtab.views.EConTabElementoElettrico;
 /**
  * Contiene funzioni di comodit� non di logica di business
  * 
- * @author daniele
  * 
  */
 public class Utility {
@@ -1392,57 +1391,6 @@ public class Utility {
 
     }
 
-	/**
-	 * Visualizza un file dalla cartella asset
-	 * 
-	 * @param ctx
-	 * @param fileName
-	 * @param tipoFile
-	 */
-	public static void visualizzaFileAsset(Context ctx, String fileName, String tipoFile) {
-		AssetManager assetManager = ctx.getAssets();
-
-		InputStream in = null;
-		OutputStream out = null;
-		File file = new File(ctx.getFilesDir(), fileName);
-		try {
-			in = assetManager.open(fileName);
-			out = ctx.openFileOutput(file.getName(), Context.MODE_WORLD_READABLE);
-
-			byte[] buffer = new byte[1024];
-			int read;
-			while ((read = in.read(buffer)) != -1) {
-				out.write(buffer, 0, read);
-			}
-
-			out.flush();
-
-		} catch (Exception e) {
-			Log.e("tag", e.getMessage());
-		} finally {
-			try {
-				in.close();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			in = null;
-			try {
-				out.close();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			out = null;
-		}
-
-		Intent intent = new Intent(Intent.ACTION_VIEW);
-
-		intent.setDataAndType(Uri.parse("file://" + ctx.getFilesDir() + File.separator + fileName), tipoFile);
-
-		ctx.startActivity(intent);
-	}
-
 	public static String getColoreCategoria(int idCategoria) {
 		// TODO Auto-generated method stub
 		if (idCategoria == 1) {
@@ -1556,28 +1504,6 @@ public class Utility {
 	public static String getURLServer(Context ctx) {
 		// TODO Auto-generated method stub
         return ctx.getSharedPreferences(APP_NAME, ctx.MODE_PRIVATE).getString("URL", "http://127.0.0.1:8000/");
-	}
-
-	public static String getStringaDaPaginaWeb(String url) {
-		System.out.println("EConTab: Utility getStringaDaPaginaWeb ENTER url=" + url);
-		OkHttpClient client = new OkHttpClient.Builder()
-				.connectTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
-				.readTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
-				.build();
-		Request request = new Request.Builder().url(url).build();
-		try (Response response = client.newCall(request).execute()) {
-			if (!response.isSuccessful()) {
-				Log.w("MyApp", "Download Error: " + response.code() + " | for URL: " + url);
-				return null;
-			}
-			ResponseBody body = response.body();
-			String result = body != null ? body.string() : null;
-			System.out.println("EConTab: Utility getStringaDaPaginaWeb response=" + result);
-			return result;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
 	}
 
 	public static ArrayList<JSONObject> toJSONArrayList(ArrayList<Object> records) throws JSONException {
@@ -1702,78 +1628,6 @@ public class Utility {
         i.setData(Uri.parse(url));
         ctx.startActivity(i);
     }
-
-	public static void aggiornaApp(final Context ctx) {
-		// DL: TODO
-		/*
-		AsyncTask<Void, Integer, String> task = new AsyncTask<Void, Integer, String>(){
-			ProgressDialog pd = null;
-			@Override
-			protected String doInBackground(Void... params) {
-				// TODO Auto-generated method stub
-				String result = "";
-				try{
-					DefaultHttpClient httpclient = new DefaultHttpClient();
-
-					HttpParams httpParameters = new BasicHttpParams();
-					// set the timeout in milliseconds until a connection is established
-					// the default value is zero, that means the timeout is not used
-					int timeoutConnection = 3000;
-					HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
-					// set the default socket timeout (SO_TIMEOUT) in milliseconds
-					// which is the timeout for waiting for data
-					int timeoutSocket = 5000;
-					HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
-
-					httpclient.setParams(httpParameters);
-
-					HttpGet get = new HttpGet("http://econtab.mobi/download/econtab.apk");
-					HttpEntity entity = httpclient.execute( get ).getEntity();
-
-					if( entity.getContentType().getValue().equalsIgnoreCase("application/vnd.android.package-archive")) {
-						String fname = "econtab.apk";
-						FileOutputStream fos = ctx.getApplicationContext().openFileOutput( fname, Context.MODE_WORLD_READABLE);
-						entity.writeTo(fos);
-						fos.close();
-						Intent notificationIntent = new Intent(Intent.ACTION_VIEW );
-						notificationIntent.setDataAndType(
-								Uri.parse("file://" + ctx.getFilesDir().getAbsolutePath() + "/" + fname),
-								"application/vnd.android.package-archive");
-						notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						ctx.startActivity(notificationIntent);
-					}
-
-				}
-				catch(Exception e){
-					e.printStackTrace();
-					result = Log.getStackTraceString(e);
-				}
-				return result;
-			}
-
-			@Override
-			protected void onPreExecute() {
-				pd = new ProgressDialog(ctx);
-				pd.setMax(100);
-				pd.setTitle("Download...");
-				pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-				pd.setCancelable(false);
-				pd.setIndeterminate(true);
-				pd.show();
-			}
-
-			@Override
-			protected void onPostExecute(String s) {
-				super.onPostExecute(s);
-				pd.cancel();
-				if (!s.equals("")){
-					Utility.mostraDialog("",s,ctx,"OK");
-				}
-			}
-		};
-		task.execute();
-		*/
-	}
 
 	public static String readStringFromAPrivateFile(Context ctx, String filename)
 	{

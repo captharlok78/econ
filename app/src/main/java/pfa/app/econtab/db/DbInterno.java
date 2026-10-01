@@ -67,7 +67,7 @@ import pfa.app.econtab.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECONTAB.db";
 	public static final String DATABASE_NAME_ZIP = ".econtab.db";
-	public static final int SCHEMA_VERSION = 33;
+	public static final int SCHEMA_VERSION = 34;
 
 	private Context cont = null;
 
@@ -168,6 +168,13 @@ public class DbInterno extends SQLiteOpenHelper {
 		db.execSQL(new Composizioni().getSQL_create());
 		db.execSQL(new ComposizioniCantiere().getSQL_create());
 		db.execSQL(new Costruttori().getSQL_create());
+		// tabelle degli schemi recenti: anche alla prima installazione, non solo negli aggiornamenti
+		db.execSQL(new pfa.app.econtab.db.table.SettoriArticolo().getSQL_create());
+		db.execSQL(new pfa.app.econtab.db.table.ModelliStampa().getSQL_create());
+		db.execSQL(new pfa.app.econtab.db.table.TipologieModello().getSQL_create());
+		db.execSQL(new pfa.app.econtab.db.table.DitteModelliStampa().getSQL_create());
+		db.execSQL(new ClientiIndirizzi().getSQL_create());
+		db.execSQL(new ClientiReferenti().getSQL_create());
 		db.execSQL(new Ditte().getSQL_create());
 		db.execSQL(new Elementi().getSQL_create());
 		db.execSQL(new ElementiCantiere().getSQL_create());
@@ -489,6 +496,25 @@ public class DbInterno extends SQLiteOpenHelper {
 					}
 				}
 				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
+			}
+		}
+		// Schema 34: le installazioni nuove con lo schema 33 non avevano le tabelle aggiunte dagli aggiornamenti (onCreate
+		// non le creava): si creano ora se mancano, e si riscarica tutto
+		if (oldVersion<34){
+			if (oldVersion<newVersion){
+				AbstractTable[] recenti = { new pfa.app.econtab.db.table.SettoriArticolo(), new pfa.app.econtab.db.table.ModelliStampa(),
+						new pfa.app.econtab.db.table.TipologieModello(), new pfa.app.econtab.db.table.DitteModelliStampa(),
+						new ClientiIndirizzi(), new ClientiReferenti() };
+				boolean mancavano = false;
+				for (AbstractTable t : recenti) {
+					if (getTableColumns(db, t.getNomeTabella()).isEmpty()) {
+						db.execSQL(t.getSQL_create());
+						mancavano = true;
+					}
+				}
+				if (mancavano) {
+					Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
+				}
 			}
 		}
 		// Schema 33: tipologie di modello e modello della ditta per documento (GESTIONE_RAPPORTINI.md §16); arrivano interi

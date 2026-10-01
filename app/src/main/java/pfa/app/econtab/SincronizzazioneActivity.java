@@ -48,6 +48,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     private static final int    REQUEST_RELOGIN  = 9001;
 
     public static final String EXTRA_MODE    = "SYNC_MODE";
+    /** Avvio senza un altro tocco (dalla schermata Sincronizzazione). */
+    public static final String EXTRA_AUTOMATICO = "AUTOMATICO";
     public static final String MODE_DOWNLOAD = "download";
     public static final String MODE_UPLOAD   = "upload";
     /**
@@ -315,7 +317,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             } else {
                 setStatus("Accedi prima all'account Mercury", true);
             }
-        } else if (getIntent().getBooleanExtra("FIRST_RUN", false)) {
+        } else if (getIntent().getBooleanExtra("FIRST_RUN", false) || getIntent().getBooleanExtra(EXTRA_AUTOMATICO, false)) {
             // Auto-avvio solo al primo lancio dopo attivazione: nessun click richiesto
             btnSincronizza.setVisibility(android.view.View.GONE);
             uiHandler.postDelayed(() -> avviaSincronizzazione(null), 300);
@@ -429,10 +431,15 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         // versione del server per il piede delle stampe (GESTIONE_RAPPORTINI.md §15)
         try {
             Response<MercuryApiService.VersionResponse> v = api.getVersioneMercury().execute();
-            if (v.isSuccessful() && v.body() != null) pfa.app.econtab.utils.VersioneApp.salvaServer(this, v.body().versione);
+            if (v.isSuccessful() && v.body() != null) {
+                pfa.app.econtab.utils.VersioneApp.salvaServer(this, v.body().versione);
+                pfa.app.econtab.utils.Editore.salva(this, v.body());
+            }
         } catch (Exception ignored) {
             // resta quella salvata
         }
+        // dati del dispositivo per Sonata › Terminali (STATO_SISTEMA_APP.md); se non riesce, non ferma l'avvio
+        pfa.app.econtab.utils.DatiDispositivo.invia(this);
     }
 
     /** Anche nelle sincronizzazioni manuali: i pacchetti cambiati nel pannello valgono subito (utils.PermessiServer). */
@@ -627,6 +634,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         }
 
         if (dl.syncTimestamp != null) salvaUltimaSync(dl.syncTimestamp);
+        pfa.app.econtab.utils.UltimeSync.download(this);
         uiHandler.post(this::aggiornaEtichettaUltimaSync);
         setStatus("Download completato ✓", false);
 
@@ -818,6 +826,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
                 if (riga.total == 0) aggiornaRiga(riga, STATO_SALTO, 0, true);
             }
             setStatus("Nessun dato locale da inviare", false);
+            pfa.app.econtab.utils.UltimeSync.upload(this);
             return;
         }
 
@@ -866,6 +875,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
                     int inviati = totInsert + totUpdate + totDelete;
                     setStatus("Upload completato ✓  (" + inviati + " record)", false);
                 }
+                pfa.app.econtab.utils.UltimeSync.upload(this);
 
             } else {
                 if (upResp.code() == 401) {
@@ -1253,7 +1263,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     private void incrementaTabelleCompletate() {
         tabelleCompletate++;
         final int completate = tabelleCompletate;
-        final int totale     = MODE_UPLOAD.equals(syncMode) ? TABELLE_UPLOAD.length + TABELLE.length : TABELLE.length;
+        // si contano le tabelle scaricate (il contatore riparte da zero al download anche dopo l'invio)
+        final int totale     = TABELLE.length;
         uiHandler.post(() -> {
             progressGlobale.setProgress((int)(completate * 100.0 / totale));
             String attuale = textTabelleProgress.getText().toString();
@@ -1395,7 +1406,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         String ts    = getLastSyncTimestamp();
         String label = "1970-01-01T00:00:00".equals(ts)
                 ? "Nessuna sincronizzazione precedente"
-                : "Ultima sync: " + ts;
+                : "Ultimo download: " + pfa.app.econtab.utils.UltimeSync.etichettaDownload(this);
         textLastSync.setText(label);
     }
 

@@ -474,11 +474,6 @@ public class Preventivi extends AbstractTable {
 
 	}
 
-	@Override
-	protected int getMassimoNumeroRecordLicenzaGratis() {
-		// TODO Auto-generated method stub
-		return 2;
-	}
 
     /**
      * SQL dei clienti della ditta selezionata che hanno almeno un ordine APERTO: sono i soli per cui si puo'

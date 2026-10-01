@@ -12,9 +12,6 @@ import pfa.app.econtab.db.table.Costruttori;
 import pfa.app.econtab.db.table.Linee;
 import pfa.app.econtab.db.table.Placche;
 
-/**
- * Created by daniele on 15/01/2018.
- */
 
 public class AssCodiciLineeAdapter extends  EConTabListViewAdapter {
     private class AccCodiciLineeViewHolder extends EConTabViewHolder {

@@ -97,10 +97,5 @@ public class Anagrafica extends AbstractTable {
 		return n == null ? 0 : n;
 	}
 
-	@Override
-	protected int getMassimoNumeroRecordLicenzaGratis() {
-		// TODO Auto-generated method stub
-		return 1;
-	}
 
 }

@@ -68,6 +68,7 @@ public class MenuActivity extends EConTabActivity {
         items.add(new MenuItemDef(R.id.buttonImpostazioni, R.drawable.button_impostazioni,  R.string.impostazioni,   "IMPOSTAZIONI"));
         items.add(new MenuItemDef(R.id.buttonGuida,        R.drawable.button_guida,         R.string.guida,          "GUIDA"));
         items.add(new MenuItemDef(R.id.buttonSync,         R.drawable.button_sincronizza,   R.string.sincronizza,    "SINCRONIZZA"));
+        items.add(new MenuItemDef(R.id.buttonSetup,        R.drawable.button_setup,         R.string.setup,          "SETUP"));
         return items;
     }
 
@@ -128,35 +129,10 @@ public class MenuActivity extends EConTabActivity {
 
         costruisciGriglia();
         riparaDateLocali();
+        // sincronizzazione in background secondo Impostazioni › Preferenze del dispositivo (spenta di base)
+        pfa.app.econtab.utils.PreferenzeDispositivo.applicaSyncAutomatica(this);
         // a ogni login/apertura il listino si riallinea agli articoli della ditta (in background, senza avvisi)
         pfa.app.econtab.utils.CatalogoLocale.allineaInBackground(this);
-
-        SharedPreferences pref = getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE);
-        if (!pref.contains("PERINIZIARE") && pref.contains("ECONTAB_REG")) {
-            SharedPreferences.Editor editor = pref.edit();
-            editor.putString("PERINIZIARE", "1");
-            editor.apply();
-
-            findViewById(R.id.footer).postDelayed(() -> {
-                AlertDialog.Builder ab = new AlertDialog.Builder(MenuActivity.this);
-                ab.setTitle(getString(R.string.periniziare));
-                String[] opzioni = {
-                    getString(R.string.videoguide),
-                    getString(R.string.faq),
-                    getString(R.string.guidapdf)
-                };
-                ab.setItems(opzioni, (d, i) -> selezioneGuida(i));
-                ab.setIcon(android.R.drawable.ic_dialog_info);
-                ab.setNeutralButton(getString(R.string.chiudi),
-                    (d, i) -> Utility.mostraDialog("", getString(R.string.messaggio_guida), MenuActivity.this, "OK"));
-                AlertDialog di = ab.create();
-                di.show();
-                di.setCancelable(true);
-                di.setCanceledOnTouchOutside(true);
-                di.setOnCancelListener(
-                    d -> Utility.mostraDialog("", getString(R.string.messaggio_guida), MenuActivity.this, "OK"));
-            }, 2000);
-        }
 
         System.out.println("EConTab: MenuActivity onCreate EXIT");
     }
@@ -226,7 +202,7 @@ public class MenuActivity extends EConTabActivity {
             startActivity(new Intent(this, FornitoriLineeActivity.class)
                 .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
         } else if (id == R.id.buttonImpostazioni) {
-            startActivity(new Intent(this, ConfigurazioneActivity.class)
+            startActivity(new Intent(this, ImpostazioniActivity.class)
                 .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
         } else if (id == R.id.buttonPreventivi) {
             startActivity(new Intent(this, PreventiviActivity.class)
@@ -241,16 +217,21 @@ public class MenuActivity extends EConTabActivity {
             startActivity(new Intent(this, StatoSistemaActivity.class)
                 .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
         } else if (id == R.id.buttonGuida) {
-            String[] opzioni = {
-                getString(R.string.videoguide),
-                getString(R.string.faq),
-                getString(R.string.guidapdf),
-                getString(R.string.richiedi_assistenza)
-            };
+            // sito ed e-mail dell'editore (utils.Editore, cambiabili dal server)
+            String telefono = pfa.app.econtab.utils.Editore.telefonoAssistenza(this);
+            java.util.List<String> voci = new java.util.ArrayList<>();
+            voci.add("Sito web  (" + pfa.app.econtab.utils.Editore.sito(this).replaceFirst("^https?://", "") + ")");
+            voci.add(getString(R.string.richiedi_assistenza) + "  (" + pfa.app.econtab.utils.Editore.emailAssistenza(this) + ")");
+            if (!telefono.isEmpty()) voci.add("Chiama l'assistenza  (" + telefono + ")");
+            String[] opzioni = voci.toArray(new String[0]);
             Utility.mostraSelezioneDialog(getString(R.string.serve_aiuto), opzioni, this,
                 (dialog, i) -> selezioneGuida(i));
-        } else if (id == R.id.buttonSync) {
+        } else if (id == R.id.buttonSetup) {
+            // Setup: indirizzo del server, immagini, test, reset (STATO_SISTEMA_APP.md §4)
             startActivity(new Intent(this, ConfigurazioneGenActivity.class)
+                .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
+        } else if (id == R.id.buttonSync) {
+            startActivity(new Intent(this, SincronizzaActivity.class)
                 .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
         }
 
@@ -260,8 +241,13 @@ public class MenuActivity extends EConTabActivity {
     // ── Guida ─────────────────────────────────────────────────────────────────
 
     private void selezioneGuida(int i) {
-        // TODO: implementare navigazione guida
-        System.out.println("EConTab: MenuActivity selezioneGuida " + i);
+        if (i == 0) {
+            pfa.app.econtab.utils.Editore.apriSito(this);
+        } else if (i == 1) {
+            pfa.app.econtab.utils.Editore.scriviAssistenza(this, "Assistenza Econ", "");
+        } else {
+            pfa.app.econtab.utils.Editore.chiamaAssistenza(this);
+        }
     }
 
     // ── Scaling (non necessario: layout responsivo) ───────────────────────────
@@ -272,7 +258,7 @@ public class MenuActivity extends EConTabActivity {
     @Override
     protected boolean ridimensionaXY() { return false; }
 
-    // ── onResume: LED server + check aggiornamenti ────────────────────────────
+    // ── onResume: LED server e permessi ────────────────────────────
 
     @Override
     protected void onResume() {
@@ -283,66 +269,6 @@ public class MenuActivity extends EConTabActivity {
         verificaConnessioneServer();
         // pacchetti cambiati nel pannello: il menu si aggiorna subito (al massimo ogni 30 secondi, in background)
         pfa.app.econtab.utils.PermessiServer.aggiorna(this, this::costruisciGriglia);
-
-        SharedPreferences pref = getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE);
-        String dataultimaVerifica = pref.getString("DATA_VERIFICA_AGGIORNAMERNTI", "01/01/1970");
-
-        long ultimaVerificaNumber = Utility.dataToNumber(dataultimaVerifica);
-        Calendar oggi = Calendar.getInstance();
-        oggi.set(Calendar.HOUR_OF_DAY, 0);
-        oggi.set(Calendar.MINUTE, 0);
-        oggi.set(Calendar.SECOND, 0);
-        long oggiNumber = Utility.dataToNumber(oggi);
-
-        if (ultimaVerificaNumber > oggiNumber) {
-            Calendar ieri = Calendar.getInstance();
-            ieri.add(Calendar.DATE, -1);
-            ieri.set(Calendar.HOUR_OF_DAY, 0);
-            ieri.set(Calendar.MINUTE, 0);
-            ieri.set(Calendar.SECOND, 0);
-            ultimaVerificaNumber = Utility.dataToNumber(ieri);
-        }
-
-        if (oggiNumber > ultimaVerificaNumber && Utility.isOnline(this)) {
-            AsyncTaskExecutorService<Void, Integer, String> task =
-                new AsyncTaskExecutorService<Void, Integer, String>() {
-                    @Override
-                    protected String doInBackground(Void unused) {
-                        try {
-                            String url = pfa.app.econtab.Globals.LICENSE_URL_SERVER + "/mobileapp/version?type=Android";
-                            return Utility.getStringaDaPaginaWeb(url);
-                        } catch (Exception e) {
-                            return "NO";
-                        }
-                    }
-
-                    @Override
-                    protected void onPostExecute(String result) {
-                        SharedPreferences.Editor editor =
-                            getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE).edit();
-                        editor.putString("DATA_VERIFICA_AGGIORNAMERNTI",
-                            Utility.dataToString(Calendar.getInstance()));
-                        editor.apply();
-                        if (result != null && !result.trim().equals("NO")) {
-                            try {
-                                PackageInfo pinfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-                                int newVersion = Integer.parseInt(result.trim());
-                                if (newVersion > pinfo.versionCode) {
-                                    Utility.mostraConfermaDialog("",
-                                        "E' disponibile una nuova versione dell'app. Aggiorna adesso!",
-                                        MenuActivity.this, "Aggiorna", "No, grazie",
-                                        (dialog, which) -> {
-                                            if (which == DialogInterface.BUTTON_POSITIVE) {
-                                                Utility.aggiornaApp(MenuActivity.this);
-                                            }
-                                        });
-                                }
-                            } catch (Exception ignored) {}
-                        }
-                    }
-                };
-            task.execute();
-        }
 
         System.out.println("EConTab: MenuActivity onResume EXIT");
     }

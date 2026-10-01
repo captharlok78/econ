@@ -77,7 +77,7 @@ public class EConTabListaStandardController {
     public EConTabListaStandardController(Host host, EConTabListaStandardDefinition definizione) {
         this.host = host;
         this.definizione = definizione;
-        this.risultatiPerPagina = definizione.getRisultatiPerPaginaDefault();
+        this.risultatiPerPagina = pfa.app.econtab.utils.PreferenzeDispositivo.righePerPagina(host.getContext(), definizione.getRisultatiPerPaginaDefault());
         this.colonnaOrdinamento = definizione.getColonnaOrdinamentoDefault();
         this.ordineDiscendente = definizione.isOrdinamentoDefaultDiscendente();
     }
@@ -232,6 +232,20 @@ public class EConTabListaStandardController {
     /** Pulsante filtro nella barra in alto: apre/richiude la form filtri. */
     public void toggleFiltri() {
         cardFiltri.setVisibility(cardFiltri.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+    }
+
+    /**
+     * Apertura e ritorno sulla lista (onResume): secondo la preferenza del tablet, solo la form filtri oppure subito i
+     * risultati (al ritorno da una scheda si ricarica la ricerca in corso).
+     */
+    public void apertura() {
+        if (!pfa.app.econtab.utils.PreferenzeDispositivo.listeSubito(host.getContext())) {
+            mostraSoloForm();
+        } else if (ricercaAttiva) {
+            caricaPagina();
+        } else {
+            eseguiRicerca(false);
+        }
     }
 
     /** Stato di apertura del modulo: solo la form filtri, nessun caricamento dati. */

@@ -78,10 +78,5 @@ public class Ditte extends AbstractTable {
 		return true;
 	}
 
-	@Override
-	protected int getMassimoNumeroRecordLicenzaGratis() {
-		// TODO Auto-generated method stub
-		return 1;
-	}
 
 }

@@ -636,9 +636,4 @@ public class ElementiCantiere extends AbstractTable {
 		this.idElementoCantierePreferito = idElementoCantierePreferito;
 	}
 
-	@Override
-	protected int getMassimoNumeroRecordLicenzaGratis() {
-		// TODO Auto-generated method stub
-		return 140;
-	}
 }

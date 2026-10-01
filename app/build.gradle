@@ -21,7 +21,9 @@ android {
     buildToolsVersion '35.0.0'
 
     defaultConfig {
-        applicationId "pfa.app.econtab"
+        // ID dell'app (EDITORE_E_FIRMA.md): non si cambia piu' dopo la pubblicazione. Il namespace del codice Java resta
+        // pfa.app.econtab (interno, non visibile).
+        applicationId "com.ncfsistemi.econ"
         minSdkVersion 26
         targetSdkVersion 34
 
@@ -33,6 +35,14 @@ android {
         // Commit HEAD al momento della build: risolto lato server in versione "umana"
         // tramite GET /api/version/app?commit=... (vedi VersionResolver).
         buildConfigField "String", "GIT_COMMIT", "\"${gitCommitHash(rootDir)}\""
+
+        // Editore (EDITORE_E_FIRMA.md): valori predefiniti; il server li puo' cambiare senza una nuova versione
+        // (GET /api/version/mercury: editore, sito, emailAssistenza), l'app li ricorda (utils.Editore).
+        buildConfigField "String", "EDITORE_NOME",             '"NCF Sistemi - Alberto Coppo"'
+        buildConfigField "String", "EDITORE_SITO",             '"https://www.ncfsistemi.it"'
+        buildConfigField "String", "EDITORE_EMAIL_ASSISTENZA", '"acoppo@ncfsistemi.com"'
+        // vuoto = la voce "Chiama l'assistenza" non compare
+        buildConfigField "String", "EDITORE_TELEFONO_ASSISTENZA", '"041 4061548"'
     }
 
     namespace 'pfa.app.econtab'
@@ -58,7 +68,6 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
 
-    useLibrary 'org.apache.http.legacy'
     packagingOptions {
         resources {
             excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/LICENSE.txt', 'META-INF/license.txt', 'META-INF/NOTICE', 'META-INF/NOTICE.txt', 'META-INF/notice.txt', 'META-INF/ASL2.0', 'META-INF/*.kotlin_module']

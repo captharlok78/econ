@@ -17,14 +17,7 @@
     <string name="stato_rifiutato">Rifiutato</string>
     <string name="stato_chiuso">Chiuso</string>
     <!-- MESSAGGI -->
-    <string name="messaggio_vai_al_sito">Visita il sito xxxxxxx per maggiori informazioni e opportunità</string>
-    <string name="messaggio_abbonamento">Con l\'abbonamento potrai usufruire di tutte le funzioni di RVel (esportazioni in Excel, inserimenti illimitati). L\'abbonamento costa %1$s al mese.</string>
-    <string name="messaggio_abbonamento_scaduto">Verifica lo stato di attivazione del servizio completo</string>
-    <string name="messaggio_abbonamento_scaduto_2">Potrai continuare ad utilizzare il servizio completo per 10 giorni dopo</string>
-    <string name="messaggio_registrazione">La registrazione del tuo account è gratuita ed è necessaria per utilizzare il programma</string>
     <string name="messaggio_non_modificabile">Dato non modificabile</string>
-    <string name="messaggio_licenza_inserimenti">Con la versione light di RVel non è possibile effettuare ulteriori inserimenti.\nPer ulteriori informazioni invia una email a xxxxxxx o visita il sito xxxxxxx.\nIn alternativa puoi eliminare alcuni elementi esistenti per consentire un nuovo inserimento.</string>
-    <string name="messaggio_licenza_funzionalita">Con la versione light di RVel non è possibile utilizzare questa funzione.\nPer maggiori informazioni invia una email a xxxxxxx o visita il sito xxxxxxx.</string>
     <string name="messaggio_componenti">Verranno aggiunti i seguenti componenti</string>
     <string name="messaggio_composizione">Salvare i dati e passare alla configurazione?</string>
     <string name="messaggio_seleziona_inserisci_codice">Seleziona o digita un nuovo codice</string>
@@ -43,20 +36,17 @@
     <string name="messaggio_creazione_report">Creazione report in corso...</string>
     <string name="messaggio_sostituzione_scatola_relazioni">La scatola incassata può essere sostituita solo con una delle stesse dimensioni perché sono presenti collegamenti e/o connessioni</string>
     <string name="messaggio_eliminazione_frutto_relazioni">Per eliminare il componente è necessario eliminare prima le Connessioni</string>
-    <string name="messaggio_selezione_account">Seleziona un account Google tra quelli presenti sul dispositivo.</string>
-    <string name="messaggio_backup_ok">Backup del database completato nella cartella RVEL\\backup</string>
+    <string name="messaggio_backup_ok">Backup del database completato nella cartella ECONTAB/backup</string>
     <string name="messaggio_backup_ko">Backup del database non riuscito</string>
     <string name="messaggio_ripristino_ok">Ripristino del database completato</string>
     <string name="messaggio_ripristino_ko">Ripristino del database non riuscito</string>
     <string name="messaggio_attivazione_non_riuscita">Attivazione non riuscita, controlla il codice inserito.</string>
-    <string name="messaggio_licenza_non_attiva">Licenza non attivata</string>
-    <string name="messaggio_conferma_reset">Confermare l\'eliminazione di tutti i dati eConTab sul dispositivo? Dopo l\'eliminazione sarà sufficiente eseguire una normale sincronizzazione per importare i dati del server.</string>
+    <string name="messaggio_conferma_reset">Confermare l\'eliminazione di tutti i dati Econ sul dispositivo? Dopo l\'eliminazione sarà sufficiente eseguire una normale sincronizzazione per importare i dati del server.</string>
     <string name="messaggio_nessun_tubo_selezionato">Per questo cavo non è stato selezionato alcun tubo. Procedere con il salvataggio comunque?</string>
     <string name="messaggio_cavi_passanti">Per questo tubo passano in totale</string>
     <string name="messaggio_associazione_linea">Alla conferma, l\'elemento %s verrà associato alla linea selezionata</string>
     <string name="messaggio_selezione_ordine">Seleziona almeno un ordine</string>
     <string name="messaggio_solo_un_attimo">Un momento prego...</string>
-    <string name="messaggio_guida">Puoi consultare la guida in qualsiasi momento cliccando sul pulsante GUIDA nel menu principale</string>
     <string name="messaggio_composizoni_mancanti">Devi aggiungere almeno un componente all\'elemento selezionato</string>
 
     <!-- ERRORI -->
@@ -79,19 +69,13 @@
     <string name="errore_selezione_componente_partenza">Seleziona il componente di partenza</string>
     <string name="errore_selezione_componente_destinazione">Seleziona il componente di destinazione</string>
     <string name="errore_selezione_componente_comando">Seleziona il componente di comando</string>
-    <string name="errore_aggiornamento_dati">Errore nell\'aggiornamento dei dati</string>
     <string name="errore_connessione">Il server specificato non risponde. Controlla la connessione e l\'indirizzo URL</string>
-    <string name="errore_connessione_play_store">Impossibile recuperare le informazioni. Controlla la connessione internet e riprova.</string>
 
     <!--  -->
 
-    <string name="abbonati">Richiedi informazioni</string>
-    <string name="abbonati_periodo_prova">I primi 15 giorni sono gratuiti e puoi annullare l\'abbonamento in qualsiasi momento!</string>
 
     <string name="accedi">Accedi</string>
     <string name="action_settings">Configurazione generale</string>
-    <string name="aggiornamento_dati">Aggiornamento dati</string>
-    <string name="aggiornamento_files">Aggiornamento file</string>
     <string name="aggiorna_prezzi_preventivo">Aggiorna prezzi preventivo</string>
     <string name="aggiungi_componente">Aggiungi componente</string>
     <string name="aggiungi_punto_comando">+Aggiungi punto di comando</string>
@@ -107,7 +91,6 @@
     <string name="articoli_preferiti">Articoli preferiti</string>
     <string name="attenzione">Attenzione</string>
     <string name="attiva">Attiva</string>
-    <string name="inserisci_codice_attivazione">Inserisci il tuo codice di attivazione</string>
     <string name="attiva_versione_business">Attiva versione business</string>
     <string name="aziende">Aziende</string>
     <string name="cambia_copriscatola">Cambia coperchio scatola</string>
@@ -150,7 +133,6 @@
     <string name="cod">Cod.</string>
     <string name="codice">Codice</string>
     <string name="codice_articolo">Codice articolo</string>
-    <string name="codice_attivazione">Codice di attivazione</string>
     <string name="codice_fiscale">Codice fiscale</string>
     <string name="codice_iva">Codice IVA</string>
     <string name="codici_preventivo">Codici preventivo</string>
@@ -249,6 +231,7 @@
     <string name="materiale">Materiale</string>
     <string name="materiali">Materiali</string>
     <string name="gestione_elettrica">Gestione elettrica</string>
+    <string name="setup">Setup</string>
     <string name="menu">Menu</string>
     <string name="metri">Metri</string>
     <string name="metri_tot">Metri totali</string>
@@ -325,8 +308,6 @@
     <string name="ragione_sociale">Ragione sociale</string>
     <string name="rapportini">Rapportini</string>
     <string name="rapportino_del">Rapportino del</string>
-    <string name="registra_econtab">Registra eConTab</string>
-    <string name="registrazione_effettuata">Registrazione effettuata</string>
     <string name="relazione">Associazione</string>
     <string name="relazioni">Associazioni (utente - interruttore)</string>
     <string name="relazioni_logiche">Associazioni</string>
@@ -339,8 +320,6 @@
     <string name="richiedi">Richiedi</string>
     <string name="richiedi_codice">Richiedi il tuo codice di attivazione cliccando qui. Sarai contattato da uno dei nostri operatori.</string>
     <string name="richiedi_assistenza">Richiedi assistenza</string>
-    <string name="richiedi_via_mail">Richiedi via email</string>
-    <string name="richiedi_per_telefono">Richiedi per telefono</string>
     <string name="ricorda_password">Ricorda password</string>
     <string name="rimanda_verifica">Rimanda verifica</string>
     <string name="ripristina_db">Ripristina database</string>
@@ -348,7 +327,6 @@
     <string name="salva_locale_preferito">Aggiungi ai locali preferiti</string>
     <string name="scatola">Scatola</string>
     <string name="sconto">Sconto</string>
-    <string name="seleziona_account">Seleziona account</string>
     <string name="seleziona_centralino">Seleziona centralino</string>
     <string name="seleziona_cliente">Seleziona il cliente</string>
     <string name="seleziona_icona">Seleziona l\'immagine o scatta una nuova foto</string>
@@ -391,7 +369,7 @@
     <string name="title_activity_piantina_locale_mod">Modifica piantina</string>
     <string name="title_activity_placche_dettaglio_mod">Dettaglio placche</string>
     <string name="title_activity_preventivi">Preventivi / Ordini</string>
-    <string name="title_activity_start">eConTab</string>
+    <string name="title_activity_start">Econ</string>
     <string name="title_activity_rapportini">Rapportini</string>
     <string name="title_section1_clienti">Dati anagrafici</string>
     <string name="title_section2_clienti">Cantieri</string>
@@ -422,10 +400,6 @@
     <string name="visualizza">Visualizza</string>
     <string name="punti_comandati">Punti comandati</string>
     <string name="invia_mail_support">Invia segnalazione errore</string>
-    <string name="videoguide">Video guide di xxxxxxx</string>
-    <string name="faq">FAQ di xxxxxxx</string>
-    <string name="guidapdf">Guida PDF</string>
-    <string name="periniziare">Per iniziare...</string>
     <string name="elemento_non_conteggiato">L\'elemento non verrà conteggiato nel preventivo/ordine selezionato</string>
     <string name="elemento_conteggiato">L\'elemento verrà conteggiato nel preventivo/ordine selezionato</string>
     <string name="copia_elemento_su_preventivo_corrente_senza_conteggiare">Copia l\'elemento nel preventivo corrente senza conteggiarlo nel totale</string>
@@ -449,44 +423,8 @@
     <string name="unita_principale">Unità principale</string>
     <string name="area_principale">Area principale</string>
     <string name="locale_principale">Locale principale</string>
-    <string name="disclaimer_license_lang_string">eConTab APPLICAZIONE ANDROID</string>
-    <string name="license_disclaimer_1_lang_string">LEGGERE ATTENTAMENTE IL PRESENTE CONTRATTO DI LICENZA CON L\'UTENTE FINALE (\'LICENZA\') PRIMA DI PREMERE IL PULSANTE \'ACCETTA\' O DI SCARICARE O UTILIZZARE L\'APPLICAZIONE MOBILE RV (\'APPLICAZIONE\') ALLEGATA A QUESTA LICENZA. CLICCANDO IL PULSANTE \'ACCETTA\' O SCARICANDO O UTILIZZANDO L\'APPLICAZIONE, L\'UTENTE ENTRA E ACCETTA I TERMINI DELLA PRESENTE LICENZA. SE NON SI ACCETTANO I TERMINI DELLA PRESENTE LICENZA, NON FARE CLIC SUL PULSANTE \'ACCETTA\' NÉ SCARICARE O UTILIZZARE L\'APPLICAZIONE.</string>
-    <string name="license_disclaimer_2_lang_string">1. GENERALITÀ</string>
-    <string name="license_disclaimer_3_lang_string">L\'Applicazione è concessa in licenza all\'Utente da XXX. (la \'Società\') per l\'uso esclusivamente in conformità con i termini e le condizioni della presente Licenza e qualsiasi \'regola d\'uso\' stabilita da qualsiasi altra terza parte, come Google o altri fornitori (\'Regole d\'uso\'), che sono incorporate nel presente documento tramite questo riferimento.</string>
-    <string name="license_disclaimer_4_lang_string">2. CONCESSIONE DI LICENZA E RESTRIZIONI D\'USO</string>
-    <string name="license_disclaimer_5_lang_string">2.1 Concessione della Licenza. La Società ti concede un diritto revocabile, non esclusivo, non trasferibile e limitato di installare e utilizzare l\'Applicazione su Dispositivi Mobili di tua proprietà e controllo, in conformità con i termini della presente Licenza.</string>
-    <string name="license_disclaimer_6_lang_string">2.2 Restrizioni d\'uso. L\'Utente si impegna a non decompilare, modificare, distribuire o utilizzare l\'Applicazione per scopi non consentiti dalla presente Licenza.</string>
-    <string name="license_disclaimer_7_lang_string">3. DIRITTI DI PROPRIETÀ INTELLETTUALE</string>
-    <string name="license_disclaimer_8_lang_string">3.1 Diritti sull\'Applicazione. L\'Utente riconosce che l\'Applicazione e tutti i diritti di proprietà intellettuale associati sono e rimarranno di proprietà della Società.</string>
-    <string name="license_disclaimer_9_lang_string">3.2 Software di Terzi. L\'Applicazione può utilizzare software di terze parti soggetto a licenze open source.</string>
-    <string name="license_disclaimer_10_lang_string">3.3 Marchi della Società. L\'Utente non è autorizzato a utilizzare i marchi della Società senza il previo consenso scritto.</string>
-    <string name="license_disclaimer_11_lang_string">3.4 Riconoscimento di violazione. L\'Utente è responsabile della difesa da qualsiasi reclamo di terzi relativo alla violazione dei diritti di proprietà intellettuale.</string>
-    <string name="license_disclaimer_12_lang_string">4. RESTRIZIONE AL TRASFERIMENTO</string>
-    <string name="license_disclaimer_13_lang_string">L\'Utente non può affittare, concedere in leasing, prestare, concedere in sublicenza o trasferire l\'Applicazione, la presente Licenza o i diritti concessi.</string>
-    <string name="license_disclaimer_14_lang_string">5. DURATA E RISOLUZIONE</string>
-    <string name="license_disclaimer_15_lang_string">5.1 Durata. La presente Licenza sarà efficace fino alla sua risoluzione.</string>
-    <string name="license_disclaimer_16_lang_string">5.2 Risoluzione. La Società può sospendere o risolvere la presente Licenza in qualsiasi momento. In caso di risoluzione, l\'Utente dovrà cessare ogni utilizzo dell\'Applicazione e disinstallarla.</string>
-    <string name="license_disclaimer_17_lang_string">6. ESCLUSIONE DI GARANZIE</string>
-    <string name="license_disclaimer_18_lang_string">L\'APPLICAZIONE VIENE FORNITA \'COSÌ COM\'È\' E \'COME DISPONIBILE\'. LA SOCIETÀ ESCLUDE QUALSIASI GARANZIA, ESPRESSA, IMPLICITA O LEGALE, INCLUSE LE GARANZIE IMPLICITE DI COMMERCIABILITÀ E IDONEITÀ A UNO SCOPO PARTICOLARE.</string>
-    <string name="license_disclaimer_19_lang_string">7. LIMITAZIONE DI RESPONSABILITÀ</string>
-    <string name="license_disclaimer_20_lang_string">IN NESSUN CASO LA SOCIETÀ SARÀ RESPONSABILE PER PERDITE DI PROFITTI, DATI, REPUTAZIONE O DANNI INDIRETTI O CONSEQUENZIALI DERIVANTI DALL\'USO O DALL\'IMPOSSIBILITÀ DI UTILIZZO DELL\'APPLICAZIONE.</string>
-    <string name="license_disclaimer_21_lang_string">8. INDENNIZZO</string>
-    <string name="license_disclaimer_22_lang_string">L\'Utente si impegna a indennizzare e tenere indenne la Società da qualsiasi reclamo derivante dall\'uso dell\'Applicazione da parte dell\'Utente.</string>
-    <string name="license_disclaimer_23_lang_string">9. COMPATIBILITÀ</string>
-    <string name="license_disclaimer_24_lang_string">La Società non garantisce che l\'Applicazione sia compatibile con il dispositivo dell\'Utente o con altri software installati.</string>
-    <string name="license_disclaimer_25_lang_string">10. RECLAMI SUL PRODOTTO</string>
-    <string name="license_disclaimer_26_lang_string">L\'Utente è responsabile di gestire qualsiasi reclamo di terzi relativo all\'uso o al possesso dell\'Applicazione.</string>
-    <string name="license_disclaimer_27_lang_string">11. DISPOSIZIONI VARIE</string>
-    <string name="license_disclaimer_28_lang_string">11.1 Legge applicabile. La presente Licenza è regolata dalla legge italiana.</string>
-    <string name="license_disclaimer_29_lang_string">11.2 Separabilità. Se una disposizione della presente Licenza è ritenuta non valida, le restanti disposizioni rimarranno in vigore.</string>
-    <string name="license_disclaimer_30_lang_string">11.3 Rinuncia. Nessun ritardo nell\'esercizio di un diritto costituisce rinuncia a tale diritto.</string>
-    <string name="license_disclaimer_31_lang_string">11.4 Modifica. La Società si riserva il diritto di modificare la presente Licenza con preavviso all\'Utente.</string>
-    <string name="license_disclaimer_32_lang_string">11.5 Sopravvivenza. Le disposizioni che per loro natura devono sopravvivere alla risoluzione della Licenza continueranno ad essere applicabili.</string>
-    <string name="license_disclaimer_33_lang_string">11.6 Cessione. L\'Utente non può cedere la presente Licenza senza il previo consenso scritto della Società.</string>
-    <string name="license_disclaimer_34_lang_string">11.7 Accordo completo. La presente Licenza costituisce l\'accordo completo tra le parti in relazione all\'oggetto e sostituisce tutti i precedenti accordi.</string>
     <string name="accept">Accetta</string>
     <string name="reject">Rifiuta</string>
-    <string name="pick_account">Seleziona account:</string>
     <string name="extra_cables">Cavi extra</string>
     <string name="extra_tubes">Tubi extra</string>
     <string name="force_download_all_images">Forza download di tutte le immagini</string>

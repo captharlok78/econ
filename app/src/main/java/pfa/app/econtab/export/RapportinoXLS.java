@@ -35,9 +35,6 @@ import pfa.app.econtab.utils.RegoleRapportino;
 import pfa.app.econtab.utils.Utility;
 import pfa.app.general.simplecropimage.Util;
 
-/**
- * Created by daniele on 15/02/2016.
- */
 public class RapportinoXLS {
     private Context ctx = null;
     int rowCount = 0;

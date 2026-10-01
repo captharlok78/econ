@@ -37,7 +37,6 @@ import pfa.app.econtab.api.TokenManager;
 import pfa.app.econtab.db.DbInterno;
 import pfa.app.econtab.db.table.Ditte;
 import pfa.app.econtab.utils.AsyncTaskExecutorService;
-import pfa.app.econtab.utils.Licenza;
 import pfa.app.econtab.utils.Sessione;
 import pfa.app.econtab.utils.Utility;
 import retrofit2.Call;
@@ -74,7 +73,8 @@ public class ConfigurazioneGenActivity extends EConTabActivity {
 
 		SharedPreferences pref = getSharedPreferences(Utility.APP_NAME, MODE_PRIVATE);
 
-		if (pref.contains(Sessione.CODICE_ATTIVAZIONE)) {
+		// gia' collegato a Mercury: solo il setup; altrimenti anche il primo accesso
+		if (TokenManager.getInstance(this).hasToken()) {
 			findViewById(R.id.linear_attivazione).setVisibility(View.GONE);
 			linearSincMercury.setVisibility(View.VISIBLE);
 			findViewById(R.id.footer_dett).setVisibility(View.VISIBLE);
@@ -250,37 +250,6 @@ public class ConfigurazioneGenActivity extends EConTabActivity {
 		});
 	}
 
-	public void richiediCodice(View v) {
-		System.out.println("EConTab: ConfigurazioneGenActivity richiediCodice ENTER");
-        String[] opzioni = new String[2];
-        opzioni[0] = getString(R.string.richiedi_per_telefono);
-        opzioni[1] = getString(R.string.richiedi_via_mail);
-        Utility.mostraSelezioneDialog(getString(R.string.codice_attivazione), opzioni, this, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if (i == 0) {
-                    Utility.chiama(ConfigurazioneGenActivity.this, "+390499832182",false);
-                }
-                if (i == 1) {
-                    String partitaIva = "P.I.";
-                    ContentValues where = new ContentValues();
-                    where.put(Ditte.ID_DITTA, Sessione.getDittaSelezionata());
-                    DbInterno db = new DbInterno(ConfigurazioneGenActivity.this);
-                    ContentValues recDitta = db.getRecord(new Ditte(), where);
-                    if (recDitta != null) {
-                        partitaIva = partitaIva + " " + recDitta.getAsString(Ditte.PARTITA_IVA);
-                    }
-                    db.close();
-					String publisher_email_address = "";
-					publisher_email_address = pfa.app.econtab.Globals.PUBLISHER_EMAIL_ADDRESS;
-                    Utility.inviaMail(ConfigurazioneGenActivity.this, publisher_email_address, "Richiesta codice attivazione App.el business", "Ragione Sociale: " + Sessione.getNomeDittaSelezionata() + "\n" + partitaIva);
-
-                }
-            }
-        });
-		System.out.println("EConTab: ConfigurazioneGenActivity richiediCodice EXIT");
-	}
-
 	public void attiva(View v) {
 		String email    = attivazioneEmail.getText().toString().trim();
 		String password = attivazionePassword.getText().toString().trim();
@@ -321,11 +290,8 @@ public class ConfigurazioneGenActivity extends EConTabActivity {
 
 					SharedPreferences pref = getSharedPreferences(Utility.APP_NAME, MODE_PRIVATE);
 					pref.edit()
-						.putString(Sessione.CODICE_ATTIVAZIONE, body.token)
 						.putString("URL", getTesto(R.id.editTextUrlServer))
 						.apply();
-
-					Sessione.resettaLicenza(ConfigurazioneGenActivity.this);
 
 					// Pre-imposta la ditta: se l'utente ne ha una sola, selezionala subito
 					// senza aspettare il primo download, così il menu mostra già il nome

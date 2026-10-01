@@ -44,7 +44,6 @@ import java.util.List;
 import pfa.app.econtab.EConTabFileChooserActivity;
 import pfa.app.econtab.CantiereSplitActivity;
 import pfa.app.econtab.FinestraListinoBaseActivity;
-import pfa.app.econtab.GestAbbonamentoActivity;
 import pfa.app.econtab.R;
 import pfa.app.econtab.adapters.PreventiviDettaglioAdapter;
 import pfa.app.econtab.db.DbInterno;
@@ -679,21 +678,7 @@ public class PreventivoDettaglioFragment extends EConTabFragment implements OnCl
 					}
 
 					if (which == 1) {
-                        if (Sessione.isLicenzaGratis(getEConTabActivity())){
-                            Utility.mostraConfermaDialog("Upgrade EConTab",getActivity().getString(R.string.messaggio_licenza_funzionalita),getActivity(),getString(R.string.abbonati),getString(R.string.annulla),new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    if (i==DialogInterface.BUTTON_POSITIVE){
-                                        Intent intent = new Intent(getActivity(), GestAbbonamentoActivity.class);
-                                        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                                        startActivity(intent);
-                                    }
-                                }
-                            });
-                        }
-                        else{
-                            esportaPreventivoXLS();
-                        }
+                        esportaPreventivoXLS();
 
 					}
 					// if (tipoPreventivoOrdine.equals(Preventivi.TIPO_ORDINE)) {
@@ -706,43 +691,16 @@ public class PreventivoDettaglioFragment extends EConTabFragment implements OnCl
 					// }
 
 					if (which == 4) {
-                        if (Sessione.isLicenzaGratis(getEConTabActivity())){
-                            Utility.mostraConfermaDialog("Upgrade EConTab",getActivity().getString(R.string.messaggio_licenza_funzionalita),getActivity(),getString(R.string.abbonati),getString(R.string.annulla),new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    if (i==DialogInterface.BUTTON_POSITIVE){
-                                        Intent intent = new Intent(getActivity(), GestAbbonamentoActivity.class);
-                                        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                                        startActivity(intent);
-                                    }
-                                }
-                            });
-                        }
-                        else {
-                            if (modificheBloccate) {
+                        if (modificheBloccate) {
                                 Toast.makeText(getActivity(), getString(R.string.modifiche_non_permesse), Toast.LENGTH_SHORT).show();
                             } else {
                                 importaPrezziDaXLS();
                             }
-                        }
 
 					}
 
                     if (which == 5){
-                        if (Sessione.isLicenzaGratis(getEConTabActivity())){
-                            Utility.mostraConfermaDialog("Upgrade EConTab",getActivity().getString(R.string.messaggio_licenza_funzionalita),getActivity(),getString(R.string.abbonati),getString(R.string.annulla),new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    if (i==DialogInterface.BUTTON_POSITIVE){
-                                        Intent intent = new Intent(getActivity(), GestAbbonamentoActivity.class);
-                                        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                                        startActivity(intent);
-                                    }
-                                }
-                            });
-                        }
-                        else{
-                            //prendo gli ordini per questo cantiere
+                        //prendo gli ordini per questo cantiere
                             DbInterno db = new DbInterno(getActivity());
                             Preventivi tabPrev = new Preventivi();
                             ContentValues whereOrdCant = new ContentValues();
@@ -796,7 +754,6 @@ public class PreventivoDettaglioFragment extends EConTabFragment implements OnCl
                                     }
                                 }
                             });
-                        }
                     }
 				}
 			});
@@ -863,21 +820,7 @@ public class PreventivoDettaglioFragment extends EConTabFragment implements OnCl
 		// TODO Auto-generated method stub
 		if (getActivity() instanceof CantiereSplitActivity) {
 			if (conPiantine) {
-                if (Sessione.isLicenzaGratis(getEConTabActivity())){
-                    Utility.mostraConfermaDialog("Upgrade EConTab",getActivity().getString(R.string.messaggio_licenza_funzionalita),getActivity(),getString(R.string.abbonati),getString(R.string.annulla),new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            if (i==DialogInterface.BUTTON_POSITIVE){
-                                Intent intent = new Intent(getActivity(), GestAbbonamentoActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                                startActivity(intent);
-                            }
-                        }
-                    });
-                }
-                else{
-                    ((CantiereSplitActivity) getActivity()).creaImmaginiPiantine(0, idPreventivo);
-                }
+                ((CantiereSplitActivity) getActivity()).creaImmaginiPiantine(0, idPreventivo);
 
 			} else {
 				((CantiereSplitActivity) getActivity()).stampaComposizioneScatole(idPreventivo, false);

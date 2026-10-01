@@ -15,7 +15,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import pfa.app.econtab.GestAbbonamentoActivity;
 import pfa.app.econtab.R;
 import pfa.app.econtab.db.DbInterno;
 import pfa.app.econtab.server.RecordEliminati;
@@ -432,10 +431,7 @@ public abstract class AbstractTable {
 
 		// per le installazioni server inserisco le chiavi dei record cancellati
 		// in record_eliminati per eliminarli successivamente anche dal server al momento della sincronizzazione
-		if (Sessione.isLicenzaBusiness(db.getContext())
-				|| pfa.app.econtab.api.TokenManager.getInstance(db.getContext()).hasToken()) {
-			_scriviRecordEliminati(db, val, perchiave);
-		}
+		_scriviRecordEliminati(db, val, perchiave);
 		if (perchiave) {
 			return db.delete(getNomeTabella(), getFiltroPerChiave(val));
 		} else {
@@ -539,61 +535,12 @@ public abstract class AbstractTable {
 				val.put(ComponentiCantiere.NON_CONTEGGIARE_PREVENTIVI,1);
 			}
 		}
-		if (controllaMaxInserimentiLicenza(db)) {
-			//System.out.println("EConTab: AbstractTable inserisciRecord ComponentiCantiere insert...");
-			long result = db.insert(getNomeTabella(), val);
-			inserimentoCorrelati(db, val);
-			//System.out.println("EConTab: AbstractTable inserisciRecord ComponentiCantiere result " + result);
-			return result;
-		}
-		return -1;
+		long result = db.insert(getNomeTabella(), val);
+		inserimentoCorrelati(db, val);
+		return result;
 
 	}
 
-
-	public boolean controllaMaxInserimentiLicenza(final DbInterno db) {
-		//System.out.println("EConTab: AbstractTable controllaMaxInserimentiLicenza ENTER");
-		// TODO Auto-generated method stub
-		if (Sessione.isLicenzaGratis(db.getContext())) {
-			if (getMassimoNumeroRecordLicenzaGratis() > 0) {
-				int numeroRecord = db.eseguiCount(this, null);
-				if (numeroRecord >= getMassimoNumeroRecordLicenzaGratis()) {
-					/*Toast toastLicenza = Toast.makeText(db.getContext(), db.getResources()
-							.getString(R.string.messaggio_licenza_inserimenti).toUpperCase(Locale.getDefault()), Toast.LENGTH_LONG);
-					toastLicenza.setGravity(Gravity.CENTER, 0, 0);
-
-					toastLicenza.show();*/
-
-                    Utility.mostraConfermaDialog("Upgrade EConTab",db.getContext().getString(R.string.messaggio_licenza_inserimenti),db.getContext(),db.getContext().getString(R.string.abbonati),db.getContext().getString(R.string.annulla),new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            if (i==DialogInterface.BUTTON_POSITIVE){
-                                Intent intent = new Intent(db.getContext(), GestAbbonamentoActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                                db.getContext().startActivity(intent);
-                            }
-                        }
-                    });
-					//System.out.println("EConTab: AbstractTable controllaMaxInserimentiLicenza EXIT (1)");
-					// Utility.mostraDialog(db.getResources().getString(R.string.attenzione),
-					// db.getResources().getString(R.string.messaggio_licenza_inserimenti), db.getContext(), "OK");
-					return false;
-				}
-			}
-		}
-		//System.out.println("EConTab: AbstractTable controllaMaxInserimentiLicenza EXIT (2)");
-		return true;
-
-	}
-
-	/**
-	 * Per la licenza gratis ritorna il massimo numero di record inseribili nella tabella
-	 * 
-	 * @return
-	 */
-	protected int getMassimoNumeroRecordLicenzaGratis() {
-		return Integer.MAX_VALUE;
-	}
 
 	/**
 	 * Aggiorna il record ed effetua eventuali azioni correlate

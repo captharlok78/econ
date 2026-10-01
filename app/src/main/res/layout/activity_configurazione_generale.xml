@@ -20,7 +20,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Configurazione"
+            android:text="@string/setup"
             android:textColor="#FFFFFF"
             android:textSize="18sp"
             android:textStyle="bold" />
@@ -107,6 +107,13 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="14dp" />
 
+            <!-- Vecchie opzioni di sincronizzazione (data delle immagini, anno, forza immagini): non salvate né usate,
+                 nascoste nel Setup (STATO_SISTEMA_APP.md §4). Gli id restano per il codice che le legge. -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
             <!-- Sezione Sincronizzazione -->
             <TextView
                 android:layout_width="wrap_content"
@@ -235,6 +242,8 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="14dp" />
 
+            </LinearLayout>
+
             <!-- Sezione Attivazione (condizionale) -->
             <LinearLayout
                 android:id="@+id/linear_attivazione"
@@ -303,7 +312,7 @@
                 android:visibility="gone"
                 android:onClick="apriDownload" />
 
-            <!-- Sezione azioni Mercury (dopo attivazione) -->
+            <!-- Sezione azioni Mercury (dopo attivazione). Scarica/Carica sono nella schermata Sincronizzazione (SincronizzaActivity) -->
             <LinearLayout
                 android:id="@+id/linear_sinc_mercury"
                 android:layout_width="match_parent"
@@ -313,6 +322,7 @@
 
                 <Button
                     android:id="@+id/button_download"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:text="↓  Scarica da server"
@@ -324,6 +334,7 @@
 
                 <Button
                     android:id="@+id/button_upload"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:layout_marginTop="8dp"

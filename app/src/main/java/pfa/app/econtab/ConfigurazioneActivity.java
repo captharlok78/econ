@@ -64,11 +64,7 @@ public class ConfigurazioneActivity extends EConTabActivity implements OnChildCl
 
 		setContentView(R.layout.activity_configurazione);
 
-		// if (!Sessione.isLicenzaBusiness(this)) {
-		// findViewById(R.id.buttonConfigurazioniGenerali).setVisibility(View.GONE);
-		// }
-
-		setText(R.id.textViewVersione, getString(R.string.versione) + " " + Sessione.getLicenza(this).getDescrizioneLicenza());
+		setText(R.id.textViewVersione, pfa.app.econtab.utils.VersioneApp.etichetta(this));
 
 		selezioniDitte = new ArrayList<Boolean>();
 

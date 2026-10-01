@@ -20,9 +20,6 @@ import pfa.app.econtab.db.table.Linee;
 import pfa.app.econtab.db.table.Placche;
 
 
-/**
- * Created by daniele on 15/01/2018.
- */
 
 public class AssCodiciLineeActivity extends EConTabActivity implements AdapterView.OnItemClickListener {
     private ListView lista = null;

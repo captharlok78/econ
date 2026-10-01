@@ -89,9 +89,4 @@ public class Costruttori extends AbstractTable {
 		return null;
 	}
 
-	@Override
-	protected int getMassimoNumeroRecordLicenzaGratis() {
-		// TODO Auto-generated method stub
-		return 5;
-	}
 }

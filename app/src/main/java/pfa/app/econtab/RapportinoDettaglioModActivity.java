@@ -669,8 +669,6 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity {
         ContentValues val = tabella.getValoriLogInserimento(db);
         valoriTestata(val);
         val.put(Rapportini.ID_UTENTE_DITTA, utente.idUtenteDitta);
-        // inserisciRecord ritorna il rowid, negativo per i record locali: il limite di licenza si controlla prima
-        if (!tabella.controllaMaxInserimentiLicenza(db)) return getString(R.string.messaggio_licenza_inserimenti);
         tabella.inserisciRecord(db, val);
         return salvaRighe(db, val.getAsInteger(Rapportini.ID), val.getAsInteger(Rapportini.ID_ORDINE));
     }
@@ -915,7 +913,6 @@ public class RapportinoDettaglioModActivity extends EConTabDettaglioActivity {
             }
             val.put(RapportiniDettaglio.ID_RAPPORTINO, idRapportino);
             if (id == null) {
-                if (!tab.controllaMaxInserimentiLicenza(db)) return getString(R.string.messaggio_licenza_inserimenti);
                 tab.inserisciRecord(db, val);
             } else {
                 ContentValues where = new ContentValues();

@@ -15,9 +15,6 @@ import java.util.Iterator;
 import pfa.app.econtab.R;
 
 
-/**
- * Created by matteo on 09/10/2017.
- */
 
 public class SQLAdapter extends BaseAdapter {
     private ArrayList<Object> dati = null;
