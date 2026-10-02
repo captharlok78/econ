@@ -29,10 +29,7 @@
 
             <!--
                 Form filtri: e' l'unica cosa visibile all'apertura del modulo (nessun
-                caricamento dati finche' non si preme uno dei pulsanti sotto). Le righe di
-                Rapportini hanno pulsanti di azione con logica di business
-                (isTabellare()=false in RapportiniDefinition), quindi non c'e' testata
-                ordinabile per colonna.
+                caricamento dati finche' non si preme uno dei pulsanti sotto).
             -->
             <LinearLayout
                 android:id="@+id/cardFiltri"
@@ -67,19 +64,25 @@
 
         </LinearLayout>
 
-        <!-- Testata non usata (isTabellare()=false): resta sempre nascosta. -->
+        <!-- Testata tabella (come Clienti/Cantieri): popolata da EconListaStandardController dalle colonne del modulo. -->
         <LinearLayout
             android:id="@+id/headerTabella"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:gravity="center_vertical"
             android:background="#EEEEEE"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
             android:visibility="gone" />
 
         <View
             android:id="@+id/headerBorder"
             android:layout_width="match_parent"
             android:layout_height="1px"
+            android:layout_marginBottom="8dp"
             android:background="#000000"
             android:visibility="gone" />
 
@@ -107,73 +110,7 @@
                 android:visibility="gone" />
         </RelativeLayout>
 
-        <LinearLayout
-            android:id="@+id/barraPaginazione"
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingStart="12dp"
-            android:paddingEnd="4dp"
-            android:background="#FFFFFF">
-
-            <TextView
-                android:id="@+id/textViewPaginaInfo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="12sp"
-                android:textColor="#666666"
-                android:text="" />
-
-            <EditText
-                android:id="@+id/editTextRisultatiPerPagina"
-                android:layout_width="36dp"
-                android:layout_height="28dp"
-                android:layout_marginStart="4dp"
-                android:minHeight="0dp"
-                android:minWidth="0dp"
-                android:paddingTop="0dp"
-                android:paddingBottom="0dp"
-                android:gravity="center"
-                android:background="@drawable/bg_input_outline"
-                android:inputType="number"
-                android:maxLength="3"
-                android:singleLine="true"
-                android:textSize="12sp"
-                android:textColor="#1565C0"
-                android:imeOptions="actionDone" />
-
-            <TextView
-                android:id="@+id/textViewPaginaInfo2"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:textSize="12sp"
-                android:textColor="#666666"
-                android:text="" />
-
-            <ImageButton
-                android:id="@+id/buttonPaginaPrec"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:padding="8dp"
-                android:background="@android:color/transparent"
-                android:src="@drawable/ic_back"
-                android:tint="#1565C0"
-                android:contentDescription="Pagina precedente" />
-
-            <ImageButton
-                android:id="@+id/buttonPaginaSucc"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:padding="8dp"
-                android:background="@android:color/transparent"
-                android:src="@drawable/ic_forward"
-                android:tint="#1565C0"
-                android:contentDescription="Pagina successiva" />
-
-        </LinearLayout>
+        <include layout="@layout/barra_paginazione_standard" />
 
     </LinearLayout>
 

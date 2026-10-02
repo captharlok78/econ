@@ -287,7 +287,7 @@ public class FornitoriLineeActivity extends EconActivity implements OnChildClick
     private void aggiornaBarraPaginazione() {
         barraPaginazione.setVisibility(View.VISIBLE);
         textViewPaginaInfo.setText("Pagina " + (paginaCorrente + 1) + " di " + totalePagine + "  ·  ");
-        textViewPaginaInfo2.setText("  fornitori per pagina  ·  " + totaleCostruttori + " fornitori trovati");
+        textViewPaginaInfo2.setText("  fornitori per pagina  ·  " + totaleCostruttori + " trovati");
         if (!editTextRisultatiPerPagina.isFocused()) {
             editTextRisultatiPerPagina.setText(String.valueOf(risultatiPerPagina));
         }

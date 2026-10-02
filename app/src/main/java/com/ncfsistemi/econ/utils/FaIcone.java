@@ -36,6 +36,9 @@ public final class FaIcone {
 	public static final String PRINCIPALE = "\uf005";   // star
 	public static final String AUTOMATICO = "\uf0e7";   // bolt
 	public static final String ELENCO = "\uf03a";       // list
+	public static final String AZIONI = "\uf142";       // ellipsis-v: menu delle azioni della riga
+	public static final String XLS = "\uf1c3";          // file-excel: esporta in xls
+	public static final String STATO = "\uf111";        // circle: stato del documento, nel colore dello stato
 	// Sezioni delle schede (STANDARD_GRAFICO.md)
 	public static final String CLIENTE = "\uf007";      // user
 	public static final String INDIRIZZO = "\uf3c5";    // map-marker-alt

@@ -312,7 +312,6 @@ public class EconFileChooserActivity extends EconActivity implements OnItemClick
 						File fileExport = new File(file.f.getPath());
 						Intent intent = new Intent(Intent.ACTION_VIEW);
 						intent.setDataAndType(com.ncfsistemi.econ.utils.Utility.uriCondivisibile(EconFileChooserActivity.this, fileExport), "application/vnd.ms-excel"); intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 						startActivity(intent);
 					}
 

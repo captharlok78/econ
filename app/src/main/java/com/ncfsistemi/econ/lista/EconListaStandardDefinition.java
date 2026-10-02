@@ -78,6 +78,20 @@ public abstract class EconListaStandardDefinition {
         return null;
     }
 
+    /**
+     * Azione a icona in fondo a ogni riga (STANDARD_GRAFICO.md: azioni di riga solo icona). Default null = nessuna.
+     * Nella testata le corrisponde uno spazio vuoto della stessa larghezza, cosi' le colonne restano allineate.
+     */
+    public AzioneRiga getAzioneRiga(EconListaStandardController.Host host) {
+        return null;
+    }
+
+    public interface AzioneRiga {
+        String glifo();
+        String tooltip();
+        void onClick(ContentValues riga);
+    }
+
     /** Order by SQL usato quando e' attivo "ultimi N". Null = disabilita quel pulsante. */
     public String getOrdineRecenti() {
         return null;

@@ -58,7 +58,7 @@ public class RapportinoXLS {
         DbInterno db = new DbInterno(ctx);
 
         // cliente, cantiere e ordine facoltativi (almeno uno); il cliente e' quello del rapportino o del cantiere
-        ArrayList<Object> recs =  db.eseguiSelect("Select rapportini.*,Preventivi.numero,Preventivi.data,Anagrafica.ragione_sociale,cantieri.nome as nome_cantiere,"
+        ArrayList<Object> recs =  db.eseguiSelect("Select rapportini.*,Preventivi.numero as numero_ordine,Preventivi.data as data_ordine,Anagrafica.ragione_sociale,cantieri.nome as nome_cantiere," // alias: "numero" e' quello del rapportino
                 + "Utenti.nome as nome_operatore,Utenti.cognome as cognome_operatore,ditte.ragione_sociale as rag_soc_ditta"
                 + " from Rapportini left join Utenti on rapportini.id_utente_ditta=Utenti.id_utente_ditta left join Preventivi on rapportini.id_ordine=Preventivi.id_preventivo"
                 + " left join cantieri on cantieri.id_cantiere=rapportini.id_cantiere"
@@ -68,7 +68,7 @@ public class RapportinoXLS {
             valTestata = (ContentValues)recs.get(0);
             amministratore = RegoleRapportino.vedePrezzi(db, RegoleRapportino.utenteCorrente(db, ctx)); // chi vede i prezzi vede i costi
             dataRapp = Utility.numberToData(valTestata.getAsLong(Rapportini.DATA_RAPPORTINO));
-            numeroOrdine = valTestata.getAsString(Preventivi.NUMERO);
+            numeroOrdine = valTestata.getAsString("numero_ordine");
 
             _aggiungiTitolo(valTestata);
             rowCount = 4;
@@ -332,7 +332,7 @@ public class RapportinoXLS {
         c = riga.createCell(amministratore ? 5 : 7);
         c.setCellValue(ore);
         c.setCellType(Cell.CELL_TYPE_NUMERIC);
-        c.setCellStyle(cs);
+        c.setCellStyle(stileOre(cs));
         totaleOre += ore;
 
         if (amministratore) {
@@ -355,6 +355,14 @@ public class RapportinoXLS {
         rowCount++;
     }
 
+    /** Ore con due decimali e separatori della lingua del foglio (0,50 e non 0.5), sullo stile della riga. */
+    private CellStyle stileOre(CellStyle base) {
+        CellStyle stile = wb.createCellStyle();
+        stile.cloneStyleFrom(base);
+        stile.setDataFormat(wb.createDataFormat().getFormat("#,##0.00"));
+        return stile;
+    }
+
     /** Totale ore-uomo (e costo, per l'amministratore) sotto le righe dei tecnici. */
     private void _aggiungiRigaTotali() {
         Row riga = sheet1.createRow(rowCount);
@@ -372,7 +380,7 @@ public class RapportinoXLS {
         c = riga.createCell(amministratore ? 5 : 7);
         c.setCellValue(Utility.arrotonda(totaleOre, 2));
         c.setCellType(Cell.CELL_TYPE_NUMERIC);
-        c.setCellStyle(cs);
+        c.setCellStyle(stileOre(cs));
 
         if (amministratore) {
             CellStyle csCosto = wb.createCellStyle();
@@ -426,7 +434,12 @@ public class RapportinoXLS {
         Cell c = row.createCell(0);
 
        // c.setCellValue(ctx.getResources().getString(R.string.rapportino_del) + " " + Utility.numberToData(val.getAsLong(Rapportini.DATA_RAPPORTINO)) + " - " + val.getAsString("nome_operatore")+" "+val.getAsString("cognome_operatore"));
-        c.setCellValue(ctx.getResources().getString(R.string.rapportino_del) + " " + Utility.numberToData(val.getAsLong(Rapportini.DATA_RAPPORTINO)) + " - " + val.getAsString("rag_soc_ditta"));
+        // numero dato alla conferma (NUMERAZIONE_DOCUMENTI.md); la ditta solo se presente sul dispositivo
+        String numero = Rapportini.numeroDocumento(val);
+        String ditta = val.getAsString("rag_soc_ditta");
+        c.setCellValue(ctx.getResources().getString(R.string.rapportino_del) + " " + Utility.numberToData(val.getAsLong(Rapportini.DATA_RAPPORTINO))
+                + (numero.isEmpty() ? "" : " - N. " + numero)
+                + (ditta == null || ditta.isEmpty() ? "" : " - " + ditta));
 
 
         c.setCellStyle(csTitolo);
@@ -440,8 +453,8 @@ public class RapportinoXLS {
         String cantiere = val.getAsString("nome_cantiere") != null ? val.getAsString("nome_cantiere") : "";
         testoClienteCantiere = testoClienteCantiere + ": " + cliente + "\n"
                 + ctx.getResources().getString(R.string.cantiere).toUpperCase(Locale.getDefault()) + ": " + cantiere;
-        if (val.getAsString(Preventivi.NUMERO) != null && val.getAsLong(Preventivi.DATA) != null) {
-            testoClienteCantiere = testoClienteCantiere + "\n" + ctx.getResources().getString(R.string.ordine_num_del,val.getAsString(Preventivi.NUMERO), Utility.numberToData(val.getAsLong(Preventivi.DATA))).toUpperCase(Locale.getDefault());
+        if (val.getAsString("numero_ordine") != null && val.getAsLong("data_ordine") != null) {
+            testoClienteCantiere = testoClienteCantiere + "\n" + ctx.getResources().getString(R.string.ordine_num_del,val.getAsString("numero_ordine"), Utility.numberToData(val.getAsLong("data_ordine"))).toUpperCase(Locale.getDefault());
         }
         c = row.createCell(0);
         c.setCellValue(testoClienteCantiere);

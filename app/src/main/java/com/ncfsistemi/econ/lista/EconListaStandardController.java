@@ -159,6 +159,16 @@ public class EconListaStandardController {
         if (headerBackTitolo != null) {
             headerBackTitolo.setVisibility(definizione.mostraBarraTitolo() ? View.VISIBLE : View.GONE);
         }
+        TextView buttonEsportaXls = host.findViewById(R.id.buttonEsportaXls);
+        if (buttonEsportaXls != null && definizione.isTabellare()) {
+            com.ncfsistemi.econ.utils.FaIcone.applica(buttonEsportaXls, com.ncfsistemi.econ.utils.FaIcone.XLS, "Esporta in xls");
+            buttonEsportaXls.setTextColor(0xFF1565C0);
+            TypedValue sfondoXls = new TypedValue();
+            host.getContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, sfondoXls, true);
+            buttonEsportaXls.setBackgroundResource(sfondoXls.resourceId);
+            buttonEsportaXls.setOnClickListener(v -> esportaXls());
+            buttonEsportaXls.setVisibility(View.VISIBLE);
+        }
         View buttonPaginaPrec = host.findViewById(R.id.buttonPaginaPrec);
         if (buttonPaginaPrec != null) {
             buttonPaginaPrec.setOnClickListener(v -> paginaPrecedente());
@@ -214,6 +224,12 @@ public class EconListaStandardController {
 
             headerTabella.addView(cellaHeader);
             frecceOrdinamento.put(colonna.campo, new TextView[]{frecciaSu, frecciaGiu});
+        }
+        if (definizione.getAzioneRiga(host) != null) {
+            // spazio dell'azione di riga (44dp, vedi EconListaStandardAdapter), meno il padding destro della testata
+            View spazio = new View(host.getContext());
+            spazio.setLayoutParams(new LinearLayout.LayoutParams(dpToPx(44 - 8), 1));
+            headerTabella.addView(spazio);
         }
     }
 
@@ -328,14 +344,53 @@ public class EconListaStandardController {
         return campo;
     }
 
+    private String ordineSqlCorrente() {
+        return (ordinaPerRecenti && definizione.getOrdineRecenti() != null)
+                ? definizione.getOrdineRecenti()
+                : ordinamentoSqlPerCampo(colonnaOrdinamento) + (ordineDiscendente ? " desc" : " asc");
+    }
+
+    /**
+     * Pulsante xls della barra in fondo: tutti i risultati della ricerca corrente (non solo la pagina), con le colonne
+     * e l'ordinamento della tabella; il file si apre con l'app scelta dall'utente.
+     */
+    public void esportaXls() {
+        Context ctx = host.getContext();
+        QueryPagina query = definizione.costruisciQuery(filtro.getText().toString().trim(), ordinaPerRecenti);
+        String ordineSql = ordineSqlCorrente();
+        android.widget.Toast.makeText(ctx, "Esportazione in corso…", android.widget.Toast.LENGTH_SHORT).show();
+        android.os.Handler ui = new android.os.Handler(android.os.Looper.getMainLooper());
+        new Thread(() -> {
+            try {
+                DbInterno db = new DbInterno(ctx);
+                DbInterno.PaginaRisultati tutti = db.eseguiSelectPaginato(query.selectSql, query.fromJoinSql, query.whereSql,
+                        query.whereArgs, ordineSql, Integer.MAX_VALUE, 0);
+                db.close();
+                java.io.File file = EsportaListaXls.esporta(definizione.getTitolo(), definizione.getColonne(), tutti.righe);
+                ui.post(() -> {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(com.ncfsistemi.econ.utils.Utility.uriCondivisibile(ctx, file), com.ncfsistemi.econ.utils.Utility.XLS);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    try {
+                        host.startActivity(intent);
+                    } catch (android.content.ActivityNotFoundException e) {
+                        android.widget.Toast.makeText(ctx, "Nessuna app per aprire i file xls", android.widget.Toast.LENGTH_LONG).show();
+                    }
+                });
+            } catch (Exception e) {
+                android.util.Log.e("EsportaListaXls", "esportazione", e);
+                ui.post(() -> android.widget.Toast.makeText(ctx, "Errore nell'esportazione: " + e.getMessage(),
+                        android.widget.Toast.LENGTH_LONG).show());
+            }
+        }).start();
+    }
+
     /** Query paginata (risultatiPerPagina) con il filtro e l'ordinamento correnti. */
     public void caricaPagina() {
         String testoFiltro = filtro.getText().toString().trim();
         QueryPagina query = definizione.costruisciQuery(testoFiltro, ordinaPerRecenti);
 
-        String ordineSql = (ordinaPerRecenti && definizione.getOrdineRecenti() != null)
-                ? definizione.getOrdineRecenti()
-                : ordinamentoSqlPerCampo(colonnaOrdinamento) + (ordineDiscendente ? " desc" : " asc");
+        String ordineSql = ordineSqlCorrente();
 
         DbInterno db = new DbInterno(host.getContext());
         DbInterno.PaginaRisultati paginaRisultati = db.eseguiSelectPaginato(
@@ -369,7 +424,7 @@ public class EconListaStandardController {
             EconListViewAdapter adapterPersonalizzato = definizione.creaAdapterPersonalizzato(host.getContext(), dati);
             adapter = adapterPersonalizzato != null
                     ? adapterPersonalizzato
-                    : new EconListaStandardAdapter(host.getContext(), dati, definizione.getColonne());
+                    : new EconListaStandardAdapter(host.getContext(), dati, definizione.getColonne(), definizione.getAzioneRiga(host));
             lista.setAdapter(adapter);
             lista.setOnItemClickListener((parent, view, position, id) ->
                     definizione.onRigaClick(host, (ContentValues) dati.get(position)));
@@ -392,7 +447,7 @@ public class EconListaStandardController {
     private void aggiornaBarraPaginazione() {
         barraPaginazione.setVisibility(View.VISIBLE);
         textViewPaginaInfo.setText("Pagina " + (paginaCorrente + 1) + " di " + totalePagine + "  ·  ");
-        textViewPaginaInfo2.setText("  per pagina  ·  " + totaleRisultati + " risultati trovati");
+        textViewPaginaInfo2.setText("  per pagina  ·  " + totaleRisultati + " trovati");
         if (!editTextRisultatiPerPagina.isFocused()) {
             editTextRisultatiPerPagina.setText(String.valueOf(risultatiPerPagina));
         }

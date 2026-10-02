@@ -1176,7 +1176,6 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
                     File fileExport = new File(percorsoFile);
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     intent.setDataAndType(com.ncfsistemi.econ.utils.Utility.uriCondivisibile(CantiereSplitActivity.this, fileExport), "application/vnd.ms-excel"); intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
                 }
 
