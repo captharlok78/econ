@@ -515,6 +515,37 @@ public class LoginActivity extends EconActivity {
         return "";
     }
 
+    /** Secondi dopo i quali la password mostrata torna nascosta. */
+    private static final long PASSWORD_VISIBILE_MS = 10_000;
+    private final android.os.Handler handlerPassword = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable nascondiPassword = () -> impostaPasswordVisibile(false);
+
+    /** Occhio accanto alla password: la mostra (per PASSWORD_VISIBILE_MS) o la nasconde. */
+    public void mostraNascondiPassword(View v) {
+        EditText et = findViewById(R.id.editTextPasswordMercury);
+        boolean visibile = (et.getInputType() & InputType.TYPE_MASK_VARIATION) == InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
+        impostaPasswordVisibile(!visibile);
+    }
+
+    private void impostaPasswordVisibile(boolean visibile) {
+        EditText et = findViewById(R.id.editTextPasswordMercury);
+        android.widget.ImageButton occhio = findViewById(R.id.buttonMostraPassword);
+        handlerPassword.removeCallbacks(nascondiPassword);
+        int cursore = et.getSelectionEnd();
+        et.setInputType(InputType.TYPE_CLASS_TEXT
+                | (visibile ? InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD : InputType.TYPE_TEXT_VARIATION_PASSWORD));
+        et.setSelection(Math.max(0, Math.min(cursore, et.length())));
+        occhio.setImageResource(visibile ? R.drawable.ic_password_nascondi : R.drawable.ic_password_mostra);
+        occhio.setContentDescription(visibile ? "Nascondi la password" : "Mostra la password");
+        if (visibile) handlerPassword.postDelayed(nascondiPassword, PASSWORD_VISIBILE_MS);
+    }
+
+    @Override
+    protected void onPause() {
+        impostaPasswordVisibile(false);
+        super.onPause();
+    }
+
     /** Login offline consentito: non per un nuovo accesso richiesto da un'altra schermata (serve il server). */
     private boolean offlineConsentito() {
         return !getIntent().getBooleanExtra(EXTRA_RETURN_AFTER_LOGIN, false)
@@ -531,11 +562,13 @@ public class LoginActivity extends EconActivity {
             editEmail.setEnabled(false);
             pulsante.setText("Accedi offline");
             checkBoxRicordamiMercury.setVisibility(View.GONE);
+            findViewById(R.id.testoRicordamiOffline).setVisibility(View.GONE);
             testoStatoConnessione.setText("Server non raggiungibile: puoi accedere offline");
         } else {
             editEmail.setEnabled(true);
             pulsante.setText("Accedi");
             checkBoxRicordamiMercury.setVisibility(View.VISIBLE);
+            findViewById(R.id.testoRicordamiOffline).setVisibility(View.VISIBLE);
         }
     }
 

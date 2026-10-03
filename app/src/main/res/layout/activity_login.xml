@@ -63,21 +63,48 @@
                     android:inputType="textEmailAddress"
                     android:layout_marginBottom="@dimen/margine" />
 
-                <EditText
-                    android:id="@+id/editTextPasswordMercury"
+                <!-- Password con l'occhio per vederla mentre si digita -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Password"
-                    android:inputType="textPassword"
-                    android:layout_marginBottom="@dimen/margine" />
+                    android:layout_marginBottom="@dimen/margine"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/editTextPasswordMercury"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Password"
+                        android:inputType="textPassword" />
+
+                    <ImageButton
+                        android:id="@+id/buttonMostraPassword"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Mostra la password"
+                        android:onClick="mostraNascondiPassword"
+                        android:src="@drawable/ic_password_mostra" />
+                </LinearLayout>
 
                 <CheckBox
                     android:id="@+id/checkBoxRicordamiMercury"
                     style="@style/TestoIntestazioneNoPadding"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/margine"
                     android:text="Ricordami" />
+
+                <TextView
+                    android:id="@+id/testoRicordamiOffline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/margine"
+                    android:paddingStart="32dp"
+                    android:text="(consigliato per il lavoro offline)"
+                    android:textColor="#757575"
+                    android:textSize="12sp" />
 
                 <Button
                     android:id="@+id/button_login_mercury"
