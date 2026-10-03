@@ -90,6 +90,7 @@ class RinnovoToken implements Authenticator {
                     tm.saveToken(r.body());
                     android.util.Log.i(TAG, "token rinnovato prima della scadenza");
                 } else {
+                    if (r.code() == 403) ProfiloOffline.blocca(context);
                     android.util.Log.w(TAG, "rinnovo anticipato rifiutato: HTTP " + r.code());
                 }
             } catch (Exception e) {
@@ -130,9 +131,11 @@ class RinnovoToken implements Authenticator {
                     tm.getEmailRicordami(), tm.getPasswordRicordami(), ditta > 0 ? ditta : null, seriale)).execute();
             if (r.isSuccessful() && r.body() != null && r.body().token != null) {
                 tm.saveToken(r.body());
+                ProfiloOffline.registraPassword(context, tm.getEmailRicordami(), tm.getPasswordRicordami());
                 android.util.Log.i(TAG, "token rinnovato");
                 return r.body().token;
             }
+            if (r.code() == 403) ProfiloOffline.blocca(context);
             android.util.Log.w(TAG, "rinnovo rifiutato: HTTP " + r.code());
         } catch (Exception e) {
             android.util.Log.w(TAG, "rinnovo non riuscito", e); // rete assente o risposta illeggibile: resta la 401

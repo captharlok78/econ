@@ -52,6 +52,7 @@ public final class AccessoMercury {
                         if (response.isSuccessful() && response.body() != null) {
                             MercuryApiService.LoginResponse body = response.body();
                             tm.saveToken(body);
+                            com.ncfsistemi.econ.api.ProfiloOffline.registraPassword(app, email, password);
                             app.getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE)
                                     .edit()
                                     .putString("MERCURY_EMAIL", email)
@@ -61,6 +62,8 @@ public final class AccessoMercury {
                         } else if (response.code() == 401) {
                             esito.rifiutato("Le credenziali salvate non sono più valide: accedi di nuovo.");
                         } else if (response.code() == 403 || response.code() == 429) {
+                            // dispositivo disattivato, licenza o account non abilitati: niente offline (429: troppi tentativi)
+                            if (response.code() == 403) com.ncfsistemi.econ.api.ProfiloOffline.blocca(app);
                             esito.rifiutato(MercuryApiClient.messaggioErrore(response, "Accesso non consentito"));
                         } else {
                             esito.erroreRete("Errore server (HTTP " + response.code() + ").");

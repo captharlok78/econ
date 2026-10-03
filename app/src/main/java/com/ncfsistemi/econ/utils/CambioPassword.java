@@ -50,6 +50,7 @@ public final class CambioPassword {
                                 tm.saveCredenzialiRicordami(tm.getEmailRicordami(), nuova);
                             }
                             tm.setPasswordScaduta(false);
+                            com.ncfsistemi.econ.api.ProfiloOffline.aggiornaPassword(app, nuova);
                             esito.fatto(response.body().password);
                         } else {
                             esito.errore(MercuryApiClient.messaggioErrore(response, "Errore dal server"));

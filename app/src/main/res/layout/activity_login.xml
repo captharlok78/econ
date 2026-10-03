@@ -127,60 +127,6 @@
                         android:layout_height="wrap_content" />
                 </LinearLayout>
 
-                <!-- Separatore -->
-                <View
-                    android:id="@+id/separatoreLogin"
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#CCCCCC"
-                    android:layout_marginBottom="@dimen/margine" />
-
-                <!-- Sezione login locale (vecchio sistema, solo se ci sono utenti nel DB) -->
-                <TextView
-                    android:id="@+id/textViewAccount"
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Accesso locale" />
-
-                <com.ncfsistemi.econ.views.EconSpinner
-                    android:id="@+id/econSpinnerUtenti"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/margine" >
-                </com.ncfsistemi.econ.views.EconSpinner>
-
-                <EditText
-                    android:id="@+id/editTextPassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="15"
-                    android:inputType="textPassword"
-                    android:maxLength="10" >
-                    <requestFocus />
-                </EditText>
-
-                <CheckBox
-                    android:id="@+id/checkBoxRicordaPassword"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/margine"
-                    style="@style/TestoIntestazioneNoPadding"
-                    android:layout_marginTop="@dimen/margine"
-                    android:text="@string/ricorda_password" />
-
-                <Button
-                    android:id="@+id/button_login"
-                    style="@style/TestoNeroGrande"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_margin="@dimen/margine"
-                    android:onClick="accedi"
-                    android:padding="@dimen/margine"
-                    android:text="@string/accedi"
-                    android:textColor="#1784c5" />
-
                 </LinearLayout>
             </LinearLayout>
         </ScrollView>

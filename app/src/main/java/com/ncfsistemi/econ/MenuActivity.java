@@ -132,7 +132,14 @@ public class MenuActivity extends EconActivity {
         // sincronizzazione in background secondo Impostazioni › Preferenze del dispositivo (spenta di base)
         com.ncfsistemi.econ.utils.PreferenzeDispositivo.applicaSyncAutomatica(this);
         // a ogni login/apertura il listino si riallinea agli articoli della ditta (in background, senza avvisi)
-        com.ncfsistemi.econ.utils.CatalogoLocale.allineaInBackground(this);
+        if (!com.ncfsistemi.econ.utils.Sessione.isOffline()) {
+            com.ncfsistemi.econ.utils.CatalogoLocale.allineaInBackground(this);
+        }
+        // ingresso senza server: avviso che i dati partono alla riconnessione (ACCESSO_OFFLINE.md §2.3), una volta
+        if (savedInstanceState == null && getIntent().getBooleanExtra(com.ncfsistemi.econ.utils.AccessoOffline.EXTRA_AVVISO, false)) {
+            getIntent().removeExtra(com.ncfsistemi.econ.utils.AccessoOffline.EXTRA_AVVISO);
+            com.ncfsistemi.econ.utils.AccessoOffline.mostraAvviso(this);
+        }
 
         System.out.println("Econ: MenuActivity onCreate EXIT");
     }
@@ -290,22 +297,37 @@ public class MenuActivity extends EconActivity {
             .enqueue(new okhttp3.Callback() {
                 @Override
                 public void onFailure(okhttp3.Call call, IOException e) {
+                    // server non raggiungibile: si lavora offline e si aspetta che torni (utils.Riconnessione)
+                    com.ncfsistemi.econ.utils.Riconnessione.serverNonRaggiungibile(MenuActivity.this);
+                    int nonInviate = com.ncfsistemi.econ.utils.DatiLocali.modificheNonInviate(MenuActivity.this);
                     runOnUiThread(() -> {
+                        if (isFinishing() || isDestroyed()) return;
                         View l = findViewById(R.id.led_server);
                         if (l != null) l.setBackgroundResource(R.drawable.ic_led_red);
-                        impostaTestoLed("Disconnesso");
+                        impostaTestoLed(nonInviate == 0 ? "Offline" : "Offline · " + nonInviate + " da inviare");
                     });
                 }
                 @Override
                 public void onResponse(okhttp3.Call call, okhttp3.Response response) {
                     response.close();
                     runOnUiThread(() -> {
+                        if (isFinishing() || isDestroyed()) return;
                         View l = findViewById(R.id.led_server);
                         if (l != null) l.setBackgroundResource(R.drawable.ic_led_green);
                         impostaTestoLed("Connesso");
+                        com.ncfsistemi.econ.utils.Riconnessione.serverRaggiungibile();
                     });
                 }
             });
+    }
+
+    /** Ricollegato al server: il LED torna verde (l'avviso lo mostra EconActivity). */
+    @Override
+    public void notificaRicollegamento() {
+        super.notificaRicollegamento();
+        runOnUiThread(() -> {
+            if (!isFinishing() && !isDestroyed()) verificaConnessioneServer();
+        });
     }
 
     private void impostaTestoLed(String testo) {
@@ -814,6 +836,7 @@ public class MenuActivity extends EconActivity {
      * Se l'utente ha "Ricordami", aggiorna anche le credenziali salvate (servono al login automatico).
      */
     private void apriCambioPassword(TextView tvPassword) {
+        if (com.ncfsistemi.econ.utils.AccessoOffline.richiedeServer(this, "Cambia password")) return;
         int dp16 = (int) (16 * getResources().getDisplayMetrics().density);
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);

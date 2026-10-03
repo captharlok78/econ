@@ -336,13 +336,26 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         if (!verificaDatiLocali()) {
             return; // in attesa della scelta dell'utente
         }
-        if (!com.ncfsistemi.econ.utils.Utility.isOnline(this)) {
-            setStatus("Nessuna connessione: si lavora con i dati già presenti sul dispositivo.", true);
-            mostraContinua();
-            uiHandler.postDelayed(this::vaiAlMenu, 2500);
-            return;
-        }
-        uiHandler.postDelayed(() -> avviaSincronizzazione(null), 300);
+        setStatus("Verifica del server...", false);
+        com.ncfsistemi.econ.utils.VerificaServer.verifica(this, raggiungibile -> {
+            if (isFinishing() || isDestroyed()) return;
+            if (raggiungibile) {
+                avviaSincronizzazione(null);
+            } else if (com.ncfsistemi.econ.utils.AccessoOffline.possibile(this)) {
+                // si lavora con i dati del tablet, con l'avviso (ACCESSO_OFFLINE.md §2.3)
+                com.ncfsistemi.econ.utils.AccessoOffline.entra(this);
+                finish();
+            } else {
+                setStatus(com.ncfsistemi.econ.utils.AccessoOffline.motivo(this), true);
+                Intent intent = new Intent(this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                uiHandler.postDelayed(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    startActivity(intent);
+                    finish();
+                }, 2500);
+            }
+        });
     }
 
     /**
@@ -415,6 +428,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     private void aggiornaModuli(MercuryApiService api) throws Exception {
         setStatus("Aggiornamento moduli e pacchetti...", false);
         Response<MercuryApiService.ModuliResponse> resp = api.getModuli().execute();
+        com.ncfsistemi.econ.utils.Sessione.setOffline(false); // il server ha risposto
         if (resp.code() == 401) {
             gestisci401();
             return;
@@ -428,6 +442,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         tm.saveFunzionalita(resp.body().funzionalita);
         tm.savePianificazione(resp.body().pianificazione);
         tm.savePacchetti(resp.body().pacchetti);
+        com.ncfsistemi.econ.api.ProfiloOffline.segnaOnline(this, resp.body().offlineGiorni);
         // versione del server per il piede delle stampe (GESTIONE_RAPPORTINI.md §15)
         try {
             Response<MercuryApiService.VersionResponse> v = api.getVersioneMercury().execute();
@@ -478,12 +493,11 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     }
 
     /**
-     * Gestisce una risposta HTTP 401 (token scaduto o non valido):
-     * cancella il token, mostra un messaggio chiaro e porta al login.
+     * Gestisce una risposta HTTP 401 (token scaduto o non valido): messaggio chiaro e login, poi si riprende. Non si
+     * cancella niente: "Ricordami", moduli, funzionalita' e profilo offline restano (il login li aggiorna).
      */
     private void gestisci401() {
         redirectingToLogin = true;
-        com.ncfsistemi.econ.api.TokenManager.getInstance(this).clearToken();
         setStatus("Sessione scaduta — effettua nuovamente il login a Mercury.", true);
         uiHandler.postDelayed(() -> {
             if (isFinishing() || isDestroyed()) return;
@@ -536,6 +550,9 @@ public class SincronizzazioneActivity extends AppCompatActivity {
                     if (erroreAvvio) {
                         mostraContinua();
                     } else {
+                        // dati del tablet completi: da ora questo account puo' lavorare offline (ACCESSO_OFFLINE.md §2.2)
+                        com.ncfsistemi.econ.api.ProfiloOffline.abilita(this);
+                        com.ncfsistemi.econ.utils.Sessione.setOffline(false);
                         setStatus("Allineamento completato ✓", false);
                         uiHandler.postDelayed(this::vaiAlMenu, 1200);
                     }

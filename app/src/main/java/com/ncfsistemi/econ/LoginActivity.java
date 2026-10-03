@@ -6,14 +6,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.text.Editable;
 import android.text.InputType;
-import android.text.TextWatcher;
-import android.util.Base64;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -21,36 +17,25 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import com.ncfsistemi.econ.api.MercuryApiClient;
 import com.ncfsistemi.econ.api.MercuryApiService;
 import com.ncfsistemi.econ.api.TokenManager;
 import com.ncfsistemi.econ.db.DbInterno;
-import com.ncfsistemi.econ.db.table.Utenti;
 import com.ncfsistemi.econ.utils.Sessione;
 import com.ncfsistemi.econ.utils.Utility;
-import com.ncfsistemi.econ.views.EconSpinner;
 import retrofit2.Call;
 import retrofit2.Callback;
 
-public class LoginActivity extends EconActivity implements TextWatcher {
+public class LoginActivity extends EconActivity {
 
-    private EconSpinner spinnerutenti = null;
-    private CheckBox ricordaPassword = null;
-    private EditText editPassword = null;
     private View indicatoreConnessione = null;
     private TextView testoStatoConnessione = null;
     private TextView testoVersioneApp = null;
     private CheckBox checkBoxRicordamiMercury = null;
     private String versioneAppTesto = "";
     private String versioneMercuryTesto = "";
+    /** Server non raggiungibile e profilo offline disponibile: la password si controlla sul tablet (ACCESSO_OFFLINE.md). */
+    private boolean modoOffline = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,15 +43,10 @@ public class LoginActivity extends EconActivity implements TextWatcher {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        ricordaPassword = (CheckBox) findViewById(R.id.checkBoxRicordaPassword);
-        editPassword = (EditText) findViewById(R.id.editTextPassword);
-        spinnerutenti = (EconSpinner) findViewById(R.id.econSpinnerUtenti);
         indicatoreConnessione = findViewById(R.id.indicatoreConnessione);
         testoStatoConnessione = (TextView) findViewById(R.id.testoStatoConnessione);
         testoVersioneApp = (TextView) findViewById(R.id.testoVersioneApp);
         checkBoxRicordamiMercury = (CheckBox) findViewById(R.id.checkBoxRicordamiMercury);
-
-        spinnerutenti.addTextChangeListener(this);
 
         caricaVersioni();
 
@@ -96,46 +76,10 @@ public class LoginActivity extends EconActivity implements TextWatcher {
 
         // Auto-login solo se NON siamo stati aperti per fare un nuovo login esplicito
         boolean returnAfterLogin = getIntent().getBooleanExtra(EXTRA_RETURN_AFTER_LOGIN, false);
-        if (!returnAfterLogin && isTokenValid()) {
+        if (!returnAfterLogin && TokenManager.getInstance(this).isTokenValido()) {
             setupSessioneFromToken();
             avanzaAlMenu();
             return;
-        }
-
-        DbInterno db = new DbInterno(this);
-        ContentValues where = new ContentValues();
-        ArrayList<Object> utenti = db.eseguiSelect(new Utenti(), where, new String[]{Utenti.NOME, Utenti.COGNOME});
-        db.close();
-
-        ArrayList<Object> valori = new ArrayList<>();
-        for (int i = 0; i < utenti.size(); i++) {
-            ContentValues curr = (ContentValues) utenti.get(i);
-            String pwd = curr.getAsString(Utenti.PASSWORD);
-            if (pwd != null && !pwd.isEmpty()) {
-                ContentValues val = new ContentValues();
-                val.put(EconSpinner.VALORE, curr.getAsInteger(Utenti.ID_UTENTE));
-                val.put(EconSpinner.DESCRIZIONE, curr.getAsString(Utenti.NOME) + " " + curr.getAsString(Utenti.COGNOME));
-                valori.add(val);
-            }
-        }
-
-        // Mostra la sezione login locale solo se ci sono utenti locali con password
-        boolean hasLocalUsers = !valori.isEmpty();
-        int localVisibility = hasLocalUsers ? View.VISIBLE : View.GONE;
-        findViewById(R.id.separatoreLogin).setVisibility(localVisibility);
-        findViewById(R.id.textViewAccount).setVisibility(localVisibility);
-        findViewById(R.id.econSpinnerUtenti).setVisibility(localVisibility);
-        findViewById(R.id.editTextPassword).setVisibility(localVisibility);
-        findViewById(R.id.checkBoxRicordaPassword).setVisibility(localVisibility);
-        findViewById(R.id.button_login).setVisibility(localVisibility);
-
-        if (hasLocalUsers) {
-            ContentValues valVuoto = new ContentValues();
-            valVuoto.put(EconSpinner.VALORE, 0);
-            valVuoto.put(EconSpinner.DESCRIZIONE, "");
-            valori.add(0, valVuoto);
-            spinnerutenti.setValue("0");
-            spinnerutenti.setValoriSpinnerLibero(valori);
         }
 
         // Verifica connessione Mercury in background
@@ -222,31 +166,19 @@ public class LoginActivity extends EconActivity implements TextWatcher {
         indicatoreConnessione.setBackgroundColor(Color.parseColor("#FFC107"));
         testoStatoConnessione.setText("Verifica connessione...");
 
-        String pingUrl = (url.endsWith("/") ? url : url + "/") + "api/auth/ditte";
         new Thread(() -> {
-            int code = -1;
-            try {
-                OkHttpClient client = new OkHttpClient.Builder()
-                        .connectTimeout(5, TimeUnit.SECONDS)
-                        .readTimeout(5, TimeUnit.SECONDS)
-                        .build();
-                Request req = new Request.Builder().url(pingUrl).build();
-                try (Response resp = client.newCall(req).execute()) {
-                    code = resp.code();
-                }
-            } catch (Exception ignored) {
-            }
-
-            final boolean raggiungibile = code > 0;
+            final boolean raggiungibile = com.ncfsistemi.econ.utils.VerificaServer.raggiungibile(this);
             final String urlDisplay = url;
             runOnUiThread(() -> {
                 if (isFinishing() || isDestroyed()) return;
                 if (raggiungibile) {
                     indicatoreConnessione.setBackgroundColor(Color.parseColor("#4CAF50"));
                     testoStatoConnessione.setText("Connesso: " + urlDisplay);
+                    impostaModoOffline(false);
                 } else {
                     indicatoreConnessione.setBackgroundColor(Color.parseColor("#F44336"));
                     testoStatoConnessione.setText("Server non raggiungibile");
+                    impostaModoOffline(offlineConsentito());
                 }
             });
         }).start();
@@ -268,6 +200,11 @@ public class LoginActivity extends EconActivity implements TextWatcher {
         }
         if (password.isEmpty()) {
             editPasswordMercury.setError("Inserisci la password");
+            return;
+        }
+
+        if (modoOffline) {
+            accediOffline(v, email, password);
             return;
         }
 
@@ -296,6 +233,8 @@ public class LoginActivity extends EconActivity implements TextWatcher {
                             MercuryApiService.LoginResponse body = response.body();
                             TokenManager tm = TokenManager.getInstance(LoginActivity.this);
                             tm.saveToken(body);
+                            com.ncfsistemi.econ.api.ProfiloOffline.registraPassword(LoginActivity.this, email, password);
+                            Sessione.setOffline(false);
 
                             // "Ricordami": salva o cancella email+password cifrate a seconda della
                             // checkbox. Restano finché non si fa logout (TokenManager.clearToken()).
@@ -317,6 +256,7 @@ public class LoginActivity extends EconActivity implements TextWatcher {
                             avanzaAlMenu();
                         } else {
                             String msg;
+                            if (response.code() == 403) com.ncfsistemi.econ.api.ProfiloOffline.blocca(LoginActivity.this);
                             if (response.code() == 401) msg = "Email o password errata.";
                             else if (response.code() == 403 || response.code() == 429) msg = MercuryApiClient.messaggioErrore(response, "Accesso non consentito");
                             else if (response.code() >= 500) msg = "Errore server (HTTP " + response.code() + ").";
@@ -329,7 +269,16 @@ public class LoginActivity extends EconActivity implements TextWatcher {
                     public void onFailure(Call<MercuryApiService.LoginResponse> call, Throwable t) {
                         v.setEnabled(true);
                         if (isFinishing() || isDestroyed()) return;
-                        Utility.mostraDialog("Errore di rete", t.getMessage(), LoginActivity.this, "OK");
+                        // server non raggiungibile: se si puo', si entra offline con la stessa password
+                        if (offlineConsentito() && email.equalsIgnoreCase(com.ncfsistemi.econ.api.ProfiloOffline.email(LoginActivity.this))) {
+                            impostaModoOffline(true);
+                            accediOffline(v, email, password);
+                            return;
+                        }
+                        String motivo = com.ncfsistemi.econ.api.ProfiloOffline.motivoNonDisponibile(LoginActivity.this);
+                        Utility.mostraDialog("Server non raggiungibile",
+                                "Non è possibile collegarsi al server (" + t.getMessage() + ")."
+                                        + (motivo != null ? "\n\n" + motivo : ""), LoginActivity.this, "OK");
                     }
                 });
         System.out.println("Econ: LoginActivity accediMercury EXIT");
@@ -343,67 +292,6 @@ public class LoginActivity extends EconActivity implements TextWatcher {
     @Override
     protected boolean isControllaLogin() {
         return false;
-    }
-
-    public void accedi(View v) {
-        System.out.println("Econ: LoginActivity accedi ENTER");
-        int idUtenteSel = Integer.parseInt(spinnerutenti.getValue());
-        if (idUtenteSel == 0) {
-            spinnerutenti.setError(getString(R.string.seleziona_utente));
-        } else {
-            String password = getTesto(R.id.editTextPassword);
-            DbInterno db = new DbInterno(this);
-            ContentValues where = new ContentValues();
-            where.put(Utenti.ID_UTENTE, idUtenteSel);
-            ContentValues recUt = db.getRecord(new Utenti(), where);
-            db.close();
-
-            if (recUt != null && recUt.getAsString(Utenti.PASSWORD).equals(password)) {
-                db = new DbInterno(this);
-                Utenti tabUt = new Utenti();
-                ContentValues valUpd = tabUt.getValoriLogModifica(db);
-                valUpd.put(Utenti.RICORDA_PASSWORD, ricordaPassword.isChecked() ? 1 : 0);
-                tabUt.aggiornaRecord(db, valUpd, where);
-                db.close();
-
-                Sessione.setIdOperatore(idUtenteSel, this);
-
-                Intent intent = new Intent(this, MenuActivity.class);
-                startActivity(intent);
-            } else {
-                editPassword.setError(getString(R.string.password_errata));
-            }
-        }
-        System.out.println("Econ: LoginActivity accedi EXIT");
-    }
-
-    @Override
-    public void afterTextChanged(Editable arg0) {
-        System.out.println("Econ: LoginActivity afterTextChanged ENTER");
-        setText(R.id.editTextPassword, "");
-        ricordaPassword.setChecked(false);
-        int idUtenteSel = Integer.parseInt(spinnerutenti.getValue());
-        if (idUtenteSel > 0) {
-            DbInterno db = new DbInterno(this);
-            ContentValues where = new ContentValues();
-            where.put(Utenti.ID_UTENTE, idUtenteSel);
-            ContentValues recUt = db.getRecord(new Utenti(), where);
-            db.close();
-
-            if (recUt != null && recUt.getAsInteger(Utenti.RICORDA_PASSWORD) == 1) {
-                setText(R.id.editTextPassword, recUt.getAsString(Utenti.PASSWORD));
-                ricordaPassword.setChecked(true);
-            }
-        }
-        System.out.println("Econ: LoginActivity afterTextChanged EXIT");
-    }
-
-    @Override
-    public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
-    }
-
-    @Override
-    public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
     }
 
     /** Apre la schermata di configurazione del server Mercury */
@@ -627,26 +515,52 @@ public class LoginActivity extends EconActivity implements TextWatcher {
         return "";
     }
 
-    /**
-     * Verifica se il JWT token presente nel TokenManager è ancora valido (non scaduto).
-     * Decodifica il payload senza network call.
-     */
-    private boolean isTokenValid() {
-        String token = TokenManager.getInstance(this).getToken();
-        if (token == null) return false;
-        try {
-            String[] parts = token.split("\\.");
-            if (parts.length != 3) return false;
-            byte[] decoded = Base64.decode(
-                    parts[1].replace('-', '+').replace('_', '/'),
-                    Base64.DEFAULT
-            );
-            JSONObject payload = new JSONObject(new String(decoded, "UTF-8"));
-            long exp = payload.optLong("exp", 0);
-            return exp > System.currentTimeMillis() / 1000L;
-        } catch (Exception e) {
-            return false;
+    /** Login offline consentito: non per un nuovo accesso richiesto da un'altra schermata (serve il server). */
+    private boolean offlineConsentito() {
+        return !getIntent().getBooleanExtra(EXTRA_RETURN_AFTER_LOGIN, false)
+                && com.ncfsistemi.econ.api.ProfiloOffline.disponibile(this);
+    }
+
+    /** Server non raggiungibile con profilo offline: email fissa, "Accedi offline", niente "Ricordami". */
+    private void impostaModoOffline(boolean attivo) {
+        modoOffline = attivo;
+        EditText editEmail = findViewById(R.id.editTextEmail);
+        android.widget.Button pulsante = findViewById(R.id.button_login_mercury);
+        if (attivo) {
+            editEmail.setText(com.ncfsistemi.econ.api.ProfiloOffline.email(this));
+            editEmail.setEnabled(false);
+            pulsante.setText("Accedi offline");
+            checkBoxRicordamiMercury.setVisibility(View.GONE);
+            testoStatoConnessione.setText("Server non raggiungibile: puoi accedere offline");
+        } else {
+            editEmail.setEnabled(true);
+            pulsante.setText("Accedi");
+            checkBoxRicordamiMercury.setVisibility(View.VISIBLE);
         }
+    }
+
+    /** Password controllata sul tablet (ProfiloOffline); se giusta si entra nel menu offline. */
+    private void accediOffline(View v, String email, String password) {
+        v.setEnabled(false);
+        new Thread(() -> {
+            boolean ok = com.ncfsistemi.econ.api.ProfiloOffline.verificaPassword(this, email, password);
+            runOnUiThread(() -> {
+                v.setEnabled(true);
+                if (isFinishing() || isDestroyed()) return;
+                if (ok) {
+                    com.ncfsistemi.econ.utils.AccessoOffline.entra(this);
+                    finish();
+                    return;
+                }
+                int rimasti = com.ncfsistemi.econ.api.ProfiloOffline.tentativiRimasti(this);
+                if (rimasti > 0) {
+                    ((EditText) findViewById(R.id.editTextPasswordMercury)).setError("Password errata (tentativi rimasti: " + rimasti + ")");
+                } else {
+                    impostaModoOffline(false);
+                    Utility.mostraDialog("Accesso offline", com.ncfsistemi.econ.api.ProfiloOffline.motivoNonDisponibile(this), this, "OK");
+                }
+            });
+        }, "accesso-offline").start();
     }
 
     /** Costante per indicare che dopo il login si deve tornare all'activity chiamante. */

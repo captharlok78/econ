@@ -26,7 +26,7 @@ public final class PermessiServer {
     /** Rilegge i permessi; se sono cambiati esegue seCambiati sul thread principale (es. ridisegnare il menu). */
     public static void aggiorna(Activity activity, Runnable seCambiati) {
         long ora = System.currentTimeMillis();
-        if (ora - ultimaLettura < INTERVALLO_MS || !Utility.isOnline(activity)) return;
+        if (ora - ultimaLettura < INTERVALLO_MS || Sessione.isOffline() || !Utility.isOnline(activity)) return;
         TokenManager tm = TokenManager.getInstance(activity);
         if (!tm.hasToken()) return;
         ultimaLettura = ora;
@@ -43,6 +43,7 @@ public final class PermessiServer {
     public static boolean leggi(android.content.Context ctx) throws Exception {
         MercuryApiService api = MercuryApiClient.getInstance(ctx).getService();
         Response<MercuryApiService.ModuliResponse> resp = api.getModuli().execute();
+        Sessione.setOffline(false); // il server ha risposto
         if (!resp.isSuccessful() || resp.body() == null) return false;
         TokenManager tm = TokenManager.getInstance(ctx);
         String prima = tm.improntaPermessi();
@@ -50,6 +51,7 @@ public final class PermessiServer {
         tm.saveFunzionalita(resp.body().funzionalita);
         tm.savePianificazione(resp.body().pianificazione);
         tm.savePacchetti(resp.body().pacchetti);
+        com.ncfsistemi.econ.api.ProfiloOffline.segnaOnline(ctx, resp.body().offlineGiorni);
         ultimaLettura = System.currentTimeMillis();
         return !prima.equals(tm.improntaPermessi());
     }

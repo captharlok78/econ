@@ -7,16 +7,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Base64;
 import android.view.MotionEvent;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
-import org.json.JSONObject;
-
 import com.ncfsistemi.econ.api.TokenManager;
 import com.ncfsistemi.econ.utils.AccessoMercury;
+import com.ncfsistemi.econ.utils.AccessoOffline;
 import com.ncfsistemi.econ.utils.Sessione;
 import com.ncfsistemi.econ.utils.Utility;
 
@@ -96,12 +94,28 @@ public class StartActivity extends EconActivity {
             splashHandler = null;
         }
 
-        // Ad ogni apertura l'app si riallinea al server (moduli, pacchetti, dati) prima del menu:
-        // con "Ricordami" rifà l'accesso con le credenziali salvate, altrimenti usa il token ancora valido.
+        // Ad ogni apertura l'app si riallinea al server (moduli, pacchetti, dati) prima del menu: con "Ricordami" rifà
+        // l'accesso con le credenziali salvate, altrimenti usa il token ancora valido. Se il server non risponde si
+        // entra offline quando e' possibile (ACCESSO_OFFLINE.md §2.3).
         TokenManager tm = TokenManager.getInstance(this);
-        boolean tokenValido = tm.hasToken() && isTokenValid() && tm.getIdDitta() > 0;
+        if (!tm.hasToken() && !tm.hasCredenzialiRicordami()) {
+            apriLogin();
+            return;
+        }
+        ((TextView) findViewById(R.id.textViewVersione)).setText("Verifica del server...");
+        com.ncfsistemi.econ.utils.VerificaServer.verifica(this, raggiungibile -> {
+            if (isFinishing() || isDestroyed()) return;
+            if (raggiungibile) {
+                accediOnline();
+            } else {
+                senzaServer();
+            }
+        });
+    }
 
-        if (tm.hasCredenzialiRicordami() && Utility.isOnline(this)) {
+    private void accediOnline() {
+        TokenManager tm = TokenManager.getInstance(this);
+        if (tm.hasCredenzialiRicordami()) {
             ((TextView) findViewById(R.id.textViewVersione)).setText("Accesso in corso...");
             AccessoMercury.accediConCredenzialiRicordate(this, new AccessoMercury.Esito() {
                 @Override
@@ -118,48 +132,34 @@ public class StartActivity extends EconActivity {
 
                 @Override
                 public void erroreRete(String messaggio) {
-                    // Server non raggiungibile: si prosegue con i dati del dispositivo se il token vale ancora.
-                    if (tokenValido) {
-                        Sessione.ripristinaDaToken(StartActivity.this);
-                        AccessoMercury.apriAllineamento(StartActivity.this);
-                        finish();
-                    } else {
-                        apriLogin();
-                    }
+                    senzaServer();
                 }
             });
             return;
         }
-
-        if (tokenValido) {
+        if (tm.isTokenValido() && tm.getIdDitta() > 0) {
             Sessione.ripristinaDaToken(this);
             AccessoMercury.apriAllineamento(this);
+            finish();
         } else {
-            startActivity(new Intent(this, LoginActivity.class));
+            apriLogin();
         }
-        finish();
+    }
+
+    /** Server non raggiungibile: con "Ricordami" (o token ancora valido) si entra offline, altrimenti il login offline. */
+    private void senzaServer() {
+        TokenManager tm = TokenManager.getInstance(this);
+        if (AccessoOffline.possibile(this) && (tm.hasCredenzialiRicordami() || tm.isTokenValido())) {
+            AccessoOffline.entra(this);
+            finish();
+        } else {
+            apriLogin();
+        }
     }
 
     private void apriLogin() {
         startActivity(new Intent(this, LoginActivity.class));
         finish();
-    }
-
-    private boolean isTokenValid() {
-        String token = TokenManager.getInstance(this).getToken();
-        if (token == null) return false;
-        try {
-            String[] parts = token.split("\\.");
-            if (parts.length != 3) return false;
-            byte[] decoded = Base64.decode(
-                    parts[1].replace('-', '+').replace('_', '/'),
-                    Base64.DEFAULT);
-            JSONObject payload = new JSONObject(new String(decoded, "UTF-8"));
-            long exp = payload.optLong("exp", 0);
-            return exp > System.currentTimeMillis() / 1000L;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     @Override

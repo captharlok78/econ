@@ -177,6 +177,8 @@ public interface MercuryApiService {
         /** true = password scaduta secondo la ditta: va cambiata prima di continuare (le altre API rispondono 401) */
         public boolean passwordScaduta;
         public PasswordProfilo password;
+        /** Giorni in cui si puo' lavorare senza server (ditte.giorni_offline_app); null da server vecchi */
+        public Integer offlineGiorni;
     }
 
     /** GET api/auth/moduli: moduli app e pacchetti dell'utente nella ditta del token (chiamato a ogni apertura). */
@@ -185,6 +187,7 @@ public interface MercuryApiService {
         public java.util.List<String> funzionalita;
         public Boolean pianificazione;
         public java.util.List<PacchettoInfo> pacchetti;
+        public Integer offlineGiorni;
     }
 
     /** Pacchetto licenza assegnato: tipo "APP" o "WEB" (server), stato leggibile (Attiva, In scadenza, Scaduta, ...). */

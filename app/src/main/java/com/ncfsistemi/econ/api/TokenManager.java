@@ -58,6 +58,11 @@ public class TokenManager {
         this.prefs = p;
     }
 
+    /** Storage cifrato condiviso con ProfiloOffline. */
+    SharedPreferences prefs() {
+        return prefs;
+    }
+
     public static synchronized TokenManager getInstance(Context context) {
         if (instance == null) {
             instance = new TokenManager(context.getApplicationContext());
@@ -92,6 +97,8 @@ public class TokenManager {
         savePianificazione(response.pianificazione);
         savePacchetti(response.pacchetti);
         saveDitte(response.ditte);
+        // token nuovo dal server (login o rinnovo): riparte il periodo in cui si puo' lavorare offline
+        ProfiloOffline.segnaOnline(this, response.offlineGiorni);
     }
 
     /** Pacchetti licenza assegnati (dal login o da GET api/auth/moduli), salvati come JSON. */
@@ -275,10 +282,16 @@ public class TokenManager {
                 .apply();
     }
 
+    /** Token presente e non ancora scaduto (letto dal JWT, senza server). */
+    public boolean isTokenValido() {
+        return RinnovoToken.scadenza(getToken()) > System.currentTimeMillis() / 1000L;
+    }
+
     public boolean hasToken() {
         return getToken() != null;
     }
 
+    /** Logout: toglie token, permessi, "Ricordami" e il profilo offline (ACCESSO_OFFLINE.md). */
     public void clearToken() {
         prefs.edit()
                 .remove(KEY_TOKEN)
@@ -295,6 +308,9 @@ public class TokenManager {
                 .remove(KEY_PIANIFICAZIONE)
                 .apply();
         clearCredenzialiRicordami();
+        SharedPreferences.Editor ed = prefs.edit();
+        ProfiloOffline.cancella(ed);
+        ed.apply();
     }
 
     /**

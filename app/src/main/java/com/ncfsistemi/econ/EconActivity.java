@@ -474,7 +474,13 @@ public abstract class EconActivity extends FragmentActivity {
     }
 
     private void richiediConfermaLogout() {
-        Utility.mostraConfermaDialog(getString(R.string.attenzione), getString(R.string.conferma_disconnessione), this, "OK",
+        // modifiche fatte offline e non ancora inviate: uscendo non si potra' piu' lavorare offline (ACCESSO_OFFLINE.md §2.5)
+        int nonInviate = com.ncfsistemi.econ.utils.DatiLocali.modificheNonInviate(this);
+        String messaggio = nonInviate == 0 ? getString(R.string.conferma_disconnessione)
+                : "Sul tablet ci sono " + nonInviate + " modifiche non ancora inviate al server. Restano sul tablet, ma "
+                + "per inviarle dovrai accedere di nuovo con questo account e, finché non ti ricolleghi, non potrai "
+                + "lavorare offline.\n\nUscire comunque?";
+        Utility.mostraConfermaDialog(getString(R.string.attenzione), messaggio, this, "OK",
                 getString(R.string.annulla), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -549,6 +555,54 @@ public abstract class EconActivity extends FragmentActivity {
         EconActivity.this.finish();
     }
 
+    /** Schermata in primo piano, per l'avviso di ricollegamento al server (utils.Riconnessione). */
+    private static java.lang.ref.WeakReference<EconActivity> inPrimoPiano = new java.lang.ref.WeakReference<>(null);
+
+    public static EconActivity inPrimoPiano() {
+        return inPrimoPiano.get();
+    }
+
+    @Override
+    protected void onPause() {
+        if (inPrimoPiano.get() == this) inPrimoPiano.clear();
+        super.onPause();
+    }
+
+    /** Le schermate di accesso gestiscono da sole il collegamento: niente avvisi li' (sincronizzazione e cambio password non sono EconActivity). */
+    private boolean gestisceConnessione() {
+        return this instanceof StartActivity || this instanceof LoginActivity;
+    }
+
+    /**
+     * Il server e' tornato raggiungibile dopo un periodo offline (ACCESSO_OFFLINE.md §2.4): con modifiche da inviare si
+     * propone l'invio (che poi scarica anche gli aggiornamenti), altrimenti basta un avviso.
+     */
+    public void notificaRicollegamento() {
+        runOnUiThread(() -> {
+            // non adatta: l'avviso resta in attesa della prossima schermata
+            if (isFinishing() || isDestroyed() || gestisceConnessione()) return;
+            if (!com.ncfsistemi.econ.utils.Riconnessione.consumaNotifica()) return;
+            int nonInviate = com.ncfsistemi.econ.utils.DatiLocali.modificheNonInviate(this);
+            if (nonInviate == 0) {
+                Toast.makeText(this, "Di nuovo collegato al server.", Toast.LENGTH_LONG).show();
+                return;
+            }
+            new AlertDialog.Builder(this)
+                    .setTitle("Di nuovo collegato al server")
+                    .setMessage("Hai " + nonInviate + (nonInviate == 1 ? " modifica fatta" : " modifiche fatte")
+                            + " senza collegamento. Inviarle adesso? Dopo l'invio si scaricano anche gli aggiornamenti.")
+                    .setPositiveButton("Invia ora", (d, w) -> {
+                        Intent sync = new Intent(this, SincronizzazioneActivity.class);
+                        sync.putExtra(SincronizzazioneActivity.EXTRA_MODE, SincronizzazioneActivity.MODE_UPLOAD);
+                        sync.putExtra(SincronizzazioneActivity.EXTRA_AUTOMATICO, true);
+                        startActivity(sync);
+                    })
+                    .setNegativeButton("Più tardi", (d, w) -> Toast.makeText(this,
+                            "Le modifiche restano sul tablet: inviale da Sincronizza.", Toast.LENGTH_LONG).show())
+                    .show();
+        });
+    }
+
     @Override
     protected void onResume() {
         System.out.println("Econ: EconActivity onResume ENTER");
@@ -556,6 +610,16 @@ public abstract class EconActivity extends FragmentActivity {
         super.onResume();
         if (getLocalClassName().equals("StartActivity")) {
             return;
+        }
+        inPrimoPiano = new java.lang.ref.WeakReference<>(this);
+        if (!gestisceConnessione()) {
+            if (com.ncfsistemi.econ.utils.Sessione.isOffline()) {
+                com.ncfsistemi.econ.utils.Riconnessione.avvia(this);
+                com.ncfsistemi.econ.utils.Riconnessione.verifica(this);
+            } else {
+                // ricollegamento avvenuto mentre nessuna schermata adatta era in primo piano
+                notificaRicollegamento();
+            }
         }
         // Riallinea sempre ditta/operatore dal JWT: la Sessione è un singleton in-memory
         // che il sistema azzera se ricrea il processo, mentre il token resta valido.

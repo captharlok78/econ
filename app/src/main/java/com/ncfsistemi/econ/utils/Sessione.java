@@ -39,6 +39,20 @@ public class Sessione {
 
 	private int idPreventivoSelezionato=0;
 
+	/**
+	 * Si lavora senza server (ACCESSO_OFFLINE.md): lo impostano l'avvio, il login offline e le verifiche del server
+	 * fallite; lo toglie utils.Riconnessione quando il server torna a rispondere.
+	 */
+	private static volatile boolean offline = false;
+
+	public static boolean isOffline() {
+		return offline;
+	}
+
+	public static void setOffline(boolean valore) {
+		offline = valore;
+	}
+
 
 	private Sessione() {
 
