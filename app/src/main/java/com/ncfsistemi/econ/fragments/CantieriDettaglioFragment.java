@@ -74,6 +74,29 @@ public class CantieriDettaglioFragment extends EconFragment {
 		setText(R.id.editText_indirizzo, valore(via), v);
 		setText(R.id.editText_luogo, valore(paese), v);
 		setText(R.id.editText_note, valore(testo(val, Cantieri.NOTE)), v);
+		setText(R.id.text_durata, durata(val), v);
+	}
+
+	/** "Permanente (segue il cliente)" oppure "A termine · aperto dal … · chiude il … / chiuso dal …" (STUDIO_DATE_CANTIERI.md). */
+	private static String durata(ContentValues val) {
+		Long apertura = val.getAsLong(Cantieri.DATA_APERTURA);
+		Long chiusura = val.getAsLong(Cantieri.DATA_CHIUSURA);
+		Integer permanente = val.getAsInteger(Cantieri.PERMANENTE);
+		StringBuilder s = new StringBuilder(permanente != null && permanente == 1 ? "Permanente (segue il cliente)" : "A termine");
+		if (apertura != null && apertura > 0) {
+			s.append(" · aperto dal ").append(data(apertura));
+		}
+		if ((permanente == null || permanente == 0) && chiusura != null && chiusura > 0) {
+			java.util.Calendar oggi = java.util.Calendar.getInstance();
+			long giorno = oggi.get(java.util.Calendar.YEAR) * 10000L + (oggi.get(java.util.Calendar.MONTH) + 1) * 100L + oggi.get(java.util.Calendar.DAY_OF_MONTH);
+			s.append(chiusura / 1000000L < giorno ? " · chiuso, ultimo giorno " : " · ultimo giorno di lavoro ").append(data(chiusura));
+		}
+		return s.toString();
+	}
+
+	private static String data(long yyyyMMddHHmmss) {
+		String s = String.valueOf(yyyyMMddHHmmss / 1000000L);
+		return s.length() < 8 ? "" : s.substring(6, 8) + "/" + s.substring(4, 6) + "/" + s.substring(0, 4);
 	}
 
 	private static String valore(String s) {

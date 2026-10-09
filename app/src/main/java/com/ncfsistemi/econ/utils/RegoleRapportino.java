@@ -54,12 +54,15 @@ public final class RegoleRapportino {
         public final boolean altri;
         /** La ditta usa la pianificazione: solo allora cantieri e operatori sono limitati ai pianificati. */
         public final boolean pianificazione;
+        /** Id dell'account (utenti.id_utente): e' chi inserisce le righe (id_operatore_ins). */
+        public final int idAccount;
 
-        Utente(int idUtenteDitta, boolean amministratore, boolean altri, boolean pianificazione) {
+        Utente(int idUtenteDitta, boolean amministratore, boolean altri, boolean pianificazione, int idAccount) {
             this.idUtenteDitta = idUtenteDitta;
             this.amministratore = amministratore;
             this.altri = altri;
             this.pianificazione = pianificazione;
+            this.idAccount = idAccount;
         }
     }
 
@@ -69,9 +72,10 @@ public final class RegoleRapportino {
         boolean altri = FunzionalitaApp.ha(ctx, FunzionalitaApp.RAPPORTINI_ALTRI);
         boolean pianificazione = com.ncfsistemi.econ.api.TokenManager.getInstance(ctx).dittaUsaPianificazione();
         if (ut == null) {
-            return new Utente(0, false, altri, pianificazione);
+            return new Utente(0, false, altri, pianificazione, Sessione.getIdOperatore(ctx));
         }
-        return new Utente(intero(ut, Utenti.ID_UTENTE_DITTA), intero(ut, Utenti.AMMINISTRATORE) == 1, altri, pianificazione);
+        return new Utente(intero(ut, Utenti.ID_UTENTE_DITTA), intero(ut, Utenti.AMMINISTRATORE) == 1, altri, pianificazione,
+                Sessione.getIdOperatore(ctx));
     }
 
     /** Primo e ultimo istante (yyyyMMddHHmmss) della settimana, da lunedi a domenica, che contiene la data. */
@@ -122,8 +126,8 @@ public final class RegoleRapportino {
     }
 
     /**
-     * Cantieri su cui l'utente puo' fare un rapportino in quella data (id_cantiere, nome, id_anagrafica e
-     * ragione_sociale del cliente). idCantiereSempreIncluso (0 = nessuno) resta in elenco comunque, per non perdere il cantiere di un
+     * Cantieri su cui l'utente puo' fare un rapportino in quella data (id_cantiere, nome, id_anagrafica, data_apertura e
+     * ragione_sociale del cliente), senza quelli chiusi prima di quella data. idCantiereSempreIncluso (0 = nessuno) resta in elenco comunque, per non perdere il cantiere di un
      * rapportino gia' esistente.
      */
     public static ArrayList<Object> cantieriDisponibili(DbInterno db, Utente utente, long data, int idCantiereSempreIncluso) {
@@ -133,13 +137,18 @@ public final class RegoleRapportino {
                     + sqlPianificati(settimana(data)) + ") where id_utente_ditta=" + utente.idUtenteDitta + ")"
                     + " or " + Cantieri.NOME_TABELLA + "." + Cantieri.ID_CANTIERE + "=" + idCantiereSempreIncluso + ")";
         }
+        // cantieri chiusi prima della data del rapportino: non si scelgono (STUDIO_DATE_CANTIERI.md), tranne quello gia' scelto
+        long giorno = Cantieri.giorno(data);
+        String chiusi = giorno == 0 ? "" : " and (" + Cantieri.sqlNonChiuso(Cantieri.NOME_TABELLA, giorno)
+                + " or " + Cantieri.NOME_TABELLA + "." + Cantieri.ID_CANTIERE + "=" + idCantiereSempreIncluso + ")";
         String sql = "Select " + Cantieri.NOME_TABELLA + "." + Cantieri.ID_CANTIERE + ", " + Cantieri.NOME_TABELLA + "."
                 + Cantieri.NOME + ", " + Cantieri.NOME_TABELLA + "." + Cantieri.ID_ANAGRAFICA + ", "
+                + Cantieri.NOME_TABELLA + "." + Cantieri.DATA_APERTURA + ", "
                 + Anagrafica.NOME_TABELLA + "." + Anagrafica.RAGIONE_SOCIALE
                 + " from " + Cantieri.NOME_TABELLA + " left join " + Anagrafica.NOME_TABELLA + " on "
                 + Anagrafica.NOME_TABELLA + "." + Anagrafica.ID_ANAGRAFICA + "=" + Cantieri.NOME_TABELLA + "." + Cantieri.ID_ANAGRAFICA
                 + " where " + Cantieri.NOME_TABELLA + "." + Cantieri.ID_DITTA + "=" + Sessione.getDittaSelezionata() + filtro
-                + " order by " + Cantieri.NOME_TABELLA + "." + Cantieri.NOME;
+                + chiusi + " order by " + Cantieri.NOME_TABELLA + "." + Cantieri.NOME;
         return db.eseguiSelect(sql, null);
     }
 
@@ -292,6 +301,79 @@ public final class RegoleRapportino {
     /** Senza stato (non ancora scaricato) il rapportino si tratta come in bozza. */
     public static boolean isModificabile(ContentValues stato) {
         return stato == null || intero(stato, StatiDocumento.MODIFICABILE) == 1;
+    }
+
+    // ── Chi puo' fare cosa (STUDIO_VERIFICA_RAPPORTINI.md §2.2, come RegoleRapportini del server) ──────────────
+
+    /** Stato In verifica: gli operatori coinvolti aggiungono e correggono le proprie righe. */
+    public static boolean isRigheOperatori(ContentValues stato) {
+        return stato != null && intero(stato, StatiDocumento.RIGHE_OPERATORI) == 1;
+    }
+
+    /** Stato che modifica solo l'amministratore (es. Confermato); la firma del cliente resta ammessa. */
+    public static boolean isSoloAmministratore(ContentValues stato) {
+        return stato != null && intero(stato, StatiDocumento.MODIFICA_SOLO_AMMINISTRATORE) == 1;
+    }
+
+    /** Proprietario del rapportino: l'autore o chi l'ha inserito; un rapportino nuovo e' sempre di chi lo compila. */
+    public static boolean isProprietario(ContentValues testata, Utente utente) {
+        if (testata == null) return true;
+        return (utente.idUtenteDitta > 0 && intero(testata, com.ncfsistemi.econ.db.table.Rapportini.ID_UTENTE_DITTA) == utente.idUtenteDitta)
+                || (utente.idAccount > 0 && intero(testata, com.ncfsistemi.econ.db.table.Rapportini.ID_OPERATORE_INS) == utente.idAccount);
+    }
+
+    /**
+     * L'utente puo' aggiungere le proprie ore a un rapportino In verifica: e' gia' in una riga, oppure e' pianificato sul
+     * cantiere nella settimana; senza pianificazione (es. Econ Mini) tutti.
+     */
+    public static boolean coinvolto(DbInterno db, Utente utente, int idCantiere, long data, java.util.List<Object> righe) {
+        for (Object o : righe) {
+            if (intero((ContentValues) o, com.ncfsistemi.econ.db.table.RapportiniDettaglio.ID_UTENTE_MANODOPERA) == utente.idUtenteDitta) return true;
+        }
+        if (!utente.pianificazione) return true;
+        if (idCantiere <= 0 || utente.idUtenteDitta <= 0) return false;
+        return !db.eseguiSelect("select 1 from (" + sqlPianificati(settimana(data)) + ") where id_cantiere=" + idCantiere
+                + " and id_utente_ditta=" + utente.idUtenteDitta, null).isEmpty();
+    }
+
+    /** La riga si modifica o cancella: chi l'ha inserita o l'amministratore; le righe senza chi le ha inserite il proprietario. */
+    public static boolean rigaModificabile(ContentValues riga, Utente utente, boolean proprietario) {
+        if (utente.amministratore) return true;
+        Integer id = riga.getAsInteger(com.ncfsistemi.econ.db.table.RapportiniDettaglio.ID);
+        if (id == null) return true; // riga nuova di questa sessione
+        int inseritaDa = intero(riga, com.ncfsistemi.econ.db.table.RapportiniDettaglio.ID_OPERATORE_INS);
+        return inseritaDa == 0 ? proprietario : inseritaDa == utente.idAccount;
+    }
+
+    /**
+     * Condizione SQL (tabella rapportini senza alias) dei rapportini "Da verificare" per l'utente: In verifica e in cui e'
+     * autore, gia' in una riga o pianificato sul cantiere (negli ultimi 60 giorni o nei prossimi 7: per l'elenco basta; la
+     * scheda controlla la settimana esatta). Senza pianificazione tutti quelli In verifica.
+     */
+    public static String sqlDaVerificare(Utente utente) {
+        String r = com.ncfsistemi.econ.db.table.Rapportini.NOME_TABELLA;
+        String inVerifica = r + "." + com.ncfsistemi.econ.db.table.Rapportini.ID_STATO + " in (select " + StatiDocumento.ID + " from "
+                + StatiDocumento.NOME_TABELLA + " where " + StatiDocumento.RIGHE_OPERATORI + "=1)";
+        if (!utente.pianificazione || utente.amministratore) return inVerifica;
+        Calendar dal = Calendar.getInstance();
+        dal.add(Calendar.DATE, -60);
+        Calendar al = Calendar.getInstance();
+        al.add(Calendar.DATE, 7);
+        long[] periodo = { giorno(dal) * 1000000L, giorno(al) * 1000000L + 235959L };
+        int io = utente.idUtenteDitta;
+        return inVerifica + " and (" + r + "." + com.ncfsistemi.econ.db.table.Rapportini.ID_UTENTE_DITTA + "=" + io
+                + " or exists (select 1 from " + com.ncfsistemi.econ.db.table.RapportiniDettaglio.NOME_TABELLA + " dv where dv."
+                + com.ncfsistemi.econ.db.table.RapportiniDettaglio.ID_RAPPORTINO + "=" + r + "." + com.ncfsistemi.econ.db.table.Rapportini.ID
+                + " and dv." + com.ncfsistemi.econ.db.table.RapportiniDettaglio.ID_UTENTE_MANODOPERA + "=" + io + ")"
+                + " or " + r + "." + com.ncfsistemi.econ.db.table.Rapportini.ID_CANTIERE + " in (select id_cantiere from ("
+                + sqlPianificati(periodo) + ") where id_utente_ditta=" + io + "))";
+    }
+
+    /** Nome di chi ha inserito la riga (account), dagli operatori scaricati; "" se non si sa. */
+    public static String nomeAccount(DbInterno db, int idAccount) {
+        if (idAccount <= 0) return "";
+        ContentValues ut = db.getRecord("Select * from " + Utenti.NOME_TABELLA + " where " + Utenti.ID_UTENTE + "=" + idAccount);
+        return ut != null ? nome(ut) : "";
     }
 
     public static boolean isCancellabile(ContentValues stato) {

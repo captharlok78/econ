@@ -57,6 +57,8 @@ public class PopupRigaRapportino {
     /** Quello che la finestra deve sapere del rapportino. */
     public static class Contesto {
         public RegoleRapportino.Utente utente;
+        /** In verifica, chi non e' l'autore mette righe solo per se' stesso (STUDIO_VERIFICA_RAPPORTINI.md). */
+        public boolean soloSeStesso;
         public boolean vedePrezzi;
         public int idCantiere;
         public int idOrdine;
@@ -137,6 +139,7 @@ public class PopupRigaRapportino {
         List<CampoRicerca.Voce> utenti = new ArrayList<CampoRicerca.Voce>();
         if (isMateriale()) utenti.add(new CampoRicerca.Voce(0, ctx.getString(R.string.nessuno), new ContentValues()));
         for (ContentValues ut : RegoleRapportino.operatoriSelezionabili(db, contesto.utente, contesto.idCantiere, contesto.data)) {
+            if (contesto.soloSeStesso && RigheRapportino.intero(ut, Utenti.ID_UTENTE_DITTA) != contesto.utente.idUtenteDitta) continue;
             utenti.add(new CampoRicerca.Voce(RigheRapportino.intero(ut, Utenti.ID_UTENTE_DITTA), RegoleRapportino.nome(ut)
                     + (RigheRapportino.intero(ut, RegoleRapportino.PIANIFICATO) == 1 ? " (" + ctx.getString(R.string.pianificato) + ")" : ""), ut));
         }

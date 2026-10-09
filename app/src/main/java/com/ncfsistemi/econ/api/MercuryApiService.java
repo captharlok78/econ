@@ -299,6 +299,8 @@ public interface MercuryApiService {
 
         public static class Perimetro {
             public int giorni;
+            /** Giorni in cui un cantiere chiuso resta sul tablet (schema 35); 0 da server vecchi. */
+            public int giorniCantieri;
         }
     }
 

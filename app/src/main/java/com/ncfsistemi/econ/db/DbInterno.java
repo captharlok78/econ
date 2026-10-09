@@ -67,7 +67,7 @@ import com.ncfsistemi.econ.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECON.db";
 	public static final String DATABASE_NAME_ZIP = ".econ.db";
-	public static final int SCHEMA_VERSION = 34;
+	public static final int SCHEMA_VERSION = 36;
 
 	private Context cont = null;
 
@@ -489,6 +489,41 @@ public class DbInterno extends SQLiteOpenHelper {
 						{Anagrafica.NOME_TABELLA, Anagrafica.CODICE_SDI, "TEXT"},
 						{Cantieri.NOME_TABELLA, Cantieri.CIVICO, "TEXT"},
 						{Cantieri.NOME_TABELLA, Cantieri.ID_CLIENTE_INDIRIZZO, "INTEGER DEFAULT 0"},
+				};
+				for (String[] c : colonne) {
+					if (!getTableColumns(db, c[0]).contains(c[1])) {
+						db.execSQL("ALTER TABLE " + c[0] + " ADD COLUMN " + c[1] + " " + c[2]);
+					}
+				}
+				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
+			}
+		}
+		// Schema 36 (STUDIO_VERIFICA_RAPPORTINI.md): stato In verifica (righe degli operatori), Confermato modificabile solo
+		// dall'amministratore, chi ha confermato. Download completo una tantum per i flag degli stati e le conferme.
+		if (oldVersion<36){
+			if (oldVersion<newVersion){
+				String[][] colonne = {
+						{com.ncfsistemi.econ.db.table.StatiDocumento.NOME_TABELLA, com.ncfsistemi.econ.db.table.StatiDocumento.RIGHE_OPERATORI, "INTEGER DEFAULT 0"},
+						{com.ncfsistemi.econ.db.table.StatiDocumento.NOME_TABELLA, com.ncfsistemi.econ.db.table.StatiDocumento.MODIFICA_SOLO_AMMINISTRATORE, "INTEGER DEFAULT 0"},
+						{Rapportini.NOME_TABELLA, Rapportini.ID_CONFERMATO_DA, "INTEGER DEFAULT 0"},
+						{Rapportini.NOME_TABELLA, Rapportini.DATA_CONFERMA, "INTEGER DEFAULT 0"},
+				};
+				for (String[] c : colonne) {
+					if (!getTableColumns(db, c[0]).isEmpty() && !getTableColumns(db, c[0]).contains(c[1])) {
+						db.execSQL("ALTER TABLE " + c[0] + " ADD COLUMN " + c[1] + " " + c[2]);
+					}
+				}
+				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
+			}
+		}
+		// Schema 35 (STUDIO_DATE_CANTIERI.md): durata dei cantieri (permanente, apertura, chiusura), decisa dal portale.
+		// Download completo una tantum per ricevere le date dei cantieri gia' sul tablet.
+		if (oldVersion<35){
+			if (oldVersion<newVersion){
+				String[][] colonne = {
+						{Cantieri.NOME_TABELLA, Cantieri.PERMANENTE, "INTEGER DEFAULT 0"},
+						{Cantieri.NOME_TABELLA, Cantieri.DATA_APERTURA, "INTEGER DEFAULT 0"},
+						{Cantieri.NOME_TABELLA, Cantieri.DATA_CHIUSURA, "INTEGER DEFAULT 0"},
 				};
 				for (String[] c : colonne) {
 					if (!getTableColumns(db, c[0]).contains(c[1])) {

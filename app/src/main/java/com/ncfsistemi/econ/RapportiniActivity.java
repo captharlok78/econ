@@ -79,6 +79,8 @@ public class RapportiniActivity extends EconListaStandardActivity {
         valoriPeriodo.add(vocePeriodo("6M", getString(R.string.ultimi_6_mesi)));
         valoriPeriodo.add(vocePeriodo("A", getString(R.string.ultimo_anno)));
         valoriPeriodo.add(vocePeriodo("", getString(R.string.sempre)));
+        // In verifica e mi riguardano (STUDIO_VERIFICA_RAPPORTINI.md F8)
+        valoriPeriodo.add(vocePeriodo("V", "Da verificare"));
         spinnerPeriodo.setValue(com.ncfsistemi.econ.utils.PreferenzeDispositivo.periodoRapportini(this));
         spinnerPeriodo.setValoriSpinnerLibero(valoriPeriodo);
     }
@@ -239,7 +241,12 @@ public class RapportiniActivity extends EconListaStandardActivity {
 
             String periodo = spinnerPeriodo.getValue();
             String where = "(" + like.whereSql + ")";
-            if (!periodo.equals("")) {
+            if (periodo.equals("V")) {
+                DbInterno dbu = new DbInterno(RapportiniActivity.this);
+                RegoleRapportino.Utente u = RegoleRapportino.utenteCorrente(dbu, RapportiniActivity.this);
+                dbu.close();
+                where += " and " + RegoleRapportino.sqlDaVerificare(u);
+            } else if (!periodo.equals("")) {
                 Calendar cal = Calendar.getInstance();
                 int giorni = 0;
                 if (periodo.equals("S")) giorni = -7;

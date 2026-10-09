@@ -68,6 +68,13 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     /** Stato attuale (null se gli stati non sono ancora scaricati). */
     private ContentValues stato = null;
     private boolean modificabile = true;
+    /**
+     * Chi puo' fare cosa (STUDIO_VERIFICA_RAPPORTINI.md §2.2): l'autore (o chi l'ha inserito) e l'amministratore cambiano
+     * testata e stato; gli operatori coinvolti, In verifica, aggiungono e correggono solo le proprie righe.
+     */
+    private boolean proprietario = true;
+    private boolean testataModificabile = true;
+    private boolean aggiungeRighe = true;
     /** Rapportino esistente e ruolo senza RAPPORTINI.MODIFICA: sola lettura qualunque sia lo stato. */
     private boolean senzaLicenzaModifica = false;
 
@@ -129,7 +136,12 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         // stato modificabile e, per un rapportino esistente, la funzionalita' MODIFICA del pacchetto per il ruolo
         senzaLicenzaModifica = testata != null
                 && !com.ncfsistemi.econ.utils.FunzionalitaApp.puoModificare(this, com.ncfsistemi.econ.utils.FunzionalitaApp.RAPPORTINI);
-        modificabile = RegoleRapportino.isModificabile(stato) && !senzaLicenzaModifica;
+        modificabile = RegoleRapportino.isModificabile(stato) && !senzaLicenzaModifica
+                && (!RegoleRapportino.isSoloAmministratore(stato) || utente.amministratore);
+        proprietario = RegoleRapportino.isProprietario(testata, utente);
+        testataModificabile = modificabile && (utente.amministratore || proprietario);
+        aggiungeRighe = modificabile && (utente.amministratore || proprietario
+                || (RegoleRapportino.isRigheOperatori(stato) && RegoleRapportino.coinvolto(db, utente, idCantiere, dataRapportino(), righe)));
         caricaClienti(db);
         db.close();
 
@@ -217,23 +229,48 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             badge.setVisibility(View.GONE);
         }
 
-        data.setEnabled(modificabile);
-        campoCliente.setEnabled(modificabile);
-        campoCantiere.setEnabled(modificabile);
-        campoOrdine.setEnabled(modificabile);
-        editNote.setEnabled(modificabile);
-        findViewById(R.id.pulsanti_righe).setVisibility(modificabile ? View.VISIBLE : View.GONE);
-        findViewById(R.id.button_salva).setVisibility(modificabile ? View.VISIBLE : View.GONE);
+        data.setEnabled(testataModificabile);
+        campoCliente.setEnabled(testataModificabile);
+        campoCantiere.setEnabled(testataModificabile);
+        campoOrdine.setEnabled(testataModificabile);
+        editNote.setEnabled(testataModificabile);
+        findViewById(R.id.pulsanti_righe).setVisibility(aggiungeRighe ? View.VISIBLE : View.GONE);
+        findViewById(R.id.button_salva).setVisibility(testataModificabile || aggiungeRighe ? View.VISIBLE : View.GONE);
 
+        // Conferma e In verifica: solo l'autore o l'amministratore, se il passaggio e' ammesso
         DbInterno db = new DbInterno(this);
+        int idAttuale = stato != null ? RigheRapportino.intero(stato, StatiDocumento.ID) : 0;
         ContentValues confermato = RegoleRapportino.statoPerCodice(db, StatiDocumento.CODICE_CONFERMATO);
-        boolean confermabile = modificabile && confermato != null
-                && (stato == null || RigheRapportino.intero(stato, StatiDocumento.ID) != RigheRapportino.intero(confermato, StatiDocumento.ID))
-                && RegoleRapportino.passaggioAmmesso(db,
-                stato != null ? RigheRapportino.intero(stato, StatiDocumento.ID) : 0, RigheRapportino.intero(confermato, StatiDocumento.ID), utente);
+        boolean confermabile = testataModificabile && confermato != null && idAttuale != RigheRapportino.intero(confermato, StatiDocumento.ID)
+                && RegoleRapportino.passaggioAmmesso(db, idAttuale, RigheRapportino.intero(confermato, StatiDocumento.ID), utente);
+        ContentValues verifica = RegoleRapportino.statoPerCodice(db, StatiDocumento.CODICE_VERIFICA);
+        boolean verificabile = testataModificabile && verifica != null && idAttuale != RigheRapportino.intero(verifica, StatiDocumento.ID)
+                && RegoleRapportino.passaggioAmmesso(db, idAttuale, RigheRapportino.intero(verifica, StatiDocumento.ID), utente);
+        // riga informativa: In verifica, chi ha confermato
+        String info = "";
+        if (RegoleRapportino.isRigheOperatori(stato)) {
+            info = proprietario || utente.amministratore
+                    ? "In verifica: gli operatori coinvolti aggiungono le proprie ore, poi conferma."
+                    : (aggiungeRighe ? "In verifica: aggiungi e correggi le tue ore." : "In verifica: non sei tra gli operatori coinvolti.");
+        }
+        if (testata != null && RigheRapportino.intero(testata, Rapportini.ID_CONFERMATO_DA) > 0) {
+            String chi = RegoleRapportino.nomeOperatore(db, RigheRapportino.intero(testata, Rapportini.ID_CONFERMATO_DA));
+            long quando = testata.getAsLong(Rapportini.DATA_CONFERMA) != null ? testata.getAsLong(Rapportini.DATA_CONFERMA) : 0;
+            info += (info.isEmpty() ? "" : "\n") + "Confermato da " + (chi.isEmpty() ? "—" : chi) + (quando > 0 ? " il " + dataOra(quando) : "");
+        }
         db.close();
+        TextView testoInfo = (TextView) findViewById(R.id.text_info_stato);
+        testoInfo.setText(info);
+        testoInfo.setVisibility(info.isEmpty() ? View.GONE : View.VISIBLE);
         findViewById(R.id.button_conferma).setVisibility(confermabile ? View.VISIBLE : View.GONE);
+        findViewById(R.id.button_verifica).setVisibility(verificabile ? View.VISIBLE : View.GONE);
         adapter.notifyDataSetChanged();
+    }
+
+    /** gg/mm/aaaa hh:mm da yyyyMMddHHmmss */
+    private static String dataOra(long v) {
+        String s = String.valueOf(v);
+        return s.length() < 12 ? "" : s.substring(6, 8) + "/" + s.substring(4, 6) + "/" + s.substring(0, 4) + " " + s.substring(8, 10) + ":" + s.substring(10, 12);
     }
 
     // ── Cliente, cantiere, ordine ─────────────────────────────────────────────────────────────────────────────
@@ -253,6 +290,16 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             voci.add(new CampoRicerca.Voce(RigheRapportino.intero(c, Anagrafica.ID_ANAGRAFICA), RigheRapportino.testo(c, Anagrafica.RAGIONE_SOCIALE), c));
         }
         campoCliente.setVoci(voci);
+    }
+
+    /** Avviso (non blocco) per un rapportino prima dell'apertura del cantiere (STUDIO_DATE_CANTIERI.md D3). */
+    private void avvisoApertura(ContentValues cantiere) {
+        Long apertura = cantiere.getAsLong(Cantieri.DATA_APERTURA);
+        long giorno = Cantieri.giorno(dataRapportino());
+        if (apertura == null || apertura <= 0 || giorno == 0 || giorno >= apertura / 1000000L) return;
+        String s = String.valueOf(apertura / 1000000L);
+        Toast.makeText(this, "Il cantiere apre il " + s.substring(6, 8) + "/" + s.substring(4, 6) + "/" + s.substring(0, 4)
+                + ": il rapportino e' prima dell'apertura.", Toast.LENGTH_LONG).show();
     }
 
     /** Cantieri ammessi per la data (quello del rapportino salvato resta sempre sceglibile). */
@@ -347,6 +394,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             public void selezioneCambiata(CampoRicerca campo, CampoRicerca.Voce voce) {
                 modificato = true;
                 if (voce != null) { // il cliente diventa quello del cantiere (come sul server)
+                    avvisoApertura(voce.dati);
                     int cliente = RigheRapportino.intero(voce.dati, Cantieri.ID_ANAGRAFICA);
                     if (cliente > 0 && cliente != campoCliente.getIdScelto()) {
                         campoCliente.selezionaId(cliente);
@@ -469,6 +517,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     private void apriRiga(String categoria, final int posizione) {
         PopupRigaRapportino.Contesto c = new PopupRigaRapportino.Contesto();
         c.utente = utente;
+        c.soloSeStesso = !proprietario && !utente.amministratore;
         c.vedePrezzi = vedePrezzi;
         c.idCantiere = campoCantiere.getIdScelto();
         c.idOrdine = campoOrdine.getIdScelto();
@@ -532,6 +581,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             colonne.add(ColonnaDettaglio.testo("articolo", getString(R.string.articolo), 1.5f));
             colonne.add(ColonnaDettaglio.testoFisso("um", getString(R.string.um), 50, Gravity.START));
             colonne.add(ColonnaDettaglio.testoFisso("quantita", getString(R.string.qta), 70, Gravity.END));
+            colonne.add(ColonnaDettaglio.testo("inserita", "Inserita da", 0.9f));
         }
 
         @Override
@@ -548,7 +598,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
                 case "modifica":
                 case "elimina":
                     boolean modifica = colonna.id.equals("modifica");
-                    if (!modificabile) {
+                    if (!modificabile || !RegoleRapportino.rigaModificabile(r, utente, proprietario)) {
                         ((TextView) cella).setText("");
                         break;
                     }
@@ -587,8 +637,26 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
                 case "quantita":
                     ((TextView) cella).setText(Utility.formatNumero(RigheRapportino.decimale(r, RapportiniDettaglio.QUANTITA)));
                     break;
+                case "inserita":
+                    ((TextView) cella).setText(nomeInserita(r));
+                    break;
             }
         }
+    }
+
+    /** Chi ha inserito la riga (non si cambia): dagli operatori scaricati; le righe nuove sono di chi compila. */
+    private final java.util.Map<Integer, String> nomiAccount = new java.util.HashMap<Integer, String>();
+
+    private String nomeInserita(ContentValues r) {
+        int id = r.getAsInteger(RapportiniDettaglio.ID) == null ? utente.idAccount : RigheRapportino.intero(r, RapportiniDettaglio.ID_OPERATORE_INS);
+        if (id <= 0) return "—";
+        if (!nomiAccount.containsKey(id)) {
+            DbInterno db = new DbInterno(RapportinoDettaglioModActivity.this);
+            String n = RegoleRapportino.nomeAccount(db, id);
+            db.close();
+            nomiAccount.put(id, n.isEmpty() ? "—" : n);
+        }
+        return nomiAccount.get(id);
     }
 
     // ── Salvataggio ───────────────────────────────────────────────────────────────────────────────────────────
@@ -631,6 +699,23 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         } else {
             Toast.makeText(this, esito, Toast.LENGTH_LONG).show();
         }
+    }
+
+    /** In verifica: salva e passa allo stato In verifica, in cui gli operatori coinvolti aggiungono le proprie ore. */
+    public void mettiInVerifica(final View v) {
+        Utility.mostraConfermaDialog("In verifica", "Mettere il rapportino in verifica? Gli operatori coinvolti potranno aggiungere e correggere le proprie ore; poi lo confermi.",
+                this, "In verifica", getString(R.string.annulla), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which != DialogInterface.BUTTON_POSITIVE) return;
+                        DbInterno db = new DbInterno(RapportinoDettaglioModActivity.this);
+                        ContentValues verifica = RegoleRapportino.statoPerCodice(db, StatiDocumento.CODICE_VERIFICA);
+                        db.close();
+                        if (verifica == null) return;
+                        idStatoDestino = RigheRapportino.intero(verifica, StatiDocumento.ID);
+                        eseguiSalvataggio();
+                    }
+                });
     }
 
     /** Conferma: salva e passa a Confermato; l'avviso dice cosa non si potra' piu' fare (regole dello stato Confermato). */
@@ -697,6 +782,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     private String controlla(DbInterno db) {
         if (senzaLicenzaModifica) return getString(R.string.sola_lettura_licenza);
         if (!modificabile) return getString(R.string.rapportino_non_modificabile, RigheRapportino.testo(stato, StatiDocumento.NOME));
+        if (!testataModificabile && !aggiungeRighe) return "Le righe di questo rapportino le modifica l'autore o l'amministratore.";
         if (campoCliente.getIdScelto() == 0 && campoCantiere.getIdScelto() == 0 && campoOrdine.getIdScelto() == 0) {
             return getString(R.string.errore_riferimento_rapportino);
         }
@@ -810,8 +896,8 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         firmaNuova = data.getStringExtra(FirmaActivity.EXTRA_FIRMA);
         firmaNuovaNome = data.getStringExtra(FirmaActivity.EXTRA_NOME);
         firmaNuovaData = Utility.dataToNumber(java.util.Calendar.getInstance());
-        if (!modificabile && testata != null) {
-            // rapportino bloccato: si salva subito solo la firma (Salva non c'e')
+        if ((!modificabile || !testataModificabile) && testata != null) {
+            // rapportino bloccato o di un altro: si salva subito solo la firma, come accetta il server
             DbInterno db = new DbInterno(this);
             Rapportini tabella = new Rapportini();
             ContentValues val = tabella.getValoriLogModifica(db);

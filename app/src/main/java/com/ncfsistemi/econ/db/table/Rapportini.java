@@ -37,6 +37,9 @@ public class Rapportini extends AbstractTable {
     public static final String FIRMA = "firma";
     public static final String FIRMA_NOME = "firma_nome";
     public static final String FIRMA_DATA = "firma_data";
+    /** Schema 36: chi ha confermato (id_utente_ditta) e quando (yyyyMMddHHmmss); li scrive solo il server. */
+    public static final String ID_CONFERMATO_DA = "id_confermato_da";
+    public static final String DATA_CONFERMA = "data_conferma";
 
 
     public static final String PATH_EXPORT_RAPPORTINI = "rapportini";
@@ -61,6 +64,8 @@ public class Rapportini extends AbstractTable {
         aggiungiCampo(FIRMA, TEXT);
         aggiungiCampo(FIRMA_NOME, TEXT);
         aggiungiCampo(FIRMA_DATA, DATE);
+        aggiungiCampo(ID_CONFERMATO_DA, INTEGER);
+        aggiungiCampo(DATA_CONFERMA, INTEGER);
 
 		aggiungiCampo(ATTIVO, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);

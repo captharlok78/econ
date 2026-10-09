@@ -522,10 +522,29 @@ public final class SyncUtil {
             togliDocumenti(db, rap, "id", rapDett, "id_rapportino", "p.data_rapportino < " + limite
                     + " AND NOT EXISTS (SELECT 1 FROM stati_documento s WHERE s.id = p.id_stato AND s.iniziale = 1)");
             togliDocumenti(db, prev, "id_preventivo", prevDett, "id_preventivo", "p.data < " + limite + " AND p.stato = 'C'");
+            togliCantieriChiusi(db, Math.max(dl.perimetro.giorniCantieri, 0), prev, prevDett);
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
         }
+    }
+
+    /**
+     * Cantieri a termine chiusi da piu' dei giorni di tolleranza (schema 35, STUDIO_DATE_CANTIERI.md): escono anche senza
+     * rete, come sul server, con i loro preventivi/ordini (restano i rapportini: hanno il loro perimetro). Solo quelli
+     * senza modifiche da inviare.
+     */
+    private static void togliCantieriChiusi(SQLiteDatabase db, int giorniCantieri, String prev, String prevDett) {
+        if (!getColonne(db, com.ncfsistemi.econ.db.table.Cantieri.NOME_TABELLA).contains(com.ncfsistemi.econ.db.table.Cantieri.DATA_CHIUSURA)) {
+            return;
+        }
+        java.util.Calendar c = java.util.Calendar.getInstance();
+        c.add(java.util.Calendar.DATE, -giorniCantieri);
+        long limite = c.get(java.util.Calendar.YEAR) * 10000L + (c.get(java.util.Calendar.MONTH) + 1) * 100L + c.get(java.util.Calendar.DAY_OF_MONTH);
+        String chiusi = "SELECT id_cantiere FROM cantieri WHERE NOT " + com.ncfsistemi.econ.db.table.Cantieri.sqlNonChiuso("cantieri", limite)
+                + " AND in_server = 1";
+        togliDocumenti(db, prev, "id_preventivo", prevDett, "id_preventivo", "p.id_cantiere IN (" + chiusi + ")");
+        db.execSQL("DELETE FROM cantieri WHERE id_cantiere IN (" + chiusi + ")");
     }
 
     /** Chiave (SharedPreferences dell'app) dei giorni di storico della ditta, ricevuti con il perimetro. */

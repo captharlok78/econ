@@ -28,6 +28,13 @@ public class Cantieri extends AbstractTable {
 	/** Indirizzo del cliente da cui e' nato il cantiere (schema 28). */
 	public static final String ID_CLIENTE_INDIRIZZO = "id_cliente_indirizzo";
 	public static final String NOTE = "note";
+	/**
+	 * Durata del cantiere (schema 35, STUDIO_DATE_CANTIERI.md), decisa solo dal portale: 1 = permanente (segue il
+	 * cliente), 0 = a termine; apertura e chiusura (ultimo giorno di lavoro) come yyyyMMddHHmmss, 0 = non indicata.
+	 */
+	public static final String PERMANENTE = "permanente";
+	public static final String DATA_APERTURA = "data_apertura";
+	public static final String DATA_CHIUSURA = "data_chiusura";
 
 	public Cantieri() {
 		setNomeTabella(NOME_TABELLA);
@@ -46,6 +53,9 @@ public class Cantieri extends AbstractTable {
 		aggiungiCampo(NOTE, TEXT);
 		aggiungiCampo(CIVICO, TEXT);
 		aggiungiCampo(ID_CLIENTE_INDIRIZZO, INTEGER);
+		aggiungiCampo(PERMANENTE, INTEGER);
+		aggiungiCampo(DATA_APERTURA, INTEGER);
+		aggiungiCampo(DATA_CHIUSURA, INTEGER);
 		aggiungiCampo(ATTIVO, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
@@ -54,6 +64,21 @@ public class Cantieri extends AbstractTable {
 		aggiungiCampo(IN_SERVER, INTEGER);
 
 		aggiungiCampoChiave(ID_CANTIERE);
+	}
+
+	/**
+	 * Condizione SQL (alias della tabella cantieri) "non chiuso nel giorno" (giorno yyyyMMdd): a termine con l'ultimo
+	 * giorno di lavoro prima di quel giorno = chiuso, come Cantieri::isChiuso() del server.
+	 */
+	public static String sqlNonChiuso(String alias, long giornoYmd) {
+		return "(coalesce(" + alias + "." + PERMANENTE + ", 0) = 1 OR coalesce(" + alias + "." + DATA_CHIUSURA + ", 0) = 0 OR "
+				+ alias + "." + DATA_CHIUSURA + " / 1000000 >= " + giornoYmd + ")";
+	}
+
+	/** Giorno yyyyMMdd di una data dell'app (yyyyMMddHHmmss o yyyyMMdd); 0 se non valida. */
+	public static long giorno(long data) {
+		String s = String.valueOf(data);
+		return s.length() >= 8 ? Long.parseLong(s.substring(0, 8)) : 0;
 	}
 
 	/**
