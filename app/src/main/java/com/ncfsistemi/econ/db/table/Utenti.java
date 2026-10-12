@@ -15,7 +15,7 @@ public class Utenti extends AbstractTable {
 	public static final String RICORDA_PASSWORD = "ricorda_password";
 	/** Dal server (download operatori): appartenenza alla ditta, usata dagli operatori delle righe dei rapportini. */
 	public static final String ID_UTENTE_DITTA = "id_utente_ditta";
-	/** Dal server: 1 se ha ruolo Operatore. */
+	/** Dal server: 1 se la persona e' attiva e operativa, cioe' lavora nei cantieri (OPERATIVITA_PERSONE.md). */
 	public static final String OPERATORE = "operatore";
 	/** Dal server: 1 se Amministratore ditta (o Super Amministratore): nessun vincolo su cantieri e operatori. */
 	public static final String AMMINISTRATORE = "amministratore";

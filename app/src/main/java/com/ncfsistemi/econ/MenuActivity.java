@@ -27,6 +27,7 @@ import com.ncfsistemi.econ.api.MercuryApiService;
 import com.ncfsistemi.econ.api.TokenManager;
 import com.ncfsistemi.econ.server.ConfigurazioneGenActivity;
 import com.ncfsistemi.econ.utils.AsyncTaskExecutorService;
+import com.ncfsistemi.econ.utils.RegoleRapportino;
 import com.ncfsistemi.econ.db.DbInterno;
 import com.ncfsistemi.econ.utils.Sessione;
 import com.ncfsistemi.econ.utils.SyncUtil;
@@ -81,6 +82,12 @@ public class MenuActivity extends EconActivity {
      */
     private List<MenuItemDef> getMenuItems() {
         List<MenuItemDef> tutte = getTutteLeVociMenu();
+        if (!utenteOperativo()) {
+            // il calendario personale e' delle ore lavorate: chi non lavora nei cantieri non lo vede (OPERATIVITA_PERSONE.md)
+            for (int i = tutte.size() - 1; i >= 0; i--) {
+                if ("CALENDARIO".equals(tutte.get(i).codice)) tutte.remove(i);
+            }
+        }
 
         TokenManager tm = TokenManager.getInstance(this);
         if (tm.moduliMaiRicevuti()) {
@@ -95,6 +102,19 @@ public class MenuActivity extends EconActivity {
             }
         }
         return visibili;
+    }
+
+    /** L'utente collegato lavora nei cantieri (operatori scaricati dal server); se non si sa, si'. */
+    private boolean utenteOperativo() {
+        DbInterno db = null;
+        try {
+            db = new DbInterno(this);
+            return RegoleRapportino.utenteCorrente(db, this).operativo;
+        } catch (Exception e) {
+            return true;
+        } finally {
+            if (db != null) db.close();
+        }
     }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────

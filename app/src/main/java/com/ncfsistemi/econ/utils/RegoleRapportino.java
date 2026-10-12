@@ -56,6 +56,11 @@ public final class RegoleRapportino {
         public final boolean pianificazione;
         /** Id dell'account (utenti.id_utente): e' chi inserisce le righe (id_operatore_ins). */
         public final int idAccount;
+        /**
+         * Lavora nei cantieri (OPERATIVITA_PERSONE.md): solo allora compare tra le persone delle righe e ha il calendario
+         * personale. Vero anche se gli operatori non sono ancora stati scaricati o il server non lo manda.
+         */
+        public boolean operativo = true;
 
         Utente(int idUtenteDitta, boolean amministratore, boolean altri, boolean pianificazione, int idAccount) {
             this.idUtenteDitta = idUtenteDitta;
@@ -74,8 +79,10 @@ public final class RegoleRapportino {
         if (ut == null) {
             return new Utente(0, false, altri, pianificazione, Sessione.getIdOperatore(ctx));
         }
-        return new Utente(intero(ut, Utenti.ID_UTENTE_DITTA), intero(ut, Utenti.AMMINISTRATORE) == 1, altri, pianificazione,
+        Utente u = new Utente(intero(ut, Utenti.ID_UTENTE_DITTA), intero(ut, Utenti.AMMINISTRATORE) == 1, altri, pianificazione,
                 Sessione.getIdOperatore(ctx));
+        u.operativo = operativo(ut);
+        return u;
     }
 
     /** Primo e ultimo istante (yyyyMMddHHmmss) della settimana, da lunedi a domenica, che contiene la data. */
@@ -152,9 +159,16 @@ public final class RegoleRapportino {
         return db.eseguiSelect(sql, null);
     }
 
+    /** La persona lavora nei cantieri: colonna operatore del server (attiva e operativa); senza valore si', come prima. */
+    public static boolean operativo(ContentValues ut) {
+        Integer v = ut.getAsInteger(Utenti.OPERATORE);
+        return v == null || v == 1;
+    }
+
     /**
      * Operatori che l'utente puo' mettere su una riga di un rapportino di quel cantiere e di quella data (colonne di
-     * utenti piu' PIANIFICATO): prima i pianificati sul cantiere nella settimana, poi gli altri, per cognome e nome.
+     * utenti piu' PIANIFICATO): solo le persone operative, prima le pianificate sul cantiere nella settimana, poi le altre,
+     * per cognome e nome.
      */
     public static ArrayList<ContentValues> operatoriSelezionabili(DbInterno db, Utente utente, int idCantiere, long data) {
         long[] sett = settimana(data);
@@ -185,8 +199,8 @@ public final class RegoleRapportino {
                 + " order by " + Utenti.COGNOME + ", " + Utenti.NOME, null)) {
             ContentValues ut = (ContentValues) o;
             int id = intero(ut, Utenti.ID_UTENTE_DITTA);
-            if (ammessi != null && !ammessi.contains(id)) {
-                continue;
+            if ((ammessi != null && !ammessi.contains(id)) || !operativo(ut)) {
+                continue; // non ammessa, oppure disattivata o non operativa (OPERATIVITA_PERSONE.md)
             }
             boolean pianificato = pianificati.contains(id);
             ut.put(PIANIFICATO, pianificato ? 1 : 0);
