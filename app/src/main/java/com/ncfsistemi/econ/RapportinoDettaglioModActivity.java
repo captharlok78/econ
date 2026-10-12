@@ -517,13 +517,13 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     // ── Invio al cliente per mail (INVIO_RAPPORTINI_MAIL.md) ─────────────────────────────────────────────────
 
     /**
-     * "Invia mail" attivo solo se il cliente ha l'email; senza la licenza di modifica non c'e' (il server non accetterebbe la
+     * "Invia mail" attivo solo se il rapportino e' confermato (firmato e' meglio, ma non serve) e il cliente ha l'email; senza la licenza di modifica non c'e' (il server non accetterebbe la
      * richiesta). Dopo l'invio dice "Inviata ✓".
      */
     private void aggiornaInviaMail() {
         android.widget.Button pulsante = findViewById(R.id.button_invia_mail);
         pulsante.setVisibility(senzaLicenzaModifica ? View.GONE : View.VISIBLE);
-        pulsante.setEnabled(!emailCliente().isEmpty());
+        pulsante.setEnabled(confermato() && !emailCliente().isEmpty());
         boolean inviata = testata != null && Rapportini.MAIL_INVIATA.equals(RigheRapportino.testo(testata, Rapportini.MAIL_STATO));
         pulsante.setText(inviata ? "Inviata ✓" : getString(R.string.invia_mail));
     }
@@ -546,6 +546,10 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         }
         if (testata == null || modificato) {
             Toast.makeText(this, "Salva il rapportino prima di inviarlo.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (!confermato()) {
+            Toast.makeText(this, "Si invia al cliente solo un rapportino confermato.", Toast.LENGTH_LONG).show();
             return;
         }
         String gia = "";
@@ -768,11 +772,6 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     @Override
     public void salva(View v) {
         idStatoDestino = stato != null ? RigheRapportino.intero(stato, StatiDocumento.ID) : 0;
-        // appena firmato dal cliente: passa a "Firmato dal cliente" se dallo stato attuale si puo' (es. da Confermato)
-        if (firmaNuova != null) {
-            int firmato = idStatoFirmatoAmmesso(idStatoDestino);
-            if (firmato != 0) idStatoDestino = firmato;
-        }
         eseguiSalvataggio();
     }
 
@@ -940,25 +939,18 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         return testata != null ? RigheRapportino.testo(testata, Rapportini.FIRMA) : "";
     }
 
-    /**
-     * Si firma se si puo' modificare il rapportino; se e' bloccato (es. Confermato) solo la prima volta, come sul server:
-     * la firma del cliente arriva di solito dopo la conferma. Senza RAPPORTINI.MODIFICA solo la si guarda.
-     */
-    /**
-     * Id dello stato "Firmato dal cliente" se dallo stato idDa il passaggio e' ammesso per l'utente, altrimenti 0. Da Bozza
-     * non si puo': il rapportino firmato e poi confermato ci arriva dal server (secondo passo alla sincronizzazione).
-     */
-    private int idStatoFirmatoAmmesso(int idDa) {
-        DbInterno db = new DbInterno(this);
-        ContentValues firmato = RegoleRapportino.statoPerCodice(db, StatiDocumento.CODICE_FIRMATO);
-        int id = firmato != null ? RigheRapportino.intero(firmato, StatiDocumento.ID) : 0;
-        boolean ammesso = id != 0 && id != idDa && idDa > 0 && RegoleRapportino.passaggioAmmesso(db, idDa, id, utente);
-        db.close();
-        return ammesso ? id : 0;
+    /** Il rapportino e' confermato: solo allora il cliente firma e si invia per mail (STUDIO_FLUSSO_DOCUMENTI_E_MAIL.md). */
+    private boolean confermato() {
+        return testata != null && stato != null && StatiDocumento.CODICE_CONFERMATO.equals(RigheRapportino.testo(stato, StatiDocumento.CODICE));
     }
 
+    /**
+     * Si firma solo un rapportino confermato; la firma non cambia lo stato, e' un indicatore con la sua data. La prima
+     * volta chiunque abbia la licenza di modifica, di nuovo solo chi puo' modificare il confermato (l'amministratore),
+     * come sul server. Senza RAPPORTINI.MODIFICA la firma solo si guarda.
+     */
     private boolean puoFirmare() {
-        return !senzaLicenzaModifica && (modificabile || firmaAttuale().isEmpty());
+        return !senzaLicenzaModifica && confermato() && (modificabile || firmaAttuale().isEmpty());
     }
 
     /** Pulsante Firma: se c'e' gia' la firma la mostra (con "Firma di nuovo" se si puo'), altrimenti apre la firma. */
@@ -999,29 +991,22 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         firmaNuova = data.getStringExtra(FirmaActivity.EXTRA_FIRMA);
         firmaNuovaNome = data.getStringExtra(FirmaActivity.EXTRA_NOME);
         firmaNuovaData = Utility.dataToNumber(java.util.Calendar.getInstance());
-        if ((!modificabile || !testataModificabile) && testata != null) {
-            // rapportino bloccato o di un altro: si salva subito solo la firma, come accetta il server
+        if (testata != null) {
+            // il rapportino e' confermato: si salva subito solo la firma, come accetta il server; lo stato non cambia
             DbInterno db = new DbInterno(this);
             Rapportini tabella = new Rapportini();
             ContentValues val = tabella.getValoriLogModifica(db);
             val.put(Rapportini.FIRMA, firmaNuova);
             val.put(Rapportini.FIRMA_NOME, firmaNuovaNome);
             val.put(Rapportini.FIRMA_DATA, firmaNuovaData);
-            int idAttuale = stato != null ? RigheRapportino.intero(stato, StatiDocumento.ID) : 0;
-            int firmato = idStatoFirmatoAmmesso(idAttuale);
-            if (firmato != 0) val.put(Rapportini.ID_STATO, firmato);
             ContentValues where = new ContentValues();
             where.put(Rapportini.ID, getIDModifica());
             tabella.aggiornaRecord(db, val, where);
             testata.putAll(val);
-            if (firmato != 0) stato = RegoleRapportino.stato(db, firmato);
             db.close();
             firmaNuova = null;
             setResult(RESULT_OK);
-            if (firmato != 0) applicaStato();
-            Toast.makeText(this, firmato != 0 ? "Firma salvata: rapportino firmato dal cliente." : "Firma salvata.", Toast.LENGTH_SHORT).show();
-        } else {
-            modificato = true;
+            Toast.makeText(this, "Firma salvata.", Toast.LENGTH_SHORT).show();
         }
         mostraFirma();
     }
@@ -1040,12 +1025,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         }
         riga.setVisibility(View.VISIBLE);
         ((android.widget.ImageView) findViewById(R.id.img_firma)).setImageBitmap(bitmapFirma(firma));
-        String avviso = "";
-        if (firmaNuova != null && modificabile) {
-            boolean diventaFirmato = idStatoFirmatoAmmesso(stato != null ? RigheRapportino.intero(stato, StatiDocumento.ID) : 0) != 0;
-            avviso = diventaFirmato ? " — con Salva il rapportino passa a «Firmato dal cliente»" : " (da salvare)";
-        }
-        ((TextView) findViewById(R.id.text_firma)).setText(testoFirma() + avviso);
+        ((TextView) findViewById(R.id.text_firma)).setText(testoFirma());
         pulsante.setText("Firmato ✓");
         disponiPulsanti();
     }

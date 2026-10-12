@@ -33,6 +33,7 @@ public final class FaIcone {
 	public static final String MAPPA = "\uf5a0";        // map-marked-alt
 	public static final String TELEFONO = "\uf095";     // phone
 	public static final String EMAIL = "\uf0e0";        // envelope
+	public static final String FIRMA = "\uf5b7";        // signature: firmato dal cliente
 	public static final String PRINCIPALE = "\uf005";   // star
 	public static final String AUTOMATICO = "\uf0e7";   // bolt
 	public static final String ELENCO = "\uf03a";       // list

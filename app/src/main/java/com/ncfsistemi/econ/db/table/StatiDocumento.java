@@ -26,8 +26,6 @@ public class StatiDocumento extends AbstractTable {
 	public static final String AMBITO_RAPPORTINI = "rapportini";
 	public static final String CODICE_CONFERMATO = "CONFERMATO";
 	public static final String CODICE_VERIFICA = "VERIFICA";
-	/** Stato in cui va il rapportino quando il cliente firma, se il passaggio e' ammesso (GESTIONE_RAPPORTINI.md §13.6). */
-	public static final String CODICE_FIRMATO = "FIRMATO";
 
 	public StatiDocumento() {
 		setNomeTabella(NOME_TABELLA);

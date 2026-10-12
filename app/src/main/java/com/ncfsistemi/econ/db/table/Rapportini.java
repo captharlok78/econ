@@ -103,6 +103,12 @@ public class Rapportini extends AbstractTable {
         return n != null && n > 0 ? n + "/" + (a != null ? a : "") : "";
     }
 
+    /** Colore dell'icona della firma del cliente: verde se firmato, trasparente se no (la firma e' un indicatore, non uno stato). */
+    public static int coloreFirma(ContentValues r) {
+        String firma = r != null ? r.getAsString(FIRMA) : null;
+        return firma != null && !firma.trim().isEmpty() ? android.graphics.Color.parseColor("#198754") : android.graphics.Color.TRANSPARENT;
+    }
+
     /** Colore dell'icona dell'invio al cliente: verde inviato, arancio in attesa, rosso non riuscito, trasparente mai chiesto. */
     public static int coloreMail(ContentValues r) {
         String stato = r != null ? r.getAsString(MAIL_STATO) : null;
