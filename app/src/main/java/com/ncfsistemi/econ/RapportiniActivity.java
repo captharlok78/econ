@@ -274,12 +274,14 @@ public class RapportiniActivity extends EconListaStandardActivity {
                             "(" + rapp + Rapportini.ANNO + "*1000000+" + rapp + Rapportini.NUMERO + ")"),
                     new ColonnaLista(Rapportini.DATA_RAPPORTINO, "Data", 13, false,
                             riga -> Utility.numberToDataShort(riga.getAsLong(Rapportini.DATA_RAPPORTINO)), rapp + Rapportini.DATA_RAPPORTINO),
-                    new ColonnaLista(Anagrafica.RAGIONE_SOCIALE, "Cliente", 23, true, null,
+                    new ColonnaLista(Anagrafica.RAGIONE_SOCIALE, "Cliente", 20, true, null,
                             Anagrafica.NOME_TABELLA + "." + Anagrafica.RAGIONE_SOCIALE),
-                    new ColonnaLista("nome_cantiere", "Cantiere", 21, false, RapportiniActivity::cantiereOOrdine, "nome_cantiere"),
+                    new ColonnaLista("nome_cantiere", "Cantiere", 18, false, RapportiniActivity::cantiereOOrdine, "nome_cantiere"),
                     new ColonnaLista("cognome_operatore", "Operatore", 16, false,
                             riga -> testo(riga, "nome_operatore") + " " + testo(riga, "cognome_operatore"), "cognome_operatore"),
-                    ColonnaLista.ore("tot_ore", "Ore", 9, "tot_ore"));
+                    ColonnaLista.ore("tot_ore", "Ore", 9, "tot_ore"),
+                    // invio al cliente per mail (INVIO_RAPPORTINI_MAIL.md): busta verde inviato, arancio in attesa, rossa non riuscito
+                    ColonnaLista.icona(Rapportini.MAIL_STATO, "Mail", 6, FaIcone.EMAIL, Rapportini::coloreMail, rapp + Rapportini.MAIL_STATO));
         }
 
         @Override

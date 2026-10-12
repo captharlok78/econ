@@ -169,6 +169,18 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         applicaStato();
         aggiornaInviaMail();
         mostraFirma();
+        disponiPulsanti();
+    }
+
+    /** Pulsanti in fondo su una o piu' righe (smartphone in verticale: 2-3 righe), di nuovo a ogni rotazione. */
+    private void disponiPulsanti() {
+        com.ncfsistemi.econ.views.BarraPulsanti.disponi((android.widget.LinearLayout) findViewById(R.id.barra_pulsanti));
+    }
+
+    @Override
+    public void onConfigurationChanged(android.content.res.Configuration nuova) {
+        super.onConfigurationChanged(nuova);
+        disponiPulsanti();
     }
 
     /** Se il riferimento salvato non e' tra le voci del tablet, lo seleziona con un testo che lo spiega (l'id resta). */
@@ -264,6 +276,8 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             long quando = testata.getAsLong(Rapportini.DATA_CONFERMA) != null ? testata.getAsLong(Rapportini.DATA_CONFERMA) : 0;
             info += (info.isEmpty() ? "" : "\n") + "Confermato da " + (chi.isEmpty() ? "—" : chi) + (quando > 0 ? " il " + dataOra(quando) : "");
         }
+        String mail = testoMail();
+        if (!mail.isEmpty()) info += (info.isEmpty() ? "" : "\n") + mail;
         db.close();
         TextView testoInfo = (TextView) findViewById(R.id.text_info_stato);
         testoInfo.setText(info);
@@ -271,6 +285,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         findViewById(R.id.button_conferma).setVisibility(confermabile ? View.VISIBLE : View.GONE);
         findViewById(R.id.button_verifica).setVisibility(verificabile ? View.VISIBLE : View.GONE);
         adapter.notifyDataSetChanged();
+        disponiPulsanti();
     }
 
     /** gg/mm/aaaa hh:mm da yyyyMMddHHmmss */
@@ -499,10 +514,92 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         Utility.mostraDialog(getString(R.string.attenzione), avviso, this, "OK");
     }
 
-    /** "Invia mail" solo se il cliente ha l'email (per ora senza azione, §8.9). */
+    // ── Invio al cliente per mail (INVIO_RAPPORTINI_MAIL.md) ─────────────────────────────────────────────────
+
+    /**
+     * "Invia mail" attivo solo se il cliente ha l'email; senza la licenza di modifica non c'e' (il server non accetterebbe la
+     * richiesta). Dopo l'invio dice "Inviata ✓".
+     */
     private void aggiornaInviaMail() {
+        android.widget.Button pulsante = findViewById(R.id.button_invia_mail);
+        pulsante.setVisibility(senzaLicenzaModifica ? View.GONE : View.VISIBLE);
+        pulsante.setEnabled(!emailCliente().isEmpty());
+        boolean inviata = testata != null && Rapportini.MAIL_INVIATA.equals(RigheRapportino.testo(testata, Rapportini.MAIL_STATO));
+        pulsante.setText(inviata ? "Inviata ✓" : getString(R.string.invia_mail));
+    }
+
+    /** Email del cliente scelto ("" se non c'e'). */
+    private String emailCliente() {
         CampoRicerca.Voce cliente = campoCliente.getScelta();
-        findViewById(R.id.button_invia_mail).setEnabled(cliente != null && !RigheRapportino.testo(cliente.dati, Anagrafica.MAIL).isEmpty());
+        return cliente != null ? RigheRapportino.testo(cliente.dati, Anagrafica.MAIL) : "";
+    }
+
+    /**
+     * Invia mail: chiede conferma con i destinatari, poi segna la richiesta sul rapportino. La mail con il PDF la manda il
+     * server alla sincronizzazione (anche se ora il telefono e' senza rete), all'email del cliente e in copia a chi la chiede.
+     */
+    public void inviaMail(View v) {
+        String email = emailCliente();
+        if (email.isEmpty()) {
+            Toast.makeText(this, "Il cliente non ha l'email: aggiungila nella sua scheda.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (testata == null || modificato) {
+            Toast.makeText(this, "Salva il rapportino prima di inviarlo.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        String gia = "";
+        if (Rapportini.MAIL_INVIATA.equals(RigheRapportino.testo(testata, Rapportini.MAIL_STATO))) {
+            gia = testoMail() + ".\n\n";
+        }
+        Utility.mostraConfermaDialog(getString(R.string.invia_mail), gia + "Inviare il rapportino (PDF) a " + email
+                        + "?\n\nLa mail parte dal server alla sincronizzazione, con una copia a te.", this, "Invia",
+                getString(R.string.annulla), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which == DialogInterface.BUTTON_POSITIVE) richiediInvioMail();
+                    }
+                });
+    }
+
+    private void richiediInvioMail() {
+        // sempre una data piu' recente della richiesta precedente: per il server e' quella che fa partire un nuovo invio
+        long ora = Utility.dataToNumber(java.util.Calendar.getInstance());
+        Long prima = testata.getAsLong(Rapportini.MAIL_RICHIESTA_IL);
+        if (prima != null && ora <= prima) ora = prima + 1;
+        DbInterno db = new DbInterno(this);
+        Rapportini tabella = new Rapportini();
+        ContentValues val = tabella.getValoriLogModifica(db);
+        val.put(Rapportini.MAIL_RICHIESTA_IL, ora);
+        val.put(Rapportini.MAIL_STATO, Rapportini.MAIL_IN_ATTESA); // solo per mostrarlo: lo stato vero lo rimanda il server
+        ContentValues where = new ContentValues();
+        where.put(Rapportini.ID, getIDModifica());
+        tabella.aggiornaRecord(db, val, where);
+        db.close();
+        testata.putAll(val);
+        setResult(RESULT_OK);
+        com.ncfsistemi.econ.servizi.SyncWorker.scheduleImmediateSync(this);
+        Toast.makeText(this, "Invio chiesto: la mail parte alla sincronizzazione.", Toast.LENGTH_LONG).show();
+        aggiornaInviaMail();
+        applicaStato();
+    }
+
+    /** Esito dell'invio al cliente, per la riga informativa ("" se non e' mai stato chiesto). */
+    private String testoMail() {
+        if (testata == null) return "";
+        String stato = RigheRapportino.testo(testata, Rapportini.MAIL_STATO);
+        long quando = testata.getAsLong(Rapportini.MAIL_INVIATA_IL) != null ? testata.getAsLong(Rapportini.MAIL_INVIATA_IL) : 0;
+        String destinatari = RigheRapportino.testo(testata, Rapportini.MAIL_DESTINATARI);
+        if (Rapportini.MAIL_INVIATA.equals(stato)) {
+            return "Mail inviata al cliente" + (quando > 0 ? " il " + dataOra(quando) : "") + (destinatari.isEmpty() ? "" : " a " + destinatari);
+        }
+        if (Rapportini.MAIL_IN_ATTESA.equals(stato)) {
+            return "Mail al cliente: in attesa di invio (parte alla sincronizzazione)";
+        }
+        if (Rapportini.MAIL_NON_INVIATA.equals(stato)) {
+            return "Mail al cliente non inviata: " + RigheRapportino.testo(testata, Rapportini.MAIL_ERRORE);
+        }
+        return "";
     }
 
     // ── Righe ────────────────────────────────────────────────────────────────────────────────────────────────
@@ -938,6 +1035,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         if (firma.isEmpty()) {
             riga.setVisibility(View.GONE);
             pulsante.setText(R.string.firma);
+            disponiPulsanti();
             return;
         }
         riga.setVisibility(View.VISIBLE);
@@ -949,6 +1047,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         }
         ((TextView) findViewById(R.id.text_firma)).setText(testoFirma() + avviso);
         pulsante.setText("Firmato ✓");
+        disponiPulsanti();
     }
 
     /** "Firmato da Mario Rossi il 30/09/2026 10:40". */

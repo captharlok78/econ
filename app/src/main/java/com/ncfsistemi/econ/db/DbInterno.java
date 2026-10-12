@@ -67,7 +67,7 @@ import com.ncfsistemi.econ.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECON.db";
 	public static final String DATABASE_NAME_ZIP = ".econ.db";
-	public static final int SCHEMA_VERSION = 36;
+	public static final int SCHEMA_VERSION = 37;
 
 	private Context cont = null;
 
@@ -496,6 +496,23 @@ public class DbInterno extends SQLiteOpenHelper {
 					}
 				}
 				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
+			}
+		}
+		// Schema 37 (INVIO_RAPPORTINI_MAIL.md): invio del rapportino al cliente per mail, richiesta ed esito sulla testata
+		if (oldVersion<37){
+			if (oldVersion<newVersion){
+				String[][] colonne = {
+						{Rapportini.NOME_TABELLA, Rapportini.MAIL_RICHIESTA_IL, "INTEGER DEFAULT 0"},
+						{Rapportini.NOME_TABELLA, Rapportini.MAIL_STATO, "TEXT"},
+						{Rapportini.NOME_TABELLA, Rapportini.MAIL_INVIATA_IL, "INTEGER DEFAULT 0"},
+						{Rapportini.NOME_TABELLA, Rapportini.MAIL_DESTINATARI, "TEXT"},
+						{Rapportini.NOME_TABELLA, Rapportini.MAIL_ERRORE, "TEXT"},
+				};
+				for (String[] c : colonne) {
+					if (!getTableColumns(db, c[0]).isEmpty() && !getTableColumns(db, c[0]).contains(c[1])) {
+						db.execSQL("ALTER TABLE " + c[0] + " ADD COLUMN " + c[1] + " " + c[2]);
+					}
+				}
 			}
 		}
 		// Schema 36 (STUDIO_VERIFICA_RAPPORTINI.md): stato In verifica (righe degli operatori), Confermato modificabile solo

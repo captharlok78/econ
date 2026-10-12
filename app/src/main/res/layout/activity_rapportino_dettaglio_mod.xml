@@ -2,7 +2,7 @@
 <!--
     Rapportino (GESTIONE_RAPPORTINI.md §12.1): testata standard con lo stato, operatore e data, cliente / cantiere / ordine
     con ricerca, note, i tre pulsanti che aprono le finestre delle righe, la tabella delle righe (testata fissa) e in fondo
-    Annulla · Firma · Invia mail · Salva · Conferma.
+    Annulla · Stampa · Firma · Invia al cliente · Salva · In verifica · Conferma.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/container"
@@ -259,11 +259,13 @@
         <include layout="@layout/dettaglio_tabella_standard" />
     </FrameLayout>
 
+    <!-- pulsanti in fondo: su una o piu' righe secondo la larghezza (views.BarraPulsanti, smartphone in verticale 2-3 righe) -->
     <LinearLayout
+        android:id="@+id/barra_pulsanti"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margine"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
         <Button
             android:id="@+id/button_annulla"
@@ -293,7 +295,7 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
-        <!-- Firma del cliente (§13); Invia mail nascosto finche' non c'e' l'invio (§8.9) -->
+        <!-- Firma del cliente (§13); Invia al cliente: mail con il PDF mandata dal server (INVIO_RAPPORTINI_MAIL.md) -->
         <Button
             android:id="@+id/button_firma"
             android:onClick="firma"
@@ -310,7 +312,7 @@
 
         <Button
             android:id="@+id/button_invia_mail"
-            android:visibility="gone"
+            android:onClick="inviaMail"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"

@@ -40,6 +40,19 @@ public class Rapportini extends AbstractTable {
     /** Schema 36: chi ha confermato (id_utente_ditta) e quando (yyyyMMddHHmmss); li scrive solo il server. */
     public static final String ID_CONFERMATO_DA = "id_confermato_da";
     public static final String DATA_CONFERMA = "data_conferma";
+    /**
+     * Schema 37 (INVIO_RAPPORTINI_MAIL.md): invio del rapportino al cliente per mail, con il PDF. L'app scrive solo quando lo
+     * chiede (yyyyMMddHHmmss, una data nuova = un nuovo invio); la mail la manda il server alla sincronizzazione, che rimanda
+     * stato (IN_ATTESA, INVIATA, ERRORE), data dell'invio, destinatari ed errore.
+     */
+    public static final String MAIL_RICHIESTA_IL = "mail_richiesta_il";
+    public static final String MAIL_STATO = "mail_stato";
+    public static final String MAIL_INVIATA_IL = "mail_inviata_il";
+    public static final String MAIL_DESTINATARI = "mail_destinatari";
+    public static final String MAIL_ERRORE = "mail_errore";
+    public static final String MAIL_IN_ATTESA = "IN_ATTESA";
+    public static final String MAIL_INVIATA = "INVIATA";
+    public static final String MAIL_NON_INVIATA = "ERRORE";
 
 
     public static final String PATH_EXPORT_RAPPORTINI = "rapportini";
@@ -66,6 +79,11 @@ public class Rapportini extends AbstractTable {
         aggiungiCampo(FIRMA_DATA, DATE);
         aggiungiCampo(ID_CONFERMATO_DA, INTEGER);
         aggiungiCampo(DATA_CONFERMA, INTEGER);
+        aggiungiCampo(MAIL_RICHIESTA_IL, INTEGER);
+        aggiungiCampo(MAIL_STATO, TEXT);
+        aggiungiCampo(MAIL_INVIATA_IL, INTEGER);
+        aggiungiCampo(MAIL_DESTINATARI, TEXT);
+        aggiungiCampo(MAIL_ERRORE, TEXT);
 
 		aggiungiCampo(ATTIVO, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
@@ -83,6 +101,15 @@ public class Rapportini extends AbstractTable {
         Integer n = r != null ? r.getAsInteger(NUMERO) : null;
         Integer a = r != null ? r.getAsInteger(ANNO) : null;
         return n != null && n > 0 ? n + "/" + (a != null ? a : "") : "";
+    }
+
+    /** Colore dell'icona dell'invio al cliente: verde inviato, arancio in attesa, rosso non riuscito, trasparente mai chiesto. */
+    public static int coloreMail(ContentValues r) {
+        String stato = r != null ? r.getAsString(MAIL_STATO) : null;
+        if (MAIL_INVIATA.equals(stato)) return android.graphics.Color.parseColor("#198754");
+        if (MAIL_IN_ATTESA.equals(stato)) return android.graphics.Color.parseColor("#E0A800");
+        if (MAIL_NON_INVIATA.equals(stato)) return android.graphics.Color.parseColor("#DC3545");
+        return android.graphics.Color.TRANSPARENT;
     }
 
     /** Ultimo rapportino dell'autore (id_utente_ditta), per proporre gli stessi riferimenti in un rapportino nuovo. */
