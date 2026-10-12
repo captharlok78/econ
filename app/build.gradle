@@ -16,6 +16,26 @@ static String gitCommitHash(File rootDir) {
     }
 }
 
+// versionCode (AGGIORNAMENTO_APP.md §4): cresce a ogni commit, cosi' Android accetta la build piu' nuova come aggiornamento
+// e il server la confronta con l'ultimo APK pubblicato. 1000 + numero di commit: le build di prima avevano 108.
+static int numeroCommit(File rootDir) {
+    try {
+        def process = ['git', 'rev-list', '--count', 'HEAD'].execute(null, rootDir)
+        process.waitFor()
+        return process.exitValue() == 0 ? process.text.trim().toInteger() : 0
+    } catch (Exception ignored) {
+        return 0
+    }
+}
+
+// Chiave di firma di release (EDITORE_E_FIRMA.md §4): un file .properties fuori dal repository (storeFile, storePassword,
+// keyAlias, keyPassword), indicato con -PeconFirma=<file> o con ECON_FIRMA_APP; senza, la release non e' firmata.
+def fileFirma = project.findProperty('econFirma') ?: System.getenv('ECON_FIRMA_APP')
+def firma = new Properties()
+if (fileFirma && file(fileFirma).isFile()) {
+    file(fileFirma).withInputStream { firma.load(it) }
+}
+
 android {
     compileSdk 36
     buildToolsVersion '35.0.0'
@@ -25,6 +45,10 @@ android {
         applicationId "com.ncfsistemi.econ"
         minSdkVersion 26
         targetSdkVersion 34
+
+        versionCode 1000 + numeroCommit(rootDir)
+        // la versione "umana" la passa mercurycloud/rilascia-app.sh (-PversioneApp=1.0.54); quella vera la dice il server
+        versionName project.findProperty('versioneApp') ?: "sviluppo"
 
         // Timeout di rete configurabili a compile-time
         buildConfigField "int",    "CONNECT_TIMEOUT_SEC", "30"
@@ -50,6 +74,17 @@ android {
         buildConfig true
     }
 
+    signingConfigs {
+        if (firma.getProperty('storeFile')) {
+            release {
+                storeFile file(firma.getProperty('storeFile'))
+                storePassword firma.getProperty('storePassword')
+                keyAlias firma.getProperty('keyAlias')
+                keyPassword firma.getProperty('keyPassword')
+            }
+        }
+    }
+
     buildTypes {
         // HTTP in chiaro solo nelle build di sviluppo (server di prova in rete locale); la release vuole https
         // (SICUREZZA_E_PRIVACY.md, S1)
@@ -61,6 +96,9 @@ android {
         release {
             manifestPlaceholders = [httpInChiaro: "false"]
             debuggable false   // ERA true — corretto per sicurezza
+            if (firma.getProperty('storeFile')) signingConfig signingConfigs.release
+            // chi installa la release non deve scrivere l'indirizzo (resta modificabile nel Setup)
+            buildConfigField "String", "API_BASE_URL", '"https://www.mercurycloud.net/"'
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.txt'
         }

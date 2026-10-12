@@ -105,6 +105,28 @@ public class StatoSistemaActivity extends AppCompatActivity {
         finish();
     }
 
+    /** Aggiornamento proposto in corso (attesa del permesso di installazione), null se nessuno. */
+    private com.ncfsistemi.econ.utils.AggiornaApp aggiornamento = null;
+
+    /** Come all'avvio: c'e' un APK piu' nuovo sul server? Se si', lo propone (AGGIORNAMENTO_APP.md). */
+    public void cercaAggiornamenti(View v) {
+        v.setEnabled(false);
+        com.ncfsistemi.econ.utils.ControlloAvvio.esegui(this, esito -> {
+            v.setEnabled(true);
+            if (isFinishing() || isDestroyed()) return;
+            aggiornamento = com.ncfsistemi.econ.utils.AggiornaApp.proponi(this, esito.aggiornamento, () -> aggiornamento = null);
+            if (aggiornamento == null) {
+                com.ncfsistemi.econ.utils.AggiornaApp.nessunAggiornamento(this, esito.serverRaggiungibile ? esito.aggiornamento : null);
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (aggiornamento != null) aggiornamento.riprendi();
+    }
+
     // ── Dati locali (sincroni) ───────────────────────────────────────────────
 
     private void popolaDatiLocali() {

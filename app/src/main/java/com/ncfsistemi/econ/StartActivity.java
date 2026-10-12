@@ -1,6 +1,7 @@
 package com.ncfsistemi.econ;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -15,6 +16,8 @@ import androidx.core.content.ContextCompat;
 import com.ncfsistemi.econ.api.TokenManager;
 import com.ncfsistemi.econ.utils.AccessoMercury;
 import com.ncfsistemi.econ.utils.AccessoOffline;
+import com.ncfsistemi.econ.utils.AggiornaApp;
+import com.ncfsistemi.econ.utils.ControlloAvvio;
 import com.ncfsistemi.econ.utils.Sessione;
 import com.ncfsistemi.econ.utils.Utility;
 
@@ -24,6 +27,8 @@ public class StartActivity extends EconActivity {
     private static Handler splashHandler;
     /** inizia() può arrivare sia dal timer dello splash sia dai tocchi: l'accesso va fatto una volta sola. */
     private boolean avviato = false;
+    /** Aggiornamento proposto in corso (attesa del permesso di installazione), null se nessuno. */
+    private AggiornaApp aggiornamento = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,24 +98,78 @@ public class StartActivity extends EconActivity {
             splashHandler.removeCallbacksAndMessages(null);
             splashHandler = null;
         }
+        controlla();
+    }
 
-        // Ad ogni apertura l'app si riallinea al server (moduli, pacchetti, dati) prima del menu: con "Ricordami" rifà
-        // l'accesso con le credenziali salvate, altrimenti usa il token ancora valido. Se il server non risponde si
-        // entra offline quando e' possibile (ACCESSO_OFFLINE.md §2.3).
+    /**
+     * 1. Il dispositivo puo' usare l'app? 2. C'e' una versione nuova sul server? (AGGIORNAMENTO_APP.md §2) Poi l'accesso
+     * di sempre: ad ogni apertura l'app si riallinea al server (moduli, pacchetti, dati) prima del menu; con "Ricordami"
+     * rifa' l'accesso con le credenziali salvate, altrimenti usa il token ancora valido. Se il server non risponde si
+     * entra offline quando e' possibile (ACCESSO_OFFLINE.md §2.3).
+     */
+    private void controlla() {
+        stato("Controllo del dispositivo...");
+        ControlloAvvio.esegui(this, esito -> {
+            if (isFinishing() || isDestroyed()) return;
+            if (esito.problemi.isEmpty()) {
+                dopoControlli(esito);
+                return;
+            }
+            StringBuilder msg = new StringBuilder();
+            for (ControlloAvvio.Problema p : esito.problemi) {
+                if (msg.length() > 0) msg.append("\n\n");
+                msg.append("• ").append(p.testo);
+            }
+            AlertDialog.Builder b = new AlertDialog.Builder(this)
+                    .setTitle(esito.bloccato() ? "Il dispositivo non può usare Econ" : "Controllo del dispositivo")
+                    .setMessage(msg.toString())
+                    .setCancelable(false);
+            if (esito.bloccato()) {
+                b.setPositiveButton("Riprova", (d, w) -> controlla())
+                        .setNegativeButton("Esci", (d, w) -> finishAffinity());
+                stato("Dispositivo non abilitato");
+            } else {
+                b.setPositiveButton("Continua", (d, w) -> dopoControlli(esito));
+            }
+            b.show();
+        });
+    }
+
+    private void dopoControlli(ControlloAvvio.Esito esito) {
+        if (esito.aggiornamento != null && esito.aggiornamento.aggiornamento) {
+            stato("Aggiornamento disponibile");
+            aggiornamento = AggiornaApp.proponi(this, esito.aggiornamento, () -> {
+                aggiornamento = null;
+                accedi(esito);
+            });
+            if (aggiornamento != null) return;
+        }
+        accedi(esito);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // ritorno dalla pagina "installa app sconosciute"
+        if (aggiornamento != null) aggiornamento.riprendi();
+    }
+
+    private void accedi(ControlloAvvio.Esito esito) {
         TokenManager tm = TokenManager.getInstance(this);
         if (!tm.hasToken() && !tm.hasCredenzialiRicordami()) {
             apriLogin();
             return;
         }
-        ((TextView) findViewById(R.id.textViewVersione)).setText("Verifica del server...");
-        com.ncfsistemi.econ.utils.VerificaServer.verifica(this, raggiungibile -> {
-            if (isFinishing() || isDestroyed()) return;
-            if (raggiungibile) {
-                accediOnline();
-            } else {
-                senzaServer();
-            }
-        });
+        if (esito.serverRaggiungibile) {
+            accediOnline();
+        } else {
+            senzaServer();
+        }
+    }
+
+    private void stato(String testo) {
+        TextView tv = findViewById(R.id.textViewVersione);
+        if (tv != null) tv.setText(testo);
     }
 
     private void accediOnline() {
