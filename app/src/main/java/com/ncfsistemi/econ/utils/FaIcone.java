@@ -56,6 +56,11 @@ public final class FaIcone {
 	public static final String DITTA = "\uf1ad";        // building: dati della ditta
 	public static final String SCARICA = "\uf063";     // arrow-down: scarica da server
 	public static final String CARICA = "\uf062";      // arrow-up: carica su server
+	public static final String CALENDARIO = "\uf073";  // calendar-alt: calendario personale
+	public static final String ORE = "\uf017";         // clock: ore lavorate
+	public static final String PIANIFICATO = "\uf274"; // calendar-check: pianificazione
+	public static final String INDIETRO = "\uf053";    // chevron-left
+	public static final String AVANTI = "\uf054";      // chevron-right
 
 	private static Typeface typeface;
 

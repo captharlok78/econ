@@ -6,6 +6,7 @@
     <item name="buttonPreventivi"   type="id" />
     <item name="buttonOrdini"       type="id" />
     <item name="buttonRapportini"   type="id" />
+    <item name="buttonCalendario"   type="id" />
     <item name="buttonStatoSistema" type="id" />
     <item name="buttonImpostazioni" type="id" />
     <item name="buttonGuida"        type="id" />

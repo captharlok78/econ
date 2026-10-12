@@ -318,6 +318,13 @@
             android:exported="true"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_rapportini"></activity>
+        <!-- calendario personale: ore, rapportini aperti, pianificazione (CALENDARIO_PERSONALE.md) -->
+        <activity
+            android:name=".CalendarioActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:label="@string/calendario" />
         <!-- firma del cliente a schermo intero (GESTIONE_RAPPORTINI.md §13) -->
         <activity
             android:name=".FirmaActivity"

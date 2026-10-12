@@ -203,12 +203,21 @@ public final class RegoleRapportino {
      * del pomeriggio.
      */
     public static ArrayList<Object> pianificazioneGiorno(DbInterno db, Utente utente, long data) {
+        long giorno = data / 1000000L;
+        return pianificazionePeriodo(db, utente, giorno * 1000000L, giorno * 1000000L + 235959L);
+    }
+
+    /**
+     * Come pianificazioneGiorno, per un periodo (yyyyMMddHHmmss, estremi compresi), con in piu' la colonna data e
+     * id_cantiere; per giorno, poi mattina prima del pomeriggio (calendario personale).
+     */
+    public static ArrayList<Object> pianificazionePeriodo(DbInterno db, Utente utente, long dal, long al) {
         if (utente.idUtenteDitta == 0) {
             return new ArrayList<Object>();
         }
-        long giorno = data / 1000000L;
         int u = utente.idUtenteDitta;
-        String sql = "select pa." + PianificazioneAssegnazioni.FASCIA + " as fascia, pa." + PianificazioneAssegnazioni.MINUTI + " as minuti,"
+        String sql = "select pa." + PianificazioneAssegnazioni.DATA + " as data, pa." + PianificazioneAssegnazioni.ID_CANTIERE + " as id_cantiere,"
+                + " pa." + PianificazioneAssegnazioni.FASCIA + " as fascia, pa." + PianificazioneAssegnazioni.MINUTI + " as minuti,"
                 + " c." + Cantieri.NOME + " as nome_cantiere, a." + Anagrafica.RAGIONE_SOCIALE + " as cliente, s." + Squadre.NOME + " as squadra,"
                 + " c." + Cantieri.INDIRIZZO + " as indirizzo, c." + Cantieri.CAP + " as cap, c." + Cantieri.CITTA + " as citta, c." + Cantieri.PROVINCIA + " as provincia"
                 + " from " + PianificazioneAssegnazioni.NOME_TABELLA + " pa"
@@ -216,15 +225,34 @@ public final class RegoleRapportino {
                 + " left join " + Anagrafica.NOME_TABELLA + " a on a." + Anagrafica.ID_ANAGRAFICA + "=c." + Cantieri.ID_ANAGRAFICA
                 + " left join " + Squadre.NOME_TABELLA + " s on s." + Squadre.ID_SQUADRA + "=pa." + PianificazioneAssegnazioni.ID_SQUADRA
                 + " where pa." + PianificazioneAssegnazioni.ID_DITTA + "=" + Sessione.getDittaSelezionata()
-                + " and pa." + PianificazioneAssegnazioni.DATA + " between " + (giorno * 1000000L) + " and " + (giorno * 1000000L + 235959L)
+                + " and pa." + PianificazioneAssegnazioni.DATA + " between " + dal + " and " + al
                 + " and (pa." + PianificazioneAssegnazioni.ID_UTENTE_DITTA + "=" + u
                 + " or (s." + Squadre.ATTIVA + "=1 and (s." + Squadre.ID_COORDINATORE + "=" + u
                 + " or exists (select 1 from " + SquadreMembri.NOME_TABELLA + " m where m." + SquadreMembri.ID_SQUADRA + "=s." + Squadre.ID_SQUADRA
                 + " and m." + SquadreMembri.ID_UTENTE_DITTA + "=" + u + "))"
                 + " and not exists (select 1 from " + PianificazioneEsclusioni.NOME_TABELLA + " e where e." + PianificazioneEsclusioni.ID_ASSEGNAZIONE
                 + "=pa." + PianificazioneAssegnazioni.ID + " and e." + PianificazioneEsclusioni.ID_UTENTE_DITTA + "=" + u + ")))"
-                + " order by pa." + PianificazioneAssegnazioni.FASCIA + ", c." + Cantieri.NOME;
+                + " order by pa." + PianificazioneAssegnazioni.DATA + ", pa." + PianificazioneAssegnazioni.FASCIA + ", c." + Cantieri.NOME;
         return db.eseguiSelect(sql, null);
+    }
+
+    /** Id delle squadre attive della ditta di cui l'utente e' coordinatore o membro. */
+    public static Set<Integer> squadreDi(DbInterno db, Utente utente) {
+        int u = utente.idUtenteDitta;
+        if (u <= 0) return new HashSet<Integer>();
+        return interi(db, "select s." + Squadre.ID_SQUADRA + " from " + Squadre.NOME_TABELLA + " s where s." + Squadre.ATTIVA + "=1"
+                + " and s." + Squadre.ID_DITTA + "=" + Sessione.getDittaSelezionata() + " and (s." + Squadre.ID_COORDINATORE + "=" + u
+                + " or exists (select 1 from " + SquadreMembri.NOME_TABELLA + " m where m." + SquadreMembri.ID_SQUADRA + "=s." + Squadre.ID_SQUADRA
+                + " and m." + SquadreMembri.ID_UTENTE_DITTA + "=" + u + "))");
+    }
+
+    /** Persone (id_utente_ditta) delle squadre indicate: coordinatori e membri. */
+    public static Set<Integer> personeDelleSquadre(DbInterno db, Set<Integer> squadre) {
+        if (squadre.isEmpty()) return new HashSet<Integer>();
+        String elenco = android.text.TextUtils.join(",", squadre);
+        Set<Integer> ris = interi(db, "select " + Squadre.ID_COORDINATORE + " from " + Squadre.NOME_TABELLA + " where " + Squadre.ID_SQUADRA + " in (" + elenco + ")");
+        ris.addAll(interi(db, "select " + SquadreMembri.ID_UTENTE_DITTA + " from " + SquadreMembri.NOME_TABELLA + " where " + SquadreMembri.ID_SQUADRA + " in (" + elenco + ")"));
+        return ris;
     }
 
     private static Set<Integer> interi(DbInterno db, String sql) {

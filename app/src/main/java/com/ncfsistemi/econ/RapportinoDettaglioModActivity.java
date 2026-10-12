@@ -96,6 +96,9 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     private long firmaNuovaData = 0;
     private static final int RICHIESTA_FIRMA = 77;
 
+    /** Rapportino nuovo con questa data (yyyyMMddHHmmss), es. dal calendario personale. */
+    public static final String EXTRA_DATA = "DATA_RAPPORTINO";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_rapportino_dettaglio_mod);
@@ -124,6 +127,9 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             idCantiere = RigheRapportino.intero(testata, Rapportini.ID_CANTIERE);
             idOrdine = RigheRapportino.intero(testata, Rapportini.ID_ORDINE);
         } else {
+            // data scelta da chi apre il nuovo rapportino (calendario personale), altrimenti quella proposta
+            long dataProposta = getIntent().getLongExtra(EXTRA_DATA, 0);
+            if (dataProposta > 0) data.setValue(String.valueOf(dataProposta));
             stato = RegoleRapportino.statoIniziale(db);
             impostaOperatore(utente.idUtenteDitta);
             // stessi cliente e cantiere dell'ultimo rapportino dell'autore (il cantiere se e' ancora tra quelli ammessi)

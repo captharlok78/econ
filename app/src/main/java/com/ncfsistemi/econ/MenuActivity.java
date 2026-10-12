@@ -64,6 +64,7 @@ public class MenuActivity extends EconActivity {
         items.add(new MenuItemDef(R.id.buttonPreventivi,   R.drawable.button_preventivi,    R.string.preventivi,     "PREVENTIVI"));
         items.add(new MenuItemDef(R.id.buttonOrdini,       R.drawable.button_ordini,        R.string.ordini,         "ORDINI"));
         items.add(new MenuItemDef(R.id.buttonRapportini,   R.drawable.button_rapportini,    R.string.rapportini,     "RAPPORTINI"));
+        items.add(new MenuItemDef(R.id.buttonCalendario,   R.drawable.button_calendario,    R.string.calendario,     "CALENDARIO"));
         items.add(new MenuItemDef(R.id.buttonStatoSistema, R.drawable.button_stato_sistema, R.string.stato_sistema,  "STATO_SISTEMA"));
         items.add(new MenuItemDef(R.id.buttonImpostazioni, R.drawable.button_impostazioni,  R.string.impostazioni,   "IMPOSTAZIONI"));
         items.add(new MenuItemDef(R.id.buttonGuida,        R.drawable.button_guida,         R.string.guida,          "GUIDA"));
@@ -219,6 +220,9 @@ public class MenuActivity extends EconActivity {
                 .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
         } else if (id == R.id.buttonRapportini) {
             startActivity(new Intent(this, RapportiniActivity.class)
+                .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
+        } else if (id == R.id.buttonCalendario) {
+            startActivity(new Intent(this, CalendarioActivity.class)
                 .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
         } else if (id == R.id.buttonStatoSistema) {
             startActivity(new Intent(this, StatoSistemaActivity.class)
