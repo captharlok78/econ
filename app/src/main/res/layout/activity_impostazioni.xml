@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Impostazioni (ImpostazioniActivity, STATO_SISTEMA_APP.md §5): preferenze del dispositivo (solo su questo dispositivo) e
-    accesso ai dati della ditta. Righe costruite dal codice; standard grafico (sezione_standard).
+    Impostazioni (ImpostazioniActivity, STATO_SISTEMA_APP.md §5): preferenze del dispositivo (solo su questo dispositivo).
+    Righe costruite dal codice; standard grafico (sezione_standard).
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -65,16 +65,6 @@
 
             <LinearLayout
                 android:id="@+id/righePreferenze"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
-
-            <include
-                android:id="@+id/sezione_ditta"
-                layout="@layout/sezione_standard" />
-
-            <LinearLayout
-                android:id="@+id/righeDitta"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />

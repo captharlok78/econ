@@ -1,12 +1,10 @@
 package com.ncfsistemi.econ;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -19,9 +17,9 @@ import com.ncfsistemi.econ.utils.PreferenzeDispositivo;
 import com.ncfsistemi.econ.utils.SezioneStandard;
 
 /**
- * Impostazioni (STATO_SISTEMA_APP.md §5): "Preferenze del dispositivo" (salvate solo sul dispositivo, utils.PreferenzeDispositivo)
- * e "Dati della ditta", che per ora apre le voci di prima (Aziende, Codici IVA, Unita' di misura, Manodopera).
- * Ogni preferenza e' una riga: titolo, descrizione e valore attuale; il tocco apre la scelta.
+ * Impostazioni (STATO_SISTEMA_APP.md §5): "Preferenze del dispositivo" (salvate solo sul dispositivo, utils.PreferenzeDispositivo).
+ * I dati della ditta non ci sono: arrivano dal server e si cambiano dal portale.
+ * Ogni preferenza e' una riga: titolo, descrizione e sotto il valore attuale; il tocco apre la scelta.
  */
 public class ImpostazioniActivity extends AppCompatActivity {
 
@@ -34,12 +32,7 @@ public class ImpostazioniActivity extends AppCompatActivity {
         setContentView(R.layout.activity_impostazioni);
         dp = getResources().getDisplayMetrics().density;
         SezioneStandard.imposta(findViewById(R.id.sezione_preferenze), FaIcone.IMPOSTAZIONI, "Preferenze del dispositivo");
-        SezioneStandard.imposta(findViewById(R.id.sezione_ditta), FaIcone.DITTA, "Dati della ditta");
         righePreferenze = findViewById(R.id.righePreferenze);
-        LinearLayout righeDitta = findViewById(R.id.righeDitta);
-        righeDitta.addView(riga("Aziende, codici IVA, unità di misura, manodopera",
-                "Arrivano dal server con la sincronizzazione: si cambiano dal portale",
-                "Apri", x -> startActivity(new Intent(this, ConfigurazioneActivity.class))));
         mostraPreferenze();
     }
 
@@ -81,11 +74,10 @@ public class ImpostazioniActivity extends AppCompatActivity {
         }));
     }
 
-    /** Riga: titolo in grassetto e descrizione a sinistra, valore (blu) a destra; tutta toccabile. */
+    /** Riga: titolo in grassetto, descrizione e sotto il valore (blu), che sugli smartphone in verticale non toglie spazio al testo; tutta toccabile. */
     private View riga(String titolo, String descrizione, String valore, View.OnClickListener azione) {
         LinearLayout r = new LinearLayout(this);
-        r.setOrientation(LinearLayout.HORIZONTAL);
-        r.setGravity(Gravity.CENTER_VERTICAL);
+        r.setOrientation(LinearLayout.VERTICAL);
         r.setMinimumHeight(Math.round(64 * dp));
         r.setPadding(0, Math.round(8 * dp), 0, Math.round(8 * dp));
         TypedValue sfondo = new TypedValue();
@@ -93,9 +85,6 @@ public class ImpostazioniActivity extends AppCompatActivity {
         r.setBackgroundResource(sfondo.resourceId);
         r.setOnClickListener(azione);
 
-        LinearLayout testi = new LinearLayout(this);
-        testi.setOrientation(LinearLayout.VERTICAL);
-        testi.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
         TextView t = new TextView(this);
         t.setText(titolo);
         t.setTextSize(17);
@@ -105,17 +94,16 @@ public class ImpostazioniActivity extends AppCompatActivity {
         d.setText(descrizione);
         d.setTextSize(13);
         d.setTextColor(Color.parseColor("#757575"));
-        testi.addView(t);
-        testi.addView(d);
 
         TextView v = new TextView(this);
         v.setText(valore);
         v.setTextSize(16);
+        v.setTypeface(null, Typeface.BOLD);
         v.setTextColor(Color.parseColor("#1565C0"));
-        v.setGravity(Gravity.END);
-        v.setPadding(Math.round(12 * dp), 0, 0, 0);
+        v.setPadding(0, Math.round(4 * dp), 0, 0);
 
-        r.addView(testi);
+        r.addView(t);
+        r.addView(d);
         r.addView(v);
 
         LinearLayout contenitore = new LinearLayout(this);

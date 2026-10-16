@@ -261,6 +261,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     private boolean redirectingToLogin = false;
     /** Modalità avvio: qualche passo è fallito, quindi non si va al menu da soli (resta il pulsante Continua). */
     private volatile boolean erroreAvvio = false;
+    /** Un errore qualsiasi nell'ultima sincronizzazione: dal menu Sincronizza la pagina resta aperta per farlo vedere. */
+    private volatile boolean erroreSync = false;
 
     // ── Costanti stato ────────────────────────────────────────────────────────
     private static final int STATO_PENDING   = 0;
@@ -525,6 +527,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     // ── Logica di sync ────────────────────────────────────────────────────────
 
     private void eseguiSync() {
+        erroreSync = false;
         try {
             MercuryApiService api = MercuryApiClient.getInstance(this).getService();
             if (MODE_AVVIO.equals(syncMode)) {
@@ -558,7 +561,20 @@ public class SincronizzazioneActivity extends AppCompatActivity {
                     }
                 }
             } else if (!redirectingToLogin) {
-                uiHandler.post(() -> btnSincronizza.setEnabled(true));
+                if (getIntent().getBooleanExtra(EXTRA_AUTOMATICO, false)) {
+                    if (erroreSync) {
+                        // resta aperta: righe con ✗ (toccandole si vede il dettaglio) e pulsante per riprovare
+                        setStatus("Finito con errori: tocca ✗ sulle righe per il dettaglio", true);
+                        mostraContinua();
+                    } else {
+                        // dal menu Sincronizza: tutto bene, si torna da soli alla pagina di partenza
+                        uiHandler.postDelayed(() -> {
+                            if (!isFinishing() && !isDestroyed()) finish();
+                        }, 1200);
+                    }
+                } else {
+                    uiHandler.post(() -> btnSincronizza.setEnabled(true));
+                }
             }
         }
     }
@@ -1187,6 +1203,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
 
     private void aggiornaRiga(RigaTabella riga, int stato, int applicati, boolean isUpload) {
         if (riga == null) return;
+        if (stato == STATO_ERRORE) erroreSync = true;
         int coloreBarra = isUpload ? COLOR_UPLOAD : Color.parseColor("#1565C0");
         uiHandler.post(() -> {
             switch (stato) {
@@ -1294,8 +1311,9 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     }
 
     private void setStatus(String msg, boolean isError) {
-        if (isError && MODE_AVVIO.equals(syncMode)) {
-            erroreAvvio = true;
+        if (isError) {
+            erroreSync = true;
+            if (MODE_AVVIO.equals(syncMode)) erroreAvvio = true;
         }
         uiHandler.post(() -> {
             textSyncStatus.setText(msg);

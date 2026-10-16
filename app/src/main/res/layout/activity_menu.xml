@@ -146,6 +146,18 @@
             android:layout_height="1dp"
             android:layout_weight="1" />
 
+        <!-- ultimo download e ultimo upload riusciti (UltimeSync), in piccolo su due righe -->
+        <TextView
+            android:id="@+id/textUltimeSync"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:gravity="end"
+            android:lineSpacingMultiplier="0.95"
+            android:maxLines="2"
+            android:textColor="#CCFFFFFF"
+            android:textSize="10sp" />
+
         <View
             android:layout_width="1dp"
             android:layout_height="20dp"

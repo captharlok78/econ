@@ -5,6 +5,7 @@
     generale.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F5F5F5"
@@ -77,21 +78,29 @@
                 android:foreground="?android:attr/selectableItemBackground"
                 android:gravity="center"
                 android:onClick="scarica"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="12dp">
 
                 <TextView
                     android:id="@+id/iconaScarica"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
+                <!-- smartphone in verticale: va su due righe centrate e il carattere si riduce se serve -->
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
                     android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    android:maxLines="2"
                     android:text="Scarica da server"
+                    android:textAlignment="center"
                     android:textColor="#FFFFFF"
                     android:textSize="22sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    app:autoSizeMaxTextSize="22sp"
+                    app:autoSizeMinTextSize="14sp"
+                    app:autoSizeTextType="uniform" />
             </LinearLayout>
         </LinearLayout>
 
@@ -125,21 +134,29 @@
                 android:foreground="?android:attr/selectableItemBackground"
                 android:gravity="center"
                 android:onClick="carica"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="12dp">
 
                 <TextView
                     android:id="@+id/iconaCarica"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
+                <!-- smartphone in verticale: va su due righe centrate e il carattere si riduce se serve -->
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
                     android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    android:maxLines="2"
                     android:text="Carica su server"
+                    android:textAlignment="center"
                     android:textColor="#FFFFFF"
                     android:textSize="22sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    app:autoSizeMaxTextSize="22sp"
+                    app:autoSizeMinTextSize="14sp"
+                    app:autoSizeTextType="uniform" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

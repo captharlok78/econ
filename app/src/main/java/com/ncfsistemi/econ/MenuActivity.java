@@ -297,6 +297,7 @@ public class MenuActivity extends EconActivity {
         super.onResume();
 
         aggiornaOggi();
+        ((TextView) findViewById(R.id.textUltimeSync)).setText(com.ncfsistemi.econ.utils.UltimeSync.riepilogoBreve(this));
         verificaConnessioneServer();
         // pacchetti cambiati nel pannello: il menu si aggiorna subito (al massimo ogni 30 secondi, in background)
         com.ncfsistemi.econ.utils.PermessiServer.aggiorna(this, this::costruisciGriglia);
