@@ -9,21 +9,32 @@
 #   git config mercury.version-url   "http://<host-mercury>:8000"
 #   git config mercury.version-token "<token da .env.local VERSION_REGISTER_TOKEN>"
 #
-# Se url/token non sono configurati non fa nulla: non blocca mai il commit.
+# Se il server di sviluppo non risponde (spento) si usa la console del repo server accanto
+# (../server/econ, o git config mercury.server-dir): app:rilascio:registra app --commit=...
+# Se nessuna delle due strade funziona lo dice, ma non blocca mai il commit.
 
 URL=$(git config --get mercury.version-url)
 TOKEN=$(git config --get mercury.version-token)
-
-if [ -z "$URL" ] || [ -z "$TOKEN" ]; then
-    exit 0
-fi
-
 COMMIT=$(git rev-parse HEAD)
 
-curl -s -X POST "$URL/api/version/app/registra" \
-    -H "Content-Type: application/json" \
-    -H "X-Version-Token: $TOKEN" \
-    -d "{\"commit\":\"$COMMIT\"}" \
-    | sed 's/^/[versione] /'
+if [ -n "$URL" ] && [ -n "$TOKEN" ]; then
+    RISPOSTA=$(curl -s -f -m 10 -X POST "$URL/api/version/app/registra" \
+        -H "Content-Type: application/json" \
+        -H "X-Version-Token: $TOKEN" \
+        -d "{\"commit\":\"$COMMIT\"}")
+    if [ $? -eq 0 ] && [ -n "$RISPOSTA" ]; then
+        echo "[versione] $RISPOSTA"
+        exit 0
+    fi
+fi
+
+SERVER=$(git config --get mercury.server-dir)
+[ -z "$SERVER" ] && SERVER="$(git rev-parse --show-toplevel)/../server/econ"
+if [ -f "$SERVER/bin/console" ]; then
+    php "$SERVER/bin/console" app:rilascio:registra app --commit="$COMMIT" 2>&1 \
+        | grep -v 'Module "xml" is already loaded' | sed 's/^/[versione] /'
+else
+    echo "[versione] NON registrata: server di sviluppo spento e console non trovata in $SERVER"
+fi
 
 exit 0
