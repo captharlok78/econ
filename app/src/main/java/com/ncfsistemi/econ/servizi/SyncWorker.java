@@ -174,6 +174,13 @@ public class SyncWorker extends Worker {
                 Log.w(TAG, "Allineamento catalogo fallito: " + e.getMessage());
             }
 
+            // 1d. Giustificativi della persona (invio delle richieste ed esiti). Un errore qui non ferma la sync.
+            try {
+                com.ncfsistemi.econ.utils.GiustificativiLocali.allinea(ctx, api);
+            } catch (Exception e) {
+                Log.w(TAG, "Allineamento giustificativi fallito: " + e.getMessage());
+            }
+
             // 2. Scarica record eliminati
             Response<MercuryApiService.DeletedResponse> delResp =
                     api.getDeleted(since).execute();

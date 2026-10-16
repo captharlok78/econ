@@ -51,6 +51,17 @@ public interface MercuryApiService {
     @GET("api/mobile/catalogo")
     Call<CatalogoResponse> getCatalogo(@Query("firma") String firma, @Query("since") String since);
 
+    /**
+     * Giustificativi della persona (STUDIO_GIUSTIFICATIVI_APP.md): tipologie attive, i suoi giustificativi dagli ultimi
+     * 60 giorni e le ore della ditta per giorno della settimana (vedi utils.GiustificativiLocali).
+     */
+    @GET("api/mobile/giustificativi")
+    Call<com.google.gson.JsonObject> getGiustificativi();
+
+    /** Invio delle richieste: { nuovi, modificati, eliminati }; risponde con gli esiti e lo stato come la GET. */
+    @POST("api/mobile/giustificativi")
+    Call<com.google.gson.JsonObject> inviaGiustificativi(@Body com.google.gson.JsonObject richieste);
+
     /** File del logo della ditta (404 se non presente). Da scaricare solo se il nome file e' cambiato. */
     @Streaming
     @GET("api/mobile/ditta/logo")

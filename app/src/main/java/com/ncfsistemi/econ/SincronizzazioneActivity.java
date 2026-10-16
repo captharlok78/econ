@@ -137,6 +137,9 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         return out;
     }
 
+    /** Riga dei giustificativi (non e' una tabella della sync generale). */
+    private static final String RIGA_GIUSTIFICATIVI = "giustificativi";
+
     // ── Tabelle UPLOAD (app → Mercury): solo quelle con in_server e PK ────────
     private static final String[][] TABELLE_UPLOAD = {
         // Catalogo per primo (GESTIONE_RAPPORTINI.md §14): le righe dei rapportini possono usare un articolo appena creato.
@@ -643,6 +646,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
 
         sincronizzaDitta(api);
         allineaCatalogo(api);
+        allineaGiustificativi(api);
 
         setStatus("Eliminazioni...", false);
         try {
@@ -697,6 +701,36 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             Log.w(TAG, "Allineamento catalogo", e);
             if (riga != null) riga.errorMsg = e.getMessage();
             aggiornaRiga(riga, STATO_ERRORE, 0, false);
+        }
+    }
+
+    /**
+     * Giustificativi della persona (STUDIO_GIUSTIFICATIVI_APP.md): invia quelli chiesti dal calendario e riprende stato ed
+     * esiti dal server. Un server che non li conosce ancora (404) o una licenza senza (403) non sono errori.
+     */
+    private void allineaGiustificativi(MercuryApiService api) {
+        RigaTabella riga = righe.get(RIGA_GIUSTIFICATIVI);
+        if (riga == null) return;
+        setStatus("Giustificativi...", false);
+        aggiornaRiga(riga, STATO_IN_CORSO, 0, false);
+        try {
+            java.util.List<String> avvisi = com.ncfsistemi.econ.utils.GiustificativiLocali.allinea(this, api);
+            if (!avvisi.isEmpty()) {
+                riga.errorMsg = String.join("\n", avvisi);
+                riga.errori = avvisi.size();
+                aggiornaRiga(riga, STATO_ERRORE, 0, false);
+            } else {
+                aggiornaRiga(riga, STATO_FATTO, 0, false);
+            }
+        } catch (Exception e) {
+            String m = String.valueOf(e.getMessage());
+            if (m.startsWith("HTTP 404") || m.startsWith("HTTP 403")) {
+                aggiornaRiga(riga, STATO_SALTO, 0, false);
+            } else {
+                Log.w(TAG, "Allineamento giustificativi", e);
+                riga.errorMsg = m;
+                aggiornaRiga(riga, STATO_ERRORE, 0, false);
+            }
         }
     }
 
@@ -1162,6 +1196,10 @@ public class SincronizzazioneActivity extends AppCompatActivity {
                 RigaTabella r = creaRiga(inflater, entry[0], entry[1]);
                 righe.put(entry[0], r);
             }
+        }
+        // giustificativi: fuori dalla sync generale (GiustificativiLocali), riga in fondo, non contata tra le tabelle
+        if (com.ncfsistemi.econ.utils.GiustificativiLocali.attivo(this)) {
+            righe.put(RIGA_GIUSTIFICATIVI, creaRiga(inflater, RIGA_GIUSTIFICATIVI, "Giustificativi (ferie, permessi…)"));
         }
     }
 

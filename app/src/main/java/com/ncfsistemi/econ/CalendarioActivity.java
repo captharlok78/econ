@@ -11,11 +11,17 @@ import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
 import com.ncfsistemi.econ.db.DbInterno;
 import com.ncfsistemi.econ.db.table.Rapportini;
@@ -23,18 +29,24 @@ import com.ncfsistemi.econ.db.table.StatiDocumento;
 import com.ncfsistemi.econ.utils.CalendarioPersonale;
 import com.ncfsistemi.econ.utils.FaIcone;
 import com.ncfsistemi.econ.utils.FunzionalitaApp;
+import com.ncfsistemi.econ.utils.GiustificativiLocali;
 import com.ncfsistemi.econ.utils.RegoleRapportino;
 
 import java.text.DateFormatSymbols;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Calendario personale (CALENDARIO_PERSONALE.md): settimana (predefinita) o mese con le ore dell'utente nei rapportini
  * (lavoro e viaggio, per rapportino, con il colore dello stato) e, se la ditta usa la pianificazione, i suoi cantieri
  * pianificati. Il tocco su un giorno apre il dettaglio: ore, pianificazione, rapportini aperti in cui aggiungere le ore
  * (suoi o della sua squadra, secondo le regole della scheda del rapportino) e un nuovo rapportino con quella data.
+ * Con la funzionalita' CALENDARIO.GIUSTIFICATIVI anche i giustificativi della persona (STUDIO_GIUSTIFICATIVI_APP.md):
+ * si chiedono da qui (un giorno o un periodo), partono da soli verso il server e tornano con l'esito dell'approvazione.
  * Tutto dai dati del tablet.
  */
 public class CalendarioActivity extends AppCompatActivity {
@@ -52,6 +64,9 @@ public class CalendarioActivity extends AppCompatActivity {
     private RegoleRapportino.Utente utente;
     private final Locale it = Locale.ITALY;
     private final String[] nomiMesi = new DateFormatSymbols(Locale.ITALY).getMonths();
+    /** Giustificativi del periodo disegnato, per giorno (yyyyMMdd). */
+    private Map<Long, List<GiustificativiLocali.Voce>> giust = new HashMap<>();
+    private boolean giustAttivi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +81,16 @@ public class CalendarioActivity extends AppCompatActivity {
             mese = savedInstanceState.getBoolean(STATO_VISTA, false);
             riferimento = savedInstanceState.getLong(STATO_GIORNO, riferimento);
         }
+        // invio dei giustificativi finito (anche partito da qui): si ridisegna con gli esiti
+        WorkManager.getInstance(this).getWorkInfosForUniqueWorkLiveData(GiustificativiLocali.LAVORO).observe(this, infos -> {
+            for (WorkInfo i : infos) {
+                if (i.getState() == WorkInfo.State.SUCCEEDED && utente != null && !isFinishing()) {
+                    disegna();
+                    mostraAvvisi();
+                    return;
+                }
+            }
+        });
     }
 
     @Override
@@ -78,7 +103,13 @@ public class CalendarioActivity extends AppCompatActivity {
         } finally {
             db.close();
         }
+        giustAttivi = GiustificativiLocali.attivo(this);
         disegna();
+        if (giustAttivi) {
+            mostraAvvisi();
+            // invia quelli in sospeso e riprende gli esiti delle approvazioni
+            GiustificativiLocali.inviaInBackground(this);
+        }
     }
 
     @Override
@@ -144,6 +175,8 @@ public class CalendarioActivity extends AppCompatActivity {
             return;
         }
 
+        if (giustAttivi) contenuto.addView(pulsanteGiustificativo());
+
         long dal, al;
         Calendar c = CalendarioPersonale.calendario(riferimento);
         if (mese) {
@@ -168,6 +201,7 @@ public class CalendarioActivity extends AppCompatActivity {
     }
 
     private List<CalendarioPersonale.Giorno> carica(long dal, long al) {
+        giust = giustAttivi ? GiustificativiLocali.periodo(this, dal, al) : new HashMap<>();
         DbInterno db = new DbInterno(this);
         try {
             return CalendarioPersonale.periodo(db, this, utente, dal, al);
@@ -187,6 +221,12 @@ public class CalendarioActivity extends AppCompatActivity {
         String testo = lavoro == 0 && viaggio == 0 ? "Nessuna ora nei rapportini"
                 : "Lavoro " + CalendarioPersonale.ore(lavoro) + (viaggio > 0 ? " · viaggio " + CalendarioPersonale.ore(viaggio) : "")
                 + " · " + giorniLavorati + (giorniLavorati == 1 ? " giorno" : " giorni");
+        int minutiGiust = 0;
+        for (Map.Entry<Long, List<GiustificativiLocali.Voce>> e : giust.entrySet()) {
+            if (e.getKey() < dal || e.getKey() > al) continue;
+            for (GiustificativiLocali.Voce v : e.getValue()) if (!v.isRifiutato() && !v.nonAccettato) minutiGiust += minuti(v.ore);
+        }
+        if (minutiGiust > 0) testo += " · giustificativi " + CalendarioPersonale.ore(minutiGiust);
         ((TextView) findViewById(R.id.periodoTotali)).setText(testo);
     }
 
@@ -243,7 +283,11 @@ public class CalendarioActivity extends AppCompatActivity {
         for (ContentValues p : g.pianificazione) {
             cella.addView(pianificato(p));
         }
-        if (g.voci.isEmpty() && g.pianificazione.isEmpty()) {
+        List<GiustificativiLocali.Voce> delGiorno = giustDi(g.giorno);
+        for (GiustificativiLocali.Voce v : delGiorno) {
+            cella.addView(giustificativo(v, colonna));
+        }
+        if (g.voci.isEmpty() && g.pianificazione.isEmpty() && delGiorno.isEmpty()) {
             TextView vuoto = testo("—", 13, 0xFFBDBDBD, false);
             vuoto.setPadding(0, dp(6), 0, 0);
             cella.addView(vuoto);
@@ -350,12 +394,23 @@ public class CalendarioActivity extends AppCompatActivity {
                 p.setGravity(Gravity.START);
                 cella.addView(p);
             }
+            List<GiustificativiLocali.Voce> giustMese = giustDi(g.giorno);
+            if (!giustMese.isEmpty()) {
+                LinearLayout icone = new LinearLayout(this);
+                for (GiustificativiLocali.Voce v : giustMese) {
+                    TextView ic = iconaGiustificativo(v, 11);
+                    ic.setPadding(0, 0, dp(3), 0);
+                    if (!delMese) ic.setAlpha(0.4f);
+                    icone.addView(ic);
+                }
+                cella.addView(icone);
+            }
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
             lp.setMargins(dp(2), dp(2), dp(2), dp(2));
             riga.addView(cella, lp);
         }
-        contenuto.addView(nota(utente.pianificazione ? "Ore di lavoro in blu, viaggio in grigio; l'icona verde segna i giorni pianificati. Tocca un giorno per i dettagli."
-                : "Ore di lavoro in blu, viaggio in grigio. Tocca un giorno per i dettagli."));
+        contenuto.addView(nota((utente.pianificazione ? "Ore di lavoro in blu, viaggio in grigio; l'icona verde segna i giorni pianificati."
+                : "Ore di lavoro in blu, viaggio in grigio.") + (giustAttivi ? " Le icone colorate sono i giustificativi." : "") + " Tocca un giorno per i dettagli."));
     }
 
     // ── dettaglio del giorno ─────────────────────────────────────────────────
@@ -393,6 +448,27 @@ public class CalendarioActivity extends AppCompatActivity {
             corpo.addView(sezione(FaIcone.PIANIFICATO, "La tua pianificazione"));
             if (g.pianificazione.isEmpty()) corpo.addView(nota("Nessun cantiere pianificato."));
             for (ContentValues p : g.pianificazione) corpo.addView(pianificato(p));
+        }
+
+        if (giustAttivi) {
+            corpo.addView(sezione(FaIcone.GIUSTIFICATIVO, "Giustificativi"));
+            List<GiustificativiLocali.Voce> delGiorno = giustDi(giorno);
+            if (delGiorno.isEmpty()) corpo.addView(nota("Nessun giustificativo in questo giorno."));
+            for (GiustificativiLocali.Voce v : delGiorno) {
+                View r = giustificativo(v, false);
+                r.setOnClickListener(x -> {
+                    dialogo[0].dismiss();
+                    apriGiustificativo(v);
+                });
+                corpo.addView(r);
+            }
+            TextView chiedi = testo("+ Chiedi un giustificativo per questo giorno", 14, BLU, true);
+            chiedi.setPadding(dp(4), dp(10), dp(4), dp(6));
+            chiedi.setOnClickListener(x -> {
+                dialogo[0].dismiss();
+                nuovoGiustificativo(giorno);
+            });
+            corpo.addView(chiedi);
         }
 
         corpo.addView(sezione(FaIcone.PIU, "Aggiungi le ore a un rapportino"));
@@ -454,6 +530,311 @@ public class CalendarioActivity extends AppCompatActivity {
         // data del rapportino nuovo (RapportinoDettaglioModActivity.EXTRA_DATA), alle 8 del giorno scelto
         intent.putExtra(RapportinoDettaglioModActivity.EXTRA_DATA, giorno * 1000000L + 80000L);
         startActivity(intent);
+    }
+
+    // ── giustificativi ───────────────────────────────────────────────────────
+
+    private List<GiustificativiLocali.Voce> giustDi(long giorno) {
+        List<GiustificativiLocali.Voce> l = giust.get(giorno);
+        return l != null ? l : new ArrayList<>();
+    }
+
+    private static int minuti(double ore) {
+        return (int) Math.round(ore * 60);
+    }
+
+    /** Pulsante in cima: un giustificativo da oggi (o dal primo giorno del periodo se oggi non c'e'). */
+    private View pulsanteGiustificativo() {
+        TextView b = testo("+ Chiedi un giustificativo (ferie, permessi…)", 14, BLU, true);
+        b.setGravity(Gravity.CENTER);
+        b.setPadding(dp(12), dp(10), dp(12), dp(10));
+        b.setBackground(sfondo(Color.WHITE, 0xFFBBDEFB, 8));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, 0, 0, dp(6));
+        b.setLayoutParams(lp);
+        b.setOnClickListener(v -> nuovoGiustificativo(CalendarioPersonale.oggi()));
+        return b;
+    }
+
+    private TextView iconaGiustificativo(GiustificativiLocali.Voce v, int sp) {
+        TextView ic = new TextView(this);
+        FaIcone.applica(ic, FaIcone.daNome(this, v.tipologia.icona), v.tipologia.descrizione);
+        ic.setTextSize(TypedValue.COMPLEX_UNIT_SP, sp);
+        ic.setTextColor(coloreTipologia(v.tipologia));
+        if (v.isRifiutato() || v.nonAccettato) ic.setAlpha(0.35f);
+        else if (!v.isApprovato()) ic.setAlpha(0.6f);
+        return ic;
+    }
+
+    private int coloreTipologia(GiustificativiLocali.Tipologia t) {
+        try {
+            return t.colore != null && !t.colore.isEmpty() ? Color.parseColor(t.colore) : BLU;
+        } catch (IllegalArgumentException e) {
+            return BLU;
+        }
+    }
+
+    /** Riga di un giustificativo: icona e tipologia, ore e pastiglia dello stato; il tocco la apre. */
+    private View giustificativo(GiustificativiLocali.Voce v, boolean stretta) {
+        LinearLayout riga = new LinearLayout(this);
+        riga.setOrientation(LinearLayout.HORIZONTAL);
+        riga.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams lpr = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lpr.setMargins(0, dp(6), 0, 0);
+        riga.setLayoutParams(lpr);
+        riga.setBackground(sfondo(0xFFFFF8E1, 0, 6));
+        riga.setPadding(dp(6), dp(4), dp(6), dp(4));
+        riga.setOnClickListener(x -> apriGiustificativo(v));
+        riga.setGravity(Gravity.TOP);
+        TextView ic = iconaGiustificativo(v, 13);
+        ic.setPadding(0, dp(2), 0, 0);
+        riga.addView(ic, new LinearLayout.LayoutParams(dp(20), LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        LinearLayout testi = new LinearLayout(this);
+        testi.setOrientation(LinearLayout.VERTICAL);
+        TextView nome = testo(v.tipologia.descrizione, 13, TESTO, true);
+        nome.setMaxLines(stretta ? 2 : 1);
+        nome.setEllipsize(TextUtils.TruncateAt.END);
+        testi.addView(nome);
+        String det = CalendarioPersonale.ore(minuti(v.ore));
+        if (!stretta && !v.note.isEmpty()) det += " · " + v.note;
+        TextView dettaglio = testo(det, 12, GRIGIO, false);
+        dettaglio.setMaxLines(1);
+        dettaglio.setEllipsize(TextUtils.TruncateAt.END);
+        testi.addView(dettaglio);
+        TextView stato = testo(v.etichettaStato(), 11, Color.WHITE, true);
+        stato.setBackground(sfondo(v.coloreStato(), 0, 8));
+        stato.setPadding(dp(6), dp(1), dp(6), dp(1));
+        LinearLayout.LayoutParams lps = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lps.setMargins(0, dp(2), 0, 0);
+        testi.addView(stato, lps);
+        riga.addView(testi, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+        return riga;
+    }
+
+    /** Avvisi del server (es. modifica non accettata perché già approvata). */
+    private void mostraAvvisi() {
+        String avvisi = GiustificativiLocali.prendiAvvisi(this);
+        if (avvisi.isEmpty()) return;
+        new AlertDialog.Builder(this).setTitle("Giustificativi").setMessage(avvisi).setPositiveButton("OK", null).show();
+    }
+
+    /** Nuova richiesta: tipologia, dal / al, ore al giorno (vuoto = orario della ditta), note. */
+    private void nuovoGiustificativo(long giorno) {
+        List<GiustificativiLocali.Tipologia> tipi = GiustificativiLocali.tipologie(this);
+        if (tipi.isEmpty()) {
+            new AlertDialog.Builder(this).setTitle("Giustificativi")
+                    .setMessage("Le tipologie (ferie, permessi…) non sono ancora sul dispositivo: fai una sincronizzazione con la rete attiva.")
+                    .setPositiveButton("OK", null).show();
+            return;
+        }
+        long[] periodo = {giorno, giorno};
+        LinearLayout corpo = moduloCorpo();
+        Spinner tipologia = spinnerTipologie(tipi, 0);
+        corpo.addView(etichetta("Tipologia"));
+        corpo.addView(tipologia);
+
+        TextView dal = campoData(), al = campoData();
+        Runnable aggiornaDate = () -> {
+            dal.setText(dataLeggibile(periodo[0]));
+            al.setText(dataLeggibile(periodo[1]));
+        };
+        aggiornaDate.run();
+        dal.setOnClickListener(x -> scegliData(periodo[0], g -> {
+            periodo[0] = g;
+            if (periodo[1] < g) periodo[1] = g;
+            aggiornaDate.run();
+        }));
+        al.setOnClickListener(x -> scegliData(periodo[1], g -> {
+            periodo[1] = g;
+            if (periodo[0] > g) periodo[0] = g;
+            aggiornaDate.run();
+        }));
+        LinearLayout date = new LinearLayout(this);
+        LinearLayout colDal = new LinearLayout(this), colAl = new LinearLayout(this);
+        colDal.setOrientation(LinearLayout.VERTICAL);
+        colAl.setOrientation(LinearLayout.VERTICAL);
+        colDal.addView(etichetta("Dal"));
+        colDal.addView(dal);
+        colAl.addView(etichetta("Al"));
+        colAl.addView(al);
+        LinearLayout.LayoutParams metà = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+        metà.setMargins(0, 0, dp(8), 0);
+        date.addView(colDal, metà);
+        date.addView(colAl, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+        corpo.addView(date);
+
+        EditText ore = campoOre(null);
+        ore.setHint("come l'orario della ditta");
+        corpo.addView(etichetta("Ore al giorno"));
+        corpo.addView(ore);
+        EditText note = campoNote("");
+        corpo.addView(etichetta("Note"));
+        corpo.addView(note);
+        corpo.addView(nota("Più giorni: se ne crea uno per ogni giorno lavorativo. La richiesta parte da sola appena c'è rete; il coordinatore o l'amministratore la approva dal portale."));
+
+        AlertDialog d = new AlertDialog.Builder(this)
+                .setTitle("Chiedi un giustificativo")
+                .setView(scorri(corpo))
+                .setPositiveButton("Chiedi", null)
+                .setNegativeButton("Annulla", null)
+                .show();
+        d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(x -> {
+            try {
+                Double h = ore.getText().toString().trim().isEmpty() ? null : numero(ore);
+                int n = GiustificativiLocali.richiedi(this, ((GiustificativiLocali.Tipologia) tipologia.getSelectedItem()).id,
+                        periodo[0], periodo[1], h, note.getText().toString());
+                d.dismiss();
+                Toast.makeText(this, (n == 1 ? "Richiesta salvata" : "Richiesta salvata: " + n + " giorni") + ", parte appena c'è rete.", Toast.LENGTH_LONG).show();
+                riferimento = periodo[0];
+                disegna();
+            } catch (IllegalArgumentException e) {
+                Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    /** Un giustificativo: in attesa o da inviare si cambia o si toglie; deciso si consulta (il rifiutato si toglie). */
+    private void apriGiustificativo(GiustificativiLocali.Voce v) {
+        LinearLayout corpo = moduloCorpo();
+        StringBuilder info = new StringBuilder(maiuscola(nomeGiornoEsteso(v.giorno))).append("\nStato: ").append(v.etichettaStato());
+        if (v.isApprovato() && !v.approvatoDa.isEmpty()) info.append(" da ").append(v.approvatoDa);
+        if (v.isRifiutato()) {
+            info.append(v.approvatoDa.isEmpty() ? "" : " da " + v.approvatoDa);
+            if (!v.motivoRifiuto.isEmpty()) info.append("\nMotivo: ").append(v.motivoRifiuto);
+        }
+        if (v.nonAccettato && !v.errore.isEmpty()) info.append("\n").append(v.errore);
+        TextView t = testo(info.toString(), 14, TESTO, false);
+        t.setPadding(0, 0, 0, dp(8));
+        corpo.addView(t);
+
+        AlertDialog.Builder b = new AlertDialog.Builder(this).setTitle(v.tipologia.descrizione).setNegativeButton("Chiudi", null);
+        if (!v.modificabile()) {
+            corpo.addView(testo(CalendarioPersonale.ore(minuti(v.ore)) + (v.note.isEmpty() ? "" : " · " + v.note), 14, GRIGIO, false));
+            if (v.eliminabile()) b.setNeutralButton("Togli", (d, w) -> togliGiustificativo(v));
+            b.setView(scorri(corpo)).show();
+            return;
+        }
+        List<GiustificativiLocali.Tipologia> tipi = GiustificativiLocali.tipologie(this);
+        int scelta = 0;
+        for (int i = 0; i < tipi.size(); i++) if (tipi.get(i).id == v.idTipologia) scelta = i;
+        Spinner tipologia = spinnerTipologie(tipi, scelta);
+        corpo.addView(etichetta("Tipologia"));
+        corpo.addView(tipologia);
+        EditText ore = campoOre(v.ore);
+        corpo.addView(etichetta("Ore"));
+        corpo.addView(ore);
+        EditText note = campoNote(v.note);
+        corpo.addView(etichetta("Note"));
+        corpo.addView(note);
+        AlertDialog d = b.setView(scorri(corpo))
+                .setPositiveButton("Salva", null)
+                .setNeutralButton("Togli", (x, w) -> togliGiustificativo(v))
+                .show();
+        d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(x -> {
+            try {
+                Double h = numero(ore);
+                if (h == null || tipi.isEmpty()) throw new IllegalArgumentException("Indica le ore.");
+                GiustificativiLocali.modifica(this, v.id, ((GiustificativiLocali.Tipologia) tipologia.getSelectedItem()).id, h, note.getText().toString());
+                d.dismiss();
+                disegna();
+            } catch (IllegalArgumentException e) {
+                Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void togliGiustificativo(GiustificativiLocali.Voce v) {
+        new AlertDialog.Builder(this)
+                .setTitle("Togli il giustificativo")
+                .setMessage(v.tipologia.descrizione + " di " + nomeGiornoEsteso(v.giorno) + "?")
+                .setPositiveButton("Togli", (d, w) -> {
+                    GiustificativiLocali.elimina(this, v.id);
+                    disegna();
+                })
+                .setNegativeButton("Annulla", null)
+                .show();
+    }
+
+    private LinearLayout moduloCorpo() {
+        LinearLayout corpo = new LinearLayout(this);
+        corpo.setOrientation(LinearLayout.VERTICAL);
+        corpo.setPadding(dp(20), dp(8), dp(20), dp(4));
+        return corpo;
+    }
+
+    private ScrollView scorri(View v) {
+        ScrollView s = new ScrollView(this);
+        s.addView(v);
+        return s;
+    }
+
+    private TextView etichetta(String t) {
+        TextView tv = testo(t, 12, GRIGIO, true);
+        tv.setPadding(0, dp(10), 0, dp(2));
+        return tv;
+    }
+
+    private Spinner spinnerTipologie(List<GiustificativiLocali.Tipologia> tipi, int scelta) {
+        Spinner sp = new Spinner(this);
+        ArrayAdapter<GiustificativiLocali.Tipologia> a = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, tipi);
+        a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sp.setAdapter(a);
+        if (scelta < tipi.size()) sp.setSelection(scelta);
+        return sp;
+    }
+
+    private TextView campoData() {
+        TextView tv = testo("", 15, TESTO, false);
+        tv.setBackgroundResource(R.drawable.bg_input_outline);
+        tv.setPadding(dp(10), dp(10), dp(10), dp(10));
+        return tv;
+    }
+
+    private EditText campoOre(Double valore) {
+        EditText e = new EditText(this);
+        e.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        e.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789.,"));
+        if (valore != null) e.setText(numeroLeggibile(valore));
+        return e;
+    }
+
+    private EditText campoNote(String valore) {
+        EditText e = new EditText(this);
+        e.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        e.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(255)});
+        e.setText(valore);
+        return e;
+    }
+
+    private interface SceltaGiorno {
+        void scelto(long giorno);
+    }
+
+    private void scegliData(long giorno, SceltaGiorno dopo) {
+        int g = (int) giorno;
+        new android.app.DatePickerDialog(this, (view, anno, mese0, giornoMese) -> dopo.scelto(anno * 10000L + (mese0 + 1) * 100L + giornoMese),
+                g / 10000, (g / 100) % 100 - 1, g % 100).show();
+    }
+
+    private static Double numero(EditText e) {
+        String t = e.getText().toString().trim().replace(',', '.');
+        if (t.isEmpty()) return null;
+        try {
+            return Double.parseDouble(t);
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException("Ore non valide.");
+        }
+    }
+
+    private static String numeroLeggibile(double v) {
+        return v == Math.rint(v) ? String.valueOf((long) v) : String.valueOf(v).replace('.', ',');
+    }
+
+    private String dataLeggibile(long giorno) {
+        Calendar c = CalendarioPersonale.calendario(giorno);
+        String n = new DateFormatSymbols(it).getShortWeekdays()[c.get(Calendar.DAY_OF_WEEK)].replace(".", "");
+        return maiuscola(n) + " " + String.format(Locale.ITALY, "%02d/%02d/%04d", giorno % 100, giorno / 100 % 100, giorno / 10000);
     }
 
     // ── piccoli componenti ───────────────────────────────────────────────────

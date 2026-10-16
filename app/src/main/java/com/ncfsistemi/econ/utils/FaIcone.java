@@ -62,6 +62,10 @@ public final class FaIcone {
 	public static final String PIANIFICATO = "\uf274"; // calendar-check: pianificazione
 	public static final String INDIETRO = "\uf053";    // chevron-left
 	public static final String AVANTI = "\uf054";      // chevron-right
+	public static final String GIUSTIFICATIVO = "\uf573"; // file-signature: giustificativo (ferie, permessi…) senza icona nota
+
+	/** Nome Font Awesome → glifo (assets/fa_solid_nomi.txt), per le icone che arrivano dal server come classe ("fa-…"). */
+	private static java.util.Map<String, String> perNome;
 
 	private static Typeface typeface;
 
@@ -90,6 +94,36 @@ public final class FaIcone {
 		ctx.getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, sfondo, true);
 		tv.setBackgroundResource(sfondo.resourceId);
 		return tv;
+	}
+
+	/**
+	 * Glifo di una classe Font Awesome del portale ("fa-umbrella-beach", "fa fa-broom"…), anche con i nomi di FA6 piu'
+	 * comuni; GIUSTIFICATIVO se il nome non c'e' nel font dell'app.
+	 */
+	public static String daNome(Context ctx, String classe) {
+		synchronized (FaIcone.class) {
+			if (perNome == null) {
+				perNome = new java.util.HashMap<>();
+				try (java.io.BufferedReader r = new java.io.BufferedReader(new java.io.InputStreamReader(
+						ctx.getApplicationContext().getAssets().open("fa_solid_nomi.txt"), java.nio.charset.StandardCharsets.UTF_8))) {
+					String riga;
+					while ((riga = r.readLine()) != null) {
+						int uguale = riga.indexOf('=');
+						if (riga.startsWith("#") || uguale <= 0) continue;
+						perNome.put(riga.substring(0, uguale), new String(Character.toChars(Integer.parseInt(riga.substring(uguale + 1).trim(), 16))));
+					}
+				} catch (Exception e) {
+					android.util.Log.w("FaIcone", "Nomi delle icone non letti: " + e.getMessage());
+				}
+			}
+		}
+		if (classe == null) return GIUSTIFICATIVO;
+		for (String parte : classe.trim().split("\\s+")) {
+			String nome = parte.startsWith("fa-") ? parte.substring(3) : parte;
+			String glifo = perNome.get(nome);
+			if (glifo != null) return glifo;
+		}
+		return GIUSTIFICATIVO;
 	}
 
 	/** Trasforma la TextView in un'icona: glifo, font, colore di default, centrata; tooltip se non nullo. */
