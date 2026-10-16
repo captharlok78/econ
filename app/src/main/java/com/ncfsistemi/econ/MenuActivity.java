@@ -873,6 +873,10 @@ public class MenuActivity extends EconActivity {
         layout.addView(etAttuale);
         layout.addView(etNuova);
         layout.addView(etConferma);
+        // occhio per vedere quello che si scrive, come nel login
+        com.ncfsistemi.econ.utils.OcchioPassword.aggiungi(etAttuale);
+        com.ncfsistemi.econ.utils.OcchioPassword.aggiungi(etNuova);
+        com.ncfsistemi.econ.utils.OcchioPassword.aggiungi(etConferma);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Cambia password")

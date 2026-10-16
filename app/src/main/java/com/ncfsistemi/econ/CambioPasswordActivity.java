@@ -14,6 +14,7 @@ import com.ncfsistemi.econ.api.MercuryApiService;
 import com.ncfsistemi.econ.api.TokenManager;
 import com.ncfsistemi.econ.utils.AccessoMercury;
 import com.ncfsistemi.econ.utils.CambioPassword;
+import com.ncfsistemi.econ.utils.OcchioPassword;
 import com.ncfsistemi.econ.utils.Utility;
 
 /**
@@ -33,6 +34,10 @@ public class CambioPasswordActivity extends AppCompatActivity {
         EditText etConferma = findViewById(R.id.etPasswordConferma);
         Button btnConferma = findViewById(R.id.btnCambiaPassword);
         TextView tvEmail = findViewById(R.id.tvCambioPasswordEmail);
+        // occhio per vedere quello che si scrive, come nel login
+        OcchioPassword.aggiungi(etAttuale);
+        OcchioPassword.aggiungi(etNuova);
+        OcchioPassword.aggiungi(etConferma);
 
         String email = TokenManager.getInstance(this).getEmailRicordami();
         if (email.isEmpty()) {
