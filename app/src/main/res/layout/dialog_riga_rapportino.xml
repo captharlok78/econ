@@ -419,6 +419,17 @@
                     android:id="@+id/spinner_utente"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
+
+                <!-- Manodopera nuova: piu' utenti insieme (una riga uguale per ognuno), scelti da un elenco a spunta -->
+                <TextView
+                    android:id="@+id/text_utenti"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:gravity="center_vertical"
+                    android:background="?android:attr/editTextBackground"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
 

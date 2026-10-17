@@ -38,7 +38,8 @@ import com.ncfsistemi.econ.utils.Utility;
 /**
  * Finestra di una riga del rapportino (GESTIONE_RAPPORTINI.md §12.2), una per categoria del tipo:
  * <ul>
- * <li>LAVORO (Manodopera): tipo (se ce n'e' piu' d'uno), utente obbligatorio, quantita' in unita' di tempo (default ore);</li>
+ * <li>LAVORO (Manodopera): tipo (se ce n'e' piu' d'uno), utente obbligatorio, quantita' in unita' di tempo (default ore); una riga
+ * nuova si puo' dare a piu' utenti insieme: stessi dati, una riga per ognuno;</li>
  * <li>VIAGGIO: tipo (andata, ritorno, generico), utente, partenza e arrivo che calcolano la durata, oppure la durata a mano
  * (default minuti);</li>
  * <li>MATERIALE (Articolo): articolo dal listino (filtro costruttore e linea, ricerca da 3 lettere), utente facoltativo,
@@ -49,7 +50,10 @@ import com.ncfsistemi.econ.utils.Utility;
  */
 public class PopupRigaRapportino {
 
-    /** Riceve la riga compilata (gia' completata con i dati collegati, vedi RigheRapportino.completa()). */
+    /**
+     * Riceve la riga compilata (gia' completata con i dati collegati, vedi RigheRapportino.completa()); con piu' utenti scelti
+     * arriva una volta per ognuno.
+     */
     public interface Esito {
         void rigaConfermata(ContentValues riga);
     }
@@ -77,6 +81,10 @@ public class PopupRigaRapportino {
     private EditText editOraInizio, editOraFine, editQuantita, editNote, editPrezzo;
     private CheckBox checkACosto;
     private CampoRicerca campoArticolo;
+    /** Manodopera nuova con piu' utenti sceglibili: si scelgono dall'elenco a spunta invece che dalla tendina. */
+    private boolean piuUtenti = false;
+    private List<CampoRicerca.Voce> vociUtenti;
+    private final List<Integer> utentiScelti = new ArrayList<Integer>();
     /** true mentre la quantita' si scrive da codice (calcolo dagli orari): non deve svuotare gli orari. */
     private boolean calcoloInCorso = false;
 
@@ -152,6 +160,8 @@ public class PopupRigaRapportino {
         imposta(spinnerUtente, utenti, idUtente, null);
         spinnerUtente.setEnabled(utenti.size() > 1);
         if (isMateriale()) vista.findViewById(R.id.sezione_utente).setVisibility(View.GONE);
+        piuUtenti = nuova && RapportiniDettaglioTipi.CATEGORIA_LAVORO.equals(categoria) && utenti.size() > 1;
+        if (piuUtenti) preparaPiuUtenti(utenti, idUtente);
 
         // unita' di misura: di tempo per lavoro e viaggio (default ore / minuti), tutte per il materiale (default pezzo)
         String codiceDefault = isMateriale() ? UnitaMisura.CODICE_PEZZO : isViaggio() ? UnitaMisura.CODICE_MINUTI : UnitaMisura.CODICE_ORE;
@@ -201,9 +211,65 @@ public class PopupRigaRapportino {
                     return;
                 }
                 dialog.dismiss();
-                esito.rigaConfermata(riga);
+                if (!piuUtenti) {
+                    esito.rigaConfermata(riga);
+                    return;
+                }
+                // una riga uguale per ogni utente scelto, nell'ordine dell'elenco
+                DbInterno dbr = new DbInterno(ctx);
+                for (CampoRicerca.Voce u : vociUtenti) {
+                    if (!utentiScelti.contains(u.id)) continue;
+                    ContentValues r = new ContentValues(riga);
+                    r.put(RapportiniDettaglio.ID_UTENTE_MANODOPERA, u.id);
+                    RigheRapportino.completa(dbr, r);
+                    esito.rigaConfermata(r);
+                }
+                dbr.close();
             }
         });
+    }
+
+    // ── Manodopera: piu' utenti insieme ─────────────────────────────────────────────────────────────────────────
+
+    /** Al posto della tendina un campo con i nomi scelti; toccandolo si apre l'elenco a spunta (proposto: chi compila). */
+    private void preparaPiuUtenti(List<CampoRicerca.Voce> utenti, int idProposto) {
+        vociUtenti = utenti;
+        if (trova(utenti, idProposto) >= 0) utentiScelti.add(idProposto);
+        spinnerUtente.setVisibility(View.GONE);
+        final TextView campo = vista.findViewById(R.id.text_utenti);
+        campo.setVisibility(View.VISIBLE);
+        ((TextView) ((android.view.ViewGroup) vista.findViewById(R.id.sezione_utente)).getChildAt(0)).setText(R.string.utenti);
+        mostraUtentiScelti(campo);
+        campo.setOnClickListener(v -> {
+            final String[] nomi = new String[vociUtenti.size()];
+            final boolean[] spunte = new boolean[vociUtenti.size()];
+            for (int i = 0; i < nomi.length; i++) {
+                nomi[i] = vociUtenti.get(i).testo;
+                spunte[i] = utentiScelti.contains(vociUtenti.get(i).id);
+            }
+            new AlertDialog.Builder(ctx)
+                    .setTitle(R.string.scegli_utenti)
+                    .setMultiChoiceItems(nomi, spunte, (d, i, spuntato) -> spunte[i] = spuntato)
+                    .setPositiveButton(android.R.string.ok, (d, w) -> {
+                        utentiScelti.clear();
+                        for (int i = 0; i < spunte.length; i++) {
+                            if (spunte[i]) utentiScelti.add(vociUtenti.get(i).id);
+                        }
+                        mostraUtentiScelti(campo);
+                    })
+                    .setNegativeButton(R.string.annulla, null)
+                    .show();
+        });
+    }
+
+    private void mostraUtentiScelti(TextView campo) {
+        StringBuilder testo = new StringBuilder();
+        for (CampoRicerca.Voce u : vociUtenti) {
+            if (!utentiScelti.contains(u.id)) continue;
+            if (testo.length() > 0) testo.append(", ");
+            testo.append(u.testo);
+        }
+        campo.setText(testo.length() > 0 ? testo.toString() : ctx.getString(R.string.tocca_per_scegliere));
     }
 
     // ── Viaggio: partenza e arrivo → durata ─────────────────────────────────────────────────────────────────────
@@ -749,7 +815,7 @@ public class PopupRigaRapportino {
         if (quantita <= 0) return ctx.getString(R.string.quantita_obbligatoria);
         int idUnita = idScelto(spinnerUnita);
         if (idUnita <= 0) return ctx.getString(R.string.unita_obbligatoria);
-        int idUtente = idScelto(spinnerUtente);
+        int idUtente = piuUtenti ? (utentiScelti.isEmpty() ? 0 : utentiScelti.get(0)) : idScelto(spinnerUtente);
         if (RapportiniDettaglioTipi.CATEGORIA_LAVORO.equals(categoria) && idUtente <= 0) return ctx.getString(R.string.utente_obbligatorio);
         int idListino;
         if (isMateriale() && tabNuovoArticolo) {
