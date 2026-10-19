@@ -357,6 +357,16 @@ public final class RegoleRapportino {
         return stato != null && intero(stato, StatiDocumento.MODIFICA_SOLO_AMMINISTRATORE) == 1;
     }
 
+    /**
+     * Confermato (stato che sul server modifica solo l'amministratore; la firma del cliente c'e' solo da Confermato): dall'app
+     * non lo modifica piu' nessuno, neanche l'amministratore (si puo' ancora firmare la prima volta e inviare per mail). Se
+     * va corretto lo riapre l'amministratore dal portale (Confermato -> Bozza): da li' si modifica di nuovo, anche con la
+     * firma rimasta.
+     */
+    public static boolean bloccatoInApp(ContentValues stato) {
+        return isSoloAmministratore(stato);
+    }
+
     /** Proprietario del rapportino: l'autore o chi l'ha inserito; un rapportino nuovo e' sempre di chi lo compila. */
     public static boolean isProprietario(ContentValues testata, Utente utente) {
         if (testata == null) return true;

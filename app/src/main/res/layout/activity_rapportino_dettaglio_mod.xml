@@ -275,7 +275,7 @@
             android:layout_marginEnd="1dp"
             android:backgroundTint="#E0E0E0"
             android:onClick="annulla"
-            android:text="@string/annulla"
+            android:text="@string/chiudi"
             android:textColor="#1565C0"
             android:textSize="14sp"
             android:textStyle="bold" />

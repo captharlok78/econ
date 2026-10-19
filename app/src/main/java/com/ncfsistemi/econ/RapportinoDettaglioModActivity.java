@@ -48,7 +48,8 @@ import com.ncfsistemi.econ.views.PopupRigaRapportino;
  * Rapportino, schema 26 (GESTIONE_RAPPORTINI.md §12): testata (operatore, data, cliente / cantiere / ordine con ricerca,
  * almeno uno; note), righe aggiunte con le finestre Manodopera, Viaggio e Articolo e mostrate in tabella. Le righe restano in
  * memoria fino a Salva (il rapportino resta nello stato attuale, per un rapportino nuovo quello iniziale, Bozza) o Conferma
- * (passa a Confermato); Annulla scarta tutto. Se lo stato non e' modificabile la maschera e' in sola lettura. I cantieri
+ * (passa a Confermato). Salva, In verifica e Conferma non chiudono la maschera: la riaprono sul rapportino salvato, con
+ * stato e permessi nuovi; si esce solo con Chiudi (o indietro), che con modifiche non salvate chiede conferma. Se lo stato non e' modificabile la maschera e' in sola lettura. I cantieri
  * sceglibili sono quelli su cui l'utente e' pianificato nella settimana della data (vedi RegoleRapportino).
  */
 public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
@@ -98,6 +99,13 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
 
     /** Rapportino nuovo con questa data (yyyyMMddHHmmss), es. dal calendario personale. */
     public static final String EXTRA_DATA = "DATA_RAPPORTINO";
+    /** Maschera riaperta dopo un salvataggio: messaggio da mostrare; chi l'ha aperta deve aggiornarsi (RESULT_OK). */
+    private static final String EXTRA_SALVATO = "SALVATO";
+
+    /** In questa maschera qualcosa e' stato salvato (rapportino, firma, richiesta di invio): alla chiusura RESULT_OK. */
+    private boolean salvato = false;
+    /** Id del rapportino appena salvato (anche quello nuovo), per riaprirlo. */
+    private int idSalvato = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,7 +151,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         senzaLicenzaModifica = testata != null
                 && !com.ncfsistemi.econ.utils.FunzionalitaApp.puoModificare(this, com.ncfsistemi.econ.utils.FunzionalitaApp.RAPPORTINI);
         modificabile = RegoleRapportino.isModificabile(stato) && !senzaLicenzaModifica
-                && (!RegoleRapportino.isSoloAmministratore(stato) || utente.amministratore);
+                && !RegoleRapportino.bloccatoInApp(stato);
         proprietario = RegoleRapportino.isProprietario(testata, utente);
         testataModificabile = modificabile && (utente.amministratore || proprietario);
         aggiungeRighe = modificabile && (utente.amministratore || proprietario
@@ -170,6 +178,17 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         aggiornaInviaMail();
         mostraFirma();
         disponiPulsanti();
+
+        String messaggio = getIntent().getStringExtra(EXTRA_SALVATO);
+        if (messaggio != null) {
+            segnaSalvato();
+            Toast.makeText(this, messaggio, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void segnaSalvato() {
+        salvato = true;
+        setResult(RESULT_OK);
     }
 
     /** Pulsanti in fondo su una o piu' righe (smartphone in verticale: 2-3 righe), di nuovo a ogni rotazione. */
@@ -270,6 +289,9 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             info = proprietario || utente.amministratore
                     ? "In verifica: gli operatori coinvolti aggiungono le proprie ore, poi conferma."
                     : (aggiungeRighe ? "In verifica: aggiungi e correggi le tue ore." : "In verifica: non sei tra gli operatori coinvolti.");
+        }
+        if (RegoleRapportino.bloccatoInApp(stato)) {
+            info += (info.isEmpty() ? "" : "\n") + "Confermato: dall'app non si modifica più (si può riaprire dal portale).";
         }
         if (testata != null && RigheRapportino.intero(testata, Rapportini.ID_CONFERMATO_DA) > 0) {
             String chi = RegoleRapportino.nomeOperatore(db, RigheRapportino.intero(testata, Rapportini.ID_CONFERMATO_DA));
@@ -581,7 +603,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         tabella.aggiornaRecord(db, val, where);
         db.close();
         testata.putAll(val);
-        setResult(RESULT_OK);
+        segnaSalvato();
         com.ncfsistemi.econ.servizi.SyncWorker.scheduleImmediateSync(this);
         Toast.makeText(this, "Invio chiesto: la mail parte alla sincronizzazione.", Toast.LENGTH_LONG).show();
         aggiornaInviaMail();
@@ -772,14 +794,14 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     @Override
     public void salva(View v) {
         idStatoDestino = stato != null ? RigheRapportino.intero(stato, StatiDocumento.ID) : 0;
-        eseguiSalvataggio();
+        eseguiSalvataggio("Rapportino salvato.");
     }
 
     /**
      * Testata e righe in un'unica transazione, confermata solo se tutto va bene (la classe base la conferma anche quando
      * il salvataggio ritorna un messaggio d'errore: qui un errore non deve lasciare il rapportino salvato a meta').
      */
-    private void eseguiSalvataggio() {
+    private void eseguiSalvataggio(String messaggio) {
         DbInterno db = new DbInterno(this);
         android.database.sqlite.SQLiteDatabase sqlite = db.getReadableDatabase();
         String esito;
@@ -794,13 +816,29 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             db.close();
         }
         if (SALVATAGGIO_OK.equals(esito)) {
-            setResult(RESULT_OK);
-            finish();
+            riapri(messaggio);
         } else if (esito.startsWith("ERR")) {
             EconCrash(esito);
         } else {
             Toast.makeText(this, esito, Toast.LENGTH_LONG).show();
         }
+    }
+
+    /**
+     * Dopo il salvataggio la maschera resta aperta: si riapre sul rapportino salvato (un nuovo passa in modifica), cosi'
+     * stato, permessi, numero e pulsanti sono quelli veri. Il risultato va a chi aveva aperto questa (FORWARD_RESULT).
+     */
+    private void riapri(String messaggio) {
+        Intent intent = new Intent(getIntent());
+        intent.removeExtra(EXTRA_DATA);
+        intent.putExtra("ID", idSalvato);
+        intent.putExtra(EXTRA_SALVATO, messaggio);
+        intent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+        setResult(RESULT_OK);
+        startActivity(intent);
+        overridePendingTransition(0, 0);
+        finish();
+        overridePendingTransition(0, 0);
     }
 
     /** In verifica: salva e passa allo stato In verifica, in cui gli operatori coinvolti aggiungono le proprie ore. */
@@ -815,7 +853,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
                         db.close();
                         if (verifica == null) return;
                         idStatoDestino = RigheRapportino.intero(verifica, StatiDocumento.ID);
-                        eseguiSalvataggio();
+                        eseguiSalvataggio("Rapportino in verifica.");
                     }
                 });
     }
@@ -826,7 +864,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         ContentValues arrivo = RegoleRapportino.statoPerCodice(dbs, StatiDocumento.CODICE_CONFERMATO);
         dbs.close();
         String messaggio = getString(R.string.conferma_rapportino);
-        if (!RegoleRapportino.isModificabile(arrivo)) {
+        if (!RegoleRapportino.isModificabile(arrivo) || RegoleRapportino.bloccatoInApp(arrivo)) {
             messaggio += " " + getString(R.string.conferma_non_modificabile);
         } else if (!RegoleRapportino.isCancellabile(arrivo)) {
             messaggio += " " + getString(R.string.conferma_non_cancellabile);
@@ -841,7 +879,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
                         db.close();
                         if (confermato == null) return;
                         idStatoDestino = RigheRapportino.intero(confermato, StatiDocumento.ID);
-                        eseguiSalvataggio();
+                        eseguiSalvataggio("Rapportino confermato.");
                     }
                 });
     }
@@ -857,7 +895,8 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         valoriTestata(val);
         val.put(Rapportini.ID_UTENTE_DITTA, utente.idUtenteDitta);
         tabella.inserisciRecord(db, val);
-        return salvaRighe(db, val.getAsInteger(Rapportini.ID), val.getAsInteger(Rapportini.ID_ORDINE));
+        idSalvato = val.getAsInteger(Rapportini.ID);
+        return salvaRighe(db, idSalvato, val.getAsInteger(Rapportini.ID_ORDINE));
     }
 
     @Override
@@ -878,7 +917,8 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             del.put(RapportiniDettaglio.ID, id);
             tabRighe.cancellaRecord(db, del);
         }
-        return salvaRighe(db, getIDModifica(), val.getAsInteger(Rapportini.ID_ORDINE));
+        idSalvato = getIDModifica();
+        return salvaRighe(db, idSalvato, val.getAsInteger(Rapportini.ID_ORDINE));
     }
 
     private String controlla(DbInterno db) {
@@ -1005,7 +1045,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             testata.putAll(val);
             db.close();
             firmaNuova = null;
-            setResult(RESULT_OK);
+            segnaSalvato();
             Toast.makeText(this, "Firma salvata.", Toast.LENGTH_SHORT).show();
         }
         mostraFirma();
@@ -1096,20 +1136,26 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
 
     // ── Uscita ────────────────────────────────────────────────────────────────────────────────────────────────
 
-    /** Annulla (e indietro): con modifiche non salvate chiede conferma. */
+    /** Chiudi (e indietro): l'unico modo di uscire; con modifiche non salvate chiede conferma. */
     @Override
     public void annulla(View v) {
         if (!modificato || !modificabile) {
-            super.annulla(v);
+            chiudi();
             return;
         }
-        Utility.mostraConfermaDialog(getString(R.string.attenzione), getString(R.string.modifiche_non_salvate), this, "OK",
+        Utility.mostraConfermaDialog(getString(R.string.attenzione), getString(R.string.modifiche_non_salvate), this, "Esci",
                 getString(R.string.annulla), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (which == DialogInterface.BUTTON_POSITIVE) RapportinoDettaglioModActivity.super.annulla(null);
+                        if (which == DialogInterface.BUTTON_POSITIVE) chiudi();
                     }
                 });
+    }
+
+    /** Chi ha aperto la maschera si aggiorna se qui si e' salvato qualcosa. */
+    private void chiudi() {
+        setResult(salvato ? RESULT_OK : RESULT_CANCELED);
+        finish();
     }
 
     @Override

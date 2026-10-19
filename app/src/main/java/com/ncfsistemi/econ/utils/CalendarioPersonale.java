@@ -160,7 +160,7 @@ public final class CalendarioPersonale {
             ContentValues t = (ContentValues) o;
             ContentValues stato = RegoleRapportino.stato(db, intero(t, Rapportini.ID_STATO));
             if (!RegoleRapportino.isModificabile(stato)) continue;
-            if (RegoleRapportino.isSoloAmministratore(stato) && !utente.amministratore) continue;
+            if (RegoleRapportino.bloccatoInApp(stato)) continue;
             int idCantiere = intero(t, Rapportini.ID_CANTIERE);
             long data = lungo(t, Rapportini.DATA_RAPPORTINO);
             List<Object> righe = new ArrayList<Object>(RigheRapportino.righe(db, intero(t, Rapportini.ID)));
