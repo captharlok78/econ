@@ -41,7 +41,7 @@
     <string name="messaggio_ripristino_ok">දත්ත සමුදා ප්‍රතිසාධනය සම්පූර්ණයි</string>
     <string name="messaggio_ripristino_ko">දත්ත සමුදාය ප්‍රතිසාධනය අසාර්ථක විය</string>
     <string name="messaggio_attivazione_non_riuscita">සක්‍රිය කිරීම අසාර්ථක විය, ඇතුළත් කළ කේතය පරීක්ෂා කරන්න.</string>
-    <string name="messaggio_conferma_reset">උපාංගයේ සියලුම Econ දත්ත මකාදැමීම තහවුරු කරන්නද? මකාදැමීමෙන් පසු, ඔබට සේවාදායක දත්ත ආයාත කිරීම සඳහා සාමාන්‍ය සමමුහුර්ත කිරීමක් සිදු කිරීමට සිදුවේ.</string>
+    <string name="messaggio_conferma_reset">උපාංගයේ සියලුම iEcon දත්ත මකාදැමීම තහවුරු කරන්නද? මකාදැමීමෙන් පසු, ඔබට සේවාදායක දත්ත ආයාත කිරීම සඳහා සාමාන්‍ය සමමුහුර්ත කිරීමක් සිදු කිරීමට සිදුවේ.</string>
     <string name="messaggio_nessun_tubo_selezionato">මෙම කේබලය සඳහා නලයක් තෝරාගෙන නොමැත. කෙසේ වෙතත් සුරැකීම සමඟ ඉදිරියට යන්නද?</string>
     <string name="messaggio_cavi_passanti">මෙම නළය සඳහා සම්පූර්ණයෙන් සමත් වේ</string>
     <string name="messaggio_associazione_linea">තහවුරු කිරීමෙන් පසු, %s අයිතමය තෝරාගත් පේළිය සමඟ සම්බන්ධ වනු ඇත</string>
@@ -87,7 +87,7 @@
     <string name="altezza">උස සෙ.මී</string>
     <string name="altro_materiale">වෙනත් දුව්‍ය</string>
     <string name="annulla">අවලංගු කරන්න</string>
-    <string name="app_name">Econ</string>
+    <string name="app_name">iEcon</string>
     <string name="area">ප්‍රදේශය</string>
     <string name="articoli_preferiti">ප්‍රියතම</string>
     <string name="attenzione">අවධානය</string>
@@ -352,7 +352,7 @@
     <string name="title_activity_componente_mod">ModActivity සංරචකය</string>
     <string name="title_activity_configurazione">සැකසුම්</string>
     <string name="title_activity_costruttori_dettaglio">සැපයුම්කරුගේ විස්තර</string>
-    <string name="title_activity_crash">Econ: errore</string>
+    <string name="title_activity_crash">iEcon: errore</string>
     <string name="title_activity_elemento_mod">අයිතමය</string>
     <string name="title_activity_fornitori_linee">සැපයුම්කරුවන්ගේ මිල ලැයිස්තු සහ සම්බන්ධතා</string>
     <string name="title_activity_iva_dettaglio">වැට් කේත</string>
@@ -361,7 +361,7 @@
     <string name="title_activity_piantina_locale_mod">සිතියම සංස්කරණය කරන්න</string>
     <string name="title_activity_placche_dettaglio_mod">තහඩු විස්තර</string>
     <string name="title_activity_preventivi">මිල ගණන් / ඇණවුම්</string>
-    <string name="title_activity_start">Econ</string>
+    <string name="title_activity_start">iEcon</string>
     <string name="title_activity_rapportini">වාර්තා</string>
     <string name="title_section1_clienti">පෞද්ගලික දත්ත</string>
     <string name="title_section2_clienti">ඉදිකිරීම් ස්ථාන</string>

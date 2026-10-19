@@ -305,14 +305,14 @@ public class LoginActivity extends EconActivity {
      */
     public void registrati(View v) {
         String telefono = com.ncfsistemi.econ.utils.Editore.telefonoAssistenza(this);
-        String testo = "L'account lo crea l'amministratore della tua ditta. Per un nuovo accesso o per attivare Econ "
+        String testo = "L'account lo crea l'amministratore della tua ditta. Per un nuovo accesso o per attivare iEcon "
                 + "contatta l'assistenza:\n\n" + com.ncfsistemi.econ.utils.Editore.nome(this)
                 + "\n" + com.ncfsistemi.econ.utils.Editore.emailAssistenza(this)
                 + (telefono.isEmpty() ? "" : "\n" + telefono);
         new android.app.AlertDialog.Builder(this)
                 .setTitle("Registrati")
                 .setMessage(testo)
-                .setPositiveButton("Scrivi", (d, w) -> com.ncfsistemi.econ.utils.Editore.scriviAssistenza(this, "Richiesta di accesso a Econ", ""))
+                .setPositiveButton("Scrivi", (d, w) -> com.ncfsistemi.econ.utils.Editore.scriviAssistenza(this, "Richiesta di accesso a iEcon", ""))
                 .setNegativeButton(R.string.chiudi, null)
                 .show();
     }

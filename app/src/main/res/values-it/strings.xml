@@ -41,7 +41,7 @@
     <string name="messaggio_ripristino_ok">Ripristino  completato</string>
     <string name="messaggio_ripristino_ko">Ripristino database non riuscito</string>
     <string name="messaggio_attivazione_non_riuscita">Attivazione non riuscita, verificare il codice inserito.</string>
-    <string name="messaggio_conferma_reset">Confermare la cancellazione di tutti dati di Econ presenti sul dispositivo?Dopo la cancellazione sarà sufficente effettuare una normale sincronizzazione per importare i dati del server.</string>
+    <string name="messaggio_conferma_reset">Confermare la cancellazione di tutti dati di iEcon presenti sul dispositivo?Dopo la cancellazione sarà sufficente effettuare una normale sincronizzazione per importare i dati del server.</string>
     <string name="messaggio_nessun_tubo_selezionato">Non è stato selezionato nessun tubo per questo cavo. Procedere lo stesso con il salvataggio?</string>
     <string name="messaggio_cavi_passanti">Per questo tubo passano in totale</string>
     <string name="messaggio_associazione_linea">Alla conferma l\'articolo %s sarà associato alla linea selezionata</string>
@@ -87,7 +87,7 @@
     <string name="altezza">Altezza cm</string>
     <string name="altro_materiale">Altro materiale</string>
     <string name="annulla">Annulla</string>
-    <string name="app_name">Econ</string>
+    <string name="app_name">iEcon</string>
     <string name="area">Area</string>
     <string name="articoli_preferiti">Preferiti</string>
     <string name="attenzione">Attenzione</string>
@@ -356,7 +356,7 @@
     <string name="title_activity_componente_mod">ComponenteModActivity</string>
     <string name="title_activity_configurazione">Impostazioni</string>
     <string name="title_activity_costruttori_dettaglio">Dettaglio Fornitore</string>
-    <string name="title_activity_crash">Econ: errore</string>
+    <string name="title_activity_crash">iEcon: errore</string>
     <string name="title_activity_elemento_mod">Elemento</string>
     <string name="title_activity_fornitori_linee">Listini fornitori e linee</string>
     <string name="title_activity_iva_dettaglio">Codici IVA</string>
@@ -365,7 +365,7 @@
     <string name="title_activity_piantina_locale_mod">Modifica piantina</string>
     <string name="title_activity_placche_dettaglio_mod">Dettaglio placca</string>
     <string name="title_activity_preventivi">Preventivi / Ordini</string>
-    <string name="title_activity_start">Econ</string>
+    <string name="title_activity_start">iEcon</string>
     <string name="title_activity_rapportini">Rapportini</string>
     <string name="title_section1_clienti">Anagrafica</string>
     <string name="title_section2_clienti">Cantieri</string>

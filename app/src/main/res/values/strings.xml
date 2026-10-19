@@ -41,7 +41,7 @@
     <string name="messaggio_ripristino_ok">Ripristino del database completato</string>
     <string name="messaggio_ripristino_ko">Ripristino del database non riuscito</string>
     <string name="messaggio_attivazione_non_riuscita">Attivazione non riuscita, controlla il codice inserito.</string>
-    <string name="messaggio_conferma_reset">Confermare l\'eliminazione di tutti i dati Econ sul dispositivo? Dopo l\'eliminazione sarà sufficiente eseguire una normale sincronizzazione per importare i dati del server.</string>
+    <string name="messaggio_conferma_reset">Confermare l\'eliminazione di tutti i dati iEcon sul dispositivo? Dopo l\'eliminazione sarà sufficiente eseguire una normale sincronizzazione per importare i dati del server.</string>
     <string name="messaggio_nessun_tubo_selezionato">Per questo cavo non è stato selezionato alcun tubo. Procedere con il salvataggio comunque?</string>
     <string name="messaggio_cavi_passanti">Per questo tubo passano in totale</string>
     <string name="messaggio_associazione_linea">Alla conferma, l\'elemento %s verrà associato alla linea selezionata</string>
@@ -86,7 +86,7 @@
     <string name="altezza">Altezza cm</string>
     <string name="altro_materiale">Altro materiale</string>
     <string name="annulla">Annulla</string>
-    <string name="app_name">Econ</string>
+    <string name="app_name">iEcon</string>
     <string name="area">Area</string>
     <string name="articoli_preferiti">Articoli preferiti</string>
     <string name="attenzione">Attenzione</string>
@@ -370,7 +370,7 @@
     <string name="title_activity_piantina_locale_mod">Modifica piantina</string>
     <string name="title_activity_placche_dettaglio_mod">Dettaglio placche</string>
     <string name="title_activity_preventivi">Preventivi / Ordini</string>
-    <string name="title_activity_start">Econ</string>
+    <string name="title_activity_start">iEcon</string>
     <string name="title_activity_rapportini">Rapportini</string>
     <string name="title_section1_clienti">Dati anagrafici</string>
     <string name="title_section2_clienti">Cantieri</string>

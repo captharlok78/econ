@@ -66,7 +66,7 @@ public final class AggiornaApp {
     private void mostraAvviso() {
         String installata = VersioneApp.salvata(activity);
         StringBuilder msg = new StringBuilder();
-        msg.append("È disponibile Econ ").append(agg.versione);
+        msg.append("È disponibile iEcon ").append(agg.versione);
         msg.append(installata != null ? " (questa è la " + installata + ")" : "").append(".");
         if (agg.dimensione > 0) msg.append("\nDimensione: ").append(megabyte(agg.dimensione)).append(".");
         if (agg.note != null && !agg.note.trim().isEmpty()) msg.append("\n\n").append(agg.note.trim());
@@ -97,7 +97,7 @@ public final class AggiornaApp {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !activity.getPackageManager().canRequestPackageInstalls()) {
             new AlertDialog.Builder(activity)
                     .setTitle("Permesso necessario")
-                    .setMessage("Per aggiornarsi Econ deve poter installare app: nella pagina che si apre attiva "
+                    .setMessage("Per aggiornarsi iEcon deve poter installare app: nella pagina che si apre attiva "
                             + "\"Consenti da questa fonte\", poi torna indietro.")
                     .setCancelable(false)
                     .setPositiveButton("Apri", (d, w) -> {
@@ -119,7 +119,7 @@ public final class AggiornaApp {
     private void scarica() {
         ProgressDialog pd = new ProgressDialog(activity);
         pd.setTitle("Aggiornamento");
-        pd.setMessage("Scaricamento di Econ " + agg.versione + "...");
+        pd.setMessage("Scaricamento di iEcon " + agg.versione + "...");
         pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         pd.setMax(100);
         pd.setCancelable(false);
@@ -257,7 +257,7 @@ public final class AggiornaApp {
     public static void nessunAggiornamento(Activity a, ControlloAvvio.Aggiornamento agg) {
         String msg = agg == null ? "Il server non ha risposto." :
                 !agg.disponibile ? "Sul server non c'è ancora un'app pubblicata." :
-                        "Econ è aggiornata (" + questaVersione(a) + ").";
+                        "iEcon è aggiornata (" + questaVersione(a) + ").";
         Toast.makeText(a, msg, Toast.LENGTH_LONG).show();
     }
 }

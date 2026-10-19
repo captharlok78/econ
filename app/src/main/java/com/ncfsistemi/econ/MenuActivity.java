@@ -275,7 +275,7 @@ public class MenuActivity extends EconActivity {
         if (i == 0) {
             com.ncfsistemi.econ.utils.Editore.apriSito(this);
         } else if (i == 1) {
-            com.ncfsistemi.econ.utils.Editore.scriviAssistenza(this, "Assistenza Econ", "");
+            com.ncfsistemi.econ.utils.Editore.scriviAssistenza(this, "Assistenza iEcon", "");
         } else {
             com.ncfsistemi.econ.utils.Editore.chiamaAssistenza(this);
         }

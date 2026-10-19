@@ -24,11 +24,11 @@ public class InstallazioneAggiornamento extends BroadcastReceiver {
                 ctx.startActivity(conferma);
             }
         } else if (stato == PackageInstaller.STATUS_SUCCESS) {
-            Toast.makeText(ctx, "Econ aggiornata", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ctx, "iEcon aggiornata", Toast.LENGTH_SHORT).show();
         } else if (stato != PackageInstaller.STATUS_FAILURE_ABORTED) {
             String msg = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE);
             String testo = stato == PackageInstaller.STATUS_FAILURE_CONFLICT || stato == PackageInstaller.STATUS_FAILURE_INCOMPATIBLE
-                    ? "Aggiornamento non installato: l'app sul dispositivo è firmata con un'altra chiave. Disinstallala una volta e installa Econ dal portale."
+                    ? "Aggiornamento non installato: l'app sul dispositivo è firmata con un'altra chiave. Disinstallala una volta e installa iEcon dal portale."
                     : "Aggiornamento non installato" + (msg != null ? ": " + msg : "");
             Toast.makeText(ctx, testo, Toast.LENGTH_LONG).show();
         }

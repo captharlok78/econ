@@ -121,7 +121,7 @@ public class StartActivity extends EconActivity {
                 msg.append("• ").append(p.testo);
             }
             AlertDialog.Builder b = new AlertDialog.Builder(this)
-                    .setTitle(esito.bloccato() ? "Il dispositivo non può usare Econ" : "Controllo del dispositivo")
+                    .setTitle(esito.bloccato() ? "Il dispositivo non può usare iEcon" : "Controllo del dispositivo")
                     .setMessage(msg.toString())
                     .setCancelable(false);
             if (esito.bloccato()) {
