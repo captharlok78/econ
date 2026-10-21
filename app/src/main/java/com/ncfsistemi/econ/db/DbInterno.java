@@ -1014,23 +1014,30 @@ public class DbInterno extends SQLiteOpenHelper {
 	 * @param tabella
 	 * @return il rpossimo id
 	 */
+	/** Ultimo id negativo dato a ogni tabella (contatore che non torna mai indietro, vedi getProssimoId). */
+	private static final String PREF_ID_LOCALI = "econ_id_locali";
+	/** Primo id del contatore: sotto i -2, -3, ... dati prima del 21/10, che altri record possono ancora citare. */
+	private static final int PRIMO_ID_CONTATORE = -1001;
+
+	/**
+	 * Id del nuovo record creato sul dispositivo (negativo; il server lo rimappa alla sincronizzazione). Prima era il
+	 * minimo della tabella meno 1: dopo una sincronizzazione (tutti positivi) ripartiva da -2 e un cliente nuovo
+	 * ereditava i cantieri rimasti legati a un vecchio -2 (21/10). Ora un contatore per tabella, salvato, che scende
+	 * sempre: un id locale non si riusa mai.
+	 */
 	public int getProssimoId(AbstractTable tabella) {
-		int prossimo = -2;
-		String SQL = "Select min(" + tabella.getCampoNumeratore() + ") as numeratore from " + tabella.getNomeTabella() + " order by "
-				+ tabella.getCampoNumeratore() + " asc ";
+		int minimo = 0;
+		String SQL = "Select min(" + tabella.getCampoNumeratore() + ") as numeratore from " + tabella.getNomeTabella();
 		Cursor c = getReadableDatabase().rawQuery(SQL, null);
 		if (c.getCount() > 0) {
 			c.moveToNext();
-			int num = getInt(c, "numeratore");
-			if (num >= 0) {
-				prossimo = -2;
-			} else {
-				prossimo = num - 1;
-			}
-
+			minimo = getInt(c, "numeratore");
 		}
 		c.close();
-
+		android.content.SharedPreferences pref = getContext().getSharedPreferences(PREF_ID_LOCALI, Context.MODE_PRIVATE);
+		int ultimo = pref.getInt(tabella.getNomeTabella(), PRIMO_ID_CONTATORE + 1);
+		int prossimo = Math.min(Math.min(minimo, 0), ultimo) - 1;
+		pref.edit().putInt(tabella.getNomeTabella(), prossimo).apply();
 		return prossimo;
 	}
 

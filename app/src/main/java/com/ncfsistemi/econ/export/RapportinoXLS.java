@@ -83,7 +83,7 @@ public class RapportinoXLS {
                 //prendo gli altri rapportini nella stessa data e sullo stesso cantiere (senza cantiere: stesso cliente)
                 Integer idCantiere = valTestata.getAsInteger(Rapportini.ID_CANTIERE);
                 Integer idCliente = valTestata.getAsInteger(Rapportini.ID_CLIENTE);
-                String stesso = idCantiere != null && idCantiere > 0 ? "rapportini.id_cantiere=" + idCantiere
+                String stesso = idCantiere != null && idCantiere != 0 ? "rapportini.id_cantiere=" + idCantiere
                         : "coalesce(rapportini.id_cantiere,0)=0 and rapportini.id_cliente=" + (idCliente != null ? idCliente : 0);
                 ArrayList<Object> altriRapportini = db.eseguiSelect("Select rapportini.id,Utenti.nome as nome_operatore,Utenti.cognome as cognome_operatore"
                         + " from rapportini left join Utenti on rapportini.id_utente_ditta=Utenti.id_utente_ditta"

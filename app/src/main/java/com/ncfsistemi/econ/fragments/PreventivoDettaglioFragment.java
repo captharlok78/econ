@@ -1,6 +1,6 @@
 package com.ncfsistemi.econ.fragments;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -913,7 +913,7 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 			AlertDialog di = null;
 			@Override
 			protected void onPreExecute() {
-				AlertDialog.Builder ab = new AlertDialog.Builder(getActivity());
+				AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(getActivity());
 				ab.setMessage(getActivity().getResources().getString(R.string.messaggio_creazione_report));
 				di = ab.create();
 				di.show();
@@ -968,7 +968,7 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 			AlertDialog di = null;
 			@Override
 			protected void onPreExecute() {
-				AlertDialog.Builder ab = new AlertDialog.Builder(getActivity());
+				AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(getActivity());
 				ab.setMessage(getActivity().getResources().getString(R.string.messaggio_creazione_report));
 				di = ab.create();
 				di.show();
@@ -1024,7 +1024,7 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 			AlertDialog di = null;
 			@Override
 			protected void onPreExecute() {
-				AlertDialog.Builder ab = new AlertDialog.Builder(getActivity());
+				AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(getActivity());
 				ab.setMessage(getActivity().getResources().getString(R.string.messaggio_creazione_report));
 				di = ab.create();
 				di.show();

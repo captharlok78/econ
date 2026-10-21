@@ -66,47 +66,35 @@
         android:layout_height="56dp"
         android:orientation="horizontal">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
+            style="@style/Econ.Pulsante.Secondario"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginEnd="1dp"
             android:layout_weight="1"
-            android:backgroundTint="#E0E0E0"
             android:onClick="annulla"
-            android:text="@string/annulla"
-            android:textColor="#1565C0"
-            android:textSize="14sp"
-            android:textAllCaps="false"
-            android:textStyle="bold" />
+            android:text="@string/annulla" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
+            style="@style/Econ.Pulsante.Secondario"
             android:id="@+id/button_pulisci"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginStart="1dp"
             android:layout_marginEnd="1dp"
             android:layout_weight="1"
-            android:backgroundTint="#E0E0E0"
             android:onClick="pulisci"
-            android:text="Pulisci"
-            android:textColor="#1565C0"
-            android:textSize="14sp"
-            android:textAllCaps="false"
-            android:textStyle="bold" />
+            android:text="Pulisci" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
+            style="@style/Econ.Pulsante"
             android:id="@+id/button_salva_firma"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginStart="1dp"
             android:layout_weight="1"
-            android:backgroundTint="#1565C0"
             android:enabled="false"
             android:onClick="salva"
-            android:text="@string/salva"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:textAllCaps="false"
-            android:textStyle="bold" />
+            android:text="@string/salva" />
     </LinearLayout>
 </LinearLayout>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pulsante grande a riquadro (Sincronizza: Scarica / Carica): blu primario, angoli come le card. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid android:color="@color/econ_primario" />
+    <corners android:radius="16dp" />
+</shape>

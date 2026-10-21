@@ -1,6 +1,6 @@
 package com.ncfsistemi.econ.utils;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -337,7 +337,7 @@ public class Utility {
 	}
 
 	public static final void mostraDialog(String titolo, String messaggio, Context ctx, String testoOK) {
-		AlertDialog.Builder ab = new AlertDialog.Builder(ctx);
+		AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx);
 		ab.setMessage(messaggio);
 		ab.setTitle(titolo);
 		ab.setIcon(android.R.drawable.ic_dialog_alert);
@@ -368,7 +368,7 @@ public class Utility {
 
 	public static final void mostraSelezioneDialog(String titolo, CharSequence[] items, Context ctx, OnClickListener listener,
 			boolean cancellabile) {
-		AlertDialog.Builder ab = new AlertDialog.Builder(ctx);
+		AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx);
 		ab.setTitle(titolo);
 		ab.setItems(items, listener);
 		ab.setIcon(android.R.drawable.ic_dialog_info);
@@ -381,7 +381,7 @@ public class Utility {
 	public static void mostraConfermaDialog(String titolo, String messaggio, Context ctx, String testoOK, String testoNO,
 			OnClickListener listener) {
 
-		AlertDialog.Builder ab = new AlertDialog.Builder(ctx);
+		AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx);
 		ab.setMessage(messaggio);
 		ab.setTitle(titolo);
 		ab.setIcon(android.R.drawable.ic_dialog_alert);
@@ -397,7 +397,7 @@ public class Utility {
 
     public static final void mostraSelezioneMultiplaDialog(String titolo, CharSequence[] items, final boolean[] selezionati, Context ctx,
                                                            String testoOK, String testoNO,OnClickListener listener) {
-        AlertDialog.Builder ab = new AlertDialog.Builder(ctx);
+        AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx);
         ab.setTitle(titolo);
         ab.setMultiChoiceItems(items, selezionati, new DialogInterface.OnMultiChoiceClickListener() {
 			@Override
@@ -416,7 +416,7 @@ public class Utility {
 
 	public static void mostraConfermaCancellazioneDialog(Context ctx, OnClickListener listener) {
 
-		AlertDialog.Builder ab = new AlertDialog.Builder(ctx);
+		AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx);
 		ab.setMessage(ctx.getResources().getString(R.string.conferma_cancellazione));
 		ab.setTitle(ctx.getResources().getString(R.string.attenzione));
 		ab.setIcon(android.R.drawable.ic_dialog_alert);
@@ -431,7 +431,7 @@ public class Utility {
 
 	public static void mostraConfermaSalvataggioDialog(Context ctx, OnClickListener listener) {
 
-		AlertDialog.Builder ab = new AlertDialog.Builder(ctx);
+		AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx);
 		ab.setMessage(ctx.getResources().getString(R.string.conferma_salvataggio));
 		ab.setTitle(ctx.getResources().getString(R.string.attenzione));
 		ab.setIcon(android.R.drawable.ic_dialog_alert);
@@ -456,7 +456,7 @@ public class Utility {
 
 	public static AlertDialog mostraDialogPersonalizzato(String titolo, BitmapDrawable icona, Context ctx, View viewPersonalizzata,
 			View viewPersonalizzataTitolo, String testoOK, String testoNO, OnClickListener listener) {
-		AlertDialog.Builder ab = new AlertDialog.Builder(ctx);
+		AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx);
 
 		ab.setPositiveButton(testoOK, listener);
 		ab.setNegativeButton(testoNO, listener);

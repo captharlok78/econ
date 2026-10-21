@@ -106,17 +106,15 @@
                     android:textColor="#757575"
                     android:textSize="12sp" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Econ.Pulsante"
                     android:id="@+id/button_login_mercury"
-                    style="@style/TestoNeroGrande"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/margine"
                     android:onClick="accediMercury"
                     android:padding="@dimen/margine"
-                    android:text="Accedi"
-                    android:textColor="#FFFFFF"
-                    android:backgroundTint="#1784c5" />
+                    android:text="Accedi" />
 
                 <!-- Password dimenticata / Registrati: piccoli, in fondo alla card -->
                 <LinearLayout

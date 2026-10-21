@@ -113,7 +113,8 @@
                     android:maxLength="6" />
             </LinearLayout>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
+                style="@style/Econ.Pulsante"
                 android:id="@+id/button_salva_mod"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -121,9 +122,7 @@
                 android:layout_marginLeft="@dimen/margine"
                 android:layout_marginRight="@dimen/margine"
                 android:onClick="salvaDatiGenerali"
-                android:text="@string/salva"
-                android:textColor="#1784c5"
-                android:textSize="@dimen/testo_immagine_grande" />
+                android:text="@string/salva" />
 
             <LinearLayout
                 android:id="@+id/linear_pulsanti"

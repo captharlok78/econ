@@ -1,6 +1,6 @@
 package com.ncfsistemi.econ;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -309,7 +309,7 @@ public class LoginActivity extends EconActivity {
                 + "contatta l'assistenza:\n\n" + com.ncfsistemi.econ.utils.Editore.nome(this)
                 + "\n" + com.ncfsistemi.econ.utils.Editore.emailAssistenza(this)
                 + (telefono.isEmpty() ? "" : "\n" + telefono);
-        new android.app.AlertDialog.Builder(this)
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("Registrati")
                 .setMessage(testo)
                 .setPositiveButton("Scrivi", (d, w) -> com.ncfsistemi.econ.utils.Editore.scriviAssistenza(this, "Richiesta di accesso a iEcon", ""))
@@ -335,7 +335,7 @@ public class LoginActivity extends EconActivity {
             etEmail.setText(emailSalvata);
         }
 
-        new AlertDialog.Builder(this)
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("Recupero password Mercury")
                 .setMessage("Inserisci la tua email: riceverai per email un codice valido un'ora.")
                 .setView(etEmail)
@@ -411,7 +411,7 @@ public class LoginActivity extends EconActivity {
         etConfermaPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         layout.addView(etConfermaPassword);
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        AlertDialog dialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("Imposta nuova password")
                 .setView(layout)
                 .setPositiveButton("Conferma", null)

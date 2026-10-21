@@ -30,11 +30,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ECON"
+            android:text="iEcon"
             android:textColor="#FFFFFF"
             android:textSize="52sp"
             android:textStyle="bold"
-            android:letterSpacing="0.3" />
+            android:letterSpacing="0.05" />
 
         <TextView
             android:id="@+id/textViewVersione"
@@ -44,6 +44,32 @@
             android:text="v 2.0"
             android:textColor="#99FFFFFF"
             android:textSize="18sp" />
+
+        <!-- editore (EDITORE_E_FIRMA.md) -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/sfondo_logo_ncf"
+                android:contentDescription="NCF Sistemi"
+                android:padding="3dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/logo_ncf" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="powered by NCF Sistemi"
+                android:textColor="#B3FFFFFF"
+                android:textSize="15sp" />
+        </LinearLayout>
 
     </LinearLayout>
 

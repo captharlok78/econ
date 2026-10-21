@@ -1,6 +1,6 @@
 package com.ncfsistemi.econ.views;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -836,7 +836,7 @@ public class EconElementoElettrico extends AbstractEconElemento {
 	 * campi.findViewById(R.id.textViewMessaggio).setVisibility(View.VISIBLE); } else {
 	 * campi.findViewById(R.id.textViewMessaggio).setVisibility(View.GONE); }
 	 * 
-	 * AlertDialog.Builder ab = new AlertDialog.Builder(getContext());
+	 * AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(getContext());
 	 * 
 	 * ab.setPositiveButton(getContext().getString(R.string.conferma), listener);
 	 * ab.setNegativeButton(getContext().getString(R.string.annulla), listener);

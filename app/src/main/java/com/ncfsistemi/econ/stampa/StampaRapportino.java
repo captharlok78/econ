@@ -10,7 +10,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -64,7 +64,7 @@ public final class StampaRapportino {
         for (int i = 0; i < nomi.length; i++) {
             nomi[i] = RigheRapportino.testo(modelli.get(i), ModelliStampa.NOME) + (i == 0 ? " (proposto)" : "");
         }
-        new AlertDialog.Builder(activity).setTitle("Modello di stampa")
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(activity).setTitle("Modello di stampa")
                 .setItems(nomi, (d, i) -> stampa(activity, idRapportino, modelli.get(i)))
                 .setNegativeButton("Annulla", null).show();
     }

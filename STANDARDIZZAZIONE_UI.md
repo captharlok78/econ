@@ -60,6 +60,12 @@ non nuova migrazione.
 
 ## 2. Dettaglio (modifica/inserimento + visualizzazione) — IN CORSO
 
+> **20/10/2026: superato dal template form** (`../STUDIO_FORM_APP.md` §7): le form di dettaglio non si migrano piu' con
+> la ricetta qui sotto (header + card + `bg_input_outline` a mano), ma passano a `form.EconFormStandardActivity` con una
+> `DefinizioneForm`. Gia' sul template: le 13 maschere semplici (IVA, referente, cliente, indirizzo, fornitore, linea,
+> placca, manodopera, unita', area, locale, articolo, ditta). La domanda architetturale in fondo a questa sezione ha
+> avuto risposta: si', serve un padre Java come per le liste. Il resto della sezione e' storia.
+
 ### Cosa c'era prima
 
 Le pagine di modifica/inserimento (le `*Mod*Activity`, 19+ moduli) erano tutte costruite

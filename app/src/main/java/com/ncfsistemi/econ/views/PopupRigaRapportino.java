@@ -1,6 +1,6 @@
 package com.ncfsistemi.econ.views;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -192,7 +192,7 @@ public class PopupRigaRapportino {
         db.close();
 
         int titolo = isMateriale() ? R.string.articolo : isViaggio() ? R.string.tipo_viaggio : R.string.manodopera;
-        final AlertDialog dialog = new AlertDialog.Builder(ctx)
+        final AlertDialog dialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx)
                 .setTitle(titolo)
                 .setView(vista)
                 .setPositiveButton(nuova ? R.string.inserisci : R.string.salva, null)
@@ -247,7 +247,7 @@ public class PopupRigaRapportino {
                 nomi[i] = vociUtenti.get(i).testo;
                 spunte[i] = utentiScelti.contains(vociUtenti.get(i).id);
             }
-            new AlertDialog.Builder(ctx)
+            new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx)
                     .setTitle(R.string.scegli_utenti)
                     .setMultiChoiceItems(nomi, spunte, (d, i, spuntato) -> spunte[i] = spuntato)
                     .setPositiveButton(android.R.string.ok, (d, w) -> {
@@ -643,7 +643,7 @@ public class PopupRigaRapportino {
             android.widget.FrameLayout cornice = new android.widget.FrameLayout(ctx);
             cornice.setPadding(p, p / 2, p, 0);
             cornice.addView(nome);
-            new AlertDialog.Builder(ctx).setTitle(titolo).setView(cornice)
+            new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx).setTitle(titolo).setView(cornice)
                     .setPositiveButton(R.string.inserisci, (d, w) -> {
                         String n = nome.getText().toString().trim();
                         if (!n.isEmpty()) crea.accept(n);

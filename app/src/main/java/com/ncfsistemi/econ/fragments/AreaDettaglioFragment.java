@@ -1,85 +1,47 @@
 package com.ncfsistemi.econ.fragments;
 
 import android.content.ContentValues;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.content.Intent;
 
-import java.util.ArrayList;
-
+import com.ncfsistemi.econ.EconActivity;
+import com.ncfsistemi.econ.AreaDettaglioModActivity;
 import com.ncfsistemi.econ.R;
 import com.ncfsistemi.econ.db.DbInterno;
-import com.ncfsistemi.econ.db.Join;
 import com.ncfsistemi.econ.db.table.Aree;
-import com.ncfsistemi.econ.db.table.Costruttori;
-import com.ncfsistemi.econ.db.table.Linee;
-import com.ncfsistemi.econ.db.table.Placche;
-import com.ncfsistemi.econ.db.table.Unita;
+import com.ncfsistemi.econ.form.DefinizioneForm;
+import com.ncfsistemi.econ.form.Form;
+import com.ncfsistemi.econ.form.AreaForm;
+import com.ncfsistemi.econ.utils.FaIcone;
+import com.ncfsistemi.econ.utils.FunzionalitaApp;
 
-public  class AreaDettaglioFragment extends EconFragment {
-	private int area = 0;
+/** Scheda dell'area del cantiere (gestione elettrica) sul template: stesse sezioni di AreaForm, matita per la modifica. */
+public class AreaDettaglioFragment extends EconSchedaFragment {
+
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
-		View v = super.onCreateView(inflater, container, savedInstanceState);
-		v = inflater.inflate(R.layout.fragment_area_dettaglio, container,false);
-		area = getArguments().getInt(Aree.ID_AREA);
-		
-		return v;
+	protected DefinizioneForm creaDefinizione() {
+		return new AreaForm();
 	}
-	
+
+	private int id() {
+		return getArguments().getInt(Aree.ID_AREA);
+	}
+
 	@Override
-	public void onResume() {
-		// TODO Auto-generated method stub
-		super.onResume();
-		refresh();
+	protected ContentValues leggiRecord(DbInterno db) {
+		ContentValues where = new ContentValues();
+		where.put(Aree.ID_AREA, id());
+		return db.getRecord(new Aree(), where);
 	}
-	
-	public void refresh(){
-		DbInterno db = new DbInterno(getActivity());
-		
-		Aree uni = new Aree();
-		
-		Linee linee = new Linee();
-		Placche placche = new Placche();
-        Costruttori costruttori = new Costruttori();
-	
-		
-		Join join1 = new Join(uni.getNomeTabella(), linee.getNomeTabella(),Join.LEFT_JOIN);
-		join1.addCampiDiJoin(Unita.ID_LINEA, Linee.ID_LINEA);
-		
-		Join join2 = new Join(uni.getNomeTabella(), placche.getNomeTabella(),Join.LEFT_JOIN);
-		join2.addCampiDiJoin(Unita.ID_PLACCA, Placche.ID_PLACCA);
 
-        Join join4 = new Join(Linee.NOME_TABELLA, Costruttori.NOME_TABELLA, Join.LEFT_JOIN);
-        join4.addCampiDiJoin(Linee.ID_COSTRUTTORE, Costruttori.ID_COSTRUTTORE);
-		
-		String SQL = "Select " + uni.getNomeCampoTabella("*") +","+linee.getNomeCampoTabella(Linee.NOME_LINEA)+","+placche.getNomeCampoTabella(Placche.NOME_PLACCA)+","+costruttori.getNomeCampoTabella(Costruttori.RAGIONE_SOCIALE)+" as ragsoc_costruttore"+
-				" from " + uni.getNomeTabella()+ join1.getSQLJoin()+join2.getSQLJoin()+ join4.getSQLJoin()+
-        " where " + uni.getNomeCampoTabella(Aree.ID_AREA)+" = " + area;
-		
-		ArrayList<Object> records = db.eseguiSelect(SQL, null);
-		
-		ContentValues val = null;
-		
-		db.close();
-		
-		if (records.size()>0){
-			val = (ContentValues)records.get(0);
-		}
-		View v = getView();
-		if (val!=null){
-			setText(R.id.editText_area, val.getAsString(Aree.NOME), v);
-			if (val.getAsString("ragsoc_costruttore")!=null){
-                setText(R.id.editText_linea, val.getAsString("ragsoc_costruttore")+" - "+val.getAsString(Linee.NOME_LINEA), v);
-            }
+	@Override
+	protected void dopoCaricamento(Form form, ContentValues record) {
+		if (record == null) return;
 
-			setText(R.id.editText_placca, val.getAsString(Placche.NOME_PLACCA), v);
-			setText(R.id.editText_note, val.getAsString(Aree.NOTE),v);
-		}
+		if (!FunzionalitaApp.puoModificare(getActivity(), FunzionalitaApp.ELETTRICO)) return;
+		form.azione(0, FaIcone.MODIFICA, getString(R.string.modifica), x -> {
+			Intent intent = new Intent(getActivity(), AreaDettaglioModActivity.class);
+			intent.putExtra("ID", id());
+			((EconActivity) getActivity()).apriFinestraModifica(intent, 1);
+		});
 	}
-	
-	
-	
 }

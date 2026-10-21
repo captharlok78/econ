@@ -190,6 +190,8 @@ public interface MercuryApiService {
         public PasswordProfilo password;
         /** Giorni in cui si puo' lavorare senza server (ditte.giorni_offline_app); null da server vecchi */
         public Integer offlineGiorni;
+        /** Codice IVA proposto ai clienti nuovi (ditte.id_iva_predefinita); null = nessuno */
+        public String ivaPredefinita;
     }
 
     /** GET api/auth/moduli: moduli app e pacchetti dell'utente nella ditta del token (chiamato a ogni apertura). */
@@ -199,6 +201,7 @@ public interface MercuryApiService {
         public Boolean pianificazione;
         public java.util.List<PacchettoInfo> pacchetti;
         public Integer offlineGiorni;
+        public String ivaPredefinita;
     }
 
     /** Pacchetto licenza assegnato: tipo "APP" o "WEB" (server), stato leggibile (Attiva, In scadenza, Scaduta, ...). */

@@ -1,6 +1,6 @@
 package com.ncfsistemi.econ;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -414,7 +414,7 @@ public class FinestraElementiActivity extends EconActivity implements OnClickLis
                     }
                 };
 
-                AlertDialog.Builder ab = new AlertDialog.Builder(this);
+                AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this);
                 ab.setMessage(messaggio);
                 ab.setView(checkView);
                 ab.setTitle(getString(R.string.conferma_aggiunta_elemento));

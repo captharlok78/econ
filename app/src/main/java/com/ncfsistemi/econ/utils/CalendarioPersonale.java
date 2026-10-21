@@ -170,7 +170,7 @@ public final class CalendarioPersonale {
             if (!aggiunge) continue;
             // suo o della sua squadra (l'amministratore vedrebbe tutti quelli della ditta)
             boolean pertinente = proprietario || squadra.contains(intero(t, Rapportini.ID_UTENTE_DITTA))
-                    || (utente.pianificazione ? coinvolto && idCantiere > 0 : giaInRiga(righe, utente));
+                    || (utente.pianificazione ? coinvolto && idCantiere != 0 : giaInRiga(righe, utente));
             if (!pertinente) continue;
             t.put("autore", RegoleRapportino.nomeOperatore(db, intero(t, Rapportini.ID_UTENTE_DITTA)));
             ris.add(t);

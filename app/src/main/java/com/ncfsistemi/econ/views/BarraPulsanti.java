@@ -43,7 +43,7 @@ public final class BarraPulsanti {
         int perRiga = Math.max(MINIMO_PER_RIGA, larghezzaDp / LARGHEZZA_PULSANTE_DP);
         int righe = Math.max(1, (visibili.size() + perRiga - 1) / perRiga);
         float densita = barra.getResources().getDisplayMetrics().density;
-        int altezza = Math.round(48 * densita);
+        int altezza = Math.round(56 * densita);
 
         // stesse quantita' per riga (7 pulsanti in 3 righe: 3 + 2 + 2), i primi pulsanti in alto
         int indice = 0;
@@ -56,8 +56,8 @@ public final class BarraPulsanti {
             barra.addView(riga, lp);
             for (int i = 0; i < quanti; i++) {
                 LinearLayout.LayoutParams lpp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f);
-                lpp.setMarginStart(Math.round(densita));
-                lpp.setMarginEnd(Math.round(densita));
+                lpp.setMarginStart(Math.round(4 * densita));
+                lpp.setMarginEnd(Math.round(4 * densita));
                 riga.addView(visibili.get(indice++), lpp);
             }
         }

@@ -117,15 +117,13 @@
         android:padding="12dp"
         android:elevation="4dp">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
+            style="@style/Econ.Pulsante"
             android:id="@+id/btnSincronizza"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:onClick="avviaSincronizzazione"
-            android:text="AVVIA SINCRONIZZAZIONE"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#1565C0"
-            android:textStyle="bold" />
+            android:text="AVVIA SINCRONIZZAZIONE" />
 
     </LinearLayout>
 

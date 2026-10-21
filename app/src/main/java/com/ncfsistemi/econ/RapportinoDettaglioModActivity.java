@@ -26,8 +26,10 @@ import java.util.Set;
 import com.ncfsistemi.econ.adapters.ColonnaDettaglio;
 import com.ncfsistemi.econ.adapters.DettaglioTabellaAdapter;
 import com.ncfsistemi.econ.db.DbInterno;
+import com.ncfsistemi.econ.db.table.AbstractTable;
 import com.ncfsistemi.econ.db.table.Anagrafica;
 import com.ncfsistemi.econ.db.table.Cantieri;
+import com.ncfsistemi.econ.db.table.ClientiIndirizzi;
 import com.ncfsistemi.econ.db.table.Preventivi;
 import com.ncfsistemi.econ.db.table.PreventiviDettaglio;
 import com.ncfsistemi.econ.db.table.Rapportini;
@@ -35,6 +37,7 @@ import com.ncfsistemi.econ.db.table.RapportiniDettaglio;
 import com.ncfsistemi.econ.db.table.RapportiniDettaglioTipi;
 import com.ncfsistemi.econ.db.table.StatiDocumento;
 import com.ncfsistemi.econ.db.table.Utenti;
+import com.ncfsistemi.econ.utils.CantiereDaIndirizzo;
 import com.ncfsistemi.econ.utils.FaIcone;
 import com.ncfsistemi.econ.utils.RegoleRapportino;
 import com.ncfsistemi.econ.utils.RigheRapportino;
@@ -88,6 +91,8 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     /** Cantieri ammessi per la data (id_cantiere, nome, id_anagrafica, ragione_sociale). */
     private ArrayList<Object> cantieriAmmessi = new ArrayList<Object>();
     private String dataCaricata = null;
+    /** Cantiere creato da qui per un cliente che non ne aveva (resta sceglibile anche se non e' pianificato). */
+    private int idCantiereCreato = 0;
     /** Stato a cui porta il salvataggio in corso (Salva: lo stesso o l'iniziale; Conferma: Confermato). */
     private int idStatoDestino = 0;
 
@@ -96,6 +101,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     private String firmaNuovaNome = null;
     private long firmaNuovaData = 0;
     private static final int RICHIESTA_FIRMA = 77;
+    private static final int RICHIESTA_NUOVO_CLIENTE = 78;
 
     /** Rapportino nuovo con questa data (yyyyMMddHHmmss), es. dal calendario personale. */
     public static final String EXTRA_DATA = "DATA_RAPPORTINO";
@@ -110,6 +116,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_rapportino_dettaglio_mod);
+        com.ncfsistemi.econ.utils.SezioneStandard.imposta(findViewById(R.id.sezione_testata), com.ncfsistemi.econ.utils.FaIcone.RAPPORTINO, "Rapportino");
         data = (EconCalendario) findViewById(R.id.edit_data);
         campoCliente = (CampoRicerca) findViewById(R.id.campo_cliente);
         campoCantiere = (CampoRicerca) findViewById(R.id.campo_cantiere);
@@ -140,12 +147,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             if (dataProposta > 0) data.setValue(String.valueOf(dataProposta));
             stato = RegoleRapportino.statoIniziale(db);
             impostaOperatore(utente.idUtenteDitta);
-            // stessi cliente e cantiere dell'ultimo rapportino dell'autore (il cantiere se e' ancora tra quelli ammessi)
-            ContentValues ultimo = new Rapportini().getUltimoRapportinoOperatore(db, utente.idUtenteDitta);
-            if (ultimo != null) {
-                idCliente = RigheRapportino.intero(ultimo, Rapportini.ID_CLIENTE);
-                idCantiere = RigheRapportino.intero(ultimo, Rapportini.ID_CANTIERE);
-            }
+            // nuovo rapportino pulito (21/10): cliente, cantiere e ordine si scelgono, niente ripresi dall'ultimo
         }
         // stato modificabile e, per un rapportino esistente, la funzionalita' MODIFICA del pacchetto per il ruolo
         senzaLicenzaModifica = testata != null
@@ -178,6 +180,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         aggiornaInviaMail();
         mostraFirma();
         disponiPulsanti();
+        preparaFisarmonica();
 
         String messaggio = getIntent().getStringExtra(EXTRA_SALVATO);
         if (messaggio != null) {
@@ -200,11 +203,12 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     public void onConfigurationChanged(android.content.res.Configuration nuova) {
         super.onConfigurationChanged(nuova);
         disponiPulsanti();
+        fisarmonica();
     }
 
     /** Se il riferimento salvato non e' tra le voci del tablet, lo seleziona con un testo che lo spiega (l'id resta). */
     private static void tieniSeAssente(CampoRicerca campo, int id, String cosa) {
-        if (id > 0 && campo.getIdScelto() == 0) {
+        if (id != 0 && campo.getIdScelto() == 0) {
             campo.seleziona(new CampoRicerca.Voce(id, cosa + " n. " + id + " (non sul tablet)", new ContentValues()));
         }
     }
@@ -268,6 +272,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
 
         data.setEnabled(testataModificabile);
         campoCliente.setEnabled(testataModificabile);
+        findViewById(R.id.button_nuovo_cliente).setVisibility(testataModificabile ? View.VISIBLE : View.GONE);
         campoCantiere.setEnabled(testataModificabile);
         campoOrdine.setEnabled(testataModificabile);
         editNote.setEnabled(testataModificabile);
@@ -339,8 +344,8 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     private void avvisoApertura(ContentValues cantiere) {
         Long apertura = cantiere.getAsLong(Cantieri.DATA_APERTURA);
         long giorno = Cantieri.giorno(dataRapportino());
-        if (apertura == null || apertura <= 0 || giorno == 0 || giorno >= apertura / 1000000L) return;
-        String s = String.valueOf(apertura / 1000000L);
+        if (apertura == null || apertura <= 0 || giorno == 0 || giorno >= Cantieri.giorno(apertura)) return;
+        String s = String.valueOf(Cantieri.giorno(apertura));
         Toast.makeText(this, "Il cantiere apre il " + s.substring(6, 8) + "/" + s.substring(4, 6) + "/" + s.substring(0, 4)
                 + ": il rapportino e' prima dell'apertura.", Toast.LENGTH_LONG).show();
     }
@@ -350,7 +355,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         dataCaricata = data.getValue();
         DbInterno db = new DbInterno(this);
         cantieriAmmessi = RegoleRapportino.cantieriDisponibili(db, utente, dataRapportino(),
-                testata != null ? RigheRapportino.intero(testata, Rapportini.ID_CANTIERE) : 0);
+                testata != null ? RigheRapportino.intero(testata, Rapportini.ID_CANTIERE) : idCantiereCreato);
         db.close();
         if (cantieriAmmessi.isEmpty() && modificabile) {
             Toast.makeText(this, getString(!utente.amministratore && utente.idUtenteDitta == 0
@@ -367,15 +372,105 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         List<CampoRicerca.Voce> voci = new ArrayList<CampoRicerca.Voce>();
         for (Object o : cantieriAmmessi) {
             ContentValues c = (ContentValues) o;
-            if (cliente > 0 && RigheRapportino.intero(c, Cantieri.ID_ANAGRAFICA) != cliente) continue;
+            // i clienti creati sul dispositivo hanno l'id negativo: il filtro vale per ogni id diverso da 0
+            if (cliente != 0 && RigheRapportino.intero(c, Cantieri.ID_ANAGRAFICA) != cliente) continue;
             String rs = RigheRapportino.testo(c, Anagrafica.RAGIONE_SOCIALE);
             voci.add(new CampoRicerca.Voce(RigheRapportino.intero(c, Cantieri.ID_CANTIERE),
                     RigheRapportino.testo(c, Cantieri.NOME) + (cliente == 0 && !rs.isEmpty() ? " - " + rs : ""), c));
         }
         campoCantiere.setVoci(voci);
-        campoCantiere.setMinimoLettere(cliente > 0 ? 0 : 3);
-        campoCantiere.setHint(cliente <= 0 ? getString(R.string.cerca_3_lettere)
+        campoCantiere.setMinimoLettere(cliente != 0 ? 0 : 3);
+        campoCantiere.setHint(cliente == 0 ? getString(R.string.cerca_3_lettere)
                 : voci.isEmpty() ? "Nessun cantiere per questo cliente" : "Tocca per scegliere (" + voci.size() + ")");
+    }
+
+    /**
+     * Cliente scelto (o appena creato col "+") senza cantieri: si propone di creare il cantiere al suo indirizzo predefinito (il
+     * principale, altrimenti il primo attivo) e, alla conferma, lo si crea e lo si sceglie subito. Niente domanda se il
+     * cliente ha gia' cantieri (anche se non sceglibili per la data o la pianificazione), se non ha indirizzi o se manca
+     * CANTIERI.CREA.
+     */
+    private void proponiCantiere(CampoRicerca.Voce cliente) {
+        if (!testataModificabile) return;
+        // mai in silenzio: se il cantiere non si puo' creare si dice perche'
+        if (!com.ncfsistemi.econ.utils.FunzionalitaApp.ha(this, com.ncfsistemi.econ.utils.FunzionalitaApp.CANTIERI_CREA)) {
+            Utility.mostraDialog("Nessun cantiere", cliente.testo + " non ha cantieri e la tua licenza non consente di crearne"
+                    + " (funzionalita' Cantieri › Crea). Chiedi all'amministratore della ditta.", this, "OK");
+            return;
+        }
+        DbInterno db = new DbInterno(this);
+        ArrayList<Object> esistenti = db.eseguiSelect("select " + Cantieri.NOME + " from " + Cantieri.NOME_TABELLA + " where "
+                + Cantieri.ID_ANAGRAFICA + "=" + cliente.id + " and coalesce(" + AbstractTable.ATTIVO + ", 1) = 1 limit 1", null);
+        boolean haCantieri = !esistenti.isEmpty();
+        ArrayList<Object> indirizzi = haCantieri ? new ArrayList<Object>() : db.eseguiSelect("select * from " + ClientiIndirizzi.NOME_TABELLA
+                + " where " + ClientiIndirizzi.ID_ANAGRAFICA + "=" + cliente.id + " and coalesce(" + AbstractTable.ATTIVO + ", 1) = 1"
+                + " order by coalesce(" + ClientiIndirizzi.PRINCIPALE + ", 0) desc, " + ClientiIndirizzi.ID + " limit 1", null);
+        db.close();
+        if (haCantieri) {
+            Utility.mostraDialog("Cantiere non sceglibile", cliente.testo + " ha gia' il cantiere \""
+                    + RigheRapportino.testo((ContentValues) esistenti.get(0), Cantieri.NOME) + "\", ma non e' sceglibile per il "
+                    + data.getTesto().getText() + ": e' chiuso a quella data" + (utente.amministratore ? "" : " o non sei pianificato li'")
+                    + ". Controlla le date del cantiere.", this, "OK");
+            return;
+        }
+        // senza indirizzi (cliente con l'indirizzo solo sulla scheda): la sede principale nasce da quello, alla conferma
+        ContentValues indirizzo = indirizzi.isEmpty() ? sedeDalCliente(cliente.dati) : (ContentValues) indirizzi.get(0);
+        final boolean sedeDaCreare = indirizzi.isEmpty();
+        String dove = indirizzo == null ? "Creo il cantiere \"" + cliente.testo + "\" (senza indirizzo, si completa dopo)"
+                : "Creo il cantiere all'indirizzo " + ClientiIndirizzi.completo(indirizzo);
+        Utility.mostraConfermaDialog("Nessun cantiere", cliente.testo + " non ha cantieri.\n\n" + dove
+                        + " e lo scelgo per questo rapportino?", this, "Crea cantiere",
+                getString(R.string.annulla), (dialog, quale) -> {
+                    if (quale != DialogInterface.BUTTON_POSITIVE) return;
+                    DbInterno dbc = new DbInterno(this);
+                    CantiereDaIndirizzo.Esito esito;
+                    if (indirizzo == null) {
+                        esito = CantiereDaIndirizzo.creaCantiereSenzaIndirizzo(dbc, cliente.id);
+                    } else {
+                        int idIndirizzo = sedeDaCreare ? creaSede(dbc, indirizzo) : RigheRapportino.intero(indirizzo, ClientiIndirizzi.ID);
+                        esito = CantiereDaIndirizzo.creaCantiere(dbc, idIndirizzo);
+                    }
+                    dbc.close();
+                    Toast.makeText(this, esito.messaggio, Toast.LENGTH_LONG).show();
+                    if (esito.idCantiere == 0) return;
+                    idCantiereCreato = esito.idCantiere;
+                    caricaCantieriAmmessi();
+                    aggiornaElencoCantieri();
+                    campoCantiere.selezionaId(idCantiereCreato);
+                    cantiereScelto(campoCantiere.getScelta());
+                });
+    }
+
+    /** Sede principale (non ancora scritta) dall'indirizzo sulla scheda del cliente; null se il cliente non ha indirizzo. */
+    private static ContentValues sedeDalCliente(ContentValues cli) {
+        String via = RigheRapportino.testo(cli, Anagrafica.INDIRIZZO), citta = RigheRapportino.testo(cli, Anagrafica.CITTA);
+        if ((via + citta).trim().isEmpty()) return null;
+        ContentValues sede = new ContentValues();
+        sede.put(ClientiIndirizzi.ID_ANAGRAFICA, RigheRapportino.intero(cli, Anagrafica.ID_ANAGRAFICA));
+        sede.put(ClientiIndirizzi.TIPO, ClientiIndirizzi.TIPI[0][0]);
+        sede.put(ClientiIndirizzi.INDIRIZZO, via);
+        sede.put(ClientiIndirizzi.CIVICO, "");
+        sede.put(ClientiIndirizzi.CAP, RigheRapportino.testo(cli, Anagrafica.CAP));
+        sede.put(ClientiIndirizzi.CITTA, citta);
+        sede.put(ClientiIndirizzi.PROVINCIA, RigheRapportino.testo(cli, Anagrafica.PROVINCIA));
+        sede.put(ClientiIndirizzi.NAZIONE, "IT");
+        sede.put(ClientiIndirizzi.PRINCIPALE, 1);
+        sede.put(AbstractTable.ATTIVO, 1);
+        return sede;
+    }
+
+    /** Scrive la sede principale proposta (va al server con il cantiere); il suo id. */
+    private static int creaSede(DbInterno db, ContentValues sede) {
+        ClientiIndirizzi tab = new ClientiIndirizzi();
+        ContentValues val = tab.getValoriLogInserimento(db);
+        val.putAll(sede);
+        tab.inserisciRecord(db, val);
+        return RigheRapportino.intero(val, ClientiIndirizzi.ID);
+    }
+
+    /** "+" accanto al cliente: inserimento di un cliente nuovo (se la licenza lo consente); al ritorno e' gia' scelto. */
+    public void nuovoCliente(View v) {
+        apriFinestraInserimento(new Intent(this, ClientiDettaglioModActivity.class), RICHIESTA_NUOVO_CLIENTE, new Anagrafica());
     }
 
     /** Apre l'elenco del campo (dopo la scelta del cliente o del cantiere), se c'e' qualcosa da scegliere. */
@@ -415,41 +510,59 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         campoOrdine.setHint(voci.isEmpty() ? "Nessun ordine aperto" : "Tocca per scegliere (" + voci.size() + ")");
     }
 
+    /** Cliente scelto dall'elenco o appena creato col "+": cantieri del cliente, oppure la domanda "Crea cantiere". */
+    private void clienteScelto(CampoRicerca.Voce voce) {
+        modificato = true;
+        // il cantiere di un altro cliente non vale piu' (e con lui l'ordine)
+        CampoRicerca.Voce cantiere = campoCantiere.getScelta();
+        if (voce != null && cantiere != null && RigheRapportino.intero(cantiere.dati, Cantieri.ID_ANAGRAFICA) != voce.id) {
+            campoCantiere.seleziona(null);
+            campoOrdine.seleziona(null);
+        }
+        aggiornaElencoCantieri();
+        aggiornaElencoOrdini(0);
+        aggiornaInviaMail();
+        if (voce != null && campoCantiere.getVoci().isEmpty()) {
+            proponiCantiere(voce);
+        } else if (voce != null && campoCantiere.getScelta() == null && campoCantiere.getVoci().size() == 1) {
+            // un solo cantiere sceglibile: e' quello, senza aprire l'elenco
+            campoCantiere.seleziona(campoCantiere.getVoci().get(0));
+            cantiereScelto(campoCantiere.getScelta());
+        } else if (voce != null) {
+            apriElenco(campoCantiere); // i cantieri del cliente appena scelto
+        }
+    }
+
+    /** Cantiere scelto dall'elenco o impostato da solo (unico del cliente): cliente del cantiere, ordini aperti. */
+    private void cantiereScelto(CampoRicerca.Voce voce) {
+        modificato = true;
+        if (voce != null) { // il cliente diventa quello del cantiere (come sul server)
+            avvisoApertura(voce.dati);
+            int cliente = RigheRapportino.intero(voce.dati, Cantieri.ID_ANAGRAFICA);
+            if (cliente != 0 && cliente != campoCliente.getIdScelto()) {
+                campoCliente.selezionaId(cliente);
+                aggiornaInviaMail();
+            }
+        }
+        CampoRicerca.Voce ordine = campoOrdine.getScelta();
+        if (ordine != null && (voce == null || RigheRapportino.intero(ordine.dati, Preventivi.ID_CANTIERE) != voce.id)) {
+            campoOrdine.seleziona(null);
+        }
+        aggiornaElencoOrdini(0);
+        if (voce != null) apriElenco(campoOrdine); // gli ordini aperti del cantiere, se ce ne sono
+    }
+
     private void impostaAscoltatori() {
         campoCliente.setAscoltatore(new CampoRicerca.Ascoltatore() {
             @Override
             public void selezioneCambiata(CampoRicerca campo, CampoRicerca.Voce voce) {
-                modificato = true;
-                // il cantiere di un altro cliente non vale piu' (e con lui l'ordine)
-                CampoRicerca.Voce cantiere = campoCantiere.getScelta();
-                if (voce != null && cantiere != null && RigheRapportino.intero(cantiere.dati, Cantieri.ID_ANAGRAFICA) != voce.id) {
-                    campoCantiere.seleziona(null);
-                    campoOrdine.seleziona(null);
-                }
-                aggiornaElencoCantieri();
-                aggiornaElencoOrdini(0);
-                aggiornaInviaMail();
-                if (voce != null) apriElenco(campoCantiere); // i cantieri del cliente appena scelto
+                clienteScelto(voce);
             }
         });
         campoCantiere.setAscoltatore(new CampoRicerca.Ascoltatore() {
             @Override
             public void selezioneCambiata(CampoRicerca campo, CampoRicerca.Voce voce) {
-                modificato = true;
-                if (voce != null) { // il cliente diventa quello del cantiere (come sul server)
-                    avvisoApertura(voce.dati);
-                    int cliente = RigheRapportino.intero(voce.dati, Cantieri.ID_ANAGRAFICA);
-                    if (cliente > 0 && cliente != campoCliente.getIdScelto()) {
-                        campoCliente.selezionaId(cliente);
-                        aggiornaInviaMail();
-                    }
-                }
-                CampoRicerca.Voce ordine = campoOrdine.getScelta();
-                if (ordine != null && (voce == null || RigheRapportino.intero(ordine.dati, Preventivi.ID_CANTIERE) != voce.id)) {
-                    campoOrdine.seleziona(null);
-                }
-                aggiornaElencoOrdini(0);
-                if (voce != null) apriElenco(campoOrdine); // gli ordini aperti del cantiere, se ce ne sono
+                cantiereScelto(voce);
             }
         });
         campoOrdine.setAscoltatore(new CampoRicerca.Ascoltatore() {
@@ -464,7 +577,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
                         ContentValues c = (ContentValues) o;
                         if (RigheRapportino.intero(c, Cantieri.ID_CANTIERE) != idCantiere) continue;
                         int cliente = RigheRapportino.intero(c, Cantieri.ID_ANAGRAFICA);
-                        if (cliente > 0) campoCliente.selezionaId(cliente);
+                        if (cliente != 0) campoCliente.selezionaId(cliente);
                         aggiornaElencoCantieri();
                         campoCantiere.selezionaId(idCantiere);
                         aggiornaInviaMail();
@@ -940,11 +1053,11 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         int idCliente = campoCliente.getIdScelto();
         int idCantiere = campoCantiere.getIdScelto();
         CampoRicerca.Voce ordine = campoOrdine.getScelta();
-        if (ordine != null && RigheRapportino.intero(ordine.dati, Preventivi.ID_CANTIERE) > 0) {
+        if (ordine != null && RigheRapportino.intero(ordine.dati, Preventivi.ID_CANTIERE) != 0) {
             idCantiere = RigheRapportino.intero(ordine.dati, Preventivi.ID_CANTIERE);
         }
         CampoRicerca.Voce cantiere = campoCantiere.cercaId(idCantiere);
-        if (cantiere != null && RigheRapportino.intero(cantiere.dati, Cantieri.ID_ANAGRAFICA) > 0) {
+        if (cantiere != null && RigheRapportino.intero(cantiere.dati, Cantieri.ID_ANAGRAFICA) != 0) {
             idCliente = RigheRapportino.intero(cantiere.dati, Cantieri.ID_ANAGRAFICA);
         }
         val.put(Rapportini.DATA_RAPPORTINO, dataRapportino());
@@ -1005,7 +1118,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         img.setBackgroundColor(android.graphics.Color.WHITE);
         int p = Math.round(16 * getResources().getDisplayMetrics().density);
         img.setPadding(p, p, p, p);
-        androidx.appcompat.app.AlertDialog.Builder b = new androidx.appcompat.app.AlertDialog.Builder(this)
+        androidx.appcompat.app.AlertDialog.Builder b = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle(testoFirma())
                 .setView(img)
                 .setNegativeButton("Chiudi", null);
@@ -1027,6 +1140,21 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         super.onActivityResult(requestCode, resultCode, data);
         // foto del nuovo articolo chiesta dalla finestra della riga (§14)
         if (com.ncfsistemi.econ.views.PopupRigaRapportino.risultatoFoto(requestCode, resultCode, data)) return;
+        if (requestCode == RICHIESTA_NUOVO_CLIENTE) {
+            if (resultCode != RESULT_OK) return;
+            // i clienti nuovi del dispositivo hanno l'id negativo: l'ultimo creato e' il piu' basso
+            DbInterno db = new DbInterno(this);
+            int nuovo = db.getUltimoId(new Anagrafica());
+            caricaClienti(db);
+            db.close();
+            CampoRicerca.Voce voce = campoCliente.cercaId(nuovo);
+            if (voce == null) Toast.makeText(this, "Cliente salvato: sceglilo dall'elenco.", Toast.LENGTH_LONG).show();
+            if (voce != null) {
+                campoCliente.seleziona(voce);
+                clienteScelto(voce); // propone il cantiere alla sua sede
+            }
+            return;
+        }
         if (requestCode != RICHIESTA_FIRMA || resultCode != RESULT_OK || data == null) return;
         firmaNuova = data.getStringExtra(FirmaActivity.EXTRA_FIRMA);
         firmaNuovaNome = data.getStringExtra(FirmaActivity.EXTRA_NOME);
@@ -1049,6 +1177,123 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             Toast.makeText(this, "Firma salvata.", Toast.LENGTH_SHORT).show();
         }
         mostraFirma();
+    }
+
+    /** Tutte e due aperte in orizzontale (dopo una rotazione): la testata occupa al massimo questa parte dell'altezza (poi scorre). */
+    private static final float TESTATA_MAX_ORIZZONTALE = 0.42f;
+
+    /** Sezioni a fisarmonica (21/10): testata e righe si aprono/chiudono toccando il titolo. */
+    private boolean testataAperta = true, righeAperte = true;
+    private TextView frecciaTestata, frecciaRighe;
+
+    /**
+     * Rapportino esistente: testata chiusa (cliente / cantiere / data nel titolo) e righe aperte, per controllare e
+     * aggiungere righe; nuovo: tutte e due aperte, per scegliere cliente e cantiere.
+     */
+    private void preparaFisarmonica() {
+        testataAperta = testata == null;
+        // nuovo rapportino in orizzontale: prima la testata (cliente e cantiere), le righe si aprono dopo
+        righeAperte = !(testataAperta && orizzontale());
+        View sezTestata = findViewById(R.id.sezione_testata), sezRighe = findViewById(R.id.sezione_righe);
+        com.ncfsistemi.econ.utils.SezioneStandard.imposta(sezRighe, com.ncfsistemi.econ.utils.FaIcone.ELENCO, "Righe");
+        ((ViewGroup.MarginLayoutParams) sezRighe.getLayoutParams()).topMargin = Math.round(2 * getResources().getDisplayMetrics().density);
+        frecciaTestata = freccia(sezTestata);
+        frecciaRighe = freccia(sezRighe);
+        ((ViewGroup.MarginLayoutParams) sezTestata.getLayoutParams()).topMargin = Math.round(2 * getResources().getDisplayMetrics().density);
+        sezTestata.setOnClickListener(v -> {
+            testataAperta = !testataAperta;
+            if (testataAperta && orizzontale()) righeAperte = false;
+            fisarmonica();
+        });
+        sezRighe.setOnClickListener(v -> {
+            righeAperte = !righeAperte;
+            if (righeAperte && orizzontale()) testataAperta = false;
+            fisarmonica();
+        });
+        // il numero di righe nel titolo resta giusto a ogni riga aggiunta, modificata o tolta
+        adapter.registerDataSetObserver(new android.database.DataSetObserver() {
+            @Override
+            public void onChanged() {
+                titoliFisarmonica();
+            }
+        });
+        fisarmonica();
+    }
+
+    /** In orizzontale l'altezza e' poca: aprire una sezione chiude l'altra (fisarmonica vera). */
+    private boolean orizzontale() {
+        return getResources().getConfiguration().orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+    }
+
+    /** Freccia della sezione (non cliccabile da sola: il tocco va a tutto il titolo). */
+    private TextView freccia(View sezione) {
+        TextView t = new TextView(this);
+        t.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 18);
+        t.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.econ_testo_secondario));
+        t.setPadding(Math.round(12 * getResources().getDisplayMetrics().density), 0, 0, 0);
+        ((ViewGroup) sezione.findViewById(R.id.sezioneAzioni)).addView(t);
+        android.util.TypedValue sfondo = new android.util.TypedValue();
+        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, sfondo, true);
+        sezione.setBackgroundResource(sfondo.resourceId);
+        return t;
+    }
+
+    /**
+     * Aperto/chiuso, frecce, titoli e spazio: la sezione aperta prende l'altezza libera; con le righe aperte, in
+     * orizzontale, la testata non supera TESTATA_MAX_ORIZZONTALE (scorre).
+     */
+    private void fisarmonica() {
+        View scroll = findViewById(R.id.scroll_testata);
+        scroll.setVisibility(testataAperta ? View.VISIBLE : View.GONE);
+        findViewById(R.id.contenuto_righe).setVisibility(righeAperte ? View.VISIBLE : View.GONE);
+        com.ncfsistemi.econ.utils.FaIcone.applica(frecciaTestata, testataAperta
+                ? com.ncfsistemi.econ.utils.FaIcone.CHIUDI_SEZIONE : com.ncfsistemi.econ.utils.FaIcone.APRI, null);
+        com.ncfsistemi.econ.utils.FaIcone.applica(frecciaRighe, righeAperte
+                ? com.ncfsistemi.econ.utils.FaIcone.CHIUDI_SEZIONE : com.ncfsistemi.econ.utils.FaIcone.APRI, null);
+        titoliFisarmonica();
+
+        boolean testataRiempie = testataAperta && !righeAperte;
+        float densita = getResources().getDisplayMetrics().density;
+        android.widget.LinearLayout.LayoutParams lpT = (android.widget.LinearLayout.LayoutParams) findViewById(R.id.card_testata).getLayoutParams();
+        lpT.height = testataRiempie ? 0 : ViewGroup.LayoutParams.WRAP_CONTENT;
+        lpT.weight = testataRiempie ? 1f : 0f;
+        lpT.bottomMargin = righeAperte ? 0 : Math.round(12 * densita);
+        findViewById(R.id.card_testata).setLayoutParams(lpT);
+        android.widget.LinearLayout.LayoutParams lpR = (android.widget.LinearLayout.LayoutParams) findViewById(R.id.card_righe).getLayoutParams();
+        lpR.height = righeAperte ? 0 : ViewGroup.LayoutParams.WRAP_CONTENT;
+        lpR.weight = righeAperte ? 1f : 0f;
+        findViewById(R.id.card_righe).setLayoutParams(lpR);
+        android.widget.LinearLayout.LayoutParams lpS = (android.widget.LinearLayout.LayoutParams) scroll.getLayoutParams();
+        lpS.height = testataRiempie ? 0 : ViewGroup.LayoutParams.WRAP_CONTENT;
+        lpS.weight = testataRiempie ? 1f : 0f;
+        scroll.setLayoutParams(lpS);
+
+        android.content.res.Configuration c = getResources().getConfiguration();
+        if (testataAperta && righeAperte && c.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+            int massimo = Math.round(c.screenHeightDp * densita * TESTATA_MAX_ORIZZONTALE);
+            scroll.post(() -> {
+                if (scroll.getHeight() > massimo) {
+                    lpS.height = massimo;
+                    scroll.setLayoutParams(lpS);
+                }
+            });
+        }
+    }
+
+    /** Titoli: da chiusa la testata riassume cliente, cantiere e data; le righe dicono quante sono. */
+    private void titoliFisarmonica() {
+        String titolo = "Rapportino";
+        if (!testataAperta) {
+            StringBuilder r = new StringBuilder();
+            CampoRicerca.Voce cli = campoCliente.getScelta(), can = campoCantiere.getScelta();
+            if (cli != null) r.append(" · ").append(cli.testo);
+            if (can != null) r.append(" · ").append(can.testo);
+            r.append(" · ").append(data.getTesto().getText());
+            titolo += r;
+        }
+        ((TextView) findViewById(R.id.sezione_testata).findViewById(R.id.sezioneTitolo)).setText(titolo);
+        ((TextView) findViewById(R.id.sezione_righe).findViewById(R.id.sezioneTitolo))
+                .setText(righe.isEmpty() ? "Righe" : "Righe (" + righe.size() + ")");
     }
 
     /** Anteprima della firma sotto le note e testo del pulsante; il pulsante c'e' se si puo' firmare o guardare la firma. */

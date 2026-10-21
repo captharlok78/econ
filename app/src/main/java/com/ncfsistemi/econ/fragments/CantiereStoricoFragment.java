@@ -1,6 +1,6 @@
 package com.ncfsistemi.econ.fragments;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Color;
@@ -246,7 +246,7 @@ public class CantiereStoricoFragment extends EconFragment {
 			voci[i] = data(m.getAsLong(Rapportini.DATA_RAPPORTINO)) + "  ·  " + numero(m) + "  ·  " + quantita(decimale(m, RapportiniDettaglio.QUANTITA))
 					+ " " + g.um + (nota.isEmpty() ? "" : "  ·  " + nota);
 		}
-		new AlertDialog.Builder(getActivity())
+		new com.google.android.material.dialog.MaterialAlertDialogBuilder(getActivity())
 				.setTitle((g.codice.isEmpty() ? "" : g.codice + " ") + g.descrizione)
 				.setItems(voci, (d, i) -> apriRapportino(g.movimenti.get(i).getAsInteger("id_rapportino")))
 				.setNegativeButton(R.string.annulla, null)

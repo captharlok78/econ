@@ -1,38 +1,52 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Nuovo / modifica componente (gestione elettrica) con l'aspetto delle form del template (STUDIO_FORM_APP.md §7.7): testata
+    standard, campi in una card con etichette piccole e campi bordati, piede Annulla/Salva. Gli id sono quelli di sempre.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/container"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    tools:context=".ComponenteModActivity" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/econ_sfondo"
+    android:orientation="vertical">
 
-    <RelativeLayout
-        android:id="@+id/content"
+    <include
+        android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="wrap_content"
+        layout="@layout/header_dettaglio_standard" />
 
         <ScrollView
             android:id="@+id/scroll"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/footer_dettaglio"
-            android:layout_alignParentTop="true" >
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Econ.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp">
 
             <LinearLayout
                 android:id="@+id/campi"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="@dimen/margine" >
+                android:paddingStart="14dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="14dp" >
 
                 <TextView
                     android:id="@+id/textView_categoria"
-                    style="@style/Titolo"
+                    style="@style/TestoSezione"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginBottom="@dimen/margine"
                     android:text="Categoria"
-                    android:textAllCaps="true" />
+                    android:textAllCaps="false" />
 
                 <LinearLayout
                     android:id="@+id/linear_icona_nomecomp"
@@ -57,12 +71,14 @@
 
                         <TextView
                             android:id="@+id/textView_nome"
-                            style="@style/TestoIntestazione"
+                            style="@style/Econ.Etichetta"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/componente" />
 
                         <EditText
+                            android:background="@drawable/campo_bordato"
+                            android:textSize="16sp"
                             android:id="@+id/editText_nome"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -73,7 +89,7 @@
 
                 <TextView
                     android:id="@+id/textView_preferito"
-                    style="@style/TestoIntestazione"
+                    style="@style/Econ.Etichetta"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/margine"
@@ -101,7 +117,7 @@
 
                         <TextView
                             android:id="@+id/textView_udm"
-                            style="@style/TestoIntestazione"
+                            style="@style/Econ.Etichetta"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/margine"
@@ -128,13 +144,15 @@
 
                         <TextView
                             android:id="@+id/textView_posti"
-                            style="@style/TestoIntestazione"
+                            style="@style/Econ.Etichetta"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/margine"
                             android:text="@string/posti_occupati" />
 
                         <EditText
+                            android:background="@drawable/campo_bordato"
+                            android:textSize="16sp"
                             android:id="@+id/editText_posti"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -159,7 +177,7 @@
 
                         <TextView
                             android:id="@+id/textView_linea"
-                            style="@style/TestoIntestazione"
+                            style="@style/Econ.Etichetta"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/margine"
@@ -183,7 +201,7 @@
 
                         <TextView
                             android:id="@+id/textView_tappo"
-                            style="@style/TestoIntestazione"
+                            style="@style/Econ.Etichetta"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/margine"
@@ -213,7 +231,7 @@
 
                         <TextView
                             android:id="@+id/textView_tipotubo"
-                            style="@style/TestoIntestazione"
+                            style="@style/Econ.Etichetta"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/margine"
@@ -240,13 +258,15 @@
 
                         <TextView
                             android:id="@+id/textView_metritubo"
-                            style="@style/TestoIntestazione"
+                            style="@style/Econ.Etichetta"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/margine"
                             android:text="@string/metritubo" />
 
                         <EditText
+                            android:background="@drawable/campo_bordato"
+                            android:textSize="16sp"
                             android:id="@+id/editText_metritubo"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -270,7 +290,7 @@
 
                         <TextView
                             android:id="@+id/textView_tipocavo"
-                            style="@style/TestoIntestazione"
+                            style="@style/Econ.Etichetta"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/margine"
@@ -297,13 +317,15 @@
 
                         <TextView
                             android:id="@+id/textView_metricavo"
-                            style="@style/TestoIntestazione"
+                            style="@style/Econ.Etichetta"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/margine"
                             android:text="@string/metricavo" />
 
                         <EditText
+                            android:background="@drawable/campo_bordato"
+                            android:textSize="16sp"
                             android:id="@+id/editText_metricavo"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -330,14 +352,14 @@
 
                         <TextView
                             android:id="@+id/textView_lista"
-                            style="@style/TestoIntestazione"
+                            style="@style/Econ.Etichetta"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
                             android:layout_centerVertical="true"
                             android:layout_gravity="center_vertical"
                             android:text="@string/lista_componenti"
-                            android:textAllCaps="true" />
+                            android:textAllCaps="false" />
 
                         <ImageButton
                             android:id="@+id/button_aggiungi_componente"
@@ -358,14 +380,13 @@
                     </ListView>
                 </LinearLayout>
             </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
         </ScrollView>
 
-        <include
-            android:id="@+id/footer_dettaglio"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            layout="@layout/footer_dett" />
-    </RelativeLayout>
+    <include
+        android:id="@+id/footer_dettaglio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/footer_dett" />
 
-</FrameLayout>
+</LinearLayout>

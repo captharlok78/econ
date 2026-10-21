@@ -1,7 +1,7 @@
 package com.ncfsistemi.econ;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -423,26 +423,6 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 
 		}
 		System.out.println("Econ: CantiereSplitActivity _mostraRigaPreventivo EXIT");
-	}
-
-	public void modifica(View v) {
-		System.out.println("Econ: CantiereSplitActivity modifica ENTER");
-		if (v.getId() == R.id.button_edit_unita) {
-			Intent intent = new Intent(this, UnitaDettaglioModActivity.class);
-			intent.putExtra("ID", fragmentPagerUnita.getArguments().getInt(Unita.ID_UNITA));
-			apriFinestraModifica(intent, 1);
-		}
-		if (v.getId() == R.id.button_edit_area) {
-			Intent intent = new Intent(this, AreaDettaglioModActivity.class);
-			intent.putExtra("ID", fragmentPagerArea.getArguments().getInt(Aree.ID_AREA));
-			apriFinestraModifica(intent, 1);
-		}
-		if (v.getId() == R.id.button_edit_locale) {
-			Intent intent = new Intent(this, LocaleDettaglioModActivity.class);
-			intent.putExtra("ID", fragmentPagerLocale.getArguments().getInt(Locali.ID_LOCALE));
-			apriFinestraModifica(intent, 10);
-		}
-		System.out.println("Econ: CantiereSplitActivity modifica EXIT");
 	}
 
 	@Override
@@ -918,7 +898,7 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 	public void mostraSelezionePreventivi() {
 		System.out.println("Econ: CantiereSplitActivity mostraSelezionePreventivi ENTER");
 		AlertDialog di = null;
-		AlertDialog.Builder ab = new AlertDialog.Builder(this);
+		AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this);
 		ab.setTitle(getString(R.string.title_activity_preventivi));
 		final ListView listaPreventivi = new ListView(this);
 		listaPreventivi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
@@ -1057,7 +1037,7 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 	public void creaImmaginiPiantine(int inizio, int idPreventivoStampa) {
 		split.collapse();
 		if (inizio == 0) {
-			AlertDialog.Builder ab = new AlertDialog.Builder(this);
+			AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this);
 			ab.setMessage("Creazione immagini piantine...");
 			di = ab.create();
 			di.show();
@@ -1099,7 +1079,7 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 			AlertDialog di = null;
 			@Override
 			protected void onPreExecute() {
-				AlertDialog.Builder ab = new AlertDialog.Builder(CantiereSplitActivity.this);
+				AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(CantiereSplitActivity.this);
 				ab.setMessage(CantiereSplitActivity.this.getResources().getString(R.string.messaggio_creazione_report));
 				di = ab.create();
 				di.show();
@@ -1148,7 +1128,7 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
             AlertDialog di = null;
             @Override
             protected void onPreExecute() {
-                AlertDialog.Builder ab = new AlertDialog.Builder(CantiereSplitActivity.this);
+                AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(CantiereSplitActivity.this);
                 ab.setMessage(CantiereSplitActivity.this.getResources().getString(R.string.messaggio_creazione_report));
                 di = ab.create();
                 di.show();

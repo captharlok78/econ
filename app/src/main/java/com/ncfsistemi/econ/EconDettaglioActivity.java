@@ -126,7 +126,7 @@ public abstract class EconDettaglioActivity extends EconActivity {
 
 		View scroll = findViewById(R.id.scroll);
 		if (scroll != null) {
-			scroll.setBackgroundColor(Color.parseColor("#F5F5F5"));
+			scroll.setBackgroundColor(androidx.core.content.ContextCompat.getColor(this, R.color.econ_sfondo));
 		}
 	}
 

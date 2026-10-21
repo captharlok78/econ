@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Pagina del template form (package form, STUDIO_FORM_APP.md §3): testata standard, campi disegnati da
+    EconFormStandardActivity a partire dalla DefinizioneForm del modulo, piede Annulla/Salva. Unico layout di tutte le
+    form del template: mai ricopiarlo nei moduli.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/econ_sfondo"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/header_dettaglio_standard" />
+
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:id="@+id/form_contenitore"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="6dp" />
+    </ScrollView>
+
+    <include
+        android:id="@+id/footer_dettaglio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/footer_dett" />
+
+</LinearLayout>

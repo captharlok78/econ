@@ -5,4 +5,10 @@
     <!-- casco del cantiere: giallo = esiste (apre), verde = da creare -->
     <color name="casco_esiste">#F9A825</color>
     <color name="casco_crea">#2E7D32</color>
+    <!-- tema Material 3 (themes_econ.xml) -->
+    <color name="econ_primario">#1565C0</color>
+    <color name="econ_errore">#B3261E</color>
+    <color name="econ_sfondo">#F4F6FA</color>
+    <color name="econ_testo_secondario">#5F6B7A</color>
+    <color name="econ_campo_bloccato">#EEF1F5</color>
 </resources>

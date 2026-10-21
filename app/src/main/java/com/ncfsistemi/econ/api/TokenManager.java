@@ -32,6 +32,7 @@ public class TokenManager {
     private static final String KEY_PASSWORD_SCADUTA = "password_scaduta";
     private static final String KEY_FUNZIONALITA = "funzionalita_abilitate";
     private static final String KEY_PIANIFICAZIONE = "ditta_usa_pianificazione";
+    private static final String KEY_IVA_PREDEFINITA = "ditta_iva_predefinita";
     private static final String KEY_RICORDA_EMAIL    = "ricorda_email";
     private static final String KEY_RICORDA_PASSWORD  = "ricorda_password";
 
@@ -95,6 +96,7 @@ public class TokenManager {
         saveModuli(response.moduli);
         saveFunzionalita(response.funzionalita);
         savePianificazione(response.pianificazione);
+        saveIvaPredefinita(response.ivaPredefinita);
         savePacchetti(response.pacchetti);
         saveDitte(response.ditte);
         // token nuovo dal server (login o rinnovo): riparte il periodo in cui si puo' lavorare offline
@@ -208,6 +210,19 @@ public class TokenManager {
     }
 
     /** La ditta usa la pianificazione (licenza con il modulo Pianificazione). null (server vecchio): non tocca. */
+    /** IVA proposta ai clienti nuovi (Amministrazione › Azienda sul portale); null = nessuna. */
+    public void saveIvaPredefinita(String codice) {
+        if (codice == null || codice.isEmpty()) {
+            prefs.edit().remove(KEY_IVA_PREDEFINITA).apply();
+        } else {
+            prefs.edit().putString(KEY_IVA_PREDEFINITA, codice).apply();
+        }
+    }
+
+    public String getIvaPredefinita() {
+        return prefs.getString(KEY_IVA_PREDEFINITA, null);
+    }
+
     public void savePianificazione(Boolean pianificazione) {
         if (pianificazione == null) {
             return;

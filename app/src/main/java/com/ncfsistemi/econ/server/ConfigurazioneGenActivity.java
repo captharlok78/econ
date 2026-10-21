@@ -154,7 +154,7 @@ public class ConfigurazioneGenActivity extends EconActivity {
 	 */
 	public void testMercury(View v) {
 		// Chiede email e password in un dialog
-		android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+		androidx.appcompat.app.AlertDialog.Builder builder = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this);
 		builder.setTitle("Test Mercury API");
 
 		android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
@@ -470,7 +470,7 @@ public class ConfigurazioneGenActivity extends EconActivity {
 				android.widget.Toast.makeText(ConfigurazioneGenActivity.this, "Server trovato: " + urls.get(0), android.widget.Toast.LENGTH_SHORT).show();
 			} else {
 				String[] urlsArr = urls.toArray(new String[0]);
-				new android.app.AlertDialog.Builder(ConfigurazioneGenActivity.this)
+				new com.google.android.material.dialog.MaterialAlertDialogBuilder(ConfigurazioneGenActivity.this)
 					.setTitle("Seleziona server Mercury")
 					.setItems(urlsArr, (d, which) -> setText(R.id.editTextUrlServer, urlsArr[which]))
 					.show();

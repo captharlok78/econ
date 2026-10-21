@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Scelta scrivendo del template form (molte voci, es. i clienti): il menu filtra mentre si scrive, + crea un nuovo record. -->
+<com.google.android.material.textfield.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Econ.Campo"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp">
+
+    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+        android:id="@+id/form_campo_testo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:textSize="16sp" />
+</com.google.android.material.textfield.TextInputLayout>

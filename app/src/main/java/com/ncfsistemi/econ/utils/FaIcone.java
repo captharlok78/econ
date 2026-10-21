@@ -62,6 +62,15 @@ public final class FaIcone {
 	public static final String PIANIFICATO = "\uf274"; // calendar-check: pianificazione
 	public static final String INDIETRO = "\uf053";    // chevron-left
 	public static final String AVANTI = "\uf054";      // chevron-right
+	public static final String LUCCHETTO = "\uf023";    // lock: campo che non si modifica (template form)
+	public static final String CELLULARE = "\uf3cd";    // mobile-alt
+	public static final String PERCENTUALE = "\uf295";  // percent
+	public static final String CODICE = "\uf02a";       // barcode
+	public static final String CONFERMA = "\uf00c";     // check: pulsante Salva
+	public static final String RAPPORTINO = "\uf46d";  // clipboard-list: rapportino
+	public static final String INFO = "\uf05a";
+	public static final String APRI = "\uf078";       // chevron-down: sezione a fisarmonica chiusa
+	public static final String CHIUDI_SEZIONE = "\uf077"; // chevron-up: sezione a fisarmonica aperta        // info-circle: avviso su un campo che non si modifica (template form)
 	public static final String GIUSTIFICATIVO = "\uf573"; // file-signature: giustificativo (ferie, permessi…) senza icona nota
 
 	/** Nome Font Awesome → glifo (assets/fa_solid_nomi.txt), per le icone che arrivano dal server come classe ("fa-…"). */
@@ -124,6 +133,59 @@ public final class FaIcone {
 			if (glifo != null) return glifo;
 		}
 		return GIUSTIFICATIVO;
+	}
+
+	/**
+	 * Glifo come Drawable (lato in dp), per le icone dentro i campi del template form (TextInputLayout.setStartIconDrawable)
+	 * e nei pulsanti Material; colore di default, il campo lo puo' ritingere.
+	 */
+	public static android.graphics.drawable.Drawable drawable(Context ctx, String glifo, int latoDp) {
+		final android.graphics.Paint pennello = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+		final float densita = ctx.getResources().getDisplayMetrics().density;
+		final int lato = Math.round(latoDp * densita);
+		pennello.setTypeface(getTypeface(ctx));
+		pennello.setTextAlign(android.graphics.Paint.Align.CENTER);
+		pennello.setTextSize(lato * 0.85f);
+		pennello.setColor(ContextCompat.getColor(ctx, R.color.colore_icona));
+		return new android.graphics.drawable.Drawable() {
+			@Override
+			public void draw(android.graphics.Canvas canvas) {
+				android.graphics.Rect r = getBounds();
+				float y = r.exactCenterY() - (pennello.descent() + pennello.ascent()) / 2f;
+				canvas.drawText(glifo, r.exactCenterX(), y, pennello);
+			}
+
+			@Override
+			public void setAlpha(int alpha) {
+				pennello.setAlpha(alpha);
+			}
+
+			@Override
+			public void setColorFilter(android.graphics.ColorFilter filtro) {
+				pennello.setColorFilter(filtro);
+			}
+
+			@Override
+			public void setTintList(android.content.res.ColorStateList tinta) {
+				if (tinta != null) pennello.setColor(tinta.getColorForState(getState(), tinta.getDefaultColor()));
+				invalidateSelf();
+			}
+
+			@Override
+			public int getOpacity() {
+				return android.graphics.PixelFormat.TRANSLUCENT;
+			}
+
+			@Override
+			public int getIntrinsicWidth() {
+				return lato;
+			}
+
+			@Override
+			public int getIntrinsicHeight() {
+				return lato;
+			}
+		};
 	}
 
 	/** Trasforma la TextView in un'icona: glifo, font, colore di default, centrata; tooltip se non nullo. */

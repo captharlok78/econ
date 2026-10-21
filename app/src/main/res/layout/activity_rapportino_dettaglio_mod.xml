@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Rapportino (GESTIONE_RAPPORTINI.md §12.1): testata standard con lo stato, operatore e data, cliente / cantiere / ordine
-    con ricerca, note, i tre pulsanti che aprono le finestre delle righe, la tabella delle righe (testata fissa) e in fondo
-    Annulla · Stampa · Firma · Invia al cliente · Salva · In verifica · Conferma.
+    Rapportino (GESTIONE_RAPPORTINI.md §12.1) con l'aspetto delle form del template (STUDIO_FORM_APP.md §7.7): testata
+    standard con lo stato; card "Rapportino" con operatore e data, cliente / cantiere / ordine con ricerca, note, firma e
+    i tre pulsanti delle righe; card "Righe" con la tabella (testata fissa); barra bianca con Chiudi · Stampa · Firma ·
+    Invia al cliente · Salva · In verifica · Conferma. Gli id sono quelli di sempre (RapportinoDettaglioModActivity).
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5"
+    android:background="@color/econ_sfondo"
     android:orientation="vertical">
 
     <FrameLayout
@@ -34,337 +36,421 @@
             android:visibility="gone" />
     </FrameLayout>
 
+    <!--
+        Corpo a fisarmonica (21/10): sezione "Rapportino" (testata) e sezione "Righe" (pulsanti + tabella), ognuna con il
+        titolo sempre visibile e il contenuto che si apre/chiude toccando il titolo (RapportinoDettaglioModActivity.fisarmonica).
+        Da chiusa la testata mostra nel titolo cliente / cantiere / data, le righe il numero di righe.
+    -->
     <LinearLayout
-        android:id="@+id/campi"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingStart="@dimen/margine"
-        android:paddingTop="@dimen/margine"
-        android:paddingEnd="@dimen/margine">
-
-        <!-- riga 1: operatore (chi compila, fisso) e data -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                style="@style/TestoIntestazione"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/operatore" />
-
-            <TextView
-                android:id="@+id/text_operatore"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:paddingStart="8dp"
-                android:textColor="#212121"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                style="@style/TestoIntestazione"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="@string/data" />
-
-            <com.ncfsistemi.econ.views.EconCalendario
-                android:id="@+id/edit_data"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <!-- In verifica / Confermato da (STUDIO_VERIFICA_RAPPORTINI.md) -->
-        <TextView
-            android:id="@+id/text_info_stato"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:background="#FFF8E1"
-            android:padding="6dp"
-            android:textColor="#5D4037"
-            android:textSize="13sp"
-            android:visibility="gone" />
-
-        <!-- riga 2: cliente, cantiere, ordine (almeno uno); ricerca da 3 lettere, l'ordine anche toccando il campo -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margine"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/cliente" />
-
-                <com.ncfsistemi.econ.views.CampoRicerca
-                    android:id="@+id/campo_cliente"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/cerca_3_lettere" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="@dimen/margine"
-                android:orientation="vertical">
-
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/cantiere" />
-
-                <com.ncfsistemi.econ.views.CampoRicerca
-                    android:id="@+id/campo_cantiere"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/cerca_3_lettere" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="@dimen/margine"
-                android:orientation="vertical">
-
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ordine" />
-
-                <com.ncfsistemi.econ.views.CampoRicerca
-                    android:id="@+id/campo_ordine"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- riga 3: note -->
-        <EditText
-            android:id="@+id/editText_note"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margine"
-            android:hint="@string/note_rapportino"
-            android:inputType="textCapSentences|textMultiLine"
-            android:maxLength="255" />
-
-        <!-- firma del cliente (GESTIONE_RAPPORTINI.md §13): anteprima, il tocco la mostra grande -->
-        <LinearLayout
-            android:id="@+id/riga_firma"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margine"
-            android:background="?android:attr/selectableItemBackground"
-            android:gravity="center_vertical"
-            android:onClick="firma"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <ImageView
-                android:id="@+id/img_firma"
-                android:layout_width="wrap_content"
-                android:layout_height="56dp"
-                android:adjustViewBounds="true"
-                android:background="#FFFFFF"
-                android:contentDescription="Firma del cliente"
-                android:maxWidth="240dp"
-                android:padding="4dp" />
-
-            <TextView
-                android:id="@+id/text_firma"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_weight="1"
-                android:textColor="#546E7A"
-                android:textSize="15sp" />
-        </LinearLayout>
-
-        <!-- riga 4: nuove righe -->
-        <LinearLayout
-            android:id="@+id/pulsanti_righe"
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:layout_marginTop="@dimen/margine"
-            android:layout_marginBottom="@dimen/margine"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/button_manodopera"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_marginEnd="4dp"
-                android:backgroundTint="#E3F2FD"
-                android:onClick="nuovaManodopera"
-                android:text="@string/aggiungi_manodopera"
-                android:textColor="#1565C0"
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/button_viaggio"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_marginStart="4dp"
-                android:layout_marginEnd="4dp"
-                android:backgroundTint="#E3F2FD"
-                android:onClick="nuovoViaggio"
-                android:text="@string/aggiungi_viaggio"
-                android:textColor="#1565C0"
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/button_articolo"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_marginStart="4dp"
-                android:backgroundTint="#E3F2FD"
-                android:onClick="nuovoArticolo"
-                android:text="@string/aggiungi_articolo"
-                android:textColor="#1565C0"
-                android:textStyle="bold" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <!-- righe: testata fissa + lista (DettaglioTabellaAdapter) -->
-    <FrameLayout
+        android:id="@+id/corpo"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginStart="@dimen/margine"
-        android:layout_marginEnd="@dimen/margine"
-        android:background="#FFFFFF">
-
-        <include layout="@layout/dettaglio_tabella_standard" />
-    </FrameLayout>
-
-    <!-- pulsanti in fondo: su una o piu' righe secondo la larghezza (views.BarraPulsanti, smartphone in verticale 2-3 righe) -->
-    <LinearLayout
-        android:id="@+id/barra_pulsanti"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margine"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/button_annulla"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginEnd="1dp"
-            android:backgroundTint="#E0E0E0"
-            android:onClick="annulla"
-            android:text="@string/chiudi"
-            android:textColor="#1565C0"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_testata"
+        style="@style/Econ.Card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="12dp">
 
-        <!-- Stampa con il modello della ditta (§15) -->
-        <Button
-            android:id="@+id/button_stampa"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginStart="1dp"
-            android:layout_marginEnd="1dp"
-            android:backgroundTint="#E0E0E0"
-            android:onClick="stampa"
-            android:text="Stampa"
-            android:textColor="#1565C0"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            android:orientation="vertical"
+            android:paddingStart="14dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="10dp">
 
-        <!-- Firma del cliente (§13); Invia al cliente: mail con il PDF mandata dal server (INVIO_RAPPORTINI_MAIL.md) -->
-        <Button
-            android:id="@+id/button_firma"
-            android:onClick="firma"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginStart="1dp"
-            android:layout_marginEnd="1dp"
-            android:backgroundTint="#E0E0E0"
-            android:text="@string/firma"
-            android:textColor="#1565C0"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            <include
+                android:id="@+id/sezione_testata"
+                layout="@layout/sezione_standard" />
 
-        <Button
-            android:id="@+id/button_invia_mail"
-            android:onClick="inviaMail"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginStart="1dp"
-            android:layout_marginEnd="1dp"
-            android:backgroundTint="#E0E0E0"
-            android:text="@string/invia_mail"
-            android:textColor="#1565C0"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            <ScrollView
+                android:id="@+id/scroll_testata"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <Button
-            android:id="@+id/button_salva"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginStart="1dp"
-            android:layout_marginEnd="1dp"
-            android:backgroundTint="#1565C0"
-            android:onClick="salva"
-            android:text="@string/salva"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            <LinearLayout
+                android:id="@+id/campi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="4dp">
 
-        <Button
-            android:id="@+id/button_verifica"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginStart="1dp"
-            android:layout_marginEnd="1dp"
-            android:backgroundTint="#F9A825"
-            android:onClick="mettiInVerifica"
-            android:text="In verifica"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:visibility="gone" />
 
-        <Button
-            android:id="@+id/button_conferma"
-            android:layout_width="0dp"
+            <!-- riga 1: operatore (chi compila, fisso) e data -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="bottom"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/Econ.Etichetta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/operatore" />
+
+                    <TextView
+                        android:id="@+id/text_operatore"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#1F2933"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/Econ.Etichetta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/data" />
+
+                    <com.ncfsistemi.econ.views.EconCalendario
+                        android:id="@+id/edit_data"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- In verifica / Confermato da (STUDIO_VERIFICA_RAPPORTINI.md) -->
+            <TextView
+                android:id="@+id/text_info_stato"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="#FFF8E1"
+                android:padding="8dp"
+                android:textColor="#5D4037"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
+            <!-- riga 2: cliente, cantiere, ordine (almeno uno); ricerca da 3 lettere, l'ordine anche toccando il campo -->
+            <LinearLayout
+                android:id="@+id/riga_soggetti"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/Econ.Etichetta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/cliente" />
+
+                    <!-- cliente con "+" attaccato: nuovo cliente (RapportinoDettaglioModActivity.nuovoCliente) -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <com.ncfsistemi.econ.views.CampoRicerca
+                            android:id="@+id/campo_cliente"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@drawable/campo_bordato"
+                            android:hint="@string/cerca_3_lettere"
+                            android:textSize="16sp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/button_nuovo_cliente"
+                            style="@style/Econ.Pulsante.Tenue"
+                            android:layout_width="56dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="6dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:contentDescription="Nuovo cliente"
+                            android:onClick="nuovoCliente"
+                            android:padding="0dp"
+                            android:text="+"
+                            android:textSize="24sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/Econ.Etichetta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/cantiere" />
+
+                    <com.ncfsistemi.econ.views.CampoRicerca
+                        android:id="@+id/campo_cantiere"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/campo_bordato"
+                        android:hint="@string/cerca_3_lettere"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/Econ.Etichetta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ordine" />
+
+                    <com.ncfsistemi.econ.views.CampoRicerca
+                        android:id="@+id/campo_ordine"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/campo_bordato"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- riga 3: note, campo bordato come nelle form del template -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Econ.Campo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="@string/note_rapportino">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editText_note"
+                    style="@style/Econ.CampoTesto"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:maxLength="255" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- firma del cliente (GESTIONE_RAPPORTINI.md §13): anteprima, il tocco la mostra grande -->
+            <LinearLayout
+                android:id="@+id/riga_firma"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:onClick="firma"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/img_firma"
+                    android:layout_width="wrap_content"
+                    android:layout_height="56dp"
+                    android:adjustViewBounds="true"
+                    android:background="#FFFFFF"
+                    android:contentDescription="Firma del cliente"
+                    android:maxWidth="240dp"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/text_firma"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:textColor="@color/econ_testo_secondario"
+                    android:textSize="15sp" />
+            </LinearLayout>
+            </LinearLayout>
+            </ScrollView>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- righe: titolo a fisarmonica, pulsanti delle nuove righe e tabella (testata fissa + lista, DettaglioTabellaAdapter) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_righe"
+        style="@style/Econ.Card"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="12dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginStart="1dp"
-            android:backgroundTint="#2E7D32"
-            android:onClick="conferma"
-            android:text="@string/conferma"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:textStyle="bold" />
+            android:orientation="vertical">
+
+            <include
+                android:id="@+id/sezione_righe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_marginEnd="14dp"
+                layout="@layout/sezione_standard" />
+
+            <LinearLayout
+                android:id="@+id/contenuto_righe"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/pulsanti_righe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="12dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_manodopera"
+                    style="@style/Econ.Pulsante.Tenue"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
+                    android:onClick="nuovaManodopera"
+                    android:text="@string/aggiungi_manodopera" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_viaggio"
+                    style="@style/Econ.Pulsante.Tenue"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
+                    android:onClick="nuovoViaggio"
+                    android:text="@string/aggiungi_viaggio" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_articolo"
+                    style="@style/Econ.Pulsante.Tenue"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_weight="1"
+                    android:onClick="nuovoArticolo"
+                    android:text="@string/aggiungi_articolo" />
+            </LinearLayout>
+
+                <include
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    layout="@layout/dettaglio_tabella_standard" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+
+    <!-- pulsanti in fondo su una barra bianca come footer_dett: su una o piu' righe secondo la larghezza (views.BarraPulsanti) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:elevation="6dp"
+        android:paddingStart="10dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="6dp">
+
+        <LinearLayout
+            android:id="@+id/barra_pulsanti"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_annulla"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                style="@style/Econ.Pulsante.Secondario"
+                android:onClick="annulla"
+                android:text="@string/chiudi" />
+
+            <!-- Stampa con il modello della ditta (§15) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_stampa"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                style="@style/Econ.Pulsante.Secondario"
+                android:onClick="stampa"
+                android:text="Stampa" />
+
+            <!-- Firma del cliente (§13); Invia al cliente: mail con il PDF mandata dal server (INVIO_RAPPORTINI_MAIL.md) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_firma"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                style="@style/Econ.Pulsante.Secondario"
+                android:onClick="firma"
+                android:text="@string/firma" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_invia_mail"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                style="@style/Econ.Pulsante.Secondario"
+                android:onClick="inviaMail"
+                android:text="@string/invia_mail" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_salva"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                style="@style/Econ.Pulsante"
+                android:onClick="salva"
+                android:text="@string/salva"
+                app:icon="@drawable/ic_form_salva"
+                app:iconGravity="textStart" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_verifica"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                style="@style/Econ.Pulsante"
+                android:backgroundTint="#F9A825"
+                android:onClick="mettiInVerifica"
+                android:text="In verifica"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_conferma"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                style="@style/Econ.Pulsante"
+                android:backgroundTint="#2E7D32"
+                android:onClick="conferma"
+                android:text="@string/conferma" />
+        </LinearLayout>
     </LinearLayout>
 
     <include layout="@layout/footer" />

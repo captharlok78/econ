@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F5F5">
+    android:background="@color/econ_sfondo">
 
     <!-- Header -->
     <LinearLayout
@@ -35,14 +35,12 @@
             android:textStyle="bold"
             android:layout_marginStart="8dp"/>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
+            style="@style/Econ.Pulsante.SuBarra"
             android:id="@+id/btnAggiorna"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
+            android:layout_height="wrap_content"
             android:text="Aggiorna"
-            android:textColor="#FFFFFF"
-            android:textSize="13sp"
-            android:background="#0D47A1"
             android:onClick="eseguiVerifica"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"/>
@@ -75,7 +73,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="#FFFFFF"
+                android:background="@drawable/bg_card_standard"
                 android:elevation="1dp"
                 android:padding="14dp">
 
@@ -163,7 +161,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="#FFFFFF"
+                android:background="@drawable/bg_card_standard"
                 android:elevation="1dp"
                 android:padding="14dp">
 
@@ -297,12 +295,12 @@
                 </LinearLayout>
 
                 <!-- Pulsante login — visibile solo quando il token è assente o rifiutato -->
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Econ.Pulsante"
                     android:id="@+id/btnRilogin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="EFFETTUA IL LOGIN MERCURY"
-                    android:textColor="#FFFFFF"
                     android:backgroundTint="#E53935"
                     android:layout_marginTop="14dp"
                     android:onClick="apriLogin"
@@ -325,7 +323,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="#FFFFFF"
+                android:background="@drawable/bg_card_standard"
                 android:elevation="1dp"
                 android:padding="14dp">
 
@@ -378,7 +376,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="#FFFFFF"
+                android:background="@drawable/bg_card_standard"
                 android:elevation="1dp"
                 android:padding="14dp">
 
@@ -464,19 +462,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="#FFFFFF"
+                android:background="@drawable/bg_card_standard"
                 android:elevation="1dp"
                 android:padding="14dp"
                 android:layout_marginBottom="12dp" />
 
             <!-- aggiornamento dell'app dal server (AGGIORNAMENTO_APP.md) -->
-            <Button
+            <com.google.android.material.button.MaterialButton
+                style="@style/Econ.Pulsante"
                 android:id="@+id/btnCercaAggiornamenti"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Cerca aggiornamenti"
-                android:textColor="#FFFFFF"
-                android:backgroundTint="#1565C0"
                 android:layout_marginBottom="16dp"
                 android:onClick="cercaAggiornamenti"/>
 

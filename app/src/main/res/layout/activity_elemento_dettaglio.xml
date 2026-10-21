@@ -26,7 +26,7 @@
 
             <TextView
                 android:id="@+id/textView_titolo"
-                style="@style/Titolo"
+                style="@style/TestoSezione"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
@@ -59,7 +59,7 @@
 
                 <TextView
                     android:id="@+id/textView_etichetta"
-                    style="@style/TestoIntestazioneNoPadding"
+                    style="@style/Econ.Etichetta"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/etichetta" />
@@ -68,7 +68,7 @@
                     android:id="@+id/editText_etichetta"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_econ_edit"
+                    android:background="@drawable/campo_bordato"
                     android:ems="3"
                     android:inputType="number"
                     android:maxLength="6" />
@@ -83,7 +83,7 @@
 
                 <TextView
                     android:id="@+id/textView_altezza"
-                    style="@style/TestoIntestazioneNoPadding"
+                    style="@style/Econ.Etichetta"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/altezza" />
@@ -92,13 +92,14 @@
                     android:id="@+id/editText_altezza"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_econ_edit"
+                    android:background="@drawable/campo_bordato"
                     android:ems="3"
                     android:inputType="number"
                     android:maxLength="6" />
             </LinearLayout>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
+                style="@style/Econ.Pulsante"
                 android:id="@+id/button_salva_mod"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -106,9 +107,7 @@
                 android:layout_marginLeft="@dimen/margine"
                 android:layout_marginRight="@dimen/margine"
                 android:onClick="salvaDatiGenerali"
-                android:text="@string/salva"
-                android:textColor="#1784c5"
-                android:textSize="@dimen/testo_immagine_grande" />
+                android:text="@string/salva" />
 
             <LinearLayout
                 android:id="@+id/linear_pulsanti"
@@ -185,7 +184,7 @@
 
             <TextView
                 android:id="@+id/textView_relazioni"
-                style="@style/TestoIntestazioneNoPadding"
+                style="@style/Econ.Etichetta"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/punti_di_comando"
@@ -210,7 +209,7 @@
             </LinearLayout>
             <TextView
                 android:id="@+id/textView_collegamenti"
-                style="@style/TestoIntestazioneNoPadding"
+                style="@style/Econ.Etichetta"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/collegamenti"

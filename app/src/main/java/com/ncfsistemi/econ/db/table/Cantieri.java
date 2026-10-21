@@ -71,8 +71,10 @@ public class Cantieri extends AbstractTable {
 	 * giorno di lavoro prima di quel giorno = chiuso, come Cantieri::isChiuso() del server.
 	 */
 	public static String sqlNonChiuso(String alias, long giornoYmd) {
-		return "(coalesce(" + alias + "." + PERMANENTE + ", 0) = 1 OR coalesce(" + alias + "." + DATA_CHIUSURA + ", 0) = 0 OR "
-				+ alias + "." + DATA_CHIUSURA + " / 1000000 >= " + giornoYmd + ")";
+		// la data arriva come yyyyMMdd (server) o yyyyMMddHHmmss (app): il giorno si prende da tutte e due
+		String chiusura = alias + "." + DATA_CHIUSURA;
+		return "(coalesce(" + alias + "." + PERMANENTE + ", 0) = 1 OR coalesce(" + chiusura + ", 0) = 0 OR "
+				+ "(CASE WHEN " + chiusura + " >= 100000000 THEN " + chiusura + " / 1000000 ELSE " + chiusura + " END) >= " + giornoYmd + ")";
 	}
 
 	/** Giorno yyyyMMdd di una data dell'app (yyyyMMddHHmmss o yyyyMMdd); 0 se non valida. */

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Scelta da una tabella del template form (al posto di EconSpinner): menu a tendina Material. -->
+<com.google.android.material.textfield.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Econ.Campo.Scelta"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp">
+
+    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+        android:id="@+id/form_campo_testo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="none"
+        android:textSize="16sp" />
+</com.google.android.material.textfield.TextInputLayout>

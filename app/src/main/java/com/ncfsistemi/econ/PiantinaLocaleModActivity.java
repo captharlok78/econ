@@ -19,6 +19,8 @@ public class PiantinaLocaleModActivity extends EconDettaglioActivity implements 
 	private Boolean[] selezionati = null;
 	private int numColonne = LocalePiantinaFragment.NUMERO_COLONNE;
 	private int numRighe = LocalePiantinaFragment.NUMERO_RIGHE;
+	private String nomeLocale = null;
+	private boolean modificata = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +42,19 @@ public class PiantinaLocaleModActivity extends EconDettaglioActivity implements 
 		pianta.setInModifica(true);
 		pianta.setOnItemClickListener(this);
 		refresh();
+		com.ncfsistemi.econ.utils.SezioneStandard.imposta(findViewById(R.id.sezione_piantina),
+				com.ncfsistemi.econ.utils.FaIcone.LOCALE, "Forma del locale");
+		android.widget.TextView sotto = findViewById(R.id.headerSottotitolo);
+		if (sotto != null && nomeLocale != null) {
+			sotto.setText(nomeLocale + " · tocca i quadretti per disegnare la stanza");
+			sotto.setVisibility(View.VISIBLE);
+		}
+		getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+			@Override
+			public void handleOnBackPressed() {
+				annulla(null);
+			}
+		});
 		System.out.println("Econ: PiantinaLocaleModActivity onCreate EXIT");
 	}
 
@@ -60,7 +75,9 @@ public class PiantinaLocaleModActivity extends EconDettaglioActivity implements 
 			String piantina = "";
 			if (val != null) {
 				piantina = val.getAsString(Locali.PIANTA_LOGICA);
+				nomeLocale = val.getAsString(Locali.NOME);
 			}
+			if (piantina == null) piantina = "";
 
 			if (piantina.length()<numColonne*numRighe){
 				if (piantina.length()==36){
@@ -112,6 +129,7 @@ public class PiantinaLocaleModActivity extends EconDettaglioActivity implements 
 		System.out.println("Econ: PiantinaLocaleModActivity onItemClick ENTER");
 		// TODO Auto-generated method stub
 		selezionati[position] = !selezionati[position];
+		modificata = true;
 		refresh();
 		System.out.println("Econ: PiantinaLocaleModActivity onItemClick EXIT");
 	}
@@ -139,7 +157,26 @@ public class PiantinaLocaleModActivity extends EconDettaglioActivity implements 
 		return super.eseguiAggiornamento(db);
 	}
 
+	@Override
+	protected String getTitoloDettaglio() {
+		return "Piantina del locale";
+	}
+
+	/** Come le form del template: uscendo con modifiche non salvate si chiede conferma. */
+	@Override
+	public void annulla(View v) {
+		if (modificata && !isSolaLettura()) {
+			com.ncfsistemi.econ.utils.Utility.mostraConfermaDialog(getString(R.string.attenzione), "Uscire senza salvare le modifiche?", this,
+					"Esci", getString(R.string.annulla), (dialog, quale) -> {
+						if (quale == android.content.DialogInterface.BUTTON_POSITIVE) super.annulla(null);
+					});
+			return;
+		}
+		super.annulla(v);
+	}
+
 	public void impostaPianta(View v) {
+		modificata = true;
 		System.out.println("Econ: PiantinaLocaleModActivity impostaPianta ENTER");
 		if (v.getId() == R.id.button_pianta_0111) {
 			for (int i = 0; i < numColonne*numRighe/2; i++) {

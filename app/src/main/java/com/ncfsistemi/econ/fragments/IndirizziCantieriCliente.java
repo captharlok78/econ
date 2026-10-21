@@ -13,7 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
@@ -185,7 +185,7 @@ public class IndirizziCantieriCliente {
 						carica();
 					}
 				}));
-		new AlertDialog.Builder(activity)
+		new com.google.android.material.dialog.MaterialAlertDialogBuilder(activity)
 				.setTitle(ClientiIndirizzi.completo(v))
 				.setItems(voci.toArray(new String[0]), (d, i) -> azioni.get(i).run())
 				.show();

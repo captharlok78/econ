@@ -98,4 +98,30 @@ public class Anagrafica extends AbstractTable {
 	}
 
 
+
+	/** "+ nuovo" della ricerca cliente (template form). */
+	@Override
+	public Class getDettaglioActivity() {
+		return com.ncfsistemi.econ.ClientiDettaglioModActivity.class;
+	}
+
+	@Override
+	public String getCampoDescrizionePerSpinner() {
+		return RAGIONE_SOCIALE;
+	}
+
+	/** Clienti per la ricerca del template form: in ordine di nome, con la citta' per distinguere gli omonimi. */
+	@Override
+	public String getSQLPerSpinner(ContentValues filtro) {
+		String where = getFiltro(filtro);
+		return "SELECT " + ID_ANAGRAFICA + ", " + RAGIONE_SOCIALE + ", " + CITTA + " FROM " + NOME_TABELLA
+				+ (where.isEmpty() ? "" : " WHERE " + where) + " ORDER BY " + RAGIONE_SOCIALE + " COLLATE NOCASE";
+	}
+
+	@Override
+	public String formattaDescrizioneSpinner(ContentValues val) {
+		String nome = val.getAsString(RAGIONE_SOCIALE), citta = val.getAsString(CITTA);
+		nome = nome == null ? "" : nome.trim();
+		return citta == null || citta.trim().isEmpty() ? nome : nome + " · " + citta.trim();
+	}
 }

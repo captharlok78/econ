@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cerchio bianco dietro il logo NCF Sistemi (viola scuro) sullo sfondo nero della schermata di avvio. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+    <solid android:color="#FFFFFF" />
+</shape>

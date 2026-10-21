@@ -1,6 +1,6 @@
 package com.ncfsistemi.econ;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -501,7 +501,7 @@ public class MenuActivity extends EconActivity {
         succ.setOnClickListener(x -> { spostamento[0]++; disegna.run(); });
         disegna.run();
 
-        new AlertDialog.Builder(this)
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setView(contenuto)
                 .setPositiveButton("Chiudi", null)
                 .show();
@@ -573,7 +573,7 @@ public class MenuActivity extends EconActivity {
         }
         android.widget.ScrollView scroll = new android.widget.ScrollView(this);
         scroll.addView(elenco);
-        new AlertDialog.Builder(this)
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("I tuoi cantieri di oggi")
                 .setView(scroll)
                 .setPositiveButton("Chiudi", null)
@@ -669,7 +669,7 @@ public class MenuActivity extends EconActivity {
         tvPassword.setText("Verifica in corso...");
 
         // Cambia password in basso a sinistra (pulsante neutro), Chiudi a destra; il neutro non chiude il riquadro
-        AlertDialog finestra = new AlertDialog.Builder(this)
+        AlertDialog finestra = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("Account")
                 .setView(contenuto)
                 .setNeutralButton("Cambia password", null)
@@ -878,7 +878,7 @@ public class MenuActivity extends EconActivity {
         com.ncfsistemi.econ.utils.OcchioPassword.aggiungi(etNuova);
         com.ncfsistemi.econ.utils.OcchioPassword.aggiungi(etConferma);
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
+        AlertDialog dialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("Cambia password")
                 .setMessage("La nuova password vale per l'app e per il portale web.")
                 .setView(layout)

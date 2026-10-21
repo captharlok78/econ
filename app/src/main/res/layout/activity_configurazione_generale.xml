@@ -74,29 +74,23 @@
                     android:paddingEnd="12dp"
                     android:inputType="textUri" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Econ.Pulsante.Secondario"
                     android:id="@+id/button_cerca_server"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"
                     android:layout_marginStart="8dp"
                     android:text="@string/cerca"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold"
-                    android:textSize="14sp"
-                    android:backgroundTint="#1565C0"
                     android:onClick="cercaServerMercury" />
             </LinearLayout>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
+                style="@style/Econ.Pulsante.Secondario"
                 android:id="@+id/button_ping"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_marginTop="8dp"
                 android:text="Verifica connessione"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                android:backgroundTint="#1565C0"
                 android:onClick="pingServer" />
 
             <!-- Separatore -->
@@ -282,16 +276,13 @@
                     android:hint="Password"
                     android:inputType="textPassword" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Econ.Pulsante"
                     android:id="@+id/button_attiva"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:layout_marginTop="8dp"
                     android:text="Accedi"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold"
-                    android:textSize="14sp"
-                    android:backgroundTint="#1565C0"
                     android:onClick="attiva" />
 
                 <ProgressBar
@@ -320,53 +311,41 @@
                 android:orientation="vertical"
                 android:visibility="gone">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Econ.Pulsante"
                     android:id="@+id/button_download"
                     android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:text="↓  Scarica da server"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold"
-                    android:textSize="14sp"
-                    android:backgroundTint="#1565C0"
                     android:onClick="apriDownload" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Econ.Pulsante"
                     android:id="@+id/button_upload"
                     android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:layout_marginTop="8dp"
                     android:text="↑  Carica su server"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold"
-                    android:textSize="14sp"
-                    android:backgroundTint="#1565C0"
                     android:onClick="apriUpload" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Econ.Pulsante.Secondario"
                     android:id="@+id/button_test_mercury"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:layout_marginTop="8dp"
                     android:text="Test API"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold"
-                    android:textSize="14sp"
-                    android:backgroundTint="#1565C0"
                     android:onClick="testMercury" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Econ.Pulsante.Secondario"
                     android:id="@+id/buttonReset"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:layout_marginTop="8dp"
                     android:text="Reset DB"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold"
-                    android:textSize="14sp"
-                    android:backgroundTint="#1565C0"
                     android:onClick="reset" />
 
         </LinearLayout>
@@ -385,30 +364,24 @@
         android:elevation="4dp"
         android:visibility="gone">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
+            style="@style/Econ.Pulsante.Secondario"
             android:id="@+id/button_annulla"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
             android:text="@string/annulla"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:textSize="14sp"
-            android:backgroundTint="#1565C0"
             android:onClick="chiudi" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
+            style="@style/Econ.Pulsante"
             android:id="@+id/button_salva"
             android:layout_width="0dp"
             android:layout_height="48dp"
             android:layout_weight="1"
             android:layout_marginStart="4dp"
             android:text="@string/salva"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:textSize="14sp"
-            android:backgroundTint="#1565C0"
             android:onClick="salvaConfigurazioneGenerale" />
 
     </LinearLayout>

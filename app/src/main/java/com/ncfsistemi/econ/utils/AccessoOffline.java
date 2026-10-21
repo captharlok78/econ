@@ -1,7 +1,7 @@
 package com.ncfsistemi.econ.utils;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
@@ -67,7 +67,7 @@ public final class AccessoOffline {
             testo.append("\n\nIl tablet non ha un blocco schermo: impostane uno (PIN, sequenza o impronta), "
                     + "perché i dati della ditta sono sul dispositivo.");
         }
-        new AlertDialog.Builder(a)
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(a)
                 .setTitle("Modalità offline")
                 .setMessage(testo)
                 .setPositiveButton("Ho capito", null)

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Poche opzioni del template form (es. Azienda / Persona fisica): pulsanti a segmenti, uno scelto. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/form_campo_etichetta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/econ_testo_secondario"
+        android:textSize="12sp" />
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/form_campo_gruppo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:selectionRequired="true"
+        app:singleSelection="true" />
+
+    <TextView
+        android:id="@+id/form_campo_errore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="14dp"
+        android:textColor="@color/econ_errore"
+        android:textSize="12sp"
+        android:visibility="gone" />
+</LinearLayout>

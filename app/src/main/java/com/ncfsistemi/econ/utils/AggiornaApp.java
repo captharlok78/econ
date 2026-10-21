@@ -1,7 +1,7 @@
 package com.ncfsistemi.econ.utils;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -73,7 +73,7 @@ public final class AggiornaApp {
         if (agg.obbligatorio) msg.append("\n\nL'aggiornamento è obbligatorio: senza non si può usare l'app.");
         msg.append("\n\nI dati sul dispositivo restano.");
 
-        AlertDialog.Builder b = new AlertDialog.Builder(activity)
+        AlertDialog.Builder b = new com.google.android.material.dialog.MaterialAlertDialogBuilder(activity)
                 .setTitle(agg.obbligatorio ? "Aggiornamento obbligatorio" : "Aggiornamento disponibile")
                 .setMessage(msg.toString())
                 .setCancelable(false)
@@ -95,7 +95,7 @@ public final class AggiornaApp {
 
     private void avvia() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !activity.getPackageManager().canRequestPackageInstalls()) {
-            new AlertDialog.Builder(activity)
+            new com.google.android.material.dialog.MaterialAlertDialogBuilder(activity)
                     .setTitle("Permesso necessario")
                     .setMessage("Per aggiornarsi iEcon deve poter installare app: nella pagina che si apre attiva "
                             + "\"Consenti da questa fonte\", poi torna indietro.")
@@ -153,7 +153,7 @@ public final class AggiornaApp {
     }
 
     private void fallito(String errore) {
-        new AlertDialog.Builder(activity)
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(activity)
                 .setTitle("Aggiornamento non riuscito")
                 .setMessage(errore)
                 .setCancelable(false)

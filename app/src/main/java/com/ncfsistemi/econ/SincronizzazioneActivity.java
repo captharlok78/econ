@@ -388,7 +388,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             com.ncfsistemi.econ.utils.DatiLocali.segna(this, corrente);
             return true;
         }
-        new android.app.AlertDialog.Builder(this)
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("Dati di un altro account")
                 .setMessage("Sul dispositivo ci sono " + nonInviate + " modifiche non ancora inviate fatte con un altro account "
                         + "o in un'altra ditta. Non si possono inviare con l'account attuale.\n\n"
@@ -446,6 +446,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         tm.saveModuli(resp.body().moduli);
         tm.saveFunzionalita(resp.body().funzionalita);
         tm.savePianificazione(resp.body().pianificazione);
+        tm.saveIvaPredefinita(resp.body().ivaPredefinita);
         tm.savePacchetti(resp.body().pacchetti);
         com.ncfsistemi.econ.api.ProfiloOffline.segnaOnline(this, resp.body().offlineGiorni);
         // versione del server per il piede delle stampe (GESTIONE_RAPPORTINI.md §15)
@@ -1292,7 +1293,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
                         final String dettaglio = riga.errorMsg;
                         final String etichetta = riga.nomeUmano != null ? riga.nomeUmano : riga.nomeTecnico;
                         riga.tvStato.setOnClickListener(v ->
-                            new android.app.AlertDialog.Builder(SincronizzazioneActivity.this)
+                            new com.google.android.material.dialog.MaterialAlertDialogBuilder(SincronizzazioneActivity.this)
                                 .setTitle("Errore — " + etichetta)
                                 .setMessage(dettaglio)
                                 .setPositiveButton("Chiudi", null)

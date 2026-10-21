@@ -3,7 +3,7 @@ package com.ncfsistemi.econ;
 import android.accounts.Account;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,7 +17,7 @@ import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.fragment.app.FragmentActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Display;
@@ -50,7 +50,7 @@ import com.ncfsistemi.econ.utils.Sessione;
 import com.ncfsistemi.econ.utils.Utility;
 import com.ncfsistemi.econ.views.EconSpecialView;
 
-public abstract class EconActivity extends FragmentActivity {
+public abstract class EconActivity extends AppCompatActivity {
 
     public static final int NO_BACKGROUND = -1;
     public static final int NO_MENU = -1;
@@ -587,7 +587,7 @@ public abstract class EconActivity extends FragmentActivity {
                 Toast.makeText(this, "Di nuovo collegato al server.", Toast.LENGTH_LONG).show();
                 return;
             }
-            new AlertDialog.Builder(this)
+            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                     .setTitle("Di nuovo collegato al server")
                     .setMessage("Hai " + nonInviate + (nonInviate == 1 ? " modifica fatta" : " modifiche fatte")
                             + " senza collegamento. Inviarle adesso? Dopo l'invio si scaricano anche gli aggiornamenti.")
@@ -705,7 +705,7 @@ public abstract class EconActivity extends FragmentActivity {
         editUrl.setSingleLine(true);
         editUrl.setPadding(48, 24, 48, 24);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this);
         builder.setTitle("Impostazioni server Mercury");
         builder.setView(editUrl);
         builder.setPositiveButton("Salva", (dialog, which) -> {
@@ -965,7 +965,7 @@ public abstract class EconActivity extends FragmentActivity {
             // TODO Auto-generated method stub
             super.onPreExecute();
             if (isMostraAttesa()) {
-                AlertDialog.Builder ab = new AlertDialog.Builder(EconActivity.this);
+                AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(EconActivity.this);
                 ab.setMessage(EconActivity.this.getResources().getString(R.string.messaggio_caricamento_in_corso));
                 di = ab.create();
                 di.show();

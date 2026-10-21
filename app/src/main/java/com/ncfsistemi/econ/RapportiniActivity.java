@@ -1,6 +1,6 @@
 package com.ncfsistemi.econ;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
@@ -109,7 +109,7 @@ public class RapportiniActivity extends EconListaStandardActivity {
 
             @Override
             protected void onPreExecute() {
-                AlertDialog.Builder ab = new AlertDialog.Builder(RapportiniActivity.this);
+                AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(RapportiniActivity.this);
                 ab.setMessage(getString(R.string.messaggio_creazione_report));
                 di = ab.create();
                 di.show();

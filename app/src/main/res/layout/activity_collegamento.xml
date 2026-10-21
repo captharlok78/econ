@@ -516,30 +516,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" >
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Econ.Pulsante.Secondario"
                     android:id="@+id/button_annulla"
-                    style="@style/TestoNeroGrande"
                     android:layout_width="0sp"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.5"
                     android:onClick="chiudi"
                     android:paddingBottom="@dimen/altezza_campo"
                     android:paddingTop="@dimen/altezza_campo"
-                    android:text="@string/annulla"
-                    android:textColor="#1784c5" />
+                    android:text="@string/annulla" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Econ.Pulsante"
                     android:id="@+id/button_salva"
-                    style="@style/TestoNeroGrande"
                     android:layout_width="0sp"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.5"
                     android:onClick="salva"
                     android:paddingBottom="@dimen/altezza_campo"
                     android:paddingTop="@dimen/altezza_campo"
-                    android:text="@string/salva"
-                    android:textColor="#1784c5"
-                    android:textStyle="bold" />
+                    android:text="@string/salva" />
             </LinearLayout>
         </LinearLayout>
     </RelativeLayout>

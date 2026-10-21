@@ -694,4 +694,9 @@ public class ElementoModActivity extends EconDettaglioActivity {
         }
 		System.out.println("Econ: ElementoDettaglioActivity onResume EXIT");
     }
+
+	@Override
+	protected String getTitoloDettaglio() {
+		return getModalita() == INSERIMENTO ? "Nuovo elemento" : "Modifica elemento";
+	}
 }

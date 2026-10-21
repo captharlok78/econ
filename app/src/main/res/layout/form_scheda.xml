@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Scheda del template form (EconSchedaFragment, STUDIO_FORM_APP.md §7.6): le sezioni della definizione in sola
+    visualizzazione, disegnate in form_contenitore. Unico layout di tutte le schede: mai ricopiarlo nei moduli.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scheda_scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/econ_sfondo"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:id="@+id/form_contenitore"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="6dp" />
+</ScrollView>

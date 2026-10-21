@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Si'/no del template form: etichetta a sinistra, interruttore Material 3 a destra. -->
+<com.google.android.material.materialswitch.MaterialSwitch xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/form_campo_interruttore"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:minHeight="48dp"
+    android:textColor="#1B1F24"
+    android:textSize="16sp" />

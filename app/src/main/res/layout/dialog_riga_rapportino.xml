@@ -25,26 +25,25 @@
                 android:layout_height="40dp"
                 android:orientation="horizontal">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Econ.Pulsante"
                     android:id="@+id/button_tab_listino"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:layout_marginEnd="1dp"
                     android:backgroundTint="#1565C0"
-                    android:text="@string/listino"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold" />
+                    android:text="@string/listino" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Econ.Pulsante"
                     android:id="@+id/button_tab_nuovo_articolo"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:layout_marginStart="1dp"
                     android:backgroundTint="#E0E0E0"
-                    android:text="@string/nuovo_articolo"
-                    android:textColor="#1565C0" />
+                    android:text="@string/nuovo_articolo" />
             </LinearLayout>
 
             <!-- tab Listino: articolo del catalogo (filtro costruttore e linea, ricerca da 3 lettere) -->
@@ -333,36 +332,30 @@
                         android:contentDescription="Foto dell'articolo"
                         android:scaleType="centerCrop" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Econ.Pulsante.Secondario"
                         android:id="@+id/button_nuovo_foto"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/margine"
-                        android:backgroundTint="#E0E0E0"
-                        android:text="Scatta foto"
-                        android:textAllCaps="false"
-                        android:textColor="#1565C0" />
+                        android:text="Scatta foto" />
 
                     <!-- immagine gia' sul tablet (galleria, download dal web): JPEG, PNG, WebP -->
-                    <Button
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Econ.Pulsante.Secondario"
                         android:id="@+id/button_scegli_immagine"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/margine"
-                        android:backgroundTint="#E0E0E0"
-                        android:text="Scegli immagine"
-                        android:textAllCaps="false"
-                        android:textColor="#1565C0" />
+                        android:text="Scegli immagine" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Econ.Pulsante.Secondario"
                         android:id="@+id/button_togli_foto"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/margine"
-                        android:backgroundTint="#E0E0E0"
                         android:text="Togli"
-                        android:textAllCaps="false"
-                        android:textColor="#C62828"
                         android:visibility="gone" />
                 </LinearLayout>
 

@@ -1,6 +1,6 @@
 package com.ncfsistemi.econ;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -62,7 +62,7 @@ public class ImpostazioniActivity extends AppCompatActivity {
             String v = PreferenzeDispositivo.leggi(this, chiave, predefinito);
             int scelto = 0;
             for (int i = 0; i < valori.length; i++) if (valori[i].equals(v)) scelto = i;
-            new AlertDialog.Builder(this)
+            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                     .setTitle(titolo)
                     .setSingleChoiceItems(etichette, scelto, (d, i) -> {
                         PreferenzeDispositivo.salva(this, chiave, valori[i]);

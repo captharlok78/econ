@@ -28,4 +28,19 @@ public class Iva extends AbstractTable {
 		return IvaDettaglioActivity.class;
 	}
 
+	/** Scelte e schede: il codice con l'aliquota ("022 · 22%"), che da solo non dice niente. */
+	@Override
+	public String getSQLPerSpinner(android.content.ContentValues filtro) {
+		String where = getFiltro(filtro);
+		return "SELECT " + CODICE_IVA + ", " + ALIQUOTA + " FROM " + NOME_TABELLA + (where.isEmpty() ? "" : " WHERE " + where)
+				+ " ORDER BY " + CODICE_IVA;
+	}
+
+	@Override
+	public String formattaDescrizioneSpinner(android.content.ContentValues val) {
+		String codice = val.getAsString(CODICE_IVA);
+		Double aliquota = val.getAsDouble(ALIQUOTA);
+		if (aliquota == null) return codice;
+		return codice + " · " + java.math.BigDecimal.valueOf(aliquota).stripTrailingZeros().toPlainString().replace('.', ',') + "%";
+	}
 }

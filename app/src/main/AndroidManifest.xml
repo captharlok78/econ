@@ -46,7 +46,7 @@
             android:exported="true"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|density"
             android:label="@string/title_activity_menu"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
+            android:theme="@style/AppTheme"></activity>
         <activity
             android:name=".AziendaDettaglioActivity"
             android:exported="true"
@@ -269,31 +269,31 @@
             android:name=".SincronizzazioneActivity"
             android:exported="false"
             android:configChanges="orientation|screenSize"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:theme="@style/AppTheme"
             android:label="Sincronizzazione"></activity>
         <activity
             android:name=".ImpostazioniActivity"
             android:exported="false"
             android:configChanges="orientation|screenSize"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:theme="@style/AppTheme"
             android:label="Impostazioni"></activity>
         <activity
             android:name=".SincronizzaActivity"
             android:exported="false"
             android:configChanges="orientation|screenSize"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:theme="@style/AppTheme"
             android:label="Sincronizzazione"></activity>
         <activity
             android:name=".StatoSistemaActivity"
             android:exported="false"
             android:configChanges="orientation|screenSize"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:theme="@style/AppTheme"
             android:label="Stato sistema"></activity>
         <activity
             android:name=".CambioPasswordActivity"
             android:exported="false"
             android:configChanges="orientation|screenSize"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize"
             android:label="Cambia password"></activity>
         <activity
@@ -323,7 +323,7 @@
             android:name=".CalendarioActivity"
             android:exported="false"
             android:configChanges="orientation|screenSize"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:theme="@style/AppTheme"
             android:label="@string/calendario" />
         <!-- firma del cliente a schermo intero (GESTIONE_RAPPORTINI.md §13) -->
         <activity
@@ -331,7 +331,7 @@
             android:exported="false"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:windowSoftInputMode="adjustPan|stateHidden"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".RapportinoDettaglioModActivity"
             android:exported="true"

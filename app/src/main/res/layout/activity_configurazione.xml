@@ -57,14 +57,11 @@
             android:visibility="gone"
             android:orientation="vertical">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
+                style="@style/Econ.Pulsante"
                 android:id="@+id/buttonConfigurazioniGenerali"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:backgroundTint="#1565C0"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:textSize="14sp"
                 android:onClick="apriConfigurazioni"
                 android:text="@string/action_settings" />
         </LinearLayout>

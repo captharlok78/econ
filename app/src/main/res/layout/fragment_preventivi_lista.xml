@@ -21,8 +21,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/bg_card_filtri"
-        android:layout_margin="8dp"
-        android:padding="10dp">
+        android:layout_margin="12dp"
+                android:padding="14dp">
 
         <!-- Ricerca cliente: autocomplete, ma con lo stesso id/comportamento standard
              (editText_filtra) cosi' il controller gestisce IME-search/reset come altrove. -->
@@ -30,7 +30,10 @@
             android:id="@+id/editText_filtra"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="40dp"
+            android:minHeight="48dp"
+                    android:drawableStart="@drawable/ic_cerca"
+                    android:drawablePadding="8dp"
+                    android:textSize="16sp"
             android:background="@drawable/bg_input_outline"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"

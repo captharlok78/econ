@@ -1,6 +1,6 @@
 package com.ncfsistemi.econ.fragments;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -648,7 +648,7 @@ public class LocalePiantinaFragment extends EconFragment implements OnClickListe
 					public void onClick(DialogInterface dialog, int which) {
 						// TODO Auto-generated method stub
 						if (which == DialogInterface.BUTTON_POSITIVE) {
-							AlertDialog.Builder ab = new AlertDialog.Builder(getActivity());
+							AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(getActivity());
 							ab.setMessage(getString(R.string.messaggio_salvataggio_preferito_in_corso));
 							final AlertDialog di = ab.create();
 							di.show();

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Piede di tutte le pagine di dettaglio, tablet: pulsanti a destra, larghezza fissa (STUDIO_FORM_APP.md, Proposta 1): Annulla bordato e Salva pieno, arrotondati,
+    su una barra bianca. Id e onClick (annulla / salva) sono quelli di sempre: le maschere non cambiano.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/footer_dett"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF"
+    android:elevation="6dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="8dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_annulla"
+            style="@style/Econ.Pulsante.Secondario"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="6dp"
+            android:onClick="annulla"
+            android:text="@string/annulla" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_salva"
+            style="@style/Econ.Pulsante"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:onClick="salva"
+            android:text="@string/salva"
+            app:icon="@drawable/ic_form_salva"
+            app:iconGravity="textStart" />
+
+    </LinearLayout>
+
+    <include layout="@layout/footer" />
+
+</LinearLayout>

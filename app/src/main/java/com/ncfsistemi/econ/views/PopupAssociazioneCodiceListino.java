@@ -1,6 +1,6 @@
 package com.ncfsistemi.econ.views;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;

@@ -759,4 +759,9 @@ public class ComponenteModActivity extends EconDettaglioActivity implements OnIt
 
 	}
 
+
+	@Override
+	protected String getTitoloDettaglio() {
+		return getModalita() == INSERIMENTO ? "Nuovo componente" : "Modifica componente";
+	}
 }

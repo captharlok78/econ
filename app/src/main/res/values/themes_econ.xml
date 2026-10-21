@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Tema Material 3 dell'app (STUDIO_FORM_APP.md §7). E' il padre di AppBaseTheme in values e in tutte le cartelle
+    con qualificatore (large, xlarge, normal, it, si): i colori si cambiano solo qui.
+
+    viewInflaterClass = EconViewInflater (AppCompat): i Button/EditText scritti nei layout restano quelli di AppCompat (con
+    i loro sfondi e colori), solo i pulsanti dei dialoghi diventano MaterialButton; i componenti Material 3 si usano
+    scrivendo la classe (MaterialButton, TextInputLayout, ...), come fanno il template delle form (package form) e
+    footer_dett.xml. Cosi' il tema cambia ovunque (colori, dialoghi,
+    caselle, interruttori, selezione del testo) senza rompere le maschere non ancora rifatte.
+-->
+<resources>
+
+    <style name="Theme.Econ" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/econ_primario</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorPrimaryContainer">#D6E4F7</item>
+        <item name="colorOnPrimaryContainer">#0D3C78</item>
+        <item name="colorSecondary">#5F6B7A</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="colorSecondaryContainer">#D6E4F7</item>
+        <item name="colorOnSecondaryContainer">#0D3C78</item>
+        <item name="colorTertiary">#5F6B7A</item>
+        <item name="colorError">@color/econ_errore</item>
+        <item name="colorSurface">#FFFFFF</item>
+        <item name="colorOnSurface">#1B1F24</item>
+        <item name="colorOnSurfaceVariant">#5F6B7A</item>
+        <item name="colorOutline">#79808A</item>
+        <item name="colorOutlineVariant">#C9CED5</item>
+        <item name="colorSurfaceContainerLowest">#FFFFFF</item>
+        <item name="colorSurfaceContainerLow">#F7F9FC</item>
+        <item name="colorSurfaceContainer">#F4F6FA</item>
+        <item name="colorSurfaceContainerHigh">#EEF1F5</item>
+        <item name="colorSurfaceContainerHighest">#E4E8EE</item>
+        <item name="android:colorBackground">@color/econ_sfondo</item>
+        <!-- niente velatura blu sulle superfici in rilievo: card e dialoghi restano bianchi -->
+        <item name="elevationOverlayEnabled">false</item>
+        <item name="android:statusBarColor">#0D47A1</item>
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- dialoghi: Material 3 coi colori dell'app (MaterialAlertDialogBuilder e AlertDialog.Builder) -->
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Econ.Dialogo</item>
+        <item name="alertDialogTheme">@style/ThemeOverlay.Econ.Dialogo</item>
+
+        <item name="viewInflaterClass">com.ncfsistemi.econ.utils.EconViewInflater</item>
+        <!-- stili dei widget legacy (EconButton, EditTextStyle, Testo dipendono dalla cartella del dispositivo) -->
+        <item name="android:buttonStyle">@style/EconButton</item>
+        <item name="buttonStyle">@style/EconButton</item>
+        <item name="android:editTextStyle">@style/EditTextStyle</item>
+        <item name="editTextStyle">@style/EditTextStyle</item>
+        <item name="android:textViewStyle">@style/Testo</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+    </style>
+
+    <style name="ThemeOverlay.Econ.Dialogo" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorPrimary">@color/econ_primario</item>
+        <item name="colorSurface">#FFFFFF</item>
+        <item name="colorSurfaceContainerHigh">#FFFFFF</item>
+    </style>
+
+    <!-- Form del template (package form): campi bordati Material 3 -->
+    <style name="Econ.Campo" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">8dp</item>
+        <item name="boxCornerRadiusTopEnd">8dp</item>
+        <item name="boxCornerRadiusBottomStart">8dp</item>
+        <item name="boxCornerRadiusBottomEnd">8dp</item>
+        <item name="boxStrokeColor">@color/econ_primario</item>
+        <item name="startIconTint">#5F6B7A</item>
+    </style>
+
+    <style name="Econ.Campo.Scelta" parent="Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="boxCornerRadiusTopStart">8dp</item>
+        <item name="boxCornerRadiusTopEnd">8dp</item>
+        <item name="boxCornerRadiusBottomStart">8dp</item>
+        <item name="boxCornerRadiusBottomEnd">8dp</item>
+        <item name="boxStrokeColor">@color/econ_primario</item>
+        <item name="startIconTint">#5F6B7A</item>
+    </style>
+
+    <!-- Testo dentro i campi del template: non eredita EditTextStyle (sfondo e multilinea delle maschere vecchie) -->
+    <style name="Econ.CampoTesto" parent="Widget.Material3.TextInputEditText.OutlinedBox">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <!-- Pulsanti in fondo alle form (footer_dett.xml): Annulla bordato, Salva pieno, arrotondati -->
+    <style name="Econ.Pulsante" parent="Widget.Material3.Button">
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="Econ.Pulsante.Secondario" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <!-- Pulsante su una barra blu (testata): bordato bianco, testo bianco -->
+    <style name="Econ.Pulsante.SuBarra" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="strokeColor">#B3FFFFFF</item>
+    </style>
+
+    <!-- Pulsante tenue (azioni dentro una sezione, es. + Manodopera del rapportino) -->
+    <style name="Econ.Pulsante.Tenue" parent="Widget.Material3.Button.TonalButton">
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <!-- Etichetta piccola sopra un campo non ancora sul template (come form_campo_dato) -->
+    <style name="Econ.Etichetta" parent="">
+        <item name="android:textColor">@color/econ_testo_secondario</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:layout_marginBottom">4dp</item>
+    </style>
+
+    <!-- Card delle sezioni -->
+    <style name="Econ.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">12dp</item>
+        <item name="cardElevation">1dp</item>
+        <item name="cardBackgroundColor">#FFFFFF</item>
+    </style>
+
+</resources>

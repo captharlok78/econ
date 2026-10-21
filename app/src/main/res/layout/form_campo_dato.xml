@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Campo della scheda (template form in sola visualizzazione): etichetta piccola grigia e valore sotto, come ui.dato del portale. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/form_campo_etichetta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/econ_testo_secondario"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/form_campo_valore"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="#1F2933"
+        android:textIsSelectable="true"
+        android:textSize="16sp" />
+</LinearLayout>

@@ -1,50 +1,73 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Piantina del locale (PiantinaLocaleModActivity): stessa pagina delle form del template (testata standard, card con
+    la sezione, piede Annulla/Salva); dentro la griglia da toccare e le forme pronte.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/container"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/econ_sfondo"
+    android:orientation="vertical">
 
-    <RelativeLayout
-        android:id="@+id/content"
+    <include
+        android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="wrap_content"
+        layout="@layout/header_dettaglio_standard" />
+
+    <com.google.android.material.card.MaterialCardView
+        style="@style/Econ.Card"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="12dp"
+        android:layout_weight="1">
 
         <LinearLayout
-            android:id="@+id/linear_piantina"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/footer_dettaglio"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:orientation="vertical" >
+            android:orientation="vertical"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="14dp">
+
+            <include
+                android:id="@+id/sezione_piantina"
+                layout="@layout/sezione_standard" />
 
             <FrameLayout
                 android:id="@+id/wrapper_griglia"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.85"
-                android:padding="@dimen/margine" >
+                android:layout_weight="1"
+                android:padding="@dimen/margine">
 
                 <com.ncfsistemi.econ.views.EconPiantinaGridView
                     android:id="@+id/gridView_piantina"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@android:color/transparent"
-                    android:numColumns="10" >
-                </com.ncfsistemi.econ.views.EconPiantinaGridView>
+                    android:numColumns="10" />
             </FrameLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Forme pronte"
+                android:textColor="@color/econ_testo_secondario"
+                android:textSize="12sp" />
 
             <HorizontalScrollView
                 android:id="@+id/horizontalScrollView1"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.15"
-                android:background="#5b5b5b" >
+                android:layout_height="wrap_content">
 
                 <LinearLayout
                     android:id="@+id/forme"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:background="#5b5b5b"
                     android:divider="@drawable/divider_tab"
                     android:orientation="horizontal"
                     android:showDividers="middle" >
@@ -114,13 +137,12 @@
                 </LinearLayout>
             </HorizontalScrollView>
         </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
-        <include
-            android:id="@+id/footer_dettaglio"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            layout="@layout/footer_dett" />
-    </RelativeLayout>
+    <include
+        android:id="@+id/footer_dettaglio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/footer_dett" />
 
-</FrameLayout>
+</LinearLayout>

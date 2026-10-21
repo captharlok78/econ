@@ -13,7 +13,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_height="wrap_content">
-        <Button
+        <com.google.android.material.button.MaterialButton
+            style="@style/Econ.Pulsante.Secondario"
             android:id="@+id/button1"
 
             android:layout_width="0dp"
@@ -22,7 +23,8 @@
 
             android:onClick="chiudi"
             android:text="@string/chiudi" />
-        <Button
+        <com.google.android.material.button.MaterialButton
+            style="@style/Econ.Pulsante"
             android:id="@+id/button2"
 
             android:layout_width="0dp"

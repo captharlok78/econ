@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Campo di testo del template form (testo, numero, email, telefono, note): bordato, etichetta nel bordo. -->
+<com.google.android.material.textfield.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Econ.Campo"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/form_campo_testo"
+        style="@style/Econ.CampoTesto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</com.google.android.material.textfield.TextInputLayout>

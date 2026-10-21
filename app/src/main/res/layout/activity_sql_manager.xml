@@ -73,7 +73,8 @@
             android:clickable="true"
             android:onClick="selezionaCampi"
             />
-        <Button
+        <com.google.android.material.button.MaterialButton
+            style="@style/Econ.Pulsante.Secondario"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="aggiungi campo"
@@ -108,7 +109,8 @@
         android:gravity="center"
         android:layout_marginTop="@dimen/margine"
         android:layout_height="wrap_content">
-        <Button
+        <com.google.android.material.button.MaterialButton
+            style="@style/Econ.Pulsante"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="esegui"
@@ -118,7 +120,8 @@
             android:padding="@dimen/margine"
             android:layout_gravity="center_horizontal" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
+            style="@style/Econ.Pulsante.Secondario"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="reset"
