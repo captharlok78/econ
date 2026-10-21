@@ -180,6 +180,8 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         aggiornaInviaMail();
         mostraFirma();
         disponiPulsanti();
+        disponiSoggetti();
+        com.ncfsistemi.econ.views.BarraPulsanti.inUnaRiga((android.widget.LinearLayout) findViewById(R.id.pulsanti_righe));
         preparaFisarmonica();
 
         String messaggio = getIntent().getStringExtra(EXTRA_SALVATO);
@@ -203,6 +205,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     public void onConfigurationChanged(android.content.res.Configuration nuova) {
         super.onConfigurationChanged(nuova);
         disponiPulsanti();
+        disponiSoggetti();
         fisarmonica();
     }
 
@@ -276,7 +279,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         campoCantiere.setEnabled(testataModificabile);
         campoOrdine.setEnabled(testataModificabile);
         editNote.setEnabled(testataModificabile);
-        findViewById(R.id.pulsanti_righe).setVisibility(aggiungeRighe ? View.VISIBLE : View.GONE);
+        aggiornaPulsantiRighe();
         findViewById(R.id.button_salva).setVisibility(testataModificabile || aggiungeRighe ? View.VISIBLE : View.GONE);
 
         // Conferma e In verifica: solo l'autore o l'amministratore, se il passaggio e' ammesso
@@ -1185,6 +1188,21 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     /** Sezioni a fisarmonica (21/10): testata e righe si aprono/chiudono toccando il titolo. */
     private boolean testataAperta = true, righeAperte = true;
     private TextView frecciaTestata, frecciaRighe;
+    /** Icone delle nuove righe nel titolo "Righe" (solo in compatto). */
+    private android.widget.LinearLayout azioniRighe;
+
+    /** Smartphone in orizzontale: pochissima altezza, la pagina si stringe (margini, nuove righe come icone). */
+    private boolean compatto() {
+        android.content.res.Configuration c = getResources().getConfiguration();
+        return c.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE && c.smallestScreenWidthDp < 600;
+    }
+
+    /** Nuove righe: pulsanti sopra la tabella, o icone nel titolo in compatto; solo per chi puo' aggiungere righe. */
+    private void aggiornaPulsantiRighe() {
+        boolean compatto = compatto();
+        findViewById(R.id.pulsanti_righe).setVisibility(aggiungeRighe && !compatto ? View.VISIBLE : View.GONE);
+        if (azioniRighe != null) azioniRighe.setVisibility(aggiungeRighe && compatto ? View.VISIBLE : View.GONE);
+    }
 
     /**
      * Rapportino esistente: testata chiusa (cliente / cantiere / data nel titolo) e righe aperte, per controllare e
@@ -1193,21 +1211,31 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     private void preparaFisarmonica() {
         testataAperta = testata == null;
         // nuovo rapportino in orizzontale: prima la testata (cliente e cantiere), le righe si aprono dopo
-        righeAperte = !(testataAperta && orizzontale());
+        righeAperte = !(testataAperta && esclusiva());
         View sezTestata = findViewById(R.id.sezione_testata), sezRighe = findViewById(R.id.sezione_righe);
         com.ncfsistemi.econ.utils.SezioneStandard.imposta(sezRighe, com.ncfsistemi.econ.utils.FaIcone.ELENCO, "Righe");
         ((ViewGroup.MarginLayoutParams) sezRighe.getLayoutParams()).topMargin = Math.round(2 * getResources().getDisplayMetrics().density);
         frecciaTestata = freccia(sezTestata);
+        // nuove righe come icone nel titolo "Righe": al posto della riga di pulsanti dove l'altezza e' poca (compatto)
+        azioniRighe = new android.widget.LinearLayout(this);
+        azioniRighe.addView(com.ncfsistemi.econ.utils.FaIcone.azione(this, com.ncfsistemi.econ.utils.FaIcone.MANODOPERA,
+                getString(R.string.aggiungi_manodopera), this::nuovaManodopera));
+        azioniRighe.addView(com.ncfsistemi.econ.utils.FaIcone.azione(this, com.ncfsistemi.econ.utils.FaIcone.VIAGGIO,
+                getString(R.string.aggiungi_viaggio), this::nuovoViaggio));
+        azioniRighe.addView(com.ncfsistemi.econ.utils.FaIcone.azione(this, com.ncfsistemi.econ.utils.FaIcone.MATERIALE,
+                getString(R.string.aggiungi_articolo), this::nuovoArticolo));
+        ((ViewGroup) sezRighe.findViewById(R.id.sezioneAzioni)).addView(azioniRighe);
         frecciaRighe = freccia(sezRighe);
+        aggiornaPulsantiRighe();
         ((ViewGroup.MarginLayoutParams) sezTestata.getLayoutParams()).topMargin = Math.round(2 * getResources().getDisplayMetrics().density);
         sezTestata.setOnClickListener(v -> {
             testataAperta = !testataAperta;
-            if (testataAperta && orizzontale()) righeAperte = false;
+            if (testataAperta && esclusiva()) righeAperte = false;
             fisarmonica();
         });
         sezRighe.setOnClickListener(v -> {
             righeAperte = !righeAperte;
-            if (righeAperte && orizzontale()) testataAperta = false;
+            if (righeAperte && esclusiva()) testataAperta = false;
             fisarmonica();
         });
         // il numero di righe nel titolo resta giusto a ogni riga aggiunta, modificata o tolta
@@ -1220,9 +1248,29 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         fisarmonica();
     }
 
-    /** In orizzontale l'altezza e' poca: aprire una sezione chiude l'altra (fisarmonica vera). */
-    private boolean orizzontale() {
-        return getResources().getConfiguration().orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+    /**
+     * Fisarmonica vera (aprire una sezione chiude l'altra e quella aperta prende tutto lo schermo): in orizzontale, dove
+     * l'altezza e' poca, e sempre sugli smartphone; sui tablet in verticale si possono tenere aperte tutte e due.
+     */
+    private boolean esclusiva() {
+        android.content.res.Configuration c = getResources().getConfiguration();
+        return c.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE || c.smallestScreenWidthDp < 600;
+    }
+
+    /** Smartphone in verticale: cliente, cantiere e ordine uno sotto l'altro a tutta larghezza (in tre colonne si tagliano). */
+    private void disponiSoggetti() {
+        float densita = getResources().getDisplayMetrics().density;
+        boolean incolonna = getResources().getConfiguration().screenWidthDp < 600;
+        android.widget.LinearLayout soggetti = findViewById(R.id.riga_soggetti);
+        soggetti.setOrientation(incolonna ? android.widget.LinearLayout.VERTICAL : android.widget.LinearLayout.HORIZONTAL);
+        for (int i = 0; i < soggetti.getChildCount(); i++) {
+            android.widget.LinearLayout.LayoutParams lp = incolonna
+                    ? new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                    : new android.widget.LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+            if (i > 0 && incolonna) lp.topMargin = Math.round(12 * densita);
+            if (i > 0 && !incolonna) lp.setMarginStart(Math.round(10 * densita));
+            soggetti.getChildAt(i).setLayoutParams(lp);
+        }
     }
 
     /** Freccia della sezione (non cliccabile da sola: il tocco va a tutto il titolo). */
@@ -1243,6 +1291,8 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
      * orizzontale, la testata non supera TESTATA_MAX_ORIZZONTALE (scorre).
      */
     private void fisarmonica() {
+        // dopo una rotazione: dove la fisarmonica e' esclusiva resta aperta una sola sezione
+        if (esclusiva() && testataAperta && righeAperte) righeAperte = false;
         View scroll = findViewById(R.id.scroll_testata);
         scroll.setVisibility(testataAperta ? View.VISIBLE : View.GONE);
         findViewById(R.id.contenuto_righe).setVisibility(righeAperte ? View.VISIBLE : View.GONE);
@@ -1254,14 +1304,21 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
 
         boolean testataRiempie = testataAperta && !righeAperte;
         float densita = getResources().getDisplayMetrics().density;
+        // compatto: margini delle card e della barra in fondo ridotti, tutto lo spazio alla sezione aperta
+        int margine = Math.round((compatto() ? 6 : 12) * densita);
+        aggiornaPulsantiRighe();
+        View barra = (View) findViewById(R.id.barra_pulsanti).getParent();
+        barra.setPadding(barra.getPaddingLeft(), Math.round((compatto() ? 2 : 6) * densita), barra.getPaddingRight(),
+                Math.round((compatto() ? 2 : 6) * densita));
         android.widget.LinearLayout.LayoutParams lpT = (android.widget.LinearLayout.LayoutParams) findViewById(R.id.card_testata).getLayoutParams();
         lpT.height = testataRiempie ? 0 : ViewGroup.LayoutParams.WRAP_CONTENT;
         lpT.weight = testataRiempie ? 1f : 0f;
-        lpT.bottomMargin = righeAperte ? 0 : Math.round(12 * densita);
+        lpT.setMargins(margine, margine, margine, righeAperte ? 0 : margine);
         findViewById(R.id.card_testata).setLayoutParams(lpT);
         android.widget.LinearLayout.LayoutParams lpR = (android.widget.LinearLayout.LayoutParams) findViewById(R.id.card_righe).getLayoutParams();
         lpR.height = righeAperte ? 0 : ViewGroup.LayoutParams.WRAP_CONTENT;
         lpR.weight = righeAperte ? 1f : 0f;
+        lpR.setMargins(margine, margine, margine, margine);
         findViewById(R.id.card_righe).setLayoutParams(lpR);
         android.widget.LinearLayout.LayoutParams lpS = (android.widget.LinearLayout.LayoutParams) scroll.getLayoutParams();
         lpS.height = testataRiempie ? 0 : ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -1272,7 +1329,8 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         if (testataAperta && righeAperte && c.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
             int massimo = Math.round(c.screenHeightDp * densita * TESTATA_MAX_ORIZZONTALE);
             scroll.post(() -> {
-                if (scroll.getHeight() > massimo) {
+                // nel frattempo una sezione puo' essere stata chiusa: allora la testata resta a tutta altezza
+                if (testataAperta && righeAperte && scroll.getHeight() > massimo) {
                     lpS.height = massimo;
                     scroll.setLayoutParams(lpS);
                 }

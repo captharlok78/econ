@@ -69,6 +69,7 @@ public final class FaIcone {
 	public static final String CONFERMA = "\uf00c";     // check: pulsante Salva
 	public static final String RAPPORTINO = "\uf46d";  // clipboard-list: rapportino
 	public static final String INFO = "\uf05a";
+	public static final String VIAGGIO = "\uf1b9";    // car: riga di viaggio del rapportino
 	public static final String APRI = "\uf078";       // chevron-down: sezione a fisarmonica chiusa
 	public static final String CHIUDI_SEZIONE = "\uf077"; // chevron-up: sezione a fisarmonica aperta        // info-circle: avviso su un campo che non si modifica (template form)
 	public static final String GIUSTIFICATIVO = "\uf573"; // file-signature: giustificativo (ferie, permessi…) senza icona nota
