@@ -501,7 +501,10 @@
     <string name="eliminazione_non_consentita">La tua licenza non consente di eliminare questi dati per il tuo ruolo. Chiedi all\'amministratore della ditta.</string>
     <string name="rapportino_non_modificabile">Rapportino nello stato \"%1$s\": non modificabile</string>
     <string name="rapportino_non_cancellabile">Rapportino nello stato \"%1$s\": non cancellabile</string>
-    <string name="conferma_rapportino">Confermare il rapportino?</string>
+    <string name="conferma_rapportino">La conferma invia il rapportino in sede e gli assegna il numero progressivo, che serve per farlo firmare al cliente e inviarlo per mail.</string>
+    <string name="conferma_titolo">Confermare il rapportino?</string>
+    <string name="conferma_e_invia">Conferma e invia</string>
+    <string name="conferma_dopo">Senza collegamento il rapportino resta confermato sul dispositivo e il numero arriva alla prossima sincronizzazione.</string>
     <string name="conferma_non_modificabile">Dopo la conferma non sarà più modificabile.</string>
     <string name="conferma_non_cancellabile">Dopo la conferma non si potrà più eliminare.</string>
     <string name="passaggio_stato_non_ammesso">Passaggio di stato non ammesso</string>

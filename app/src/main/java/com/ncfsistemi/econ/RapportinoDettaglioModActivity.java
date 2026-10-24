@@ -102,6 +102,8 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     private long firmaNuovaData = 0;
     private static final int RICHIESTA_FIRMA = 77;
     private static final int RICHIESTA_NUOVO_CLIENTE = 78;
+    /** Invio in sede del rapportino appena confermato, per avere subito il numero (SincronizzazioneConfermaActivity). */
+    private static final int RICHIESTA_INVIO_CONFERMA = 79;
 
     /** Rapportino nuovo con questa data (yyyyMMddHHmmss), es. dal calendario personale. */
     public static final String EXTRA_DATA = "DATA_RAPPORTINO";
@@ -918,6 +920,11 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
      * il salvataggio ritorna un messaggio d'errore: qui un errore non deve lasciare il rapportino salvato a meta').
      */
     private void eseguiSalvataggio(String messaggio) {
+        eseguiSalvataggio(messaggio, false);
+    }
+
+    /** @param inviaInSede dopo il salvataggio si invia subito al server, che da' il numero (Conferma), poi si riapre */
+    private void eseguiSalvataggio(String messaggio, boolean inviaInSede) {
         DbInterno db = new DbInterno(this);
         android.database.sqlite.SQLiteDatabase sqlite = db.getReadableDatabase();
         String esito;
@@ -931,7 +938,14 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             sqlite.endTransaction();
             db.close();
         }
-        if (SALVATAGGIO_OK.equals(esito)) {
+        if (SALVATAGGIO_OK.equals(esito) && inviaInSede) {
+            salvato = true;
+            setResult(RESULT_OK);
+            Intent intent = new Intent(this, SincronizzazioneConfermaActivity.class);
+            intent.putExtra(SincronizzazioneActivity.EXTRA_MODE, SincronizzazioneActivity.MODE_CONFERMA);
+            intent.putExtra(SincronizzazioneActivity.EXTRA_ID_RAPPORTINO, idSalvato);
+            startActivityForResult(intent, RICHIESTA_INVIO_CONFERMA);
+        } else if (SALVATAGGIO_OK.equals(esito)) {
             riapri(messaggio);
         } else if (esito.startsWith("ERR")) {
             EconCrash(esito);
@@ -974,7 +988,12 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
                 });
     }
 
-    /** Conferma: salva e passa a Confermato; l'avviso dice cosa non si potra' piu' fare (regole dello stato Confermato). */
+    /**
+     * Conferma: l'avviso spiega che il rapportino va in sede, riceve il numero progressivo e (regole dello stato Confermato)
+     * non si modifica piu'; con "Conferma e invia" si salva come Confermato e si invia subito, con la finestra del
+     * collegamento e della sincronizzazione (NUMERAZIONE_DOCUMENTI.md §6). Senza rete resta confermato sul dispositivo e il
+     * numero arriva alla prossima sincronizzazione.
+     */
     public void conferma(final View v) {
         DbInterno dbs = new DbInterno(this);
         ContentValues arrivo = RegoleRapportino.statoPerCodice(dbs, StatiDocumento.CODICE_CONFERMATO);
@@ -985,7 +1004,8 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         } else if (!RegoleRapportino.isCancellabile(arrivo)) {
             messaggio += " " + getString(R.string.conferma_non_cancellabile);
         }
-        Utility.mostraConfermaDialog(getString(R.string.conferma), messaggio, this, getString(R.string.conferma),
+        messaggio += "\n\n" + getString(R.string.conferma_dopo);
+        Utility.mostraConfermaDialog(getString(R.string.conferma_titolo), messaggio, this, getString(R.string.conferma_e_invia),
                 getString(R.string.annulla), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -995,7 +1015,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
                         db.close();
                         if (confermato == null) return;
                         idStatoDestino = RigheRapportino.intero(confermato, StatiDocumento.ID);
-                        eseguiSalvataggio("Rapportino confermato.");
+                        eseguiSalvataggio("Rapportino confermato.", true);
                     }
                 });
     }
@@ -1143,6 +1163,18 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         super.onActivityResult(requestCode, resultCode, data);
         // foto del nuovo articolo chiesta dalla finestra della riga (§14)
         if (com.ncfsistemi.econ.views.PopupRigaRapportino.risultatoFoto(requestCode, resultCode, data)) return;
+        if (requestCode == RICHIESTA_INVIO_CONFERMA) {
+            // l'id cambia se il rapportino era nuovo (quello del server); comunque si riapre sul rapportino confermato
+            String messaggio = "Rapportino confermato.";
+            if (data != null) {
+                idSalvato = data.getIntExtra(SincronizzazioneActivity.EXTRA_ID_RAPPORTINO, idSalvato);
+                if (data.getStringExtra(SincronizzazioneActivity.EXTRA_MESSAGGIO) != null) {
+                    messaggio = data.getStringExtra(SincronizzazioneActivity.EXTRA_MESSAGGIO);
+                }
+            }
+            riapri(messaggio);
+            return;
+        }
         if (requestCode == RICHIESTA_NUOVO_CLIENTE) {
             if (resultCode != RESULT_OK) return;
             // i clienti nuovi del dispositivo hanno l'id negativo: l'ultimo creato e' il piu' basso

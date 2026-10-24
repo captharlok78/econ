@@ -272,6 +272,12 @@
             android:theme="@style/AppTheme"
             android:label="Sincronizzazione"></activity>
         <activity
+            android:name=".SincronizzazioneConfermaActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/EconFinestra"
+            android:label="Conferma del rapportino"></activity>
+        <activity
             android:name=".ImpostazioniActivity"
             android:exported="false"
             android:configChanges="orientation|screenSize"

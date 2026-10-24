@@ -58,6 +58,16 @@ public class SincronizzazioneActivity extends AppCompatActivity {
      * Vedi utils.AccessoMercury.
      */
     public static final String MODE_AVVIO    = "avvio";
+    /**
+     * Conferma del rapportino (SincronizzazioneConfermaActivity, finestra sopra il rapportino): collegamento al server,
+     * invio dei dati, download del numero dato dal server (NUMERAZIONE_DOCUMENTI.md §6). Al termine torna al rapportino con
+     * il suo id (cambia se era nuovo) e il messaggio da mostrare.
+     */
+    public static final String MODE_CONFERMA = "conferma";
+    /** MODE_CONFERMA: id del rapportino appena confermato sul dispositivo; nel risultato, l'id dopo l'invio. */
+    public static final String EXTRA_ID_RAPPORTINO = "ID_RAPPORTINO";
+    /** MODE_CONFERMA, nel risultato: messaggio per il rapportino. */
+    public static final String EXTRA_MESSAGGIO = "MESSAGGIO";
 
     // ── Colori stato ──────────────────────────────────────────────────────────
     private static final int COLOR_PENDING  = Color.parseColor("#BDBDBD");
@@ -266,6 +276,11 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     private volatile boolean erroreAvvio = false;
     /** Un errore qualsiasi nell'ultima sincronizzazione: dal menu Sincronizza la pagina resta aperta per farlo vedere. */
     private volatile boolean erroreSync = false;
+    /** MODE_CONFERMA: rapportino confermato (rimappato se il server gli da' un id nuovo), numero ricevuto, passi mostrati. */
+    private volatile int idRapportino = 0;
+    private volatile String numeroRapportino = "";
+    private volatile boolean confermaInCorso = false;
+    private final TextView[] passi = new TextView[3];
 
     // ── Costanti stato ────────────────────────────────────────────────────────
     private static final int STATO_PENDING   = 0;
@@ -283,7 +298,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sincronizzazione);
 
         String mode = getIntent().getStringExtra(EXTRA_MODE);
-        syncMode = MODE_UPLOAD.equals(mode) || MODE_AVVIO.equals(mode) ? mode : MODE_DOWNLOAD;
+        syncMode = MODE_UPLOAD.equals(mode) || MODE_AVVIO.equals(mode) || MODE_CONFERMA.equals(mode) ? mode : MODE_DOWNLOAD;
 
         textSyncTitle       = findViewById(R.id.textSyncTitle);
         textSyncStatus      = findViewById(R.id.textSyncStatus);
@@ -293,7 +308,12 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         btnSincronizza      = findViewById(R.id.btnSincronizza);
         containerTabelle    = findViewById(R.id.containerTabelle);
 
-        if (MODE_AVVIO.equals(syncMode)) {
+        if (MODE_CONFERMA.equals(syncMode)) {
+            preparaConferma();
+            costruisciRighe();
+            avviaSincronizzazione(null);
+            return;
+        } else if (MODE_AVVIO.equals(syncMode)) {
             textSyncTitle.setText("Allineamento con il server");
             btnSincronizza.setText("CONTINUA");
             btnSincronizza.setVisibility(android.view.View.GONE);
@@ -473,6 +493,10 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     }
 
     public void chiudi(View v) {
+        if (MODE_CONFERMA.equals(syncMode)) {
+            if (!confermaInCorso) chiudiConferma();
+            return;
+        }
         if (MODE_AVVIO.equals(syncMode)) {
             vaiAlMenu();
             return;
@@ -494,6 +518,12 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         } else if (requestCode == REQUEST_RELOGIN) {
             // Login annullato dall'utente
             redirectingToLogin = false;
+            if (MODE_CONFERMA.equals(syncMode)) {
+                confermaInCorso = false;
+                setStatus("Accesso al server annullato.", true);
+                fineConferma();
+                return;
+            }
             uiHandler.post(() -> btnSincronizza.setEnabled(true));
         }
     }
@@ -514,6 +544,16 @@ public class SincronizzazioneActivity extends AppCompatActivity {
     }
 
     public void avviaSincronizzazione(View v) {
+        if (MODE_CONFERMA.equals(syncMode)) {
+            // il pulsante compare solo alla fine, come "Chiudi"
+            if (v != null) {
+                chiudi(v);
+                return;
+            }
+            confermaInCorso = true;
+            new Thread(this::eseguiSync).start();
+            return;
+        }
         // In avvio il pulsante è "Continua": porta al menu con i dati presenti.
         if (MODE_AVVIO.equals(syncMode) && v != null) {
             vaiAlMenu();
@@ -534,7 +574,9 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         erroreSync = false;
         try {
             MercuryApiService api = MercuryApiClient.getInstance(this).getService();
-            if (MODE_AVVIO.equals(syncMode)) {
+            if (MODE_CONFERMA.equals(syncMode)) {
+                eseguiConferma(api);
+            } else if (MODE_AVVIO.equals(syncMode)) {
                 erroreAvvio = false;
                 aggiornaModuli(api);
                 if (!redirectingToLogin) runUploadSync(api);
@@ -552,7 +594,12 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             Log.e(TAG, "Errore sync", e);
             setStatus("Errore: " + e.getMessage(), true);
         } finally {
-            if (MODE_AVVIO.equals(syncMode)) {
+            if (MODE_CONFERMA.equals(syncMode)) {
+                if (!redirectingToLogin) {
+                    confermaInCorso = false;
+                    fineConferma();
+                }
+            } else if (MODE_AVVIO.equals(syncMode)) {
                 if (!redirectingToLogin) {
                     if (erroreAvvio) {
                         mostraContinua();
@@ -581,6 +628,138 @@ public class SincronizzazioneActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    // ── Conferma del rapportino (MODE_CONFERMA) ───────────────────────────────
+
+    /** Finestra compatta: niente elenco delle tabelle, tre passi (collegamento, invio, numero) sotto lo stato. */
+    private void preparaConferma() {
+        idRapportino = getIntent().getIntExtra(EXTRA_ID_RAPPORTINO, 0);
+        setFinishOnTouchOutside(false);
+        textSyncTitle.setText("Conferma del rapportino");
+        textLastSync.setVisibility(View.GONE);
+        findViewById(R.id.scrollTabelle).setVisibility(View.GONE);
+        findViewById(R.id.btnBack).setVisibility(View.INVISIBLE);
+        btnSincronizza.setVisibility(View.GONE);
+        btnSincronizza.setText("CHIUDI");
+        ((LinearLayout) findViewById(R.id.containerPassi).getParent()).getLayoutParams().height = LinearLayout.LayoutParams.WRAP_CONTENT;
+        LinearLayout contenitore = findViewById(R.id.containerPassi);
+        contenitore.setVisibility(View.VISIBLE);
+        String[] nomi = { "Collegamento al server", "Invio dei dati in sede", "Numero del rapportino" };
+        int spazio = Math.round(6 * getResources().getDisplayMetrics().density);
+        for (int i = 0; i < passi.length; i++) {
+            TextView t = new TextView(this);
+            t.setTextSize(15);
+            t.setPadding(0, spazio, 0, spazio);
+            t.setTag(nomi[i]);
+            contenitore.addView(t);
+            passi[i] = t;
+            passo(i, STATO_PENDING, "");
+        }
+        setStatus("Conferma in corso...", false);
+    }
+
+    /** Stato di un passo: ○ da fare, ↻ in corso, ✓ fatto, ✗ non riuscito (con il dettaglio). */
+    private void passo(int i, int stato, String dettaglio) {
+        uiHandler.post(() -> {
+            TextView t = passi[i];
+            String simbolo;
+            int colore;
+            switch (stato) {
+                case STATO_IN_CORSO: simbolo = "↻"; colore = COLOR_APPLYING; break;
+                case STATO_FATTO:    simbolo = "✓"; colore = COLOR_DONE;     break;
+                case STATO_ERRORE:   simbolo = "✗"; colore = COLOR_ERROR;    break;
+                default:             simbolo = "○"; colore = COLOR_PENDING;  break;
+            }
+            t.setText(simbolo + "   " + t.getTag() + (dettaglio.isEmpty() ? "" : " — " + dettaglio));
+            t.setTextColor(stato == STATO_PENDING ? Color.parseColor("#888888") : Color.parseColor("#333333"));
+            t.setTypeface(null, stato == STATO_IN_CORSO ? Typeface.BOLD : Typeface.NORMAL);
+            android.text.SpannableString testo = new android.text.SpannableString(t.getText());
+            testo.setSpan(new android.text.style.ForegroundColorSpan(colore), 0, simbolo.length(), 0);
+            t.setText(testo);
+        });
+    }
+
+    /**
+     * Il rapportino e' gia' confermato sul dispositivo: si invia tutto quello che c'e' da inviare (il server gli da' il
+     * numero, NumerazioneListener) e si scarica, cosi' il numero arriva subito. Senza server si ferma al primo passo.
+     */
+    private void eseguiConferma(MercuryApiService api) throws Exception {
+        numeroRapportino = "";
+        erroreSync = false;
+        passo(0, STATO_IN_CORSO, "");
+        setStatus("Collegamento al server...", false);
+        if (!TokenManager.getInstance(this).hasToken() || !com.ncfsistemi.econ.utils.VerificaServer.raggiungibile(this)) {
+            passo(0, STATO_ERRORE, "non raggiungibile");
+            setStatus("Server non raggiungibile.", true);
+            return;
+        }
+        com.ncfsistemi.econ.utils.Sessione.setOffline(false);
+        passo(0, STATO_FATTO, "");
+
+        passo(1, STATO_IN_CORSO, "");
+        aggiornaPermessi();
+        runUploadSync(api);
+        if (redirectingToLogin) return;
+        boolean invioConErrori = erroreSync;
+        passo(1, invioConErrori ? STATO_ERRORE : STATO_FATTO, invioConErrori ? "con errori" : "");
+
+        // si scarica comunque: il rapportino puo' essere passato anche se un'altra tabella ha dato errore
+        passo(2, STATO_IN_CORSO, "");
+        runDownloadSync(api);
+        if (redirectingToLogin) return;
+        DbInterno db = new DbInterno(this);
+        android.content.ContentValues r = db.getRecord("select " + com.ncfsistemi.econ.db.table.Rapportini.NUMERO + ", "
+                + com.ncfsistemi.econ.db.table.Rapportini.ANNO + " from " + com.ncfsistemi.econ.db.table.Rapportini.NOME_TABELLA
+                + " where " + com.ncfsistemi.econ.db.table.Rapportini.ID + "=" + idRapportino);
+        db.close();
+        numeroRapportino = com.ncfsistemi.econ.db.table.Rapportini.numeroDocumento(r);
+        passo(2, numeroRapportino.isEmpty() ? STATO_ERRORE : STATO_FATTO, numeroRapportino.isEmpty() ? "non ricevuto" : "N. " + numeroRapportino);
+    }
+
+    /** Fine: con il numero si torna da soli al rapportino; senza, si spiega e si chiude con Chiudi. */
+    private void fineConferma() {
+        uiHandler.post(() -> {
+            if (isFinishing() || isDestroyed()) return;
+            progressGlobale.setProgress(100);
+            textTabelleProgress.setText("");
+            if (!numeroRapportino.isEmpty()) {
+                textSyncStatus.setText("Rapportino N. " + numeroRapportino + " confermato ✓");
+                textSyncStatus.setTextColor(COLOR_DONE);
+                uiHandler.postDelayed(() -> {
+                    if (!isFinishing() && !isDestroyed()) chiudiConferma();
+                }, 1500);
+                return;
+            }
+            // appena torna la rete parte la sincronizzazione in background, che porta il numero
+            com.ncfsistemi.econ.servizi.SyncWorker.scheduleImmediateSync(this);
+            String motivo = textSyncStatus.getText().toString();
+            textSyncStatus.setText((motivo.isEmpty() ? "" : motivo + "\n\n")
+                    + "Il rapportino resta confermato sul dispositivo: il numero arriva alla prossima sincronizzazione.");
+            textSyncStatus.setTextColor(COLOR_ERROR);
+            findViewById(R.id.btnBack).setVisibility(View.VISIBLE);
+            btnSincronizza.setVisibility(View.VISIBLE);
+            btnSincronizza.setEnabled(true);
+        });
+    }
+
+    private void chiudiConferma() {
+        Intent dati = new Intent();
+        dati.putExtra(EXTRA_ID_RAPPORTINO, idRapportino);
+        dati.putExtra(EXTRA_MESSAGGIO, numeroRapportino.isEmpty()
+                ? "Rapportino confermato sul dispositivo: il numero arriva alla prossima sincronizzazione."
+                : "Rapportino N. " + numeroRapportino + " confermato.");
+        setResult(RESULT_OK, dati);
+        finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (MODE_CONFERMA.equals(syncMode)) {
+            chiudi(null);
+            return;
+        }
+        super.onBackPressed();
     }
 
     private void runDownloadSync(MercuryApiService api) throws Exception {
@@ -1029,6 +1208,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
                                         new String[]{String.valueOf(oldId)});
                             }
                         }
+                        if ("rapportini".equals(tableName) && oldId == idRapportino) idRapportino = newId;
                         Log.d(TAG, "Rimappato " + tableName + " " + oldId + "→" + newId);
                     }
                 }
