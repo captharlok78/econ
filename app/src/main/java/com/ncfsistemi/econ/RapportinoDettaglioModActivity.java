@@ -49,7 +49,7 @@ import com.ncfsistemi.econ.views.PopupRigaRapportino;
 
 /**
  * Rapportino, schema 26 (GESTIONE_RAPPORTINI.md §12): testata (operatore, data, cliente / cantiere / ordine con ricerca,
- * almeno uno; note), righe aggiunte con le finestre Manodopera, Viaggio e Articolo e mostrate in tabella. Le righe restano in
+ * cantiere obbligatorio, STUDIO_ASSISTENZE_TEMPO.md §8; note), righe aggiunte con le finestre Manodopera, Viaggio e Articolo e mostrate in tabella. Le righe restano in
  * memoria fino a Salva (il rapportino resta nello stato attuale, per un rapportino nuovo quello iniziale, Bozza) o Conferma
  * (passa a Confermato). Salva, In verifica e Conferma non chiudono la maschera: la riaprono sul rapportino salvato, con
  * stato e permessi nuovi; si esce solo con Chiudi (o indietro), che con modifiche non salvate chiede conferma. Se lo stato non e' modificabile la maschera e' in sola lettura. I cantieri
@@ -1061,6 +1061,11 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         if (senzaLicenzaModifica) return getString(R.string.sola_lettura_licenza);
         if (!modificabile) return getString(R.string.rapportino_non_modificabile, RigheRapportino.testo(stato, StatiDocumento.NOME));
         if (!testataModificabile && !aggiungeRighe) return "Le righe di questo rapportino le modifica l'autore o l'amministratore.";
+        // cantiere obbligatorio (STUDIO_ASSISTENZE_TEMPO.md §8, come Rapportini::valida() del server); i vecchi senza restano modificabili
+        boolean vecchioSenzaCantiere = testata != null && RigheRapportino.intero(testata, Rapportini.ID_CANTIERE) == 0;
+        if (campoCantiere.getIdScelto() == 0 && campoOrdine.getIdScelto() == 0 && !vecchioSenzaCantiere) {
+            return getString(R.string.errore_cantiere_rapportino);
+        }
         if (campoCliente.getIdScelto() == 0 && campoCantiere.getIdScelto() == 0 && campoOrdine.getIdScelto() == 0) {
             return getString(R.string.errore_riferimento_rapportino);
         }

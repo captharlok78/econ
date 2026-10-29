@@ -450,6 +450,7 @@
     <string name="cantiere_facoltativo">Cantiere (facoltativo)</string>
     <string name="nessun_cliente">Nessun cliente</string>
     <string name="nessun_cantiere">Nessun cantiere</string>
+    <string name="errore_cantiere_rapportino">Il cantiere è obbligatorio</string>
     <string name="errore_riferimento_rapportino">Indica almeno un cliente, un cantiere o un ordine</string>
     <string name="tipo_viaggio_andata">Viaggio andata</string>
     <string name="tipo_lavoro">Lavoro</string>
