@@ -179,6 +179,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
 
         impostaAscoltatori();
         applicaStato();
+        caricaAssistenze();
         aggiornaInviaMail();
         mostraFirma();
         disponiPulsanti();
@@ -554,6 +555,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             campoOrdine.seleziona(null);
         }
         aggiornaElencoOrdini(0);
+        caricaAssistenze();
         if (voce != null) apriElenco(campoOrdine); // gli ordini aperti del cantiere, se ce ne sono
     }
 
@@ -634,6 +636,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         aggiornaElencoCantieri();
         aggiornaElencoOrdini(0);
         aggiornaInviaMail();
+        caricaAssistenze();
 
         DbInterno db = new DbInterno(this);
         Set<Integer> sceglibili = new HashSet<Integer>();
@@ -876,7 +879,9 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
                     ((TextView) cella).setText(RigheRapportino.testo(r, RigheRapportino.NOME_UTENTE));
                     break;
                 case "articolo":
-                    ((TextView) cella).setText(RigheRapportino.articolo(r));
+                    // assistenza a tempo: il testo sotto l'articolo, con l'orologio (STUDIO_ASSISTENZE_TEMPO.md §10)
+                    String assistenza = com.ncfsistemi.econ.utils.AssistenzeLocali.testoRiga(RapportinoDettaglioModActivity.this, r, dataRapportino());
+                    ((TextView) cella).setText(RigheRapportino.articolo(r) + (assistenza.isEmpty() ? "" : "\n\u23F1 " + assistenza));
                     break;
                 case "um":
                     ((TextView) cella).setText(RigheRapportino.testo(r, RigheRapportino.CODICE_UNITA));
@@ -1032,7 +1037,9 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         val.put(Rapportini.ID_UTENTE_DITTA, utente.idUtenteDitta);
         tabella.inserisciRecord(db, val);
         idSalvato = val.getAsInteger(Rapportini.ID);
-        return salvaRighe(db, idSalvato, val.getAsInteger(Rapportini.ID_ORDINE));
+        String esito = salvaRighe(db, idSalvato, val.getAsInteger(Rapportini.ID_ORDINE));
+        if (SALVATAGGIO_OK.equals(esito)) salvaControlli(db, idSalvato);
+        return esito;
     }
 
     @Override
@@ -1054,7 +1061,151 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             tabRighe.cancellaRecord(db, del);
         }
         idSalvato = getIDModifica();
-        return salvaRighe(db, idSalvato, val.getAsInteger(Rapportini.ID_ORDINE));
+        String esito = salvaRighe(db, idSalvato, val.getAsInteger(Rapportini.ID_ORDINE));
+        if (SALVATAGGIO_OK.equals(esito)) salvaControlli(db, idSalvato);
+        return esito;
+    }
+
+    // ── Assistenze del cantiere (STUDIO_ASSISTENZE_TEMPO.md §10) ──────────────────────────────────────────────────
+
+    /** Scelte sulle assistenze del cantiere mostrate: assistenza → {esito, nota}; si salvano con il rapportino. */
+    private final java.util.LinkedHashMap<Integer, String[]> sceltaAssistenze = new java.util.LinkedHashMap<Integer, String[]>();
+    private int cantiereAssistenze = -1;
+
+    /**
+     * Sotto la testata le assistenze a tempo del cantiere (le attive installate entro la data, quelle gia' controllate da
+     * questo rapportino): per ognuna l'esito (non controllata, eseguito, sostituito, rimosso) e una nota. Le modifica chi
+     * modifica la testata; contano dalla conferma, la scadenza la ricalcola il server. Senza assistenze non compare.
+     */
+    private void caricaAssistenze() {
+        android.widget.LinearLayout elenco = findViewById(R.id.elenco_assistenze);
+        elenco.removeAllViews();
+        int idCantiere = campoCantiere.getIdScelto();
+        int idRapportino = testata != null ? getIDModifica() : 0;
+        DbInterno db = new DbInterno(this);
+        List<ContentValues> assistenze = com.ncfsistemi.econ.utils.AssistenzeLocali.controllabili(db, idCantiere, dataRapportino(), idRapportino);
+        java.util.Map<Integer, ContentValues> controlli = com.ncfsistemi.econ.utils.AssistenzeLocali.controlli(db, idRapportino);
+        db.close();
+        if (idCantiere != cantiereAssistenze) { // altro cantiere: si riparte da quanto salvato
+            sceltaAssistenze.clear();
+            cantiereAssistenze = idCantiere;
+        }
+        java.util.LinkedHashMap<Integer, String[]> mostrate = new java.util.LinkedHashMap<Integer, String[]>();
+        float densita = getResources().getDisplayMetrics().density;
+        List<String> esiti = new ArrayList<String>();
+        esiti.add(getString(R.string.non_controllata));
+        for (String[] e : com.ncfsistemi.econ.db.table.AssistenzeControlli.ESITI) esiti.add(e[1]);
+        long oggi = Utility.dataToNumber(java.util.Calendar.getInstance());
+        for (ContentValues a : assistenze) {
+            final int id = RigheRapportino.intero(a, com.ncfsistemi.econ.db.table.Assistenze.ID);
+            String[] scelta = sceltaAssistenze.get(id);
+            if (scelta == null) {
+                ContentValues c = controlli.get(id);
+                scelta = new String[] { c != null ? RigheRapportino.testo(c, com.ncfsistemi.econ.db.table.AssistenzeControlli.ESITO) : "",
+                        c != null ? RigheRapportino.testo(c, com.ncfsistemi.econ.db.table.AssistenzeControlli.NOTE) : "" };
+            }
+            final String[] valori = scelta;
+            mostrate.put(id, valori);
+
+            android.widget.LinearLayout riga = new android.widget.LinearLayout(this);
+            riga.setOrientation(android.widget.LinearLayout.VERTICAL);
+            riga.setPadding(0, Math.round(6 * densita), 0, Math.round(6 * densita));
+            TextView titolo = new TextView(this);
+            titolo.setText("\u23F1 " + RigheRapportino.testo(a, com.ncfsistemi.econ.utils.AssistenzeLocali.CODICE_ARTICOLO) + " "
+                    + RigheRapportino.testo(a, com.ncfsistemi.econ.utils.AssistenzeLocali.DESCRIZIONE_ARTICOLO));
+            titolo.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 15);
+            riga.addView(titolo);
+            StringBuilder dettagli = new StringBuilder();
+            for (String campo : new String[] { com.ncfsistemi.econ.db.table.Assistenze.MATRICOLA, com.ncfsistemi.econ.db.table.Assistenze.UBICAZIONE }) {
+                String v = RigheRapportino.testo(a, campo);
+                if (!v.isEmpty()) dettagli.append(dettagli.length() > 0 ? " · " : "").append(v);
+            }
+            long prossima = a.getAsLong(com.ncfsistemi.econ.db.table.Assistenze.PROSSIMA_SCADENZA) != null
+                    ? a.getAsLong(com.ncfsistemi.econ.db.table.Assistenze.PROSSIMA_SCADENZA) : 0;
+            if (prossima > 0) {
+                dettagli.append(dettagli.length() > 0 ? " · " : "").append("prossima ")
+                        .append(com.ncfsistemi.econ.utils.AssistenzeLocali.data(prossima)).append(prossima < oggi ? " (scaduta)" : "");
+            }
+            if (dettagli.length() > 0) {
+                TextView sotto = new TextView(this);
+                sotto.setText(dettagli);
+                sotto.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 13);
+                sotto.setTextColor(androidx.core.content.ContextCompat.getColor(this, prossima > 0 && prossima < oggi
+                        ? android.R.color.holo_red_dark : R.color.econ_testo_secondario));
+                riga.addView(sotto);
+            }
+            android.widget.LinearLayout scelte = new android.widget.LinearLayout(this);
+            scelte.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+            scelte.setGravity(Gravity.CENTER_VERTICAL);
+            android.widget.Spinner esito = new android.widget.Spinner(this);
+            android.widget.ArrayAdapter<String> ad = new android.widget.ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, esiti);
+            ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            esito.setAdapter(ad);
+            int posizione = 0;
+            for (int i = 0; i < com.ncfsistemi.econ.db.table.AssistenzeControlli.ESITI.length; i++) {
+                if (com.ncfsistemi.econ.db.table.AssistenzeControlli.ESITI[i][0].equals(valori[0])) posizione = i + 1;
+            }
+            esito.setSelection(posizione, false);
+            esito.setEnabled(testataModificabile);
+            esito.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(android.widget.AdapterView<?> parent, View view, int pos, long idVoce) {
+                    String nuovo = pos == 0 ? "" : com.ncfsistemi.econ.db.table.AssistenzeControlli.ESITI[pos - 1][0];
+                    if (!nuovo.equals(valori[0])) {
+                        valori[0] = nuovo;
+                        modificato = true;
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(android.widget.AdapterView<?> parent) {
+                }
+            });
+            scelte.addView(esito, new android.widget.LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+            EditText nota = new EditText(this);
+            nota.setHint(R.string.nota);
+            nota.setSingleLine(true);
+            nota.setText(valori[1]);
+            nota.setEnabled(testataModificabile);
+            nota.setFilters(new android.text.InputFilter[] { new android.text.InputFilter.LengthFilter(255) });
+            nota.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence t, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence t, int start, int before, int count) {
+                }
+
+                @Override
+                public void afterTextChanged(Editable t) {
+                    if (!t.toString().equals(valori[1])) {
+                        valori[1] = t.toString();
+                        modificato = true;
+                    }
+                }
+            });
+            android.widget.LinearLayout.LayoutParams lpNota = new android.widget.LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.4f);
+            lpNota.setMarginStart(Math.round(10 * densita));
+            scelte.addView(nota, lpNota);
+            riga.addView(scelte);
+            elenco.addView(riga);
+        }
+        sceltaAssistenze.clear();
+        sceltaAssistenze.putAll(mostrate);
+        ((TextView) findViewById(R.id.text_assistenze_nota)).setText(confermato()
+                ? R.string.assistenze_cantiere_nota_confermato : R.string.assistenze_cantiere_nota);
+        findViewById(R.id.box_assistenze).setVisibility(assistenze.isEmpty() ? View.GONE : View.VISIBLE);
+    }
+
+    /** Controlli delle assistenze con il rapportino: quelli mostrati, e tolti quelli di un altro cantiere. */
+    private void salvaControlli(DbInterno db, int idRapportino) {
+        if (!testataModificabile) return;
+        java.util.Map<Integer, String[]> scelte = new java.util.HashMap<Integer, String[]>(sceltaAssistenze);
+        for (Integer id : com.ncfsistemi.econ.utils.AssistenzeLocali.controlli(db, idRapportino).keySet()) {
+            if (!scelte.containsKey(id)) scelte.put(id, new String[] { "", "" });
+        }
+        com.ncfsistemi.econ.utils.AssistenzeLocali.salvaControlli(db, idRapportino, dataRapportino(), utente.idUtenteDitta, scelte);
     }
 
     private String controlla(DbInterno db) {

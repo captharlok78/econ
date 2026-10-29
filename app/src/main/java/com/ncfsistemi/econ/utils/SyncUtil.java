@@ -150,6 +150,8 @@ public final class SyncUtil {
         { "modelli_stampa",              "id" },
         { "tipologie_modello",           "id" },
         { "ditte_modelli_stampa",        "id" },
+        { "ditte_articoli_assistenza",   "id" },
+        { "assistenze",                  "id" },
     };
 
     /** Chiave primaria delle tabelle sola lettura, null per le altre. */
@@ -523,6 +525,11 @@ public final class SyncUtil {
                     + " AND NOT EXISTS (SELECT 1 FROM stati_documento s WHERE s.id = p.id_stato AND s.iniziale = 1)");
             togliDocumenti(db, prev, "id_preventivo", prevDett, "id_preventivo", "p.data < " + limite + " AND p.stato = 'C'");
             togliCantieriChiusi(db, Math.max(dl.perimetro.giorniCantieri, 0), prev, prevDett);
+            // controlli delle assistenze dei rapportini usciti (schema 39), senza modifiche da inviare
+            if (esisteTabella(db, "assistenze_controlli")) {
+                db.execSQL("DELETE FROM assistenze_controlli WHERE in_server = 1 AND NOT EXISTS (SELECT 1 FROM " + rap
+                        + " r WHERE r.id = assistenze_controlli.id_rapportino)");
+            }
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();

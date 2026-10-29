@@ -31,6 +31,7 @@ import com.ncfsistemi.econ.db.table.RapportiniDettaglioTipi;
 import com.ncfsistemi.econ.db.table.SettoriArticolo;
 import com.ncfsistemi.econ.db.table.UnitaMisura;
 import com.ncfsistemi.econ.db.table.Utenti;
+import com.ncfsistemi.econ.utils.AssistenzeLocali;
 import com.ncfsistemi.econ.utils.RegoleRapportino;
 import com.ncfsistemi.econ.utils.RigheRapportino;
 import com.ncfsistemi.econ.utils.Utility;
@@ -78,7 +79,9 @@ public class PopupRigaRapportino {
     private final View vista;
 
     private Spinner spinnerTipo, spinnerUtente, spinnerUnita, spinnerRigaOrdine, spinnerCostruttore, spinnerLinea;
-    private EditText editOraInizio, editOraFine, editQuantita, editNote, editPrezzo;
+    private EditText editOraInizio, editOraFine, editQuantita, editNote, editPrezzo, editMesiAssistenza;
+    /** Mesi proposti per l'articolo scelto se e' in assistenza a tempo, 0 se non lo e' (STUDIO_ASSISTENZE_TEMPO.md §10). */
+    private int mesiArticolo = 0;
     private CheckBox checkACosto;
     private CampoRicerca campoArticolo;
     /** Manodopera nuova con piu' utenti sceglibili: si scelgono dall'elenco a spunta invece che dalla tendina. */
@@ -138,6 +141,7 @@ public class PopupRigaRapportino {
         editPrezzo = (EditText) vista.findViewById(R.id.edit_prezzo);
         checkACosto = (CheckBox) vista.findViewById(R.id.check_a_costo);
         campoArticolo = (CampoRicerca) vista.findViewById(R.id.campo_articolo);
+        editMesiAssistenza = (EditText) vista.findViewById(R.id.edit_mesi_assistenza);
 
         // tipo: tendina solo se ce n'e' piu' d'uno (il materiale ne ha uno solo, MA)
         imposta(spinnerTipo, tipi, RigheRapportino.intero(riga, RapportiniDettaglio.ID_TIPO), null);
@@ -412,6 +416,7 @@ public class PopupRigaRapportino {
             public void selezioneCambiata(CampoRicerca campo, CampoRicerca.Voce voce) {
                 if (voce == null) return;
                 proponiRigaOrdine(RigheRapportino.testo(voce.dati, Listini.CODICE_ARTICOLO));
+                aggiornaAssistenza(voce.id, true);
                 editQuantita.requestFocus(); // scelto l'articolo si passa alla quantita'
             }
         });
@@ -420,7 +425,44 @@ public class PopupRigaRapportino {
             l.put(Listini.CODICE_ARTICOLO, RigheRapportino.testo(riga, RigheRapportino.CODICE_ARTICOLO));
             campoArticolo.seleziona(new CampoRicerca.Voce(RigheRapportino.intero(riga, RapportiniDettaglio.ID_LISTINO),
                     RigheRapportino.articolo(riga), l));
+            aggiornaAssistenza(RigheRapportino.intero(riga, RapportiniDettaglio.ID_LISTINO), false);
         }
+        editMesiAssistenza.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mostraTestoAssistenza();
+            }
+        });
+    }
+
+    /**
+     * Assistenza a tempo dell'articolo scelto: il campo dei mesi compare solo se l'articolo e' in assistenza nella ditta.
+     * Articolo nuovo o cambiato: si propongono i suoi mesi; riga esistente con lo stesso articolo: restano quelli della riga.
+     */
+    private void aggiornaAssistenza(int idListino, boolean articoloCambiato) {
+        DbInterno db = new DbInterno(ctx);
+        mesiArticolo = AssistenzeLocali.mesiArticolo(ctx, db, idListino);
+        db.close();
+        vista.findViewById(R.id.sezione_assistenza).setVisibility(mesiArticolo > 0 ? View.VISIBLE : View.GONE);
+        if (mesiArticolo <= 0) return;
+        int mesiRiga = RigheRapportino.intero(riga, RapportiniDettaglio.MESI_ASSISTENZA);
+        editMesiAssistenza.setText(String.valueOf(!articoloCambiato && mesiRiga > 0 ? mesiRiga : mesiArticolo));
+        mostraTestoAssistenza();
+    }
+
+    private void mostraTestoAssistenza() {
+        int mesi = (int) numero(editMesiAssistenza.getText().toString());
+        ContentValues anteprima = new ContentValues();
+        anteprima.put(RapportiniDettaglio.MESI_ASSISTENZA, mesi);
+        ((TextView) vista.findViewById(R.id.text_assistenza)).setText(mesi > 0 ? AssistenzeLocali.testoRiga(ctx, anteprima, contesto.data) : "");
     }
 
     private void caricaLinee() {
@@ -826,6 +868,13 @@ public class PopupRigaRapportino {
             idListino = isMateriale() ? campoArticolo.getIdScelto() : RigheRapportino.intero(riga, RapportiniDettaglio.ID_LISTINO);
         }
         if (isMateriale() && idListino == 0) return ctx.getString(R.string.articolo_obbligatorio);
+        // articolo in assistenza a tempo: pezzi interi (un'assistenza per pezzo) e mesi da 1 a 120, come sul server
+        int mesiAssistenza = 0;
+        if (isMateriale() && mesiArticolo > 0 && !tabNuovoArticolo) {
+            if (quantita != Math.floor(quantita)) return ctx.getString(R.string.errore_quantita_intera);
+            mesiAssistenza = (int) numero(editMesiAssistenza.getText().toString());
+            if (mesiAssistenza < 1 || mesiAssistenza > 120) return ctx.getString(R.string.errore_mesi_assistenza);
+        }
 
         riga.put(RapportiniDettaglio.ID_TIPO, idScelto(spinnerTipo));
         riga.put(RapportiniDettaglio.ID_UTENTE_MANODOPERA, idUtente);
@@ -836,6 +885,7 @@ public class PopupRigaRapportino {
             riga.put(RapportiniDettaglio.ORA_FINE, editOraFine.getText().toString().trim());
         }
         riga.put(RapportiniDettaglio.ID_LISTINO, isMateriale() ? idListino : 0);
+        riga.put(RapportiniDettaglio.MESI_ASSISTENZA, mesiAssistenza);
         riga.put(RapportiniDettaglio.ID_PREVENTIVO_DETTAGLIO, contesto.idOrdine != 0 ? idScelto(spinnerRigaOrdine) : 0);
         riga.put(RapportiniDettaglio.NOTE, editNote.getText().toString().trim());
         if (contesto.vedePrezzi) {

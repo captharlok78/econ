@@ -33,6 +33,8 @@ public class TokenManager {
     private static final String KEY_FUNZIONALITA = "funzionalita_abilitate";
     private static final String KEY_PIANIFICAZIONE = "ditta_usa_pianificazione";
     private static final String KEY_IVA_PREDEFINITA = "ditta_iva_predefinita";
+    private static final String KEY_MESI_ASSISTENZA = "ditta_mesi_assistenza";
+    private static final String KEY_TESTO_ASSISTENZA = "ditta_testo_assistenza";
     private static final String KEY_RICORDA_EMAIL    = "ricorda_email";
     private static final String KEY_RICORDA_PASSWORD  = "ricorda_password";
 
@@ -97,6 +99,7 @@ public class TokenManager {
         saveFunzionalita(response.funzionalita);
         savePianificazione(response.pianificazione);
         saveIvaPredefinita(response.ivaPredefinita);
+        saveAssistenza(response.mesiAssistenza, response.testoAssistenza);
         savePacchetti(response.pacchetti);
         saveDitte(response.ditte);
         // token nuovo dal server (login o rinnovo): riparte il periodo in cui si puo' lavorare offline
@@ -221,6 +224,20 @@ public class TokenManager {
 
     public String getIvaPredefinita() {
         return prefs.getString(KEY_IVA_PREDEFINITA, null);
+    }
+
+    /** Assistenza a tempo della ditta (Amministrazione › Azienda): mesi e testo predefiniti. null (server vecchio): non tocca. */
+    public void saveAssistenza(Integer mesi, String testo) {
+        if (mesi != null) prefs.edit().putInt(KEY_MESI_ASSISTENZA, mesi).apply();
+        if (testo != null) prefs.edit().putString(KEY_TESTO_ASSISTENZA, testo).apply();
+    }
+
+    public int getMesiAssistenza() {
+        return prefs.getInt(KEY_MESI_ASSISTENZA, 12);
+    }
+
+    public String getTestoAssistenza() {
+        return prefs.getString(KEY_TESTO_ASSISTENZA, "Questo articolo richiede assistenza tra {mesi} mesi, il {data}");
     }
 
     public void savePianificazione(Boolean pianificazione) {

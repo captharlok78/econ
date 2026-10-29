@@ -55,6 +55,8 @@ public class CalendarioActivity extends AppCompatActivity {
     private static final String STATO_GIORNO = "giorno";
     private static final int BLU = 0xFF1565C0;
     private static final int VERDE = 0xFF2E7D32;
+    /** Assistenze a tempo: viola, come nel calendario del portale. */
+    private static final int VIOLA = 0xFF6A1B9A;
     private static final int GRIGIO = 0xFF757575;
     private static final int TESTO = 0xFF212121;
 
@@ -329,25 +331,37 @@ public class CalendarioActivity extends AppCompatActivity {
 
     /** Blocco di pianificazione: cantiere, mattina/pomeriggio, ore, squadra. */
     private View pianificato(ContentValues p) {
+        return pianificato(p, false);
+    }
+
+    /**
+     * Blocco di pianificazione: cantiere, mattina/pomeriggio, ore, squadra. Con assistenze a tempo collegate e' viola con
+     * l'orologio e, nel dettaglio del giorno, l'elenco degli articoli da controllare.
+     */
+    private View pianificato(ContentValues p, boolean conArticoli) {
+        String articoli = val(p, CalendarioPersonale.ARTICOLI_ASSISTENZA);
+        boolean assistenza = !articoli.isEmpty();
+        int colore = assistenza ? VIOLA : VERDE;
         LinearLayout riga = new LinearLayout(this);
         riga.setOrientation(LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams lpr = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         lpr.setMargins(0, dp(6), 0, 0);
         riga.setLayoutParams(lpr);
-        riga.setBackground(sfondo(0xFFE8F5E9, 0, 6));
+        riga.setBackground(sfondo(assistenza ? 0xFFF3E5F5 : 0xFFE8F5E9, 0, 6));
         riga.setPadding(dp(6), dp(4), dp(6), dp(4));
         TextView icona = new TextView(this);
-        FaIcone.applica(icona, FaIcone.PIANIFICATO, null);
-        icona.setTextColor(VERDE);
+        FaIcone.applica(icona, assistenza ? FaIcone.ASSISTENZA : FaIcone.PIANIFICATO, null);
+        icona.setTextColor(colore);
         icona.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         riga.addView(icona, new LinearLayout.LayoutParams(dp(18), LinearLayout.LayoutParams.WRAP_CONTENT));
         LinearLayout testi = new LinearLayout(this);
         testi.setOrientation(LinearLayout.VERTICAL);
-        TextView nome = testo(val(p, "nome_cantiere"), 13, VERDE, true);
+        TextView nome = testo(val(p, "nome_cantiere"), 13, colore, true);
         nome.setMaxLines(2);
         nome.setEllipsize(TextUtils.TruncateAt.END);
         testi.addView(nome);
-        testi.addView(testo(descrizionePianificazione(p), 12, 0xFF558B2F, false));
+        testi.addView(testo((assistenza ? "Assistenza · " : "") + descrizionePianificazione(p), 12, assistenza ? 0xFF8E24AA : 0xFF558B2F, false));
+        if (assistenza && conArticoli) testi.addView(testo(articoli, 12, TESTO, false));
         riga.addView(testi, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
         return riga;
     }
@@ -387,9 +401,11 @@ public class CalendarioActivity extends AppCompatActivity {
             if (g.minutiLavoro() > 0) cella.addView(testo(CalendarioPersonale.ore(g.minutiLavoro()), 12, delMese ? BLU : 0xFF90A4AE, true));
             if (g.minutiViaggio() > 0) cella.addView(testo("+" + CalendarioPersonale.ore(g.minutiViaggio()), 11, GRIGIO, false));
             if (!g.pianificazione.isEmpty()) {
+                boolean assistenze = false;
+                for (ContentValues pv : g.pianificazione) assistenze |= !val(pv, CalendarioPersonale.ARTICOLI_ASSISTENZA).isEmpty();
                 TextView p = new TextView(this);
-                FaIcone.applica(p, FaIcone.PIANIFICATO, null);
-                p.setTextColor(delMese ? VERDE : 0xFFA5D6A7);
+                FaIcone.applica(p, assistenze ? FaIcone.ASSISTENZA : FaIcone.PIANIFICATO, null);
+                p.setTextColor(assistenze ? (delMese ? VIOLA : 0xFFCE93D8) : (delMese ? VERDE : 0xFFA5D6A7));
                 p.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
                 p.setGravity(Gravity.START);
                 cella.addView(p);
@@ -444,10 +460,11 @@ public class CalendarioActivity extends AppCompatActivity {
             corpo.addView(r);
         }
 
-        if (utente.pianificazione) {
-            corpo.addView(sezione(FaIcone.PIANIFICATO, "La tua pianificazione"));
+        if (utente.pianificazione || !g.pianificazione.isEmpty()) {
+            corpo.addView(sezione(utente.pianificazione ? FaIcone.PIANIFICATO : FaIcone.ASSISTENZA,
+                    utente.pianificazione ? "La tua pianificazione" : "Assistenze pianificate"));
             if (g.pianificazione.isEmpty()) corpo.addView(nota("Nessun cantiere pianificato."));
-            for (ContentValues p : g.pianificazione) corpo.addView(pianificato(p));
+            for (ContentValues p : g.pianificazione) corpo.addView(pianificato(p, true));
         }
 
         if (giustAttivi) {

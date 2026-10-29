@@ -1018,6 +1018,15 @@ public abstract class AbstractTable {
         if (tabella.equalsIgnoreCase(PianificazioneEsclusioni.NOME_TABELLA)) {
             return new PianificazioneEsclusioni();
         }
+        if (tabella.equalsIgnoreCase(DitteArticoliAssistenza.NOME_TABELLA)) {
+            return new DitteArticoliAssistenza();
+        }
+        if (tabella.equalsIgnoreCase(Assistenze.NOME_TABELLA)) {
+            return new Assistenze();
+        }
+        if (tabella.equalsIgnoreCase(AssistenzeControlli.NOME_TABELLA)) {
+            return new AssistenzeControlli();
+        }
 		if (tabella.equalsIgnoreCase(Unita.NOME_TABELLA)) {
 			return new Unita();
 		}

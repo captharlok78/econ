@@ -23,6 +23,9 @@ public class RapportiniDettaglio extends AbstractTable {
     public static final String A_COSTO = "a_costo";
     public static final String NOTE = "note";
     public static final String ID_PREVENTIVO_DETTAGLIO = "id_preventivo_dettaglio";
+    /** Assistenza a tempo (schema 39, STUDIO_ASSISTENZE_TEMPO.md §10): mesi (0 = nessuna) e testo fissato dal server alla conferma. */
+    public static final String MESI_ASSISTENZA = "mesi_assistenza";
+    public static final String TESTO_ASSISTENZA = "testo_assistenza";
 
 	public RapportiniDettaglio() {
 		setNomeTabella(NOME_TABELLA);
@@ -42,6 +45,8 @@ public class RapportiniDettaglio extends AbstractTable {
         aggiungiCampo(A_COSTO, INTEGER);
         aggiungiCampo(NOTE, TEXT);
         aggiungiCampo(ID_PREVENTIVO_DETTAGLIO, INTEGER);
+        aggiungiCampo(MESI_ASSISTENZA, INTEGER);
+        aggiungiCampo(TESTO_ASSISTENZA, TEXT);
 
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);

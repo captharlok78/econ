@@ -285,6 +285,37 @@
                     android:textColor="@color/econ_testo_secondario"
                     android:textSize="15sp" />
             </LinearLayout>
+
+            <!-- assistenze a tempo del cantiere da segnare come controllate (STUDIO_ASSISTENZE_TEMPO.md §10): le righe le
+                 crea RapportinoDettaglioModActivity.caricaAssistenze(); senza assistenze resta nascosto -->
+            <LinearLayout
+                android:id="@+id/box_assistenze"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    style="@style/TestoIntestazione"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/assistenze_cantiere" />
+
+                <TextView
+                    android:id="@+id/text_assistenze_nota"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="6dp"
+                    android:textColor="@color/econ_testo_secondario"
+                    android:textSize="13sp" />
+
+                <LinearLayout
+                    android:id="@+id/elenco_assistenze"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+            </LinearLayout>
             </LinearLayout>
             </ScrollView>
         </LinearLayout>

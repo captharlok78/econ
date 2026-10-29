@@ -192,6 +192,9 @@ public interface MercuryApiService {
         public Integer offlineGiorni;
         /** Codice IVA proposto ai clienti nuovi (ditte.id_iva_predefinita); null = nessuno */
         public String ivaPredefinita;
+        /** Assistenza a tempo della ditta: mesi e testo con {mesi} e {data}; null da server vecchi */
+        public Integer mesiAssistenza;
+        public String testoAssistenza;
     }
 
     /** GET api/auth/moduli: moduli app e pacchetti dell'utente nella ditta del token (chiamato a ogni apertura). */
@@ -202,6 +205,8 @@ public interface MercuryApiService {
         public java.util.List<PacchettoInfo> pacchetti;
         public Integer offlineGiorni;
         public String ivaPredefinita;
+        public Integer mesiAssistenza;
+        public String testoAssistenza;
     }
 
     /** Pacchetto licenza assegnato: tipo "APP" o "WEB" (server), stato leggibile (Attiva, In scadenza, Scaduta, ...). */

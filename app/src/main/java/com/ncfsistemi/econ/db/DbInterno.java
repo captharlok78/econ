@@ -67,7 +67,7 @@ import com.ncfsistemi.econ.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECON.db";
 	public static final String DATABASE_NAME_ZIP = ".econ.db";
-	public static final int SCHEMA_VERSION = 38;
+	public static final int SCHEMA_VERSION = 39;
 
 	private Context cont = null;
 
@@ -145,6 +145,7 @@ public class DbInterno extends SQLiteOpenHelper {
 		db.execSQL(new AssCodiciLinee().getSQL_create());
 		db.execSQL(new IconeModificate().getSQL_create());
 		creaTabelleGiustificativi(db);
+		creaTabelleAssistenze(db);
 
 		db.execSQL("VACUUM");
 
@@ -208,6 +209,7 @@ public class DbInterno extends SQLiteOpenHelper {
 		db.execSQL(new AssCodiciLinee().getSQL_create());
 		db.execSQL(new IconeModificate().getSQL_create());
 		creaTabelleGiustificativi(db);
+		creaTabelleAssistenze(db);
 
 		/**
 		 * Inserimento dati di default
@@ -500,6 +502,23 @@ public class DbInterno extends SQLiteOpenHelper {
 				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
 			}
 		}
+		// Schema 39 (STUDIO_ASSISTENZE_TEMPO.md §10): assistenza a tempo, articoli in assistenza e assistenze (sola lettura),
+		// controlli segnati nei rapportini, mesi e testo sulle righe. Download completo una tantum per le assistenze gia' nate.
+		if (oldVersion<39){
+			if (oldVersion<newVersion){
+				creaTabelleAssistenze(db);
+				String[][] colonne = {
+						{RapportiniDettaglio.NOME_TABELLA, RapportiniDettaglio.MESI_ASSISTENZA, "INTEGER DEFAULT 0"},
+						{RapportiniDettaglio.NOME_TABELLA, RapportiniDettaglio.TESTO_ASSISTENZA, "TEXT"},
+				};
+				for (String[] c : colonne) {
+					if (!getTableColumns(db, c[0]).isEmpty() && !getTableColumns(db, c[0]).contains(c[1])) {
+						db.execSQL("ALTER TABLE " + c[0] + " ADD COLUMN " + c[1] + " " + c[2]);
+					}
+				}
+				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
+			}
+		}
 		// Schema 38 (STUDIO_GIUSTIFICATIVI_APP.md): giustificativi della persona e tipologie, fuori dalla sync generale
 		// (utils.GiustificativiLocali); arrivano alla prossima sincronizzazione
 		if (oldVersion<38){
@@ -685,6 +704,13 @@ public class DbInterno extends SQLiteOpenHelper {
 		if (!getTableColumns(db, Listini.NOME_TABELLA).contains(Listini.ID)) {
 			db.execSQL("ALTER TABLE " + Listini.NOME_TABELLA + " ADD COLUMN " + Listini.ID + " INTEGER");
 		}
+	}
+
+	/** Assistenza a tempo (schema 39): articoli in assistenza, assistenze e controlli. */
+	private static void creaTabelleAssistenze(SQLiteDatabase db) {
+		db.execSQL(new com.ncfsistemi.econ.db.table.DitteArticoliAssistenza().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
+		db.execSQL(new com.ncfsistemi.econ.db.table.Assistenze().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
+		db.execSQL(new com.ncfsistemi.econ.db.table.AssistenzeControlli().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
 	}
 
 	/** Giustificativi della persona e loro tipologie (schema 38). */

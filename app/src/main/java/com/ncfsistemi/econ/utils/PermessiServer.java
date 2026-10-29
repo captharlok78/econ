@@ -51,6 +51,7 @@ public final class PermessiServer {
         tm.saveFunzionalita(resp.body().funzionalita);
         tm.savePianificazione(resp.body().pianificazione);
         tm.saveIvaPredefinita(resp.body().ivaPredefinita);
+        tm.saveAssistenza(resp.body().mesiAssistenza, resp.body().testoAssistenza);
         tm.savePacchetti(resp.body().pacchetti);
         com.ncfsistemi.econ.api.ProfiloOffline.segnaOnline(ctx, resp.body().offlineGiorni);
         ultimaLettura = System.currentTimeMillis();

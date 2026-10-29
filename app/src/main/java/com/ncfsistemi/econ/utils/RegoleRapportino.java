@@ -231,6 +231,7 @@ public final class RegoleRapportino {
         }
         int u = utente.idUtenteDitta;
         String sql = "select pa." + PianificazioneAssegnazioni.DATA + " as data, pa." + PianificazioneAssegnazioni.ID_CANTIERE + " as id_cantiere,"
+                + " pa." + PianificazioneAssegnazioni.ID + " as id_pianificazione,"
                 + " pa." + PianificazioneAssegnazioni.FASCIA + " as fascia, pa." + PianificazioneAssegnazioni.MINUTI + " as minuti,"
                 + " c." + Cantieri.NOME + " as nome_cantiere, a." + Anagrafica.RAGIONE_SOCIALE + " as cliente, s." + Squadre.NOME + " as squadra,"
                 + " c." + Cantieri.INDIRIZZO + " as indirizzo, c." + Cantieri.CAP + " as cap, c." + Cantieri.CITTA + " as citta, c." + Cantieri.PROVINCIA + " as provincia"

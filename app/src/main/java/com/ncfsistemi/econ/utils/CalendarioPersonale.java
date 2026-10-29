@@ -31,6 +31,9 @@ public final class CalendarioPersonale {
     private CalendarioPersonale() {
     }
 
+    /** Nel blocco di pianificazione: gli articoli in assistenza da controllare, uno per riga (vuoto = lavoro ordinario). */
+    public static final String ARTICOLI_ASSISTENZA = "articoli_assistenza";
+
     /** Ore di un rapportino in un giorno: una voce per rapportino, lavoro e viaggio separati. */
     public static final class Voce {
         public int idRapportino;
@@ -128,12 +131,15 @@ public final class CalendarioPersonale {
             }
         }
 
-        if (utente.pianificazione) {
-            for (Object o : RegoleRapportino.pianificazionePeriodo(db, utente, dal * 1000000L, al * 1000000L + 235959L)) {
-                ContentValues p = (ContentValues) o;
-                Giorno g = giorni.get(lungo(p, "data") / 1000000L);
-                if (g != null) g.pianificazione.add(p);
-            }
+        // pianificazione: tutta se la ditta la usa; altrimenti solo i blocchi delle assistenze a tempo (es. Econ Mini),
+        // con gli articoli da controllare (STUDIO_ASSISTENZE_TEMPO.md §10)
+        for (Object o : RegoleRapportino.pianificazionePeriodo(db, utente, dal * 1000000L, al * 1000000L + 235959L)) {
+            ContentValues p = (ContentValues) o;
+            List<String> articoli = AssistenzeLocali.articoliPianificati(db, intero(p, "id_pianificazione"));
+            if (!utente.pianificazione && articoli.isEmpty()) continue;
+            if (!articoli.isEmpty()) p.put(ARTICOLI_ASSISTENZA, android.text.TextUtils.join("\n", articoli));
+            Giorno g = giorni.get(lungo(p, "data") / 1000000L);
+            if (g != null) g.pianificazione.add(p);
         }
         return new ArrayList<>(giorni.values());
     }

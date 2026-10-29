@@ -60,6 +60,7 @@ public final class FaIcone {
 	public static final String CALENDARIO = "\uf073";  // calendar-alt: calendario personale
 	public static final String ORE = "\uf017";         // clock: ore lavorate
 	public static final String PIANIFICATO = "\uf274"; // calendar-check: pianificazione
+	public static final String ASSISTENZA = "\uf1da";  // history: assistenza a tempo (STUDIO_ASSISTENZE_TEMPO.md)
 	public static final String INDIETRO = "\uf053";    // chevron-left
 	public static final String AVANTI = "\uf054";      // chevron-right
 	public static final String LUCCHETTO = "\uf023";    // lock: campo che non si modifica (template form)

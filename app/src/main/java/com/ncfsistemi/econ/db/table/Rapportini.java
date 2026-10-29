@@ -154,6 +154,13 @@ public class Rapportini extends AbstractTable {
             ContentValues valDett = (ContentValues) dett.get(i);
             tabRappDett.cancellaRecord(db, valDett);
         }
+        // controlli delle assistenze segnati nel rapportino (schema 39)
+        AssistenzeControlli tabControlli = new AssistenzeControlli();
+        ContentValues whereControlli = new ContentValues();
+        whereControlli.put(AssistenzeControlli.ID_RAPPORTINO, rapportino);
+        for (Object o : db.eseguiSelect(tabControlli, whereControlli, null)) {
+            tabControlli.cancellaRecord(db, (ContentValues) o);
+        }
         super.eliminaCorrelati(db, val);
 
     }

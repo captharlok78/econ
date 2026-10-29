@@ -196,6 +196,9 @@ public final class StampaRapportino {
             String inizio = RigheRapportino.testo(d, RapportiniDettaglio.ORA_INIZIO), fine = RigheRapportino.testo(d, RapportiniDettaglio.ORA_FINE);
             riga.put("orario", inizio.isEmpty() && fine.isEmpty() ? "" : (inizio.isEmpty() ? "?" : inizio) + "–" + (fine.isEmpty() ? "?" : fine));
             riga.put("note", RigheRapportino.testo(d, RapportiniDettaglio.NOTE));
+            // assistenza a tempo (STUDIO_ASSISTENZE_TEMPO.md §10): testo sotto l'articolo, come la stampa del server
+            riga.put("assistenza", materiale ? com.ncfsistemi.econ.utils.AssistenzeLocali.testoRiga(ctx, d,
+                    r.getAsLong(Rapportini.DATA_RAPPORTINO) != null ? r.getAsLong(Rapportini.DATA_RAPPORTINO) : 0) : "");
             if (materiale) {
                 materiali.add(riga);
             } else if (RapportiniDettaglioTipi.CATEGORIA_VIAGGIO.equals(categoria)) {

@@ -555,6 +555,37 @@
             android:inputType="textCapSentences|textMultiLine"
             android:maxLength="255" />
 
+        <!-- Assistenza a tempo (STUDIO_ASSISTENZE_TEMPO.md §10): solo per gli articoli in assistenza della ditta -->
+        <LinearLayout
+            android:id="@+id/sezione_assistenza"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margine"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                style="@style/TestoIntestazione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/assistenza_tra_mesi" />
+
+            <EditText
+                android:id="@+id/edit_mesi_assistenza"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:maxLength="3"
+                android:selectAllOnFocus="true" />
+
+            <TextView
+                android:id="@+id/text_assistenza"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="13sp" />
+        </LinearLayout>
+
         <!-- Prezzo e "a costo": solo amministratore, coordinatori, unico operatore della ditta -->
         <LinearLayout
             android:id="@+id/sezione_prezzo"

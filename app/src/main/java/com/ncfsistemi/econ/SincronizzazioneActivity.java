@@ -102,6 +102,10 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "squadre_membri",           "Membri Squadre" },
         { "pianificazione_assegnazioni", "Pianificazione" },
         { "pianificazione_esclusioni",   "Esclusioni Pianificazione" },
+        // assistenza a tempo (schema 39): solo per le ditte con il pacchetto
+        { "ditte_articoli_assistenza", "Articoli in assistenza" },
+        { "assistenze",               "Assistenze a tempo" },
+        { "assistenze_controlli",     "Controlli assistenze" },
         { "elementi",                 "Elementi" },
         { "elementi_cantiere",        "Elementi Cantiere" },
         { "elementi_codici",          "Codici Elementi" },
@@ -171,6 +175,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "preventivi_dettaglio",     "Righe Preventivo" },
         { "rapportini",               "Rapportini" },
         { "rapportini_dettaglio",     "Righe Rapportino" },
+        { "assistenze_controlli",     "Controlli assistenze" },
         { "elementi_cantiere",        "Elementi Cantiere" },
         { "componenti_cantiere",      "Componenti Cantiere" },
         { "composizioni_cantiere",    "Composizioni Cantiere" },
@@ -194,6 +199,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             case "preventivi_dettaglio":     return "id_preventivo_dettaglio";
             case "rapportini":               return "id"; // nomi del server dallo schema 26
             case "rapportini_dettaglio":     return "id";
+            case "assistenze_controlli":     return "id";
             case "elementi_cantiere":        return "id_elemento_cant";
             case "componenti_cantiere":      return "id_componente_cant";
             case "collegamenti":             return "id_collegamento";
@@ -233,6 +239,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         {"preventivi",        "id_preventivo",    "elementi_cantiere",      "id_preventivo"},
         {"preventivi",        "id_preventivo",    "componenti_cantiere",    "id_preventivo"},
         {"rapportini",        "id",               "rapportini_dettaglio",   "id_rapportino"},
+        {"rapportini",        "id",               "assistenze_controlli",   "id_rapportino"},
         {"preventivi_dettaglio", "id_preventivo_dettaglio", "rapportini_dettaglio", "id_preventivo_dettaglio"},
         {"elementi_cantiere", "id_elemento_cant", "componenti_cantiere",    "id_elemento_cavo"},
         {"elementi_cantiere", "id_elemento_cant", "componenti_cantiere",    "id_elemento_tubo"},
@@ -467,6 +474,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         tm.saveFunzionalita(resp.body().funzionalita);
         tm.savePianificazione(resp.body().pianificazione);
         tm.saveIvaPredefinita(resp.body().ivaPredefinita);
+        tm.saveAssistenza(resp.body().mesiAssistenza, resp.body().testoAssistenza);
         tm.savePacchetti(resp.body().pacchetti);
         com.ncfsistemi.econ.api.ProfiloOffline.segnaOnline(this, resp.body().offlineGiorni);
         // versione del server per il piede delle stampe (GESTIONE_RAPPORTINI.md §15)

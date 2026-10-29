@@ -451,6 +451,13 @@
     <string name="nessun_cliente">Nessun cliente</string>
     <string name="nessun_cantiere">Nessun cantiere</string>
     <string name="errore_cantiere_rapportino">Il cantiere è obbligatorio</string>
+    <string name="assistenza_tra_mesi">Assistenza tra (mesi)</string>
+    <string name="errore_mesi_assistenza">Assistenza: da 1 a 120 mesi</string>
+    <string name="errore_quantita_intera">Articolo in assistenza: la quantità è in pezzi interi</string>
+    <string name="assistenze_cantiere">Assistenze del cantiere</string>
+    <string name="assistenze_cantiere_nota">Segna le assistenze controllate con questo intervento: contano dalla conferma del rapportino, e la scadenza riparte dalla sua data.</string>
+    <string name="assistenze_cantiere_nota_confermato">Controlli fatti con questo rapportino: la scadenza riparte dalla sua data.</string>
+    <string name="non_controllata">Non controllata</string>
     <string name="errore_riferimento_rapportino">Indica almeno un cliente, un cantiere o un ordine</string>
     <string name="tipo_viaggio_andata">Viaggio andata</string>
     <string name="tipo_lavoro">Lavoro</string>
