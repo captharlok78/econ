@@ -12,8 +12,8 @@ import com.ncfsistemi.econ.utils.FaIcone;
 import com.ncfsistemi.econ.utils.FunzionalitaApp;
 
 /**
- * Codice articolo del listino (CodiceArticoloModActivity): il codice e' la chiave (unico, non si cambia), la linea e'
- * filtrata per fornitore. Extra nel nuovo: Listini.ID_COSTRUTTORE e/o Listini.ID_LINEA (proposti).
+ * Codice articolo del listino (CodiceArticoloModActivity): la chiave e' l'id (extra "ID", schema 40), il codice e' unico
+ * per fornitore e non si cambia, la linea e' filtrata per fornitore. Extra nel nuovo: Listini.ID_COSTRUTTORE e/o Listini.ID_LINEA (proposti).
  */
 public class ArticoloForm extends DefinizioneForm {
 
@@ -72,9 +72,11 @@ public class ArticoloForm extends DefinizioneForm {
 	@Override
 	public void controlla(Form f, boolean nuovo) {
 		if (!nuovo) return;
+		// stesso codice dello stesso fornitore: c'e' gia' (di un altro fornitore va bene, L8)
 		DbInterno db = new DbInterno(ospite);
 		ContentValues where = new ContentValues();
 		where.put(Listini.CODICE_ARTICOLO, f.valore(Listini.CODICE_ARTICOLO));
+		where.put(Listini.ID_COSTRUTTORE, f.valore(Listini.ID_COSTRUTTORE));
 		ContentValues esiste = db.getRecord(new Listini(), where);
 		db.close();
 		if (esiste != null) f.errore(Listini.CODICE_ARTICOLO, contesto.getString(R.string.errore_codice_articolo_esistente));

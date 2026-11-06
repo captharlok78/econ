@@ -67,7 +67,7 @@ import com.ncfsistemi.econ.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECON.db";
 	public static final String DATABASE_NAME_ZIP = ".econ.db";
-	public static final int SCHEMA_VERSION = 39;
+	public static final int SCHEMA_VERSION = 40;
 
 	private Context cont = null;
 
@@ -502,6 +502,15 @@ public class DbInterno extends SQLiteOpenHelper {
 				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
 			}
 		}
+		// Schema 40 (STUDIO_PACCHETTI_LISTINI.md, L8): il listino si tiene per id, perche' sul server lo stesso codice puo'
+		// essere di piu' costruttori. Si rifà la tabella: restano le righe con l'id, quelle nate qui senza id ne prendono uno
+		// negativo, le altre si riscaricano (il catalogo si ricarica tutto).
+		if (oldVersion<40){
+			if (oldVersion<newVersion){
+				ricostruisciListini40(db);
+				com.ncfsistemi.econ.utils.CatalogoLocale.cancella(getContext());
+			}
+		}
 		// Schema 39 (STUDIO_ASSISTENZE_TEMPO.md §10): assistenza a tempo, articoli in assistenza e assistenze (sola lettura),
 		// controlli segnati nei rapportini, mesi e testo sulle righe. Download completo una tantum per le assistenze gia' nate.
 		if (oldVersion<39){
@@ -672,6 +681,37 @@ public class DbInterno extends SQLiteOpenHelper {
 	 * il download completo; quelle non inviate non si possono convertire (mancano tipi e unita' del server) e restano da parte
 	 * in rapportini_dettaglio_old25, senza sincronizzarsi.
 	 */
+	private void ricostruisciListini40(SQLiteDatabase db) {
+		String t = Listini.NOME_TABELLA;
+		List<String> vecchie = getTableColumns(db, t);
+		if (vecchie.isEmpty()) {
+			db.execSQL(new Listini().getSQL_create());
+			return;
+		}
+		if (!vecchie.contains(Listini.ID)) {
+			db.execSQL("ALTER TABLE " + t + " ADD COLUMN " + Listini.ID + " INTEGER");
+			vecchie = getTableColumns(db, t);
+		}
+		db.execSQL("DROP TABLE IF EXISTS " + t + "_old39");
+		db.execSQL("ALTER TABLE " + t + " RENAME TO " + t + "_old39");
+		db.execSQL(new Listini().getSQL_create());
+		List<String> nuove = getTableColumns(db, t);
+		StringBuilder colonne = new StringBuilder();
+		StringBuilder valori = new StringBuilder();
+		for (String c : nuove) {
+			if (!vecchie.contains(c)) continue;
+			if (colonne.length() > 0) { colonne.append(", "); valori.append(", "); }
+			colonne.append(c);
+			// senza id (nato qui con le maschere vecchie): negativo, sotto il minimo
+			valori.append(c.equals(Listini.ID)
+					? "CASE WHEN coalesce(o.id, 0) <> 0 THEN o.id ELSE (SELECT min(coalesce(min(x.id), 0), 0) FROM " + t + "_old39 x) - o.rowid - 1 END"
+					: "o." + c);
+		}
+		db.execSQL("INSERT OR IGNORE INTO " + t + " (" + colonne + ") SELECT " + valori + " FROM " + t + "_old39 o"
+				+ " WHERE coalesce(o.id, 0) <> 0 OR coalesce(o.in_server, 1) = 0");
+		db.execSQL("DROP TABLE " + t + "_old39");
+	}
+
 	private void ricostruisciRapportini26(SQLiteDatabase db) {
 		String r = Rapportini.NOME_TABELLA;
 		List<String> colR = getTableColumns(db, r);

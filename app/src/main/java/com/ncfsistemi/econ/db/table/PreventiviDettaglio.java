@@ -1206,7 +1206,9 @@ public class PreventiviDettaglio extends AbstractTable {
 
 		//se non trovo codice nella tabella ElementiCodici cerco nella tabella Ass_codici_linee
 		if (valLis==null){
-			String SQLASS = "Select listini.* from elementi_codici inner join ass_codici_linee on elementi_codici.codice_articolo=ass_codici_linee.codice_articolo and ass_codici_linee.id_linea="+idLineaLocale+" inner join listini on elementi_codici.codice_articolo=listini.codice_articolo where elementi_codici.id_elemento=0 and elementi_codici.id_componente="+valCurr.getAsInteger(ID_COMPONENTE)+" and elementi_codici.id_placca_moduli="+valCurr.getAsInteger(ID_PLACCA_MODULI);
+			String SQLASS = "Select listini.* from elementi_codici inner join ass_codici_linee on elementi_codici.codice_articolo=ass_codici_linee.codice_articolo and ass_codici_linee.id_linea="+idLineaLocale+" inner join listini on elementi_codici.codice_articolo=listini.codice_articolo where elementi_codici.id_elemento=0 and elementi_codici.id_componente="+valCurr.getAsInteger(ID_COMPONENTE)+" and elementi_codici.id_placca_moduli="+valCurr.getAsInteger(ID_PLACCA_MODULI)
+					// schema 40: lo stesso codice puo' essere di piu' costruttori, prima quello della linea
+					+" order by case when listini.id_linea="+idLineaLocale+" then 0 else 1 end, listini.id";
 			ArrayList<Object> codiciAss = db.eseguiSelect(SQLASS, null);
 			if (codiciAss.size() > 0) {
 				// prendo il primo codice che trovo

@@ -49,7 +49,38 @@ public class Listini extends AbstractTable {
 		aggiungiCampo(DATA_MOD, DATE);
 		aggiungiCampo(IN_SERVER, INTEGER);
 
-		aggiungiCampoChiave(CODICE_ARTICOLO);
+		// Schema 40 (STUDIO_PACCHETTI_LISTINI.md, L8): la chiave e' l'id del server, perche' lo stesso codice puo' essere di
+		// piu' costruttori. Gli articoli nati sul dispositivo hanno id negativo fino all'invio (come le altre tabelle).
+		aggiungiCampoChiave(ID);
+	}
+
+	/** Id per un articolo nuovo nato sul dispositivo: negativo, sotto il minimo gia' usato. */
+	public static int nuovoIdLocale(DbInterno db) {
+		ContentValues m = db.getRecord("select min(coalesce(" + ID + ", 0)) as m from " + NOME_TABELLA);
+		Integer minimo = m != null ? m.getAsInteger("m") : null;
+		return Math.min(minimo != null ? minimo : 0, -1) - 1;
+	}
+
+	/** Chi inserisce senza id (maschere dei preventivi, associazioni codici) riceve un id locale negativo. */
+	@Override
+	public long inserisciRecord(DbInterno db, ContentValues val) {
+		Integer id = val.containsKey(ID) && val.get(ID) != null && !"".equals(val.getAsString(ID)) ? val.getAsInteger(ID) : null;
+		if (id == null || id == 0) {
+			val.put(ID, nuovoIdLocale(db));
+			if (!val.containsKey(IN_SERVER)) val.put(IN_SERVER, 0);
+		}
+		return super.inserisciRecord(db, val);
+	}
+
+	/**
+	 * Articolo per codice, preferendo il costruttore indicato (0 = qualsiasi): con lo schema 40 lo stesso codice puo' essere
+	 * di piu' costruttori. Null se non c'e'.
+	 */
+	public static ContentValues perCodice(DbInterno db, String codice, int idCostruttore) {
+		if (codice == null || codice.trim().isEmpty()) return null;
+		String c = codice.trim().replace("'", "''");
+		String ordine = idCostruttore != 0 ? " order by case when " + ID_COSTRUTTORE + "=" + idCostruttore + " then 0 else 1 end, " + ID : " order by " + ID;
+		return db.getRecord("select * from " + NOME_TABELLA + " where " + CODICE_ARTICOLO + "='" + c + "'" + ordine + " limit 1");
 	}
 
 	public ContentValues getRecordConFornitoreELinea(ContentValues where, DbInterno db) {
@@ -57,7 +88,7 @@ public class Listini extends AbstractTable {
 		j0.addCampiDiJoin(ID_COSTRUTTORE, Costruttori.ID_COSTRUTTORE);
 
 		ArrayList<Object> res = db.eseguiSelect("Select " + NOME_TABELLA + ".*," + Costruttori.SIGLA_METEL + ","
-				+ Costruttori.RAGIONE_SOCIALE + " from " + NOME_TABELLA + j0.getSQLJoin() + " where " + CODICE_ARTICOLO + "=?",
+				+ Costruttori.RAGIONE_SOCIALE + " from " + NOME_TABELLA + j0.getSQLJoin() + " where " + CODICE_ARTICOLO + "=? order by " + NOME_TABELLA + "." + ID,
 				new String[] { where.getAsString(CODICE_ARTICOLO) });
 
 		if (res.size() > 0) {

@@ -65,7 +65,7 @@ public final class CatalogoLocale {
                     if (body.articoli != null) {
                         for (JsonObject record : body.articoli) {
                             ContentValues cv = aContentValues(record);
-                            if (!body.completo && SyncUtil.isModificatoInLocale(db, Listini.NOME_TABELLA, Listini.CODICE_ARTICOLO, cv)) {
+                            if (!body.completo && SyncUtil.isModificatoInLocale(db, Listini.NOME_TABELLA, Listini.ID, cv)) {
                                 continue;
                             }
                             cv.put("in_server", 1);

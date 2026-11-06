@@ -100,7 +100,7 @@ public class CodiciArticoliActivity extends EconListaStandardActivity {
         ContentValues articolo = (ContentValues) getController().getElementoAllaPosizione(info.position);
         if (item.getItemId() == 1) {
             Intent intent = new Intent(this, CodiceArticoloModActivity.class);
-            intent.putExtra("ID", articolo.getAsString(Listini.CODICE_ARTICOLO));
+            intent.putExtra("ID", articolo.getAsInteger(Listini.ID));
             apriFinestraModifica(intent, 1);
         }
         if (item.getItemId() == 2) {
@@ -162,7 +162,7 @@ public class CodiciArticoliActivity extends EconListaStandardActivity {
         @Override
         public void onRigaClick(EconListaStandardController.Host host, ContentValues riga) {
             Intent intent = new Intent(host.getContext(), CodiceArticoloModActivity.class);
-            intent.putExtra("ID", riga.getAsString(Listini.CODICE_ARTICOLO));
+            intent.putExtra("ID", riga.getAsInteger(Listini.ID));
             host.startActivity(intent);
         }
 

@@ -397,15 +397,19 @@ public class PopupRigaRapportino {
                 DbInterno dbc = new DbInterno(ctx);
                 List<CampoRicerca.Voce> ris = new ArrayList<CampoRicerca.Voce>();
                 // anche gli articoli della ditta non ancora inviati (id negativo); non quelli usati solo nella loro riga (§14)
-                for (Object o : dbc.eseguiSelect("select * from " + Listini.NOME_TABELLA + " where coalesce(" + Listini.ID + ",0)<>0"
-                        + " and coalesce(" + Listini.NEL_LISTINO + ",1)=1"
-                        + (costruttore > 0 ? " and " + Listini.ID_COSTRUTTORE + "=" + costruttore : "")
-                        + (linea > 0 ? " and " + Listini.ID_LINEA + "=" + linea : "")
-                        + " and (" + Listini.CODICE_ARTICOLO + " like " + like + " or " + Listini.DESCRIZIONE + " like " + like + ")"
-                        + " order by " + Listini.CODICE_ARTICOLO + " limit 50", null)) {
+                // con la sigla del costruttore: lo stesso codice puo' essere di piu' costruttori (schema 40)
+                for (Object o : dbc.eseguiSelect("select l.*, k." + Costruttori.SIGLA_METEL + " as sigla_costruttore from "
+                        + Listini.NOME_TABELLA + " l left join " + Costruttori.NOME_TABELLA + " k on k." + Costruttori.ID_COSTRUTTORE
+                        + "=l." + Listini.ID_COSTRUTTORE + " where coalesce(l." + Listini.ID + ",0)<>0"
+                        + " and coalesce(l." + Listini.NEL_LISTINO + ",1)=1"
+                        + (costruttore > 0 ? " and l." + Listini.ID_COSTRUTTORE + "=" + costruttore : "")
+                        + (linea > 0 ? " and l." + Listini.ID_LINEA + "=" + linea : "")
+                        + " and (l." + Listini.CODICE_ARTICOLO + " like " + like + " or l." + Listini.DESCRIZIONE + " like " + like + ")"
+                        + " order by l." + Listini.CODICE_ARTICOLO + ", k." + Costruttori.SIGLA_METEL + " limit 50", null)) {
                     ContentValues l = (ContentValues) o;
+                    String sigla = costruttore > 0 ? "" : RigheRapportino.testo(l, "sigla_costruttore");
                     ris.add(new CampoRicerca.Voce(RigheRapportino.intero(l, Listini.ID), RigheRapportino.testo(l, Listini.CODICE_ARTICOLO)
-                            + " " + RigheRapportino.testo(l, Listini.DESCRIZIONE), l));
+                            + (sigla.isEmpty() ? "" : " (" + sigla + ")") + " " + RigheRapportino.testo(l, Listini.DESCRIZIONE), l));
                 }
                 dbc.close();
                 return ris;
@@ -805,8 +809,10 @@ public class PopupRigaRapportino {
         String codice = testoCampo(R.id.edit_nuovo_codice).toUpperCase(Locale.ITALY);
         if (!codice.isEmpty()) {
             DbInterno db = new DbInterno(ctx);
+            // lo stesso codice di un altro costruttore va bene (L8, schema 40)
             ContentValues c = db.getRecord("select " + Listini.DESCRIZIONE + " from " + Listini.NOME_TABELLA + " where "
-                    + Listini.CODICE_ARTICOLO + "='" + codice.replace("'", "''") + "'");
+                    + Listini.CODICE_ARTICOLO + "='" + codice.replace("'", "''") + "' and " + Listini.ID_COSTRUTTORE + "="
+                    + idScelto(spinnerNuovoCostruttore));
             db.close();
             if (c != null) return "Il codice " + codice + " c'è già nel listino (" + RigheRapportino.testo(c, Listini.DESCRIZIONE)
                     + "): sceglilo dalla tab Listino.";
@@ -820,8 +826,7 @@ public class PopupRigaRapportino {
      */
     private int creaNuovoArticolo() {
         DbInterno db = new DbInterno(ctx);
-        ContentValues minimo = db.getRecord("select min(coalesce(" + Listini.ID + ",0)) as m from " + Listini.NOME_TABELLA);
-        int id = Math.min(minimo != null ? RigheRapportino.intero(minimo, "m") : 0, -1) - 1;
+        int id = Listini.nuovoIdLocale(db);
         String codice = testoCampo(R.id.edit_nuovo_codice).toUpperCase(Locale.ITALY);
         if (codice.isEmpty()) {
             codice = "D" + com.ncfsistemi.econ.utils.Sessione.getDittaSelezionata() + "-"

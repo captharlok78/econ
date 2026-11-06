@@ -443,7 +443,7 @@ public class PopupAssociazioneCodiceListino implements DialogInterface.OnClickLi
 
 				ContentValues whereUpd = new ContentValues();
 
-				whereUpd.put(Listini.CODICE_ARTICOLO, codiceArticolo.trim());
+				whereUpd.put(Listini.ID, recordCheck.getAsInteger(Listini.ID)); // schema 40: per id
 
 				tabListini.aggiornaRecord(db, valUpdate, whereUpd);
 

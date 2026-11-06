@@ -1433,7 +1433,7 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 
 				ContentValues whereUpd = new ContentValues();
 
-				whereUpd.put(Listini.CODICE_ARTICOLO, codice.trim());
+				whereUpd.put(Listini.ID, recordCheck.getAsInteger(Listini.ID)); // schema 40: per id
 
 				tabListini.aggiornaRecord(db, valUpdate, whereUpd);
 
