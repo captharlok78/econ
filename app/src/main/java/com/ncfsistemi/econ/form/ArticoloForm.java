@@ -13,7 +13,9 @@ import com.ncfsistemi.econ.utils.FunzionalitaApp;
 
 /**
  * Codice articolo del listino (CodiceArticoloModActivity): la chiave e' l'id (extra "ID", schema 40), il codice e' unico
- * per fornitore e non si cambia, la linea e' filtrata per fornitore. Extra nel nuovo: Listini.ID_COSTRUTTORE e/o Listini.ID_LINEA (proposti).
+ * per costruttore e non si cambia, la linea e' filtrata per costruttore. Extra nel nuovo: Listini.ID_COSTRUTTORE e/o Listini.ID_LINEA (proposti).
+ * Costruttore facoltativo (STUDIO_IMPORT_APPEL.md §11.8): si cerca scrivendo tra quelli collegati alla ditta (schema 41,
+ * piu' quelli dei suoi articoli), vuoto = Generico; senza linea va la Generica del costruttore.
  */
 public class ArticoloForm extends DefinizioneForm {
 
@@ -43,7 +45,7 @@ public class ArticoloForm extends DefinizioneForm {
 				.testo(Listini.CODICE_ARTICOLO, contesto.getString(R.string.codice_articolo)).obbligatorio().max(50).fissoInModifica()
 				.icona(FaIcone.CODICE)
 				.testo(Listini.DESCRIZIONE, contesto.getString(R.string.descrizione)).max(255)
-				.scelta(Listini.ID_COSTRUTTORE, contesto.getString(R.string.fornitore), new Costruttori()).obbligatorio().metaRiga()
+				.ricerca(Listini.ID_COSTRUTTORE, contesto.getString(R.string.costruttore), new CostruttoriCollegati()).metaRiga()
 				.scelta(Listini.ID_LINEA, contesto.getString(R.string.linea), new Linee()).collegataA(Listini.ID_COSTRUTTORE).metaRiga();
 		f.sezione(FaIcone.FATTURAZIONE, "Prezzi")
 				.numero(Listini.PRZ_ULTIMO_ACQUISTO, contesto.getString(R.string.prezzo_acquisto)).max(8).decimali(2).metaRiga()
@@ -65,6 +67,7 @@ public class ArticoloForm extends DefinizioneForm {
 			db.close();
 			if (valLinea != null) fornitore = valLinea.getAsInteger(Linee.ID_COSTRUTTORE);
 		}
+		if (fornitore == 0) fornitore = generico();
 		if (fornitore != 0) f.imposta(Listini.ID_COSTRUTTORE, "" + fornitore);
 		if (linea != 0) f.imposta(Listini.ID_LINEA, "" + linea);
 	}
@@ -76,7 +79,8 @@ public class ArticoloForm extends DefinizioneForm {
 		DbInterno db = new DbInterno(ospite);
 		ContentValues where = new ContentValues();
 		where.put(Listini.CODICE_ARTICOLO, f.valore(Listini.CODICE_ARTICOLO));
-		where.put(Listini.ID_COSTRUTTORE, f.valore(Listini.ID_COSTRUTTORE));
+		String costruttore = f.valore(Listini.ID_COSTRUTTORE);
+		where.put(Listini.ID_COSTRUTTORE, costruttore.isEmpty() ? "" + generico() : costruttore);
 		ContentValues esiste = db.getRecord(new Listini(), where);
 		db.close();
 		if (esiste != null) f.errore(Listini.CODICE_ARTICOLO, contesto.getString(R.string.errore_codice_articolo_esistente));
@@ -84,10 +88,49 @@ public class ArticoloForm extends DefinizioneForm {
 
 	@Override
 	public void primaDiSalvare(ContentValues val, boolean nuovo) {
+		// senza costruttore: Generico; senza linea: la Generica del costruttore se c'e'
+		String costruttore = val.getAsString(Listini.ID_COSTRUTTORE);
+		if (costruttore == null || costruttore.isEmpty() || "0".equals(costruttore)) {
+			int g = generico();
+			if (g != 0) val.put(Listini.ID_COSTRUTTORE, g);
+			else val.remove(Listini.ID_COSTRUTTORE);
+			costruttore = val.getAsString(Listini.ID_COSTRUTTORE);
+		}
+		if (val.getAsString(Listini.ID_LINEA) == null || val.getAsString(Listini.ID_LINEA).isEmpty()) {
+			int generica = costruttore != null ? genericaDi(costruttore) : 0;
+			if (generica != 0) val.put(Listini.ID_LINEA, "" + generica);
+		}
 		// senza linea: nel nuovo non si scrive, in modifica diventa 0 (come prima)
-		if (val.getAsString(Listini.ID_LINEA).isEmpty()) {
+		if (val.getAsString(Listini.ID_LINEA) == null || val.getAsString(Listini.ID_LINEA).isEmpty()) {
 			if (nuovo) val.remove(Listini.ID_LINEA);
 			else val.put(Listini.ID_LINEA, 0);
+		}
+	}
+
+	/** Id del costruttore Generico del catalogo generale, 0 se non c'e'. */
+	private int generico() {
+		DbInterno db = new DbInterno(ospite);
+		ContentValues r = db.getRecord("select " + Costruttori.ID_COSTRUTTORE + " from " + Costruttori.NOME_TABELLA + " where "
+				+ Costruttori.SIGLA_METEL + "='" + Costruttori.SIGLA_GENERICO + "' and coalesce(" + Costruttori.ID_DITTA + ",0)=0 limit 1");
+		db.close();
+		return r != null && r.getAsInteger(Costruttori.ID_COSTRUTTORE) != null ? r.getAsInteger(Costruttori.ID_COSTRUTTORE) : 0;
+	}
+
+	/** Id della linea "Generica" del costruttore, 0 se non c'e'. */
+	private int genericaDi(String costruttore) {
+		DbInterno db = new DbInterno(ospite);
+		ContentValues r = db.getRecord("select " + Linee.ID_LINEA + " from " + Linee.NOME_TABELLA + " where " + Linee.ID_COSTRUTTORE + "="
+				+ Integer.parseInt(costruttore) + " and lower(" + Linee.NOME_LINEA + ")='" + Linee.NOME_GENERICA.toLowerCase() + "' limit 1");
+		db.close();
+		return r != null && r.getAsInteger(Linee.ID_LINEA) != null ? r.getAsInteger(Linee.ID_LINEA) : 0;
+	}
+
+	/** Costruttori da proporre: collegati alla ditta (schema 41) e quelli che hanno gia' articoli sul dispositivo. */
+	static class CostruttoriCollegati extends Costruttori {
+		@Override
+		public String getSQLPerSpinner(ContentValues filtro) {
+			return "select * from " + NOME_TABELLA + " where " + CONDIZIONE_COLLEGATI + " or " + ID_COSTRUTTORE + " in (select "
+					+ Listini.ID_COSTRUTTORE + " from " + Listini.NOME_TABELLA + ") order by " + RAGIONE_SOCIALE;
 		}
 	}
 }

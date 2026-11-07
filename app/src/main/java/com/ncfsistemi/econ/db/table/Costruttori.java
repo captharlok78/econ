@@ -15,6 +15,13 @@ public class Costruttori extends AbstractTable {
 	public static final String RAGIONE_SOCIALE = "ragione_sociale";
 	/** Schema 30: costruttore della ditta (0 = catalogo generale), GESTIONE_RAPPORTINI.md §14. */
 	public static final String ID_DITTA = "id_ditta";
+	/**
+	 * Schema 41: 1 = collegato alla ditta (server CatalogoDitta::costruttoriCollegati: Catalogo › Costruttori, Generico e
+	 * i suoi), 0 = no; NULL (righe di prima o nate qui) vale come collegato. Solo questi si scelgono negli articoli propri.
+	 */
+	public static final String COLLEGATO = "collegato";
+	/** Condizione SQL (senza alias) dei costruttori da proporre negli articoli propri. */
+	public static final String CONDIZIONE_COLLEGATI = "coalesce(" + COLLEGATO + ",1)=1";
 	/** Costruttore "Generico" del catalogo generale (server: CatalogoBase), proposto negli articoli nuovi. */
 	public static final String SIGLA_GENERICO = "GEN";
 
@@ -27,6 +34,7 @@ public class Costruttori extends AbstractTable {
 		aggiungiCampo(SIGLA_METEL, TEXT);
 		aggiungiCampo(RAGIONE_SOCIALE, TEXT);
 		aggiungiCampo(ID_DITTA, INTEGER);
+		aggiungiCampo(COLLEGATO, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

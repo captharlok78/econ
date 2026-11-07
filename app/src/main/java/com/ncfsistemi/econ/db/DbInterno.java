@@ -67,7 +67,7 @@ import com.ncfsistemi.econ.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECON.db";
 	public static final String DATABASE_NAME_ZIP = ".econ.db";
-	public static final int SCHEMA_VERSION = 40;
+	public static final int SCHEMA_VERSION = 41;
 
 	private Context cont = null;
 
@@ -500,6 +500,15 @@ public class DbInterno extends SQLiteOpenHelper {
 					}
 				}
 				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
+			}
+		}
+		// Schema 41 (STUDIO_IMPORT_APPEL.md §11.8): costruttori collegati alla ditta, gli unici da scegliere negli articoli
+		// propri. La colonna la riempie il server (tabella sempre completa dal 41); fino al primo download valgono tutti.
+		if (oldVersion<41){
+			if (oldVersion<newVersion){
+				if (!getTableColumns(db, Costruttori.NOME_TABELLA).isEmpty() && !getTableColumns(db, Costruttori.NOME_TABELLA).contains(Costruttori.COLLEGATO)) {
+					db.execSQL("ALTER TABLE " + Costruttori.NOME_TABELLA + " ADD COLUMN " + Costruttori.COLLEGATO + " INTEGER DEFAULT 1");
+				}
 			}
 		}
 		// Schema 40 (STUDIO_PACCHETTI_LISTINI.md, L8): il listino si tiene per id, perche' sul server lo stesso codice puo'

@@ -636,7 +636,9 @@ public class PopupRigaRapportino {
 
     private void caricaCostruttori(int idScelto) {
         DbInterno db = new DbInterno(ctx);
-        List<CampoRicerca.Voce> costruttori = voci(db, "select * from " + Costruttori.NOME_TABELLA + " order by " + Costruttori.RAGIONE_SOCIALE,
+        // solo i costruttori collegati alla ditta (schema 41), piu' quello scelto
+        List<CampoRicerca.Voce> costruttori = voci(db, "select * from " + Costruttori.NOME_TABELLA + " where " + Costruttori.CONDIZIONE_COLLEGATI
+                        + " or " + Costruttori.ID_COSTRUTTORE + "=" + idScelto + " order by " + Costruttori.RAGIONE_SOCIALE,
                 Costruttori.ID_COSTRUTTORE, Costruttori.RAGIONE_SOCIALE);
         db.close();
         imposta(spinnerNuovoCostruttore, costruttori, idScelto, null);
