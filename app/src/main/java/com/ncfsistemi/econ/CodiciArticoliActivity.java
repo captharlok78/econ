@@ -23,6 +23,7 @@ import com.ncfsistemi.econ.lista.EconListaStandardController;
 import com.ncfsistemi.econ.lista.EconListaStandardDefinition;
 import com.ncfsistemi.econ.lista.FiltriHelper;
 import com.ncfsistemi.econ.lista.QueryPagina;
+import com.ncfsistemi.econ.views.CampoRicerca;
 import com.ncfsistemi.econ.views.EconSpinner;
 
 /**
@@ -33,7 +34,14 @@ import com.ncfsistemi.econ.views.EconSpinner;
  */
 public class CodiciArticoliActivity extends EconListaStandardActivity {
 
-    private EconSpinner spinnerFornitore;
+    /** Dal drill-down "Altro materiale": articoli del costruttore senza linea. */
+    public static final String EXTRA_SENZA_LINEA = "senza_linea";
+    /** Testo da cercare negli articoli (codice o descrizione), dalla ricerca dei Listini. */
+    public static final String EXTRA_TESTO = "testo";
+
+    private boolean senzaLinea = false;
+
+    private CampoRicerca campoFornitore;
     private EconSpinner spinnerLinea;
     private int idFornitoreIniziale = 0;
 
@@ -53,19 +61,29 @@ public class CodiciArticoliActivity extends EconListaStandardActivity {
 
         registerForContextMenu(getController().getListView());
 
-        spinnerFornitore = findViewById(R.id.spinner_fornitore);
+        campoFornitore = findViewById(R.id.campo_fornitore);
         spinnerLinea = findViewById(R.id.spinner_linea);
         idFornitoreIniziale = getIntent().getIntExtra(Costruttori.ID_COSTRUTTORE, 0);
         int idLinea = getIntent().getIntExtra(Linee.ID_LINEA, 0);
+        senzaLinea = idFornitoreIniziale != 0 && getIntent().getBooleanExtra(EXTRA_SENZA_LINEA, false);
+        String testo = getIntent().getStringExtra(EXTRA_TESTO);
+        if (testo != null && !testo.isEmpty()) {
+            ((android.widget.EditText) findViewById(R.id.editText_filtra)).setText(testo);
+        }
+        // costruttore: si scrivono 3 lettere del nome o la sigla (sono centinaia, una tendina non serve)
+        campoFornitore.setVoci(costruttoriConArticoli());
         if (idFornitoreIniziale != 0) {
-            spinnerFornitore.setValue("" + idFornitoreIniziale);
+            campoFornitore.selezionaId(idFornitoreIniziale);
         }
         if (idLinea != 0) {
             spinnerLinea.setValue("" + idLinea);
         }
-        spinnerFornitore.setTabella(new Costruttori());
-        spinnerLinea.setTabella(new Linee());
-        spinnerFornitore.setSpinnerCollegato(spinnerLinea);
+        spinnerLinea.setTabella(new LineeConArticoli());
+        aggiornaLinee(idFornitoreIniziale);
+        campoFornitore.setAscoltatore((campo, voce) -> {
+            spinnerLinea.setValue("");
+            aggiornaLinee(voce != null ? voce.id : 0);
+        });
     }
 
     @Override
@@ -76,6 +94,36 @@ public class CodiciArticoliActivity extends EconListaStandardActivity {
         if (idFornitoreIniziale != 0) {
             getController().eseguiRicerca(false);
         }
+    }
+
+    /** Id del costruttore scelto, "" se nessuno. */
+    private String valoreFornitore() {
+        return campoFornitore.getIdScelto() > 0 ? "" + campoFornitore.getIdScelto() : "";
+    }
+
+    /** Linee del costruttore scelto (solo quelle con articoli); senza costruttore la tendina è spenta. */
+    private void aggiornaLinee(int idCostruttore) {
+        spinnerLinea.setEnabled(idCostruttore > 0);
+        ContentValues filtro = new ContentValues();
+        if (idCostruttore > 0) {
+            filtro.put(Linee.ID_COSTRUTTORE, idCostruttore);
+        }
+        spinnerLinea.setFiltro(filtro);
+        spinnerLinea.setTabella(spinnerLinea.getTabella(), spinnerLinea.getCampoCodice(), spinnerLinea.getCampoDescrizione());
+    }
+
+    /** I costruttori con articoli sul dispositivo, "SIGLA - Ragione sociale": la ricerca trova anche la sigla. */
+    private java.util.List<CampoRicerca.Voce> costruttoriConArticoli() {
+        java.util.List<CampoRicerca.Voce> voci = new ArrayList<>();
+        com.ncfsistemi.econ.db.DbInterno db = new com.ncfsistemi.econ.db.DbInterno(this);
+        for (Object o : db.eseguiSelect(new CostruttoriConArticoli().getSQLPerSpinner(null), null)) {
+            ContentValues c = (ContentValues) o;
+            String sigla = c.getAsString(Costruttori.SIGLA_METEL);
+            voci.add(new CampoRicerca.Voce(c.getAsInteger(Costruttori.ID_COSTRUTTORE),
+                    (sigla != null && !sigla.isEmpty() ? sigla + " - " : "") + c.getAsString(Costruttori.RAGIONE_SOCIALE), c));
+        }
+        db.close();
+        return voci;
     }
 
     /** Compat: chiamato da CodiciArticoliAdapter dopo Elimina. */
@@ -134,12 +182,17 @@ public class CodiciArticoliActivity extends EconListaStandardActivity {
                     Listini.NOME_TABELLA + "." + Listini.CODICE_ARTICOLO, Listini.NOME_TABELLA + "." + Listini.DESCRIZIONE);
 
             String where = like.whereSql;
-            String valForn = spinnerFornitore.getValue();
+            String valForn = valoreFornitore();
             String valLinea = spinnerLinea.getValue();
             if (!valForn.equals("")) {
                 where += " and " + Listini.NOME_TABELLA + "." + Listini.ID_COSTRUTTORE + "=" + valForn;
-                if (valLinea.equals("")) {
-                    where += " and " + Listini.NOME_TABELLA + "." + Listini.ID_LINEA + "=0";
+                // senza linea scelta: tutti gli articoli del costruttore (prima solo quelli con linea 0, che dalla linea
+                // "Generica" non ci sono quasi più: il filtro per costruttore non trovava niente); "Altro materiale" del
+                // drill-down: solo quelli senza una linea
+                if (valLinea.equals("") && senzaLinea && valForn.equals("" + idFornitoreIniziale)) {
+                    where += " and (" + Listini.NOME_TABELLA + "." + Listini.ID_LINEA + " is null or " + Listini.NOME_TABELLA + "."
+                            + Listini.ID_LINEA + "=0 or " + Listini.NOME_TABELLA + "." + Listini.ID_LINEA + " not in (select "
+                            + Linee.ID_LINEA + " from " + Linee.NOME_TABELLA + "))";
                 }
             }
             if (!valLinea.equals("")) {
@@ -192,13 +245,34 @@ public class CodiciArticoliActivity extends EconListaStandardActivity {
         @Override
         public void onNuovoClick(EconListaStandardController.Host host) {
             Intent intent = new Intent(host.getContext(), CodiceArticoloModActivity.class);
-            if (!spinnerFornitore.getValue().equals("")) {
-                intent.putExtra(Listini.ID_COSTRUTTORE, Integer.parseInt(spinnerFornitore.getValue()));
+            if (!valoreFornitore().equals("")) {
+                intent.putExtra(Listini.ID_COSTRUTTORE, Integer.parseInt(valoreFornitore()));
             }
             if (!spinnerLinea.getValue().equals("")) {
                 intent.putExtra(Listini.ID_LINEA, Integer.parseInt(spinnerLinea.getValue()));
             }
             ((EconActivity) host.getContext()).apriFinestraInserimento(intent, 1, new Listini());
+        }
+    }
+
+    /** Nel filtro solo i costruttori con articoli sul dispositivo (non tutti i generali). */
+    static class CostruttoriConArticoli extends Costruttori {
+        @Override
+        public String getSQLPerSpinner(ContentValues filtro) {
+            return "select * from " + NOME_TABELLA + " where " + ID_COSTRUTTORE + " in (select " + Listini.ID_COSTRUTTORE + " from "
+                    + Listini.NOME_TABELLA + ") order by " + RAGIONE_SOCIALE;
+        }
+    }
+
+    /** Nel filtro solo le linee con articoli sul dispositivo (ogni costruttore ha la sua "Generica", spesso vuota). */
+    static class LineeConArticoli extends Linee {
+        @Override
+        public String getSQLPerSpinner(ContentValues filtro) {
+            String sql = super.getSQLPerSpinner(filtro);
+            int i = sql.indexOf(" order by ");
+            String prima = sql.substring(0, i);
+            return prima + (prima.contains(" where ") ? " and " : " where ") + NOME_TABELLA + "." + ID_LINEA + " in (select "
+                    + Listini.ID_LINEA + " from " + Listini.NOME_TABELLA + ")" + sql.substring(i);
         }
     }
 }

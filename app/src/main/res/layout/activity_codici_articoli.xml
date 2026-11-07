@@ -63,12 +63,18 @@
                     android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
-                    <com.ncfsistemi.econ.views.EconSpinner
-                        android:id="@+id/spinner_fornitore"
+                    <com.ncfsistemi.econ.views.CampoRicerca
+                        android:id="@+id/campo_fornitore"
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:background="@drawable/bg_input_outline"
+                        android:hint="@string/costruttore_3_lettere"
+                        android:textSize="16sp" />
 
                     <com.ncfsistemi.econ.views.EconSpinner
                         android:id="@+id/spinner_linea"

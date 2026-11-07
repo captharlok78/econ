@@ -221,7 +221,7 @@
     <string name="linea_standard">Linea standard</string>
     <string name="lista_componenti">Lista componenti</string>
     <string name="lista_elementi">Lista elementi</string>
-    <string name="listini">Listini</string>
+    <string name="listini">Articoli</string>
     <string name="logout">Logout</string>
     <string name="locale">Locale</string>
     <string name="locale_elemento_collegato">Elemento locale collegato</string>
@@ -483,6 +483,7 @@
     <string name="invia_mail">Invia mail</string>
     <string name="inserisci">Inserisci</string>
     <string name="cerca_3_lettere">Scrivi almeno 3 lettere</string>
+    <string name="costruttore_3_lettere">Costruttore: scrivi 3 lettere</string>
     <string name="note_rapportino">Note generali del rapportino</string>
     <string name="descrizione_tipo">Descrizione tipo</string>
     <string name="articolo">Articolo</string>

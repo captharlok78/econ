@@ -23,6 +23,7 @@ import com.ncfsistemi.econ.adapters.FornitoriLineeAdapter;
 import com.ncfsistemi.econ.db.DbInterno;
 import com.ncfsistemi.econ.db.table.Costruttori;
 import com.ncfsistemi.econ.db.table.Linee;
+import com.ncfsistemi.econ.db.table.Listini;
 
 /**
  * Modulo Fornitori/Linee (Listini, livello 1): resta su ExpandableListView/adapter
@@ -71,7 +72,7 @@ public class FornitoriLineeActivity extends EconActivity implements OnChildClick
         textViewPaginaInfo2 = findViewById(R.id.textViewPaginaInfo2);
         registerForContextMenu(lista);
 
-        ((TextView) findViewById(R.id.headerTitolo)).setText("Listini");
+        ((TextView) findViewById(R.id.headerTitolo)).setText(getString(R.string.listini));
         findViewById(R.id.buttonToggleFiltri).setOnClickListener(v ->
                 cardFiltri.setVisibility(cardFiltri.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE));
         findViewById(R.id.buttonnuovo).setOnClickListener(v -> {
@@ -206,7 +207,15 @@ public class FornitoriLineeActivity extends EconActivity implements OnChildClick
         DbInterno db = new DbInterno(this);
         String testo = getTesto(R.id.editText_filtra);
         String like = testo.isEmpty() ? "%" : "%" + testo + "%";
-        String whereSql = Costruttori.RAGIONE_SOCIALE + " like ?";
+        // solo i costruttori con articoli nel listino del dispositivo (quelli della ditta), cercando anche per sigla e
+        // per codice o descrizione dei loro articoli: prima arrivavano tutti i costruttori generali, anche senza articoli
+        String c = Costruttori.NOME_TABELLA + "." + Costruttori.ID_COSTRUTTORE;
+        String whereSql = "exists (select 1 from " + Listini.NOME_TABELLA + " la where la." + Listini.ID_COSTRUTTORE + " = " + c + ")"
+                + " and (" + Costruttori.NOME_TABELLA + "." + Costruttori.RAGIONE_SOCIALE + " like ? or "
+                + Costruttori.NOME_TABELLA + "." + Costruttori.SIGLA_METEL + " like ? or exists (select 1 from " + Listini.NOME_TABELLA
+                + " lt where lt." + Listini.ID_COSTRUTTORE + " = " + c + " and (lt." + Listini.CODICE_ARTICOLO + " like ? or lt."
+                + Listini.DESCRIZIONE + " like ?)))";
+        String[] args = new String[]{like, like, like, like};
         String orderBySql = ordinaPerRecenti
                 ? Costruttori.NOME_TABELLA + "." + Costruttori.DATA_MOD + " is null asc, "
                         + Costruttori.NOME_TABELLA + "." + Costruttori.DATA_MOD + " desc, "
@@ -214,7 +223,7 @@ public class FornitoriLineeActivity extends EconActivity implements OnChildClick
                 : Costruttori.NOME_TABELLA + "." + Costruttori.RAGIONE_SOCIALE;
 
         ArrayList<Object> conteggio = db.eseguiSelect(
-                "Select count(*) as n from " + Costruttori.NOME_TABELLA + " where " + whereSql, new String[]{like});
+                "Select count(*) as n from " + Costruttori.NOME_TABELLA + " where " + whereSql, args);
         totaleCostruttori = conteggio.isEmpty() ? 0 : ((ContentValues) conteggio.get(0)).getAsInteger("n");
         totalePagine = Math.max(1, (int) Math.ceil(totaleCostruttori / (double) risultatiPerPagina));
         if (paginaCorrente >= totalePagine) {
@@ -225,7 +234,7 @@ public class FornitoriLineeActivity extends EconActivity implements OnChildClick
                 "Select " + Costruttori.ID_COSTRUTTORE + " from " + Costruttori.NOME_TABELLA + " where " + whereSql
                         + " order by " + orderBySql
                         + " limit " + risultatiPerPagina + " offset " + (paginaCorrente * risultatiPerPagina),
-                new String[]{like});
+                args);
 
         if (!paginaCostruttori.isEmpty()) {
             StringBuilder idsIn = new StringBuilder();
@@ -239,6 +248,9 @@ public class FornitoriLineeActivity extends EconActivity implements OnChildClick
             String SQL = "Select " + Costruttori.NOME_TABELLA + ".*," + Linee.ID_LINEA + "," + Linee.NOME_LINEA + " from "
                     + Costruttori.NOME_TABELLA + " left join " + Linee.NOME_TABELLA + " on " + Costruttori.NOME_TABELLA + "."
                     + Costruttori.ID_COSTRUTTORE + "=" + Linee.NOME_TABELLA + "." + Linee.ID_COSTRUTTORE
+                    // solo le linee con articoli (ogni costruttore ha la sua "Generica", spesso vuota)
+                    + " and exists (select 1 from " + Listini.NOME_TABELLA + " ll where ll." + Listini.ID_LINEA + " = "
+                    + Linee.NOME_TABELLA + "." + Linee.ID_LINEA + ")"
                     + " where " + Costruttori.NOME_TABELLA + "." + Costruttori.ID_COSTRUTTORE + " in (" + idsIn + ")"
                     + " order by " + orderBySql;
             ArrayList<Object> listaFornitori = db.eseguiSelect(SQL, null);
@@ -261,9 +273,21 @@ public class FornitoriLineeActivity extends EconActivity implements OnChildClick
                 }
             }
 
+            // "Altro materiale" solo per i costruttori con articoli senza una linea (oggi di solito sono nella Generica)
+            ArrayList<String> conSenzaLinea = new ArrayList<>();
+            for (Object o : db.eseguiSelect("Select distinct " + Listini.ID_COSTRUTTORE + " from " + Listini.NOME_TABELLA
+                    + " where " + Listini.ID_COSTRUTTORE + " in (" + idsIn + ") and (" + Listini.ID_LINEA + " is null or "
+                    + Listini.ID_LINEA + " = 0 or " + Listini.ID_LINEA + " not in (select " + Linee.ID_LINEA + " from "
+                    + Linee.NOME_TABELLA + "))", null)) {
+                conSenzaLinea.add(((ContentValues) o).getAsString(Listini.ID_COSTRUTTORE));
+            }
             Iterator<String> iterChild = listChildData.keySet().iterator();
             while (iterChild.hasNext()) {
-                ArrayList<Object> linee = listChildData.get(iterChild.next());
+                String chiave = iterChild.next();
+                ArrayList<Object> linee = listChildData.get(chiave);
+                if (!conSenzaLinea.contains(chiave) && !linee.isEmpty()) {
+                    continue;
+                }
                 ContentValues noLinea = new ContentValues();
                 noLinea.put(Linee.ID_LINEA, 0);
                 noLinea.put(Linee.NOME_LINEA, getString(R.string.altro_materiale));
@@ -383,6 +407,21 @@ public class FornitoriLineeActivity extends EconActivity implements OnChildClick
 
         intent.putExtra(Linee.ID_LINEA, idLinea);
         intent.putExtra(Costruttori.ID_COSTRUTTORE, idCostruttore);
+        intent.putExtra(CodiciArticoliActivity.EXTRA_SENZA_LINEA, idLinea == 0);
+        // la ricerca scritta qui passa agli articoli solo se ne trova qualcuno del costruttore (codice o descrizione):
+        // se ha trovato il costruttore per nome o sigla, si vedono tutti i suoi articoli
+        String testo = getTesto(R.id.editText_filtra);
+        if (!testo.isEmpty()) {
+            DbInterno db = new DbInterno(this);
+            String like = "%" + testo + "%";
+            boolean trovati = !db.eseguiSelect("Select 1 from " + Listini.NOME_TABELLA + " where " + Listini.ID_COSTRUTTORE + " = "
+                    + idCostruttore + (idLinea != 0 ? " and " + Listini.ID_LINEA + " = " + idLinea : "") + " and ("
+                    + Listini.CODICE_ARTICOLO + " like ? or " + Listini.DESCRIZIONE + " like ?) limit 1", new String[]{like, like}).isEmpty();
+            db.close();
+            if (trovati) {
+                intent.putExtra(CodiciArticoliActivity.EXTRA_TESTO, testo);
+            }
+        }
 
         startActivity(intent);
         return true;
