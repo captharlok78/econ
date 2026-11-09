@@ -29,7 +29,8 @@ import com.ncfsistemi.econ.views.CampoRicerca;
 
 /**
  * Menu Articoli (ex Listini): elenco degli articoli sul dispositivo sullo standard di ricerca/lista condiviso, tabellare
- * come Clienti e Cantieri (testata ordinabile, pagine, esportazione xls). Filtri su una riga: testo (codice, descrizione,
+ * come Clienti e Cantieri (testata ordinabile, pagine, esportazione xls). Filtri (layout filtri_articoli: due righe sugli
+ * schermi stretti, una sui tablet in orizzontale): testo (codice, descrizione,
  * barcode, costruttore), lettore barcode con la fotocamera (un solo articolo con quel barcode = si apre la scheda) e
  * costruttore (scritto o scelto dall'elenco). "Ultimi 20" = i 20 articoli inseriti o modificati per ultimi; Reset e
  * Ultimi 20 svuotano anche il costruttore.
@@ -75,9 +76,7 @@ public class CodiciArticoliActivity extends EconListaStandardActivity {
             campoFornitore.selezionaId(idFornitoreIniziale);
         }
 
-        android.widget.TextView leggi = findViewById(R.id.buttonLeggiBarcode);
-        com.ncfsistemi.econ.utils.FaIcone.applica(leggi, com.ncfsistemi.econ.utils.FaIcone.BARCODE, "Leggi il barcode con la fotocamera");
-        leggi.setOnClickListener(v -> com.ncfsistemi.econ.utils.LettoreBarcode.leggi(this, this::cercaBarcode));
+        com.ncfsistemi.econ.utils.LettoreBarcode.collega(this, findViewById(R.id.buttonLeggiBarcode), this::cercaBarcode);
     }
 
     /**

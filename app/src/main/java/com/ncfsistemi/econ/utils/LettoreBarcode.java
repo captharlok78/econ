@@ -23,6 +23,21 @@ public final class LettoreBarcode {
     private LettoreBarcode() {
     }
 
+    /**
+     * Collega il pulsante comune "leggi barcode" (layout pulsante_leggi_barcode, stile Econ.Pulsante.Icona): icona,
+     * suggerimento e lettura al tocco. Stesso aspetto e stesso comportamento in ogni maschera.
+     */
+    public static void collega(Activity activity, android.view.View pulsante, Letto letto) {
+        if (pulsante == null) return;
+        if (pulsante instanceof com.google.android.material.button.MaterialButton) {
+            com.google.android.material.button.MaterialButton b = (com.google.android.material.button.MaterialButton) pulsante;
+            b.setIcon(FaIcone.drawable(activity, FaIcone.BARCODE, 22));
+            b.setIconTint(android.content.res.ColorStateList.valueOf(0xFF1565C0));
+        }
+        androidx.appcompat.widget.TooltipCompat.setTooltipText(pulsante, "Leggi il barcode con la fotocamera");
+        pulsante.setOnClickListener(v -> leggi(activity, letto));
+    }
+
     public static void leggi(Activity activity, Letto letto) {
         GmsBarcodeScannerOptions opzioni = new GmsBarcodeScannerOptions.Builder()
                 .setBarcodeFormats(Barcode.FORMAT_EAN_13, Barcode.FORMAT_EAN_8, Barcode.FORMAT_UPC_A, Barcode.FORMAT_UPC_E,

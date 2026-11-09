@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Campi dei filtri degli Articoli su schermi larghi (tablet in orizzontale): ricerca, barcode e costruttore su una riga. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical">
+
+    <EditText
+        android:id="@+id/editText_filtra"
+        android:layout_width="0dp"
+        android:layout_weight="3"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:drawableStart="@drawable/ic_cerca"
+        android:drawablePadding="8dp"
+        android:textSize="16sp"
+        android:background="@drawable/bg_input_outline"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:hint="@string/cerca_articolo"
+        android:imeOptions="actionSearch"
+        android:singleLine="true" />
+
+    <Space
+        android:layout_width="8dp"
+        android:layout_height="1dp" />
+
+    <include layout="@layout/pulsante_leggi_barcode" />
+
+    <Space
+        android:layout_width="8dp"
+        android:layout_height="1dp" />
+
+    <com.ncfsistemi.econ.views.CampoRicerca
+        android:id="@+id/campo_fornitore"
+        android:layout_width="0dp"
+        android:layout_weight="2"
+        android:layout_height="wrap_content"
+        android:minHeight="48dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:background="@drawable/bg_input_outline"
+        android:hint="@string/costruttore_3_lettere"
+        android:textSize="16sp" />
+</LinearLayout>

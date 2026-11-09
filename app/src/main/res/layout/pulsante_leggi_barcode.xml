@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Pulsante "leggi il barcode con la fotocamera", uguale in tutta l'app: bordato, quadrato 48dp, icona barcode.
+    Si include con <include layout="@layout/pulsante_leggi_barcode" /> e si collega con LettoreBarcode.collega().
+-->
+<com.google.android.material.button.MaterialButton xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/buttonLeggiBarcode"
+    style="@style/Econ.Pulsante.Icona"
+    android:layout_width="48dp"
+    android:layout_height="wrap_content"
+    android:contentDescription="Leggi il barcode con la fotocamera" />

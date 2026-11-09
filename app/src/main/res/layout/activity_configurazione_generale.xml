@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -75,10 +76,11 @@
                     android:inputType="textUri" />
 
                 <com.google.android.material.button.MaterialButton
-                    style="@style/Econ.Pulsante.Secondario"
+                    style="@style/Econ.Pulsante.Filtro.Secondario"
                     android:id="@+id/button_cerca_server"
                     android:layout_width="wrap_content"
                     android:layout_height="48dp"
+                    app:icon="@drawable/ic_cerca"
                     android:layout_marginStart="8dp"
                     android:text="@string/cerca"
                     android:onClick="cercaServerMercury" />

@@ -97,6 +97,49 @@
         <item name="android:textAllCaps">false</item>
     </style>
 
+    <!--
+        Pulsanti della barra filtri (Cerca | Reset filtri | Ultimi 20) e di ogni altra ricerca: compatti, sempre su una
+        riga sola (icona 18dp, poco margine, testo che non va a capo), uguali su smartphone e tablet in ogni verso.
+    -->
+    <style name="Econ.Pulsante.Filtro" parent="Widget.Material3.Button">
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="iconSize">18dp</item>
+        <item name="iconPadding">4dp</item>
+        <item name="iconGravity">textStart</item>
+    </style>
+
+    <style name="Econ.Pulsante.Filtro.Secondario" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="iconSize">18dp</item>
+        <item name="iconPadding">4dp</item>
+        <item name="iconGravity">textStart</item>
+    </style>
+
+    <!-- Pulsante a sola icona bordato, quadrato 48dp (es. leggi barcode): l'icona la mette il codice (FaIcone) -->
+    <style name="Econ.Pulsante.Icona" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:minWidth">48dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:insetLeft">0dp</item>
+        <item name="android:insetRight">0dp</item>
+        <item name="iconSize">22dp</item>
+        <item name="iconPadding">0dp</item>
+        <item name="iconGravity">textStart</item>
+    </style>
+
     <!-- Pulsante su una barra blu (testata): bordato bianco, testo bianco -->
     <style name="Econ.Pulsante.SuBarra" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:textSize">14sp</item>

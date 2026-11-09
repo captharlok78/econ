@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Barra azioni standard della form filtri: Cerca | Reset filtri | Ultimi N, con i pulsanti delle form (Cerca pieno,
-    gli altri bordati). E' identica (per default) in ogni modulo, incluso via <include> dentro il rispettivo cardFiltri.
+    Barra azioni standard della form filtri: Cerca | Reset filtri | Ultimi N, con i pulsanti dei filtri (Cerca pieno,
+    gli altri bordati; stili Econ.Pulsante.Filtro: compatti, sempre su una riga, uguali su smartphone e tablet; sugli
+    schermi più stretti il testo scende fino a 11sp invece di andare a capo). E' identica (per default) in ogni modulo, incluso via <include> dentro il rispettivo cardFiltri.
     "Ultimi N" e' gestito interamente da EconListaStandardController: visibile solo se
     la EconListaStandardDefinition del modulo fornisce un getOrdineRecenti() non nullo -
     un modulo non deve toccare questo XML per mostrarlo/nasconderlo, basta sovrascrivere
@@ -16,33 +17,44 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonCerca"
-        style="@style/Econ.Pulsante"
+        style="@style/Econ.Pulsante.Filtro"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="5dp"
         android:layout_weight="1"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="11sp"
+        app:autoSizeMaxTextSize="14sp"
+        app:autoSizeStepGranularity="1sp"
         android:text="@string/cerca"
         app:icon="@drawable/ic_cerca"
-        app:iconTint="#FFFFFF"
-        app:iconGravity="textStart" />
+        app:iconTint="#FFFFFF" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonResetFiltri"
-        style="@style/Econ.Pulsante.Secondario"
+        style="@style/Econ.Pulsante.Filtro.Secondario"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
         android:layout_marginEnd="5dp"
         android:layout_weight="1"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="11sp"
+        app:autoSizeMaxTextSize="14sp"
+        app:autoSizeStepGranularity="1sp"
         android:text="@string/reset_filtri" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonUltimiGestiti"
-        style="@style/Econ.Pulsante.Secondario"
+        style="@style/Econ.Pulsante.Filtro.Secondario"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
         android:layout_weight="1"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="11sp"
+        app:autoSizeMaxTextSize="14sp"
+        app:autoSizeStepGranularity="1sp"
         android:text="@string/ultimi_gestiti" />
 
 </LinearLayout>
