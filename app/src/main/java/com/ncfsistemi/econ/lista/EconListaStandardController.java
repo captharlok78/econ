@@ -127,6 +127,7 @@ public class EconListaStandardController {
         if (buttonResetFiltri != null) {
             buttonResetFiltri.setOnClickListener(v -> {
                 filtro.setText("");
+                definizione.azzeraFiltri();
                 eseguiRicerca(false);
             });
         }
@@ -135,6 +136,7 @@ public class EconListaStandardController {
             buttonUltimiGestiti.setVisibility(definizione.getOrdineRecenti() != null ? View.VISIBLE : View.GONE);
             buttonUltimiGestiti.setOnClickListener(v -> {
                 filtro.setText("");
+                definizione.azzeraFiltri();
                 eseguiRicerca(true);
             });
         }

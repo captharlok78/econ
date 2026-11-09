@@ -227,7 +227,8 @@ public class MenuActivity extends EconActivity {
             startActivity(new Intent(this, CantieriActivity.class)
                 .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
         } else if (id == R.id.buttonListini) {
-            startActivity(new Intent(this, FornitoriLineeActivity.class)
+            // Articoli (ex Listini): direttamente l'elenco degli articoli, come Clienti (non più l'elenco dei costruttori)
+            startActivity(new Intent(this, CodiciArticoliActivity.class)
                 .setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
         } else if (id == R.id.buttonImpostazioni) {
             startActivity(new Intent(this, ImpostazioniActivity.class)

@@ -28,10 +28,8 @@
             <include layout="@layout/header_lista_standard" />
 
             <!--
-                Form filtri: e' l'unica cosa visibile all'apertura del modulo (nessun
-                caricamento dati finche' non si preme Cerca/Reset). Le righe (prezzi,
-                icona associazioni) sono troppo custom per il modello a colonne
-                (isTabellare()=false in CodiciArticoliDefinition).
+                Form filtri (Articoli, come Clienti): testo, costruttore e linea. Nessun
+                caricamento finché non si preme Cerca/Reset/Ultimi 20.
             -->
             <LinearLayout
                 android:id="@+id/cardFiltri"
@@ -53,7 +51,7 @@
                     android:background="@drawable/bg_input_outline"
                     android:paddingStart="8dp"
                     android:paddingEnd="8dp"
-                    android:hint="@string/cerca"
+                    android:hint="@string/cerca_articolo"
                     android:imeOptions="actionSearch"
                     android:singleLine="true" />
 
@@ -89,19 +87,25 @@
 
         </LinearLayout>
 
-        <!-- Testata non usata (isTabellare()=false): resta sempre nascosta. -->
+        <!-- Testata tabella, costruita da EconListaStandardController dalle colonne (come Clienti). -->
         <LinearLayout
             android:id="@+id/headerTabella"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:gravity="center_vertical"
             android:background="#EEEEEE"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
             android:visibility="gone" />
 
         <View
             android:id="@+id/headerBorder"
             android:layout_width="match_parent"
             android:layout_height="1px"
+            android:layout_marginBottom="8dp"
             android:background="#000000"
             android:visibility="gone" />
 

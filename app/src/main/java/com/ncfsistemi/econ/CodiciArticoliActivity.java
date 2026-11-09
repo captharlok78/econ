@@ -12,12 +12,14 @@ import android.widget.AdapterView;
 
 import java.util.ArrayList;
 
-import com.ncfsistemi.econ.adapters.CodiciArticoliAdapter;
-import com.ncfsistemi.econ.adapters.EconListViewAdapter;
+import java.util.Arrays;
+import java.util.List;
+
 import com.ncfsistemi.econ.db.table.AssCodiciLinee;
 import com.ncfsistemi.econ.db.table.Costruttori;
 import com.ncfsistemi.econ.db.table.Linee;
 import com.ncfsistemi.econ.db.table.Listini;
+import com.ncfsistemi.econ.lista.ColonnaLista;
 import com.ncfsistemi.econ.lista.EconListaStandardActivity;
 import com.ncfsistemi.econ.lista.EconListaStandardController;
 import com.ncfsistemi.econ.lista.EconListaStandardDefinition;
@@ -27,10 +29,10 @@ import com.ncfsistemi.econ.views.CampoRicerca;
 import com.ncfsistemi.econ.views.EconSpinner;
 
 /**
- * Modulo Codici articoli (Listini) sullo standard di ricerca/lista condiviso. Le righe
- * (prezzi formattati, icona associazioni con linee alternative) sono troppo custom per il
- * modello a colonne: usa il proprio CodiciArticoliAdapter (via creaAdapterPersonalizzato),
- * come Preventivi/Ordini/Rapportini.
+ * Menu Articoli (ex Listini): elenco degli articoli sul dispositivo sullo standard di ricerca/lista condiviso, tabellare
+ * come Clienti e Cantieri (testata ordinabile, pagine, esportazione xls). Filtri: testo (codice, descrizione, barcode,
+ * costruttore), costruttore (scritto o scelto dall'elenco) e linea del costruttore. "Ultimi 20" = i 20 articoli inseriti o
+ * modificati per ultimi; Reset e Ultimi 20 svuotano anche costruttore e linea.
  */
 public class CodiciArticoliActivity extends EconListaStandardActivity {
 
@@ -101,6 +103,11 @@ public class CodiciArticoliActivity extends EconListaStandardActivity {
         return campoFornitore.getIdScelto() > 0 ? "" + campoFornitore.getIdScelto() : "";
     }
 
+    /** Testo scritto nel campo costruttore senza sceglierlo dall'elenco: si cerca su sigla e ragione sociale. */
+    private String testoFornitore() {
+        return campoFornitore.getIdScelto() > 0 ? "" : campoFornitore.getText().toString().trim();
+    }
+
     /** Linee del costruttore scelto (solo quelle con articoli); senza costruttore la tendina è spenta. */
     private void aggiornaLinee(int idCostruttore) {
         spinnerLinea.setEnabled(idCostruttore > 0);
@@ -126,7 +133,7 @@ public class CodiciArticoliActivity extends EconListaStandardActivity {
         return voci;
     }
 
-    /** Compat: chiamato da CodiciArticoliAdapter dopo Elimina. */
+    /** Ricarica la pagina corrente (dopo una modifica o un'eliminazione). */
     public void ricerca() {
         getController().ricaricaSeAttiva();
     }
@@ -162,54 +169,74 @@ public class CodiciArticoliActivity extends EconListaStandardActivity {
         return super.onContextItemSelected(item);
     }
 
-    /** Query, adapter e azione di click riga specifiche del modulo Codici articoli. */
+    /** Query, colonne e azione di click riga del modulo Articoli. */
     private class CodiciArticoliDefinition extends EconListaStandardDefinition {
+
+        private static final int ULTIMI = 20;
+
+        private static final String L = Listini.NOME_TABELLA + ".";
+        private static final String C = Costruttori.NOME_TABELLA + ".";
 
         @Override
         public QueryPagina costruisciQuery(String testoFiltro, boolean ordinaPerRecenti) {
             String fromJoin = Listini.NOME_TABELLA
-                    + " left join " + Costruttori.NOME_TABELLA + " on " + Listini.NOME_TABELLA + "." + Listini.ID_COSTRUTTORE
-                    + "=" + Costruttori.NOME_TABELLA + "." + Costruttori.ID_COSTRUTTORE
-                    + " left join " + Linee.NOME_TABELLA + " on " + Listini.NOME_TABELLA + "." + Listini.ID_LINEA
-                    + "=" + Linee.NOME_TABELLA + "." + Linee.ID_LINEA;
+                    + " left join " + Costruttori.NOME_TABELLA + " on " + L + Listini.ID_COSTRUTTORE + "=" + C + Costruttori.ID_COSTRUTTORE
+                    + " left join " + Linee.NOME_TABELLA + " on " + L + Listini.ID_LINEA + "=" + Linee.NOME_TABELLA + "." + Linee.ID_LINEA;
 
-            String select = Listini.NOME_TABELLA + ".*, " + Costruttori.NOME_TABELLA + "." + Costruttori.SIGLA_METEL + ", "
-                    + Linee.NOME_TABELLA + "." + Linee.NOME_LINEA + ", "
-                    + "(select count(*) from " + AssCodiciLinee.NOME_TABELLA + " where " + AssCodiciLinee.CODICE_ARTICOLO
-                    + "=" + Listini.NOME_TABELLA + "." + Listini.CODICE_ARTICOLO + ") as asscodicilinee";
+            String select = Listini.NOME_TABELLA + ".*, " + C + Costruttori.SIGLA_METEL + ", " + C + Costruttori.RAGIONE_SOCIALE + ", "
+                    + Linee.NOME_TABELLA + "." + Linee.NOME_LINEA;
 
-            QueryPagina like = FiltriHelper.likeMultiCampo(fromJoin, testoFiltro,
-                    Listini.NOME_TABELLA + "." + Listini.CODICE_ARTICOLO, Listini.NOME_TABELLA + "." + Listini.DESCRIZIONE);
+            QueryPagina like = FiltriHelper.likeMultiCampo(fromJoin, testoFiltro, L + Listini.CODICE_ARTICOLO, L + Listini.DESCRIZIONE,
+                    L + Listini.BARCODE, C + Costruttori.SIGLA_METEL, C + Costruttori.RAGIONE_SOCIALE);
+            List<String> args = new ArrayList<>(Arrays.asList(like.whereArgs));
+            String where = "(" + like.whereSql + ")";
 
-            String where = like.whereSql;
+            if (ordinaPerRecenti) {
+                // gli ultimi 20 inseriti o modificati, tutti in una pagina, dal più recente
+                where += " and " + L + Listini.ID + " in (select " + Listini.ID + " from " + Listini.NOME_TABELLA
+                        + " order by " + getOrdineRecenti().replace(L, "") + " limit " + ULTIMI + ")";
+                return new QueryPagina(select, fromJoin, where, args.toArray(new String[0]));
+            }
+
             String valForn = valoreFornitore();
             String valLinea = spinnerLinea.getValue();
             if (!valForn.equals("")) {
-                where += " and " + Listini.NOME_TABELLA + "." + Listini.ID_COSTRUTTORE + "=" + valForn;
-                // senza linea scelta: tutti gli articoli del costruttore (prima solo quelli con linea 0, che dalla linea
-                // "Generica" non ci sono quasi più: il filtro per costruttore non trovava niente); "Altro materiale" del
-                // drill-down: solo quelli senza una linea
+                where += " and " + L + Listini.ID_COSTRUTTORE + "=" + valForn;
+                // "Altro materiale" dall'elenco dei costruttori: solo quelli senza una linea
                 if (valLinea.equals("") && senzaLinea && valForn.equals("" + idFornitoreIniziale)) {
-                    where += " and (" + Listini.NOME_TABELLA + "." + Listini.ID_LINEA + " is null or " + Listini.NOME_TABELLA + "."
-                            + Listini.ID_LINEA + "=0 or " + Listini.NOME_TABELLA + "." + Listini.ID_LINEA + " not in (select "
-                            + Linee.ID_LINEA + " from " + Linee.NOME_TABELLA + "))";
+                    where += " and (" + L + Listini.ID_LINEA + " is null or " + L + Listini.ID_LINEA + "=0 or " + L
+                            + Listini.ID_LINEA + " not in (select " + Linee.ID_LINEA + " from " + Linee.NOME_TABELLA + "))";
                 }
+            } else if (!testoFornitore().isEmpty()) {
+                where += " and (" + C + Costruttori.SIGLA_METEL + " like ? or " + C + Costruttori.RAGIONE_SOCIALE + " like ?)";
+                args.add(testoFornitore() + "%");
+                args.add("%" + testoFornitore() + "%");
             }
             if (!valLinea.equals("")) {
-                where += " and " + Listini.NOME_TABELLA + "." + Listini.ID_LINEA + "=" + valLinea;
+                where += " and " + L + Listini.ID_LINEA + "=" + valLinea;
             }
 
-            return new QueryPagina(select, fromJoin, where, like.whereArgs);
+            return new QueryPagina(select, fromJoin, where, args.toArray(new String[0]));
         }
 
         @Override
-        public boolean isTabellare() {
-            return false;
+        public List<ColonnaLista> getColonne() {
+            return Arrays.asList(
+                    new ColonnaLista(Listini.CODICE_ARTICOLO, "Codice", 16, true, null, L + Listini.CODICE_ARTICOLO),
+                    new ColonnaLista(Listini.DESCRIZIONE, "Descrizione", 40, false, null, L + Listini.DESCRIZIONE),
+                    new ColonnaLista(Costruttori.RAGIONE_SOCIALE, "Costruttore", 18, false, riga -> {
+                        String rs = riga.getAsString(Costruttori.RAGIONE_SOCIALE);
+                        return rs != null ? rs : "";
+                    }, C + Costruttori.RAGIONE_SOCIALE),
+                    new ColonnaLista(Linee.NOME_LINEA, "Linea", 14, false, null, Linee.NOME_TABELLA + "." + Linee.NOME_LINEA),
+                    ColonnaLista.importo(Listini.PRZ_LISTINO, "Listino €", 12, L + Listini.PRZ_LISTINO));
         }
 
         @Override
-        public EconListViewAdapter creaAdapterPersonalizzato(android.content.Context context, ArrayList<Object> dati) {
-            return new CodiciArticoliAdapter(context, dati, R.layout.list_item_codice_articolo);
+        public void azzeraFiltri() {
+            campoFornitore.setText("");
+            spinnerLinea.setValue("");
+            aggiornaLinee(0);
         }
 
         @Override
@@ -225,15 +252,20 @@ public class CodiciArticoliActivity extends EconListaStandardActivity {
         }
 
         @Override
+        public int getRisultatiPerPaginaDefault() {
+            return ULTIMI;
+        }
+
+        @Override
         public String getOrdineRecenti() {
-            return Listini.NOME_TABELLA + "." + Listini.DATA_MOD + " is null asc, "
-                    + Listini.NOME_TABELLA + "." + Listini.DATA_MOD + " desc, "
-                    + Listini.NOME_TABELLA + "." + Listini.DATA_INS + " desc";
+            // ultima scrittura: modifica, o inserimento se mai modificato (con "data_mod is null" in fondo un articolo
+            // appena inserito finirebbe dopo tutti quelli modificati)
+            return "coalesce(" + L + Listini.DATA_MOD + ", " + L + Listini.DATA_INS + ") desc, " + L + Listini.ID + " desc";
         }
 
         @Override
         public String getTitolo() {
-            return "Codici articoli";
+            return "Articoli";
         }
 
         @Override

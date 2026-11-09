@@ -92,7 +92,17 @@ public abstract class EconListaStandardDefinition {
         void onClick(ContentValues riga);
     }
 
-    /** Order by SQL usato quando e' attivo "ultimi N". Null = disabilita quel pulsante. */
+    /**
+     * Reset filtri e "Ultimi N" svuotano il testo libero; i moduli con filtri in piu' (es. costruttore e linea negli
+     * Articoli) li svuotano qui, cosi' i due pulsanti fanno davvero quello che dicono.
+     */
+    public void azzeraFiltri() {
+    }
+
+    /**
+     * Order by SQL usato quando e' attivo "ultimi N". Null = disabilita quel pulsante. Il modulo puo' anche limitare la
+     * query agli ultimi N (costruisciQuery con ordinaPerRecenti = true), come gli Articoli.
+     */
     public String getOrdineRecenti() {
         return null;
     }

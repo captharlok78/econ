@@ -122,6 +122,7 @@
     <string name="centimetri_coda_utilizzatori">සෙ.මී. වලිගය භාවිතා කරන්නන්</string>
     <string name="centralino">සම්බන්ධතා ඒකකය</string>
     <string name="cerca">සෙවීම</string>
+    <string name="cerca_articolo">Cerca per codice, descrizione, barcode o costruttore</string>
     <string name="cerca_cliente">සමාගමේ නම හෝ ලිපිනය අනුව සොයන්න</string>
     <string name="cerca_cliente_2">පාරිභෝගිකයා විසින් සොයන්න</string>
     <string name="chiudi">වසන්න</string>

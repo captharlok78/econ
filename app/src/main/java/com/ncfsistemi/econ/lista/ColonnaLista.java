@@ -69,6 +69,14 @@ public class ColonnaLista {
         return colonna;
     }
 
+    /** Colonna di importi (es. prezzi): due decimali, vuota se il valore manca; nell'xls e' un numero vero. */
+    public static ColonnaLista importo(String campo, String label, int peso, String ordinamentoSql) {
+        ColonnaLista colonna = new ColonnaLista(campo, label, peso, false,
+                riga -> riga.getAsDouble(campo) != null ? formattaNumero(riga.getAsDouble(campo)) : "", ordinamentoSql);
+        colonna.numerica = true;
+        return colonna;
+    }
+
     public static String formattaNumero(Double valore) {
         return String.format(java.util.Locale.ITALY, "%,.2f", valore != null ? valore : 0d);
     }

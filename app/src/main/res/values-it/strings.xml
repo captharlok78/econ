@@ -125,6 +125,7 @@
     <string name="reset_filtri">Reset filtri</string>
     <string name="ultimi_gestiti">Ultimi 20</string>
     <string name="nessun_dato_trovato">Nessun dato trovato</string>
+    <string name="cerca_articolo">Cerca per codice, descrizione, barcode o costruttore</string>
     <string name="cerca_cliente">Cerca per rag. sociale o indirizzo</string>
     <string name="cerca_cliente_2">Cerca per cliente</string>
     <string name="chiudi">Chiudi</string>
@@ -221,7 +222,7 @@
     <string name="linea_standard">Linea standard</string>
     <string name="lista_componenti">Lista componenti</string>
     <string name="lista_elementi">Lista elementi</string>
-    <string name="listini">Listini</string>
+    <string name="listini">Articoli</string>
     <string name="locale">Locale</string>
     <string name="locale_elemento_collegato">Locale elem. collegato</string>
     <string name="locali_preferiti">Locali preferiti</string>
@@ -352,7 +353,7 @@
     <string name="title_activity_clienti">Clienti</string>
     <string name="title_activity_clienti_dettaglio">Dettaglio cliente</string>
     <string name="title_activity_clienti_dettaglio_mod">Dettaglio cliente</string>
-    <string name="title_activity_codici_articoli">Codici articoli</string>
+    <string name="title_activity_codici_articoli">Articoli</string>
     <string name="title_activity_componente_mod">ComponenteModActivity</string>
     <string name="title_activity_configurazione">Impostazioni</string>
     <string name="title_activity_costruttori_dettaglio">Dettaglio Fornitore</string>
