@@ -56,6 +56,8 @@ public final class FaIcone {
 	public static final String IMPOSTAZIONI = "\uf013"; // cog: preferenze
 	public static final String DITTA = "\uf1ad";        // building: dati della ditta
 	public static final String SCARICA = "\uf063";     // arrow-down: scarica da server
+	public static final String BARCODE = "\uf02a";     // barcode: legge il barcode con la fotocamera
+	public static final String FOTO = "\uf03e";        // image: foto dell'articolo
 	public static final String CARICA = "\uf062";      // arrow-up: carica su server
 	public static final String CALENDARIO = "\uf073";  // calendar-alt: calendario personale
 	public static final String ORE = "\uf017";         // clock: ore lavorate

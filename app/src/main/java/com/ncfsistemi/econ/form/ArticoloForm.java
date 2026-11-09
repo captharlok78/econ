@@ -46,15 +46,48 @@ public class ArticoloForm extends DefinizioneForm {
 				.icona(FaIcone.CODICE)
 				.testo(Listini.DESCRIZIONE, contesto.getString(R.string.descrizione)).max(255)
 				.ricerca(Listini.ID_COSTRUTTORE, contesto.getString(R.string.costruttore), new CostruttoriCollegati()).metaRiga()
-				.scelta(Listini.ID_LINEA, contesto.getString(R.string.linea), new Linee()).collegataA(Listini.ID_COSTRUTTORE).metaRiga();
+				.scelta(Listini.ID_LINEA, contesto.getString(R.string.linea), new Linee()).collegataA(Listini.ID_COSTRUTTORE).metaRiga()
+				// barcode: si scrive o si legge con la fotocamera (icona a destra del campo)
+				.testo(Listini.BARCODE, "Barcode").max(50).icona(FaIcone.BARCODE);
 		f.sezione(FaIcone.FATTURAZIONE, "Prezzi")
 				.numero(Listini.PRZ_ULTIMO_ACQUISTO, contesto.getString(R.string.prezzo_acquisto)).max(8).decimali(2).metaRiga()
 				.numero(Listini.PRZ_LISTINO, contesto.getString(R.string.prezzo_listino)).max(8).decimali(2).metaRiga()
 				.numero(Listini.SCONTO, contesto.getString(R.string.sconto)).max(6).decimali(2).icona(FaIcone.PERCENTUALE).metaRiga();
+		// foto: solo per gli articoli che ci sono sul server (id positivo), scaricata aprendo la scheda (FotoArticolo)
+		int id = ospite != null ? ospite.getIntent().getIntExtra("ID", 0) : 0;
+		if (id > 0) {
+			f.sezione(FaIcone.FOTO, "Foto").personalizzata(contenitore -> disegnaFoto(contenitore, id));
+		}
+	}
+
+	private void disegnaFoto(android.widget.LinearLayout contenitore, int id) {
+		android.widget.TextView stato = new android.widget.TextView(contesto);
+		stato.setText("Caricamento della foto…");
+		stato.setTextColor(0xFF888888);
+		stato.setPadding(0, 8, 0, 8);
+		android.widget.ImageView immagine = new android.widget.ImageView(contesto);
+		immagine.setAdjustViewBounds(true);
+		immagine.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);
+		int lato = Math.round(260 * contesto.getResources().getDisplayMetrics().density);
+		immagine.setMaxHeight(lato);
+		immagine.setVisibility(android.view.View.GONE);
+		contenitore.addView(stato);
+		contenitore.addView(immagine, new android.widget.LinearLayout.LayoutParams(
+				android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT));
+		com.ncfsistemi.econ.utils.FotoArticolo.carica(contesto, id, foto -> {
+			if (foto == null) {
+				stato.setText("Nessuna foto per questo articolo.");
+				return;
+			}
+			stato.setVisibility(android.view.View.GONE);
+			immagine.setImageBitmap(foto);
+			immagine.setVisibility(android.view.View.VISIBLE);
+		});
 	}
 
 	@Override
 	public void dopoCaricamento(Form f, ContentValues record, boolean nuovo) {
+		lettoreBarcode(f);
 		if (!nuovo) return;
 		int fornitore = ospite.getIntent().getIntExtra(Listini.ID_COSTRUTTORE, 0);
 		int linea = ospite.getIntent().getIntExtra(Listini.ID_LINEA, 0);
@@ -105,6 +138,17 @@ public class ArticoloForm extends DefinizioneForm {
 			if (nuovo) val.remove(Listini.ID_LINEA);
 			else val.put(Listini.ID_LINEA, 0);
 		}
+	}
+
+	/** Icona a destra del campo Barcode: legge il codice con la fotocamera e lo scrive nel campo. */
+	private void lettoreBarcode(Form f) {
+		Campo c = f.campo(Listini.BARCODE);
+		if (c == null || c.box == null || c.bloccato) return;
+		c.box.setEndIconMode(com.google.android.material.textfield.TextInputLayout.END_ICON_CUSTOM);
+		c.box.setEndIconDrawable(FaIcone.drawable(contesto, FaIcone.BARCODE, 22));
+		c.box.setEndIconContentDescription("Leggi il barcode con la fotocamera");
+		c.box.setEndIconOnClickListener(v -> com.ncfsistemi.econ.utils.LettoreBarcode.leggi(ospite,
+				codice -> f.imposta(Listini.BARCODE, codice)));
 	}
 
 	/** Id del costruttore Generico del catalogo generale, 0 se non c'e'. */

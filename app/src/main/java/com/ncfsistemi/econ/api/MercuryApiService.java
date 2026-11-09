@@ -67,6 +67,10 @@ public interface MercuryApiService {
     @GET("api/mobile/ditta/logo")
     Call<ResponseBody> getLogoDitta();
 
+    /** Foto di un articolo del listino della ditta (404 se non ne ha una): non viaggia nel catalogo, si scarica aprendo la scheda. */
+    @GET("api/mobile/catalogo/{id}/foto")
+    Call<ResponseBody> getFotoArticolo(@retrofit2.http.Path("id") int id);
+
     /** Moduli (voci di menu) abilitati per l'utente (richiede JWT valido) */
     @GET("api/auth/moduli")
     Call<ModuliResponse> getModuli();

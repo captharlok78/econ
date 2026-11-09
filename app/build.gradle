@@ -149,6 +149,10 @@ dependencies {
     // ── Librerie locali (POI + legacy) ────────────────────────────────────
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
+    // ── Lettura barcode con la fotocamera (Google Code Scanner) ────────────
+    // Interfaccia di Play Services: niente permesso fotocamera nell'app, il modulo si scarica al primo uso
+    implementation 'com.google.android.gms:play-services-code-scanner:16.1.0'
+
     // ── Annotazioni ────────────────────────────────────────────────────────
     implementation 'org.jetbrains:annotations:26.1.0'
 }
