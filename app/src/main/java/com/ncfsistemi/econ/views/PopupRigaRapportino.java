@@ -365,6 +365,10 @@ public class PopupRigaRapportino {
     // ── Articolo: listino filtrato per costruttore e linea ─────────────────────────────────────────────────────
 
     private void preparaArticolo(DbInterno db) {
+        // barcode: legge il codice, trova l'articolo e chiede conferma prima di metterlo nella riga
+        View pulsanteBarcode = vista.findViewById(R.id.buttonLeggiBarcode);
+        com.ncfsistemi.econ.utils.LettoreBarcode.collega((android.app.Activity) ctx, pulsanteBarcode, this::articoloDaBarcode);
+        if (pulsanteBarcode instanceof android.widget.Button) ((android.widget.Button) pulsanteBarcode).setText("Barcode");
         vista.findViewById(R.id.button_tab_listino).setOnClickListener(v -> mostraTab(false));
         vista.findViewById(R.id.button_tab_nuovo_articolo).setOnClickListener(v -> mostraTab(true));
         // la riga di un articolo gia' scelto si modifica dal listino: la tab del nuovo articolo e' per le righe nuove
@@ -445,6 +449,60 @@ public class PopupRigaRapportino {
                 mostraTestoAssistenza();
             }
         });
+    }
+
+    /**
+     * Barcode letto (pulsante Barcode della riga articolo): cerca gli articoli con quel barcode sul dispositivo. Nessuno =
+     * avviso; uno = chiede conferma; più di uno (stesso barcode su più articoli) = si sceglie dall'elenco. Confermato,
+     * l'articolo va nella riga come scelto dal Listino (riga dell'ordine proposta, assistenza, poi la quantità).
+     */
+    private void articoloDaBarcode(String codice) {
+        DbInterno db = new DbInterno(ctx);
+        List<CampoRicerca.Voce> trovati = new ArrayList<CampoRicerca.Voce>();
+        for (Object o : db.eseguiSelect("select l.*, k." + Costruttori.SIGLA_METEL + " as sigla_costruttore from "
+                + Listini.NOME_TABELLA + " l left join " + Costruttori.NOME_TABELLA + " k on k." + Costruttori.ID_COSTRUTTORE
+                + "=l." + Listini.ID_COSTRUTTORE + " where coalesce(l." + Listini.ID + ",0)<>0 and l." + Listini.BARCODE + "=?"
+                + " order by l." + Listini.CODICE_ARTICOLO + " limit 20", new String[]{codice})) {
+            ContentValues l = (ContentValues) o;
+            String sigla = RigheRapportino.testo(l, "sigla_costruttore");
+            trovati.add(new CampoRicerca.Voce(RigheRapportino.intero(l, Listini.ID), RigheRapportino.testo(l, Listini.CODICE_ARTICOLO)
+                    + (sigla.isEmpty() ? "" : " (" + sigla + ")") + " " + RigheRapportino.testo(l, Listini.DESCRIZIONE), l));
+        }
+        db.close();
+        if (trovati.isEmpty()) {
+            new androidx.appcompat.app.AlertDialog.Builder(ctx)
+                    .setTitle("Barcode " + codice)
+                    .setMessage("Nessun articolo con questo barcode. Puoi cercarlo dal Listino o crearlo con Nuovo articolo.")
+                    .setPositiveButton(android.R.string.ok, null)
+                    .show();
+            return;
+        }
+        if (trovati.size() == 1) {
+            CampoRicerca.Voce voce = trovati.get(0);
+            new androidx.appcompat.app.AlertDialog.Builder(ctx)
+                    .setTitle("Articolo trovato")
+                    .setMessage(voce.testo + "\n\nBarcode " + codice + "\n\nLo uso in questa riga?")
+                    .setPositiveButton("Usa articolo", (d, w) -> usaArticolo(voce))
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
+            return;
+        }
+        String[] testi = new String[trovati.size()];
+        for (int i = 0; i < testi.length; i++) testi[i] = trovati.get(i).testo;
+        new androidx.appcompat.app.AlertDialog.Builder(ctx)
+                .setTitle("Barcode " + codice + ": " + trovati.size() + " articoli")
+                .setItems(testi, (d, i) -> usaArticolo(trovati.get(i)))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    /** Mette l'articolo nella riga come se fosse stato scelto dal Listino. */
+    private void usaArticolo(CampoRicerca.Voce voce) {
+        mostraTab(false);
+        campoArticolo.seleziona(voce);
+        proponiRigaOrdine(RigheRapportino.testo(voce.dati, Listini.CODICE_ARTICOLO));
+        aggiornaAssistenza(voce.id, true);
+        editQuantita.requestFocus();
     }
 
     /**
