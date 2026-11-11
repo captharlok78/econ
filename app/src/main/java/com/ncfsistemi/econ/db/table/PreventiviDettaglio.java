@@ -1220,10 +1220,16 @@ public class PreventiviDettaglio extends AbstractTable {
 		ContentValues valUPd = getValoriLogModifica(db);
 		if (valLis != null) {
 
-			// calcolo il prezzo di vendita da prezzo listino con sconto
+			// prezzo di vendita proposto dal server (schema 44, D4: fisso, costo + ricarico, listino); senza, come prima:
+			// prezzo di listino con lo sconto
 			double przLis = valLis.getAsDouble(Listini.PRZ_LISTINO);
 			double sconto = valLis.getAsDouble(Listini.SCONTO);
 			double przVen = Utility.arrotonda(przLis - (przLis * sconto) / 100, 2);
+			if (Listini.prezzoVendita(valLis) > 0) {
+				przLis = Listini.prezzoVendita(valLis);
+				sconto = 0;
+				przVen = Utility.arrotonda(przLis, 2);
+			}
 
 			valUPd.put(PreventiviDettaglio.CODICE_ARTICOLO, valLis.getAsString(Listini.CODICE_ARTICOLO));
 			valUPd.put(PreventiviDettaglio.PREZZO_ACQ, valLis.getAsDouble(Listini.PRZ_ULTIMO_ACQUISTO));
@@ -1272,10 +1278,16 @@ public class PreventiviDettaglio extends AbstractTable {
 		ContentValues valUPd = getValoriLogModifica(db);
 		if (valLis != null) {
 
-			// calcolo il prezzo di vendita da prezzo listino con sconto
+			// prezzo di vendita proposto dal server (schema 44, D4: fisso, costo + ricarico, listino); senza, come prima:
+			// prezzo di listino con lo sconto
 			double przLis = valLis.getAsDouble(Listini.PRZ_LISTINO);
 			double sconto = valLis.getAsDouble(Listini.SCONTO);
 			double przVen = Utility.arrotonda(przLis - (przLis * sconto) / 100, 2);
+			if (Listini.prezzoVendita(valLis) > 0) {
+				przLis = Listini.prezzoVendita(valLis);
+				sconto = 0;
+				przVen = Utility.arrotonda(przLis, 2);
+			}
 
 			valUPd.put(PreventiviDettaglio.CODICE_ARTICOLO, valLis.getAsString(Listini.CODICE_ARTICOLO));
 			valUPd.put(PreventiviDettaglio.PREZZO_ACQ, valLis.getAsDouble(Listini.PRZ_ULTIMO_ACQUISTO));

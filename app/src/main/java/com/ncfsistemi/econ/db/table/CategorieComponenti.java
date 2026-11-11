@@ -11,6 +11,8 @@ public class CategorieComponenti extends AbstractTable {
 	public static final String NOME = "nome";
 	public static final String ICONA = "icona";
 	public static final String TIPO = "tipo";
+	/** Schema 44 (STUDIO_LISTINO_E_ARTICOLI.md §6.5, D8): famiglia degli articoli da proporre per i componenti della categoria. */
+	public static final String ID_FAMIGLIA = "id_famiglia";
 
 	public static final String PATH_ICONE = "icone_categorie_comp";
 
@@ -29,6 +31,7 @@ public class CategorieComponenti extends AbstractTable {
 		aggiungiCampo(NOME, TEXT);
 		aggiungiCampo(ICONA, TEXT);
 		aggiungiCampo(TIPO, TEXT);
+		aggiungiCampo(ID_FAMIGLIA, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

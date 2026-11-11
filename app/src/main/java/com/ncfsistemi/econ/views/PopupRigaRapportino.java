@@ -431,6 +431,7 @@ public class PopupRigaRapportino {
                     chiediAssociazione(voce, barcode);
                 }
                 proponiRigaOrdine(RigheRapportino.testo(voce.dati, Listini.CODICE_ARTICOLO));
+                proponiPrezzo(voce);
                 aggiornaAssistenza(voce.id, true);
                 editQuantita.requestFocus(); // scelto l'articolo si passa alla quantita'
             }
@@ -543,8 +544,19 @@ public class PopupRigaRapportino {
         mostraTab(false);
         campoArticolo.seleziona(voce);
         proponiRigaOrdine(RigheRapportino.testo(voce.dati, Listini.CODICE_ARTICOLO));
+        proponiPrezzo(voce);
         aggiornaAssistenza(voce.id, true);
         editQuantita.requestFocus();
+    }
+
+    /**
+     * Prezzo di vendita proposto (schema 44, STUDIO_LISTINO_E_ARTICOLI.md §6.3, D4): quello calcolato dal server (fisso,
+     * poi costo + ricarico, poi listino), solo a chi vede i prezzi e se il campo è vuoto.
+     */
+    private void proponiPrezzo(CampoRicerca.Voce voce) {
+        if (!contesto.vedePrezzi || voce == null || voce.dati == null || !editPrezzo.getText().toString().trim().isEmpty()) return;
+        double prezzo = numero(RigheRapportino.testo(voce.dati, Listini.PRZ_VENDITA));
+        if (prezzo > 0) editPrezzo.setText(formatta(prezzo));
     }
 
     /**

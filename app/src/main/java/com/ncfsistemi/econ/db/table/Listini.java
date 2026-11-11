@@ -34,6 +34,20 @@ public class Listini extends AbstractTable {
 	public static final String BARCODE_COSTRUTTORE = "barcode_costruttore";
 	/** Schema 43 (STUDIO_CODICE_ARTICOLO_DITTA.md §9): codice aziendale, lo calcola il server (anche per gli articoli del listino). */
 	public static final String CODICE_DITTA = "codice_ditta";
+	/** Schema 44 (STUDIO_LISTINO_E_ARTICOLI.md §6.3, D4): prezzo di vendita proposto, lo calcola il server (fisso, costo + ricarico, listino). */
+	public static final String PRZ_VENDITA = "prz_vendita";
+	/** Schema 44 (D8): famiglia dell'articolo, per proporre i componenti della categoria nella gestione elettrica. */
+	public static final String ID_FAMIGLIA = "id_famiglia";
+
+	/**
+	 * Prezzo di vendita proposto dal server (schema 44, D4), 0 se non c'è (catalogo di un server precedente): allora vale
+	 * la regola di prima (listino meno lo sconto).
+	 */
+	public static double prezzoVendita(android.content.ContentValues l) {
+		if (l == null) return 0;
+		Double v = l.getAsDouble(PRZ_VENDITA);
+		return v != null && v > 0 ? v : 0;
+	}
 
 	public Listini() {
 		setNomeTabella(NOME_TABELLA);
@@ -54,6 +68,8 @@ public class Listini extends AbstractTable {
 		aggiungiCampo(BARCODE_FORNITORE, TEXT);
 		aggiungiCampo(BARCODE_COSTRUTTORE, TEXT);
 		aggiungiCampo(CODICE_DITTA, TEXT);
+		aggiungiCampo(PRZ_VENDITA, NUMERIC);
+		aggiungiCampo(ID_FAMIGLIA, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

@@ -458,6 +458,11 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 								float prezzo_acq = recArticolo.getAsFloat(Listini.PRZ_ULTIMO_ACQUISTO);
 								float prezzo_vendita = recArticolo.getAsFloat(Listini.PRZ_LISTINO);
 								float sconto = recArticolo.getAsFloat(Listini.SCONTO);
+								// schema 44 (D4): prezzo di vendita proposto dal server, senza sconto
+								if (Listini.prezzoVendita(recArticolo) > 0) {
+									prezzo_vendita = (float) Listini.prezzoVendita(recArticolo);
+									sconto = 0;
+								}
 								String descrizione = recArticolo.getAsString(Listini.DESCRIZIONE);
 								ContentValues fakeDettaglioPreventivo = new ContentValues();
 								fakeDettaglioPreventivo.put(PreventiviDettaglio.ID_PREVENTIVO_DETTAGLIO, (1000000 + add_counter));

@@ -67,7 +67,7 @@ import com.ncfsistemi.econ.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECON.db";
 	public static final String DATABASE_NAME_ZIP = ".econ.db";
-	public static final int SCHEMA_VERSION = 43;
+	public static final int SCHEMA_VERSION = 44;
 
 	private Context cont = null;
 
@@ -535,6 +535,24 @@ public class DbInterno extends SQLiteOpenHelper {
 					db.execSQL("CREATE INDEX IF NOT EXISTS idx_listini_barcode_costruttore ON " + Listini.NOME_TABELLA + "(" + Listini.BARCODE_COSTRUTTORE + ")");
 				}
 				com.ncfsistemi.econ.utils.CatalogoLocale.cancella(getContext());
+			}
+		}
+		// Schema 44 (STUDIO_LISTINO_E_ARTICOLI.md §6.3/§6.5): prezzo di vendita proposto e famiglia degli articoli (catalogo
+		// riscaricato intero), famiglia delle categorie dei componenti (download completo una tantum).
+		if (oldVersion<44){
+			if (oldVersion<newVersion){
+				String[][] colonne = {
+						{Listini.NOME_TABELLA, Listini.PRZ_VENDITA, "NUMERIC DEFAULT 0"},
+						{Listini.NOME_TABELLA, Listini.ID_FAMIGLIA, "INTEGER DEFAULT 0"},
+						{CategorieComponenti.NOME_TABELLA, CategorieComponenti.ID_FAMIGLIA, "INTEGER DEFAULT 0"},
+				};
+				for (String[] c : colonne) {
+					if (!getTableColumns(db, c[0]).isEmpty() && !getTableColumns(db, c[0]).contains(c[1])) {
+						db.execSQL("ALTER TABLE " + c[0] + " ADD COLUMN " + c[1] + " " + c[2]);
+					}
+				}
+				com.ncfsistemi.econ.utils.CatalogoLocale.cancella(getContext());
+				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
 			}
 		}
 		// Schema 39 (STUDIO_ASSISTENZE_TEMPO.md §10): assistenza a tempo, articoli in assistenza e assistenze (sola lettura),

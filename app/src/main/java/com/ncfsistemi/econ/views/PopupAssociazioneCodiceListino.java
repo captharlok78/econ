@@ -25,6 +25,7 @@ import com.ncfsistemi.econ.R;
 import com.ncfsistemi.econ.adapters.PreventiviDettaglioAdapter;
 import com.ncfsistemi.econ.db.DbInterno;
 import com.ncfsistemi.econ.db.table.AssCodiciLinee;
+import com.ncfsistemi.econ.db.table.CategorieComponenti;
 import com.ncfsistemi.econ.db.table.Componenti;
 import com.ncfsistemi.econ.db.table.Costruttori;
 import com.ncfsistemi.econ.db.table.Elementi;
@@ -83,6 +84,15 @@ public class PopupAssociazioneCodiceListino implements DialogInterface.OnClickLi
 
 	}
 
+	/** D8: famiglia della categoria del componente (0 = nessuna): i suoi articoli si propongono per primi. */
+	private int idFamigliaCategoria = 0;
+
+	/** Ordine degli articoli: prima quelli della famiglia della categoria del componente, poi per codice. */
+	private String ordineFamiglia() {
+		return " order by " + (idFamigliaCategoria > 0 ? "case when " + Listini.ID_FAMIGLIA + "=" + idFamigliaCategoria + " then 0 else 1 end, " : "")
+				+ Listini.CODICE_ARTICOLO;
+	}
+
 	private void impostaCampi() {
 		vista.findViewById(R.id.textView_linea_originale).setVisibility(View.GONE);
 		// TODO Auto-generated method stub
@@ -105,6 +115,15 @@ public class PopupAssociazioneCodiceListino implements DialogInterface.OnClickLi
 			ContentValues where = new ContentValues();
 			where.put(Componenti.ID_COMPONENTE, val.getAsString(PreventiviDettaglio.ID_COMPONENTE));
 			valComponente = db.getRecord(tabComp, where);
+			// D8 (schema 44): famiglia degli articoli da proporre per la categoria del componente
+			if (valComponente != null) {
+				ArrayList<Object> cat = db.eseguiSelect("select " + CategorieComponenti.ID_FAMIGLIA + " from " + CategorieComponenti.NOME_TABELLA
+						+ " where " + CategorieComponenti.ID_CATEGORIA_COMPONENTE + "=" + valComponente.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE), null);
+				if (cat.size() > 0) {
+					Integer f = ((ContentValues) cat.get(0)).getAsInteger(CategorieComponenti.ID_FAMIGLIA);
+					idFamigliaCategoria = f != null ? f : 0;
+				}
+			}
 		}
 
 		if (idPlaccaModuli != 0) {
@@ -275,9 +294,9 @@ public class PopupAssociazioneCodiceListino implements DialogInterface.OnClickLi
 					}
 				}
 
-				ArrayList<Object> lista = db.eseguiSelect(SQL, null);
+				ArrayList<Object> lista = db.eseguiSelect(SQL + ordineFamiglia(), null);
 				if (!SQL_NO_LINEA.equals("")) {
-					ArrayList<Object> listaNoLinea = db.eseguiSelect(SQL_NO_LINEA, null);
+					ArrayList<Object> listaNoLinea = db.eseguiSelect(SQL_NO_LINEA + ordineFamiglia(), null);
 					if (listaNoLinea.size() > 0) {
 						for (int i = 0; i < listaNoLinea.size(); i++) {
 							ContentValues curr = (ContentValues) listaNoLinea.get(i);
