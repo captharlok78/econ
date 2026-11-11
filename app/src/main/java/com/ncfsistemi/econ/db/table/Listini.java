@@ -26,6 +26,14 @@ public class Listini extends AbstractTable {
 	/** 1 = proposto nella ricerca del listino; 0 = articolo usato solo nella riga in cui e' nato. */
 	public static final String NEL_LISTINO = "nel_listino";
 	public static final String ID_SETTORE = "id_settore";
+	/**
+	 * Schema 42 (STUDIO_BARCODE_ARTICOLI.md §4.2): BARCODE e' il barcode della ditta; quello del fornitore e quello del
+	 * costruttore (dal listino, o scritto dalla ditta se il listino non ce l'ha) nelle loro colonne.
+	 */
+	public static final String BARCODE_FORNITORE = "barcode_fornitore";
+	public static final String BARCODE_COSTRUTTORE = "barcode_costruttore";
+	/** Schema 43 (STUDIO_CODICE_ARTICOLO_DITTA.md §9): codice aziendale, lo calcola il server (anche per gli articoli del listino). */
+	public static final String CODICE_DITTA = "codice_ditta";
 
 	public Listini() {
 		setNomeTabella(NOME_TABELLA);
@@ -43,6 +51,9 @@ public class Listini extends AbstractTable {
 		aggiungiCampo(FOTO, TEXT);
 		aggiungiCampo(NEL_LISTINO, INTEGER);
 		aggiungiCampo(ID_SETTORE, INTEGER);
+		aggiungiCampo(BARCODE_FORNITORE, TEXT);
+		aggiungiCampo(BARCODE_COSTRUTTORE, TEXT);
+		aggiungiCampo(CODICE_DITTA, TEXT);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);
@@ -52,6 +63,23 @@ public class Listini extends AbstractTable {
 		// Schema 40 (STUDIO_PACCHETTI_LISTINI.md, L8): la chiave e' l'id del server, perche' lo stesso codice puo' essere di
 		// piu' costruttori. Gli articoli nati sul dispositivo hanno id negativo fino all'invio (come le altre tabelle).
 		aggiungiCampoChiave(ID);
+	}
+
+	/** Condizione "uno dei tre barcode e' ?" (con l'alias della tabella, es. "l."): tre parametri uguali. */
+	public static String condizioneBarcode(String alias) {
+		return "(" + alias + BARCODE + "=? or " + alias + BARCODE_FORNITORE + "=? or " + alias + BARCODE_COSTRUTTORE + "=?)";
+	}
+
+	/** Prefisso del codice aziendale della ditta ("2."), come sul server. */
+	public static String prefissoDitta() {
+		return com.ncfsistemi.econ.utils.Sessione.getDittaSelezionata() + ".";
+	}
+
+	/** Articolo del listino generale (non della ditta): sul dispositivo si cambiano solo i barcode. */
+	public static boolean isDelListino(ContentValues articolo) {
+		Integer id = articolo != null ? articolo.getAsInteger(ID) : null;
+		Integer ditta = articolo != null ? articolo.getAsInteger(ID_DITTA) : null;
+		return id != null && id > 0 && (ditta == null || ditta == 0);
 	}
 
 	/** Id per un articolo nuovo nato sul dispositivo: negativo, sotto il minimo gia' usato. */

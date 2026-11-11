@@ -85,8 +85,9 @@ public class CodiciArticoliActivity extends EconListaStandardActivity {
      */
     private void cercaBarcode(String codice) {
         com.ncfsistemi.econ.db.DbInterno db = new com.ncfsistemi.econ.db.DbInterno(this);
+        // uno dei tre barcode: della ditta, del fornitore, del costruttore (schema 42)
         ArrayList<Object> trovati = db.eseguiSelect("select " + Listini.ID + " from " + Listini.NOME_TABELLA + " where "
-                + Listini.BARCODE + " = ? limit 2", new String[]{codice});
+                + Listini.condizioneBarcode("") + " limit 2", new String[]{codice, codice, codice});
         db.close();
         campoFornitore.setText("");
         ((android.widget.EditText) findViewById(R.id.editText_filtra)).setText(codice);
@@ -188,7 +189,8 @@ public class CodiciArticoliActivity extends EconListaStandardActivity {
                     + Linee.NOME_TABELLA + "." + Linee.NOME_LINEA;
 
             QueryPagina like = FiltriHelper.likeMultiCampo(fromJoin, testoFiltro, L + Listini.CODICE_ARTICOLO, L + Listini.DESCRIZIONE,
-                    L + Listini.BARCODE, C + Costruttori.SIGLA_METEL, C + Costruttori.RAGIONE_SOCIALE);
+                    L + Listini.BARCODE, L + Listini.BARCODE_FORNITORE, L + Listini.BARCODE_COSTRUTTORE, L + Listini.CODICE_DITTA,
+                    C + Costruttori.SIGLA_METEL, C + Costruttori.RAGIONE_SOCIALE);
             List<String> args = new ArrayList<>(Arrays.asList(like.whereArgs));
             String where = "(" + like.whereSql + ")";
 

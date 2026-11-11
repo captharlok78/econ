@@ -31,6 +31,8 @@ public final class FunzionalitaApp {
     public static final String RAPPORTINI_MODIFICA = "RAPPORTINI.MODIFICA";
     public static final String RAPPORTINI_ALTRI = "RAPPORTINI.ALTRI";
     public static final String RAPPORTINI_COSTI = "RAPPORTINI.COSTI";
+    /** Netto d'acquisto e sconto degli articoli (senza, il server li manda a zero: STUDIO_LISTINO_E_ARTICOLI.md §6.2). */
+    public static final String LISTINI_COSTI = "LISTINI.COSTI";
     public static final String DASHBOARD_OGGI = "DASHBOARD.OGGI";
 
     public static final String CLIENTI = "CLIENTI";

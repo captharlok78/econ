@@ -67,7 +67,7 @@ import com.ncfsistemi.econ.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECON.db";
 	public static final String DATABASE_NAME_ZIP = ".econ.db";
-	public static final int SCHEMA_VERSION = 41;
+	public static final int SCHEMA_VERSION = 43;
 
 	private Context cont = null;
 
@@ -517,6 +517,23 @@ public class DbInterno extends SQLiteOpenHelper {
 		if (oldVersion<40){
 			if (oldVersion<newVersion){
 				ricostruisciListini40(db);
+				com.ncfsistemi.econ.utils.CatalogoLocale.cancella(getContext());
+			}
+		}
+		// dopo il 40, che rifà la tabella listini
+		// Schema 42 (STUDIO_BARCODE_ARTICOLI.md §4.2): tre barcode sull'articolo (BARCODE = della ditta). Schema 43
+		// (STUDIO_CODICE_ARTICOLO_DITTA.md §9): codice aziendale. Le colonne le riempie il server: catalogo riscaricato intero.
+		if (oldVersion<43){
+			if (oldVersion<newVersion){
+				java.util.List<String> colonneListini = getTableColumns(db, Listini.NOME_TABELLA);
+				if (!colonneListini.isEmpty()) {
+					for (String c : new String[]{Listini.BARCODE_FORNITORE, Listini.BARCODE_COSTRUTTORE, Listini.CODICE_DITTA}) {
+						if (!colonneListini.contains(c)) db.execSQL("ALTER TABLE " + Listini.NOME_TABELLA + " ADD COLUMN " + c + " TEXT");
+					}
+					db.execSQL("CREATE INDEX IF NOT EXISTS idx_listini_barcode ON " + Listini.NOME_TABELLA + "(" + Listini.BARCODE + ")");
+					db.execSQL("CREATE INDEX IF NOT EXISTS idx_listini_barcode_fornitore ON " + Listini.NOME_TABELLA + "(" + Listini.BARCODE_FORNITORE + ")");
+					db.execSQL("CREATE INDEX IF NOT EXISTS idx_listini_barcode_costruttore ON " + Listini.NOME_TABELLA + "(" + Listini.BARCODE_COSTRUTTORE + ")");
+				}
 				com.ncfsistemi.econ.utils.CatalogoLocale.cancella(getContext());
 			}
 		}

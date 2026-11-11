@@ -408,7 +408,9 @@ public class PopupRigaRapportino {
                         + " and coalesce(l." + Listini.NEL_LISTINO + ",1)=1"
                         + (costruttore > 0 ? " and l." + Listini.ID_COSTRUTTORE + "=" + costruttore : "")
                         + (linea > 0 ? " and l." + Listini.ID_LINEA + "=" + linea : "")
-                        + " and (l." + Listini.CODICE_ARTICOLO + " like " + like + " or l." + Listini.DESCRIZIONE + " like " + like + ")"
+                        + " and (l." + Listini.CODICE_ARTICOLO + " like " + like + " or l." + Listini.DESCRIZIONE + " like " + like
+                        + " or l." + Listini.CODICE_DITTA + " like " + like + " or l." + Listini.BARCODE + " like " + like
+                        + " or l." + Listini.BARCODE_FORNITORE + " like " + like + " or l." + Listini.BARCODE_COSTRUTTORE + " like " + like + ")"
                         + " order by l." + Listini.CODICE_ARTICOLO + ", k." + Costruttori.SIGLA_METEL + " limit 50", null)) {
                     ContentValues l = (ContentValues) o;
                     String sigla = costruttore > 0 ? "" : RigheRapportino.testo(l, "sigla_costruttore");
@@ -423,6 +425,11 @@ public class PopupRigaRapportino {
             @Override
             public void selezioneCambiata(CampoRicerca campo, CampoRicerca.Voce voce) {
                 if (voce == null) return;
+                if (barcodeDaAssociare != null) {
+                    String barcode = barcodeDaAssociare;
+                    barcodeDaAssociare = null;
+                    chiediAssociazione(voce, barcode);
+                }
                 proponiRigaOrdine(RigheRapportino.testo(voce.dati, Listini.CODICE_ARTICOLO));
                 aggiornaAssistenza(voce.id, true);
                 editQuantita.requestFocus(); // scelto l'articolo si passa alla quantita'
@@ -461,8 +468,8 @@ public class PopupRigaRapportino {
         List<CampoRicerca.Voce> trovati = new ArrayList<CampoRicerca.Voce>();
         for (Object o : db.eseguiSelect("select l.*, k." + Costruttori.SIGLA_METEL + " as sigla_costruttore from "
                 + Listini.NOME_TABELLA + " l left join " + Costruttori.NOME_TABELLA + " k on k." + Costruttori.ID_COSTRUTTORE
-                + "=l." + Listini.ID_COSTRUTTORE + " where coalesce(l." + Listini.ID + ",0)<>0 and l." + Listini.BARCODE + "=?"
-                + " order by l." + Listini.CODICE_ARTICOLO + " limit 20", new String[]{codice})) {
+                + "=l." + Listini.ID_COSTRUTTORE + " where coalesce(l." + Listini.ID + ",0)<>0 and " + Listini.condizioneBarcode("l.")
+                + " order by l." + Listini.CODICE_ARTICOLO + " limit 20", new String[]{codice, codice, codice})) {
             ContentValues l = (ContentValues) o;
             String sigla = RigheRapportino.testo(l, "sigla_costruttore");
             trovati.add(new CampoRicerca.Voce(RigheRapportino.intero(l, Listini.ID), RigheRapportino.testo(l, Listini.CODICE_ARTICOLO)
@@ -470,10 +477,21 @@ public class PopupRigaRapportino {
         }
         db.close();
         if (trovati.isEmpty()) {
+            // nessun articolo: si associa a uno esistente (diventa il barcode della ditta) o si crea l'articolo (STUDIO_BARCODE_ARTICOLI.md §4.1)
             new androidx.appcompat.app.AlertDialog.Builder(ctx)
                     .setTitle("Barcode " + codice)
-                    .setMessage("Nessun articolo con questo barcode. Puoi cercarlo dal Listino o crearlo con Nuovo articolo.")
-                    .setPositiveButton(android.R.string.ok, null)
+                    .setMessage("Nessun articolo con questo barcode.\n\nAssocia: cerca l'articolo nel Listino, il barcode diventa quello della tua azienda.\nNuovo articolo: lo crei con questo barcode.")
+                    .setPositiveButton("Associa a un articolo", (d, w) -> {
+                        barcodeDaAssociare = codice;
+                        mostraTab(false);
+                        campoArticolo.requestFocus();
+                        android.widget.Toast.makeText(ctx, "Cerca e scegli l'articolo a cui associare il barcode " + codice, android.widget.Toast.LENGTH_LONG).show();
+                    })
+                    .setNeutralButton("Nuovo articolo", (d, w) -> {
+                        mostraTab(true);
+                        ((EditText) vista.findViewById(R.id.edit_nuovo_barcode)).setText(codice);
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
                     .show();
             return;
         }
@@ -492,6 +510,30 @@ public class PopupRigaRapportino {
         new androidx.appcompat.app.AlertDialog.Builder(ctx)
                 .setTitle("Barcode " + codice + ": " + trovati.size() + " articoli")
                 .setItems(testi, (d, i) -> usaArticolo(trovati.get(i)))
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    /** Barcode letto e non trovato, in attesa che si scelga l'articolo a cui associarlo (null = nessuno). */
+    private String barcodeDaAssociare = null;
+
+    /** Chiede conferma e scrive il barcode come barcode della ditta dell'articolo scelto (si invia con la sincronizzazione). */
+    private void chiediAssociazione(CampoRicerca.Voce voce, String barcode) {
+        String attuale = RigheRapportino.testo(voce.dati, Listini.BARCODE);
+        new androidx.appcompat.app.AlertDialog.Builder(ctx)
+                .setTitle("Associa il barcode " + barcode)
+                .setMessage(voce.testo + (attuale.isEmpty() ? "" : "\n\nAl posto del barcode della tua azienda " + attuale + ".")
+                        + "\n\nAssocio il barcode a questo articolo?")
+                .setPositiveButton("Associa", (d, w) -> {
+                    DbInterno db = new DbInterno(ctx);
+                    ContentValues val = new ContentValues();
+                    val.put(Listini.BARCODE, barcode);
+                    ContentValues where = new ContentValues();
+                    where.put(Listini.ID, voce.id);
+                    new Listini().aggiornaRecord(db, val, where);
+                    db.close();
+                    android.widget.Toast.makeText(ctx, "Barcode " + barcode + " associato", android.widget.Toast.LENGTH_SHORT).show();
+                })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
@@ -607,6 +649,7 @@ public class PopupRigaRapportino {
         spinnerNuovoSettore = vista.findViewById(R.id.spinner_nuovo_settore);
         spinnerNuovoCostruttore = vista.findViewById(R.id.spinner_nuovo_costruttore);
         spinnerNuovaLinea = vista.findViewById(R.id.spinner_nuovo_linea);
+        ((TextView) vista.findViewById(R.id.text_nuovo_prefisso)).setText(Listini.prefissoDitta());
         vista.findViewById(R.id.sezione_nuovo_prezzo_vendita).setVisibility(contesto.vedePrezzi ? View.VISIBLE : View.INVISIBLE);
 
         // settore proposto: quello con piu' articoli nel listino della ditta (i suoi settori), altrimenti il primo
@@ -860,18 +903,25 @@ public class PopupRigaRapportino {
         return ((EditText) vista.findViewById(id)).getText().toString().trim();
     }
 
+    /** Codice del nuovo articolo senza il prefisso della ditta (anche se scritto), in maiuscolo. */
+    private String parteCodiceNuovo() {
+        String c = testoCampo(R.id.edit_nuovo_codice).toUpperCase(Locale.ITALY);
+        return c.startsWith(Listini.prefissoDitta()) ? c.substring(Listini.prefissoDitta().length()) : c;
+    }
+
     /** Controlli del nuovo articolo prima di crearlo; null se va bene. */
     private String controllaNuovoArticolo() {
         if (testoCampo(R.id.edit_nuovo_descrizione).isEmpty()) return "Scrivi la descrizione dell'articolo.";
         if (idScelto(spinnerNuovoSettore) == 0) return "Scegli il settore (o aggiungilo con +).";
         if (idScelto(spinnerNuovoCostruttore) == 0) return "Scegli il costruttore (o aggiungilo con +).";
         if (idScelto(spinnerNuovaLinea) == 0) return "Scegli la linea (o aggiungila con +).";
-        String codice = testoCampo(R.id.edit_nuovo_codice).toUpperCase(Locale.ITALY);
+        String codice = parteCodiceNuovo();
         if (!codice.isEmpty()) {
             DbInterno db = new DbInterno(ctx);
-            // lo stesso codice di un altro costruttore va bene (L8, schema 40)
-            ContentValues c = db.getRecord("select " + Listini.DESCRIZIONE + " from " + Listini.NOME_TABELLA + " where "
-                    + Listini.CODICE_ARTICOLO + "='" + codice.replace("'", "''") + "' and " + Listini.ID_COSTRUTTORE + "="
+            // lo stesso codice di un altro costruttore va bene (L8, schema 40); con o senza il prefisso della ditta
+            String q = codice.replace("'", "''");
+            ContentValues c = db.getRecord("select " + Listini.DESCRIZIONE + " from " + Listini.NOME_TABELLA + " where upper("
+                    + Listini.CODICE_ARTICOLO + ") in ('" + q + "', '" + Listini.prefissoDitta() + q + "') and " + Listini.ID_COSTRUTTORE + "="
                     + idScelto(spinnerNuovoCostruttore));
             db.close();
             if (c != null) return "Il codice " + codice + " c'è già nel listino (" + RigheRapportino.testo(c, Listini.DESCRIZIONE)
@@ -882,16 +932,14 @@ public class PopupRigaRapportino {
 
     /**
      * Crea l'articolo della ditta nel listino locale (id negativo, da inviare: in_server = 0) e ne ritorna l'id. Senza codice
-     * gliene da' uno "D<ditta>-<data e ora>". Si crea subito, anche se il rapportino poi non si salva.
+     * resta vuoto: il codice automatico lo da' il server. Si crea subito, anche se il rapportino poi non si salva.
      */
     private int creaNuovoArticolo() {
         DbInterno db = new DbInterno(ctx);
         int id = Listini.nuovoIdLocale(db);
-        String codice = testoCampo(R.id.edit_nuovo_codice).toUpperCase(Locale.ITALY);
-        if (codice.isEmpty()) {
-            codice = "D" + com.ncfsistemi.econ.utils.Sessione.getDittaSelezionata() + "-"
-                    + new java.text.SimpleDateFormat("yyMMddHHmmss", Locale.ITALY).format(new java.util.Date());
-        }
+        // codice aziendale con il prefisso della ditta; vuoto = automatico, lo da' il server alla sincronizzazione (schema 43)
+        String parte = parteCodiceNuovo();
+        String codice = parte.isEmpty() ? "" : Listini.prefissoDitta() + parte;
         Listini tab = new Listini();
         ContentValues v = tab.getValoriLogInserimento(db);
         v.put(Listini.ID, id);
