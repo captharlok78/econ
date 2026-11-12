@@ -1,15 +1,24 @@
 package com.ncfsistemi.econ;
 
 import android.app.Application;
+import android.content.Context;
 
 import com.ncfsistemi.econ.utils.Sessione;
 public class EconApplication extends Application {
+
+	private static Context contesto;
+
+	/** Contesto dell'applicazione, per chi non ne ha uno (es. utils.CategorieDisegno); null prima di onCreate. */
+	public static Context contesto() {
+		return contesto;
+	}
 
 	
 	@Override
 	public void onCreate() {
 		// TODO Auto-generated method stub
 		super.onCreate();
+		contesto = getApplicationContext();
 
 		Sessione.initIstanza();
 		// cartella privata dell'app per backup, esportazioni e piantine (SICUREZZA_E_PRIVACY.md, S5)

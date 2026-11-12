@@ -76,7 +76,10 @@ public class EconItemMenu extends RelativeLayout {
 				Bitmap bitmap = BitmapFactory.decodeFile(dirApp.getAbsolutePath() + File.separator + filename);
 				icona.setImageBitmap(bitmap);
 			} else {
-				icona.setImageDrawable(getResources().getDrawable(R.drawable.ic_launcher));
+				// icona arrivata dal server con la sync (STUDIO_DESIGN.md §8.5 A2)
+				Bitmap daDb = com.ncfsistemi.econ.utils.IconeDb.bitmap(getContext(), filename);
+				if (daDb != null) icona.setImageBitmap(daDb);
+				else icona.setImageDrawable(getResources().getDrawable(R.drawable.ic_launcher));
 			}
 
 		} catch (Exception e) {

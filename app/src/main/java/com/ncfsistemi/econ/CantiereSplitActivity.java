@@ -196,7 +196,8 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 		setContentView(R.layout.activity_cantiere_split);
 		cantiere = getIntent().getIntExtra(Cantieri.ID_CANTIERE, 0);
 		documenti = com.ncfsistemi.econ.utils.FunzionalitaApp.haPreventiviOOrdini(this);
-		elettrico = com.ncfsistemi.econ.utils.FunzionalitaApp.haModulo(this, com.ncfsistemi.econ.utils.FunzionalitaApp.ELETTRICO);
+		// struttura (unita', aree, locali) e piantine: con Elettro o con Design (STUDIO_DESIGN.md §8.5 A1)
+		elettrico = com.ncfsistemi.econ.utils.FunzionalitaApp.haModulo(this, com.ncfsistemi.econ.utils.FunzionalitaApp.STRUTTURA);
 		idPreventivoSelezionato = documenti ? getIntent().getIntExtra(Preventivi.ID_PREVENTIVO, 0) : 0;
 		// se non ho nessun preventivo seleionato prendo l'ultimo ordine ed eventualmente l'ultimo preventivo per
 		// questocantiere

@@ -15,6 +15,7 @@
         layout="@layout/sezione_standard" />
 
     <LinearLayout
+        android:id="@+id/campi_impianto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"

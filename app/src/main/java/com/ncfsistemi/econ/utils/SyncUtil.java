@@ -152,6 +152,7 @@ public final class SyncUtil {
         { "ditte_modelli_stampa",        "id" },
         { "ditte_articoli_assistenza",   "id" },
         { "assistenze",                  "id" },
+        { "icone",                       "id" },
     };
 
     /** Chiave primaria delle tabelle sola lettura, null per le altre. */

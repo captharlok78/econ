@@ -37,7 +37,7 @@ public class AreaDettaglioFragment extends EconSchedaFragment {
 	protected void dopoCaricamento(Form form, ContentValues record) {
 		if (record == null) return;
 
-		if (!FunzionalitaApp.puoModificare(getActivity(), FunzionalitaApp.ELETTRICO)) return;
+		if (!FunzionalitaApp.puoModificare(getActivity(), FunzionalitaApp.STRUTTURA)) return;
 		form.azione(0, FaIcone.MODIFICA, getString(R.string.modifica), x -> {
 			Intent intent = new Intent(getActivity(), AreaDettaglioModActivity.class);
 			intent.putExtra("ID", id());

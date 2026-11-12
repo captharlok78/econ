@@ -341,7 +341,7 @@ public class EconElementoElettrico extends AbstractEconElemento {
 		} else {
 			sfondo.setBackgroundResource(Utility.getIdSfondoDaCategoria(idCategoria));
 			//per le automazioni metto testo bianco sennò non si legge
-			if (idCategoria == 9) {
+			if (com.ncfsistemi.econ.utils.CategorieDisegno.classica(idCategoria) == com.ncfsistemi.econ.utils.CategorieDisegno.AUTOMAZIONI) {
 				testoNumeroView.setTextColor(Color.parseColor("#FFFFFF"));
 			}
 

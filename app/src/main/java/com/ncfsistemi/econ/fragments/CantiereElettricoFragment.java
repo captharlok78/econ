@@ -37,6 +37,11 @@ public class CantiereElettricoFragment extends EconFragment {
 
 		View impianto = v.findViewById(R.id.sezione_impianto);
 		SezioneStandard.imposta(impianto, FaIcone.IMPIANTO, "Linea e placca standard");
+		// linea e placca sono della gestione elettrica: con il solo Design non si vedono
+		if (!FunzionalitaApp.haModulo(getActivity(), FunzionalitaApp.ELETTRICO)) {
+			impianto.setVisibility(View.GONE);
+			v.findViewById(R.id.campi_impianto).setVisibility(View.GONE);
+		}
 		// linea e placca sono campi del cantiere: servono la modifica del cantiere e quella della gestione elettrica
 		if (FunzionalitaApp.puoModificare(getActivity(), FunzionalitaApp.CANTIERI)
 				&& FunzionalitaApp.puoModificare(getActivity(), FunzionalitaApp.ELETTRICO)) {

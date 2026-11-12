@@ -37,7 +37,7 @@ public class LocaleDettaglioFragment extends EconSchedaFragment {
 	protected void dopoCaricamento(Form form, ContentValues record) {
 		if (record == null) return;
 		titolo(record.getAsString(Locali.NOME));
-		if (!FunzionalitaApp.puoModificare(getActivity(), FunzionalitaApp.ELETTRICO)) return;
+		if (!FunzionalitaApp.puoModificare(getActivity(), FunzionalitaApp.STRUTTURA)) return;
 		form.azione(0, FaIcone.MODIFICA, getString(R.string.modifica), x -> {
 			Intent intent = new Intent(getActivity(), LocaleDettaglioModActivity.class);
 			intent.putExtra("ID", id());

@@ -43,6 +43,13 @@ public final class FunzionalitaApp {
     public static final String RAPPORTINI = "RAPPORTINI";
     /** Gestione elettrica del cantiere (unita', aree, locali, associazioni): pacchetto a parte (GESTIONE_ELETTRICA.md). */
     public static final String ELETTRICO = "ELETTRICO";
+    /** Disegno del cantiere (piantine, elementi, collegamenti, relazioni): pacchetto Design (STUDIO_DESIGN.md). */
+    public static final String DESIGN = "DESIGN";
+    /**
+     * Struttura del cantiere (unita', aree, locali): con Elettro o con Design, "uno dei moduli" come sul server
+     * (MobileSyncController::CRUD_PER_TABELLA). Vale per haModulo, ha e codice.
+     */
+    public static final String STRUTTURA = ELETTRICO + "|" + DESIGN;
 
     public static final String CREA = "CREA";
     public static final String MODIFICA = "MODIFICA";
@@ -57,7 +64,12 @@ public final class FunzionalitaApp {
      */
     public static boolean haModulo(Context ctx, String modulo) {
         TokenManager tm = TokenManager.getInstance(ctx);
-        return tm.moduliMaiRicevuti() || tm.getModuli().contains(modulo);
+        if (tm.moduliMaiRicevuti()) return true;
+        java.util.List<String> moduli = tm.getModuli();
+        for (String m : modulo.split("\\|")) {
+            if (moduli.contains(m)) return true;
+        }
+        return false;
     }
 
     /** Preventivi o ordini nell'app: senza nessuno dei due la scheda del cantiere non mostra la scelta del documento. */
@@ -65,13 +77,23 @@ public final class FunzionalitaApp {
         return haModulo(ctx, PREVENTIVI) || haModulo(ctx, ORDINI);
     }
 
+    /** Funzionalita' concessa; con "A.X|B.X" basta una delle due. */
     public static boolean ha(Context ctx, String codice) {
-        return TokenManager.getInstance(ctx).haFunzionalita(codice);
+        TokenManager tm = TokenManager.getInstance(ctx);
+        for (String c : codice.split("\\|")) {
+            if (tm.haFunzionalita(c)) return true;
+        }
+        return false;
     }
 
-    /** "MODULO.AZIONE" (es. CLIENTI.MODIFICA). */
+    /** "MODULO.AZIONE" (es. CLIENTI.MODIFICA); per STRUTTURA "ELETTRICO.MODIFICA|DESIGN.MODIFICA". */
     public static String codice(String modulo, String azione) {
-        return modulo + "." + azione;
+        StringBuilder sb = new StringBuilder();
+        for (String m : modulo.split("\\|")) {
+            if (sb.length() > 0) sb.append('|');
+            sb.append(m).append('.').append(azione);
+        }
+        return sb.toString();
     }
 
     /**
@@ -83,7 +105,8 @@ public final class FunzionalitaApp {
         if (tabella instanceof Cantieri) return CANTIERI;
         if (tabella instanceof Listini) return LISTINI;
         if (tabella instanceof Rapportini) return RAPPORTINI;
-        if (tabella instanceof Unita || tabella instanceof Aree || tabella instanceof Locali || tabella instanceof Relazioni) return ELETTRICO;
+        if (tabella instanceof Unita || tabella instanceof Aree || tabella instanceof Locali) return STRUTTURA;
+        if (tabella instanceof Relazioni) return DESIGN;
         if (tabella instanceof Preventivi) {
             String tipo = record != null ? record.getAsString(Preventivi.TIPO) : null;
             return moduloPreventivo(tipo);

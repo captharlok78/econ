@@ -61,7 +61,8 @@ public class CantierePagerFragment extends EconFragment {
 			Locale l = Locale.getDefault();
 			switch (linguette.get(position)) {
 			case ELETTRICO:
-				return getString(R.string.gestione_elettrica).toUpperCase(l);
+				return (FunzionalitaApp.haModulo(getActivity(), FunzionalitaApp.ELETTRICO)
+						? getString(R.string.gestione_elettrica) : getString(R.string.disegno)).toUpperCase(l);
 			case RAPPORTINI:
 				return getString(R.string.rapportini).toUpperCase(l);
 			case MATERIALI:
@@ -78,7 +79,8 @@ public class CantierePagerFragment extends EconFragment {
 		View v = inflater.inflate(R.layout.fragment_cantiere_pager, container, false);
 		linguette.clear();
 		linguette.add(DATI);
-		if (FunzionalitaApp.haModulo(getActivity(), FunzionalitaApp.ELETTRICO)) {
+		// con Design senza Elettro la linguetta e' "Disegno": le relazioni, senza linea e placca (STUDIO_DESIGN.md §8.5 A1)
+		if (FunzionalitaApp.haModulo(getActivity(), FunzionalitaApp.ELETTRICO) || FunzionalitaApp.haModulo(getActivity(), FunzionalitaApp.DESIGN)) {
 			linguette.add(ELETTRICO);
 		}
 		if (FunzionalitaApp.haModulo(getActivity(), FunzionalitaApp.RAPPORTINI)) {

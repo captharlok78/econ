@@ -133,6 +133,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "unita_misura",             "Unità di misura" },
         { "relazioni",                "Relazioni" },
         { "collegamenti",             "Collegamenti" },
+        // icone del disegno (schema 45, STUDIO_DESIGN.md §8.5 A2)
+        { "icone",                    "Icone" },
     };
 
     /** Tabelle scaricate dal server (senza la voce dei dati ditta, che non e' una tabella): utils.DatiLocali. */
@@ -830,6 +832,9 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             applicaTabella(sqliteDb, nome, dl);
         }
         db.close();
+        // icone e categorie del disegno possono essere cambiate (STUDIO_DESIGN.md §8.5)
+        com.ncfsistemi.econ.utils.IconeDb.azzera();
+        com.ncfsistemi.econ.utils.CategorieDisegno.azzera();
 
         sincronizzaDitta(api);
         allineaCatalogo(api);

@@ -989,7 +989,9 @@ public class Utility {
 				Bitmap bitmap = BitmapFactory.decodeFile(dirApp.getAbsolutePath() + File.separator + icona);
 				return bitmap;
 			} else {
-				return BitmapFactory.decodeResource(cont.getResources(), R.drawable.no_image);
+				// icona arrivata dal server con la sync (STUDIO_DESIGN.md §8.5 A2)
+				Bitmap daDb = IconeDb.bitmap(cont, icona);
+				return daDb != null ? daDb : BitmapFactory.decodeResource(cont.getResources(), R.drawable.no_image);
 
 			}
 
@@ -1021,7 +1023,9 @@ public class Utility {
 
                 return bitmap;
             } else {
-                return BitmapFactory.decodeResource(cont.getResources(), R.drawable.no_image);
+                Bitmap daDb = IconeDb.bitmap(cont, icona);
+                return daDb != null ? ThumbnailUtils.extractThumbnail(daDb, larghezza, altezza)
+                        : BitmapFactory.decodeResource(cont.getResources(), R.drawable.no_image);
 
             }
 
@@ -1413,8 +1417,9 @@ public class Utility {
 
     }
 
+	/** Colore della categoria dell'elemento, riconosciuta per nome anche con id nuovi (CategorieDisegno, §8.5 A3). */
 	public static String getColoreCategoria(int idCategoria) {
-		// TODO Auto-generated method stub
+		idCategoria = CategorieDisegno.classica(idCategoria);
 		if (idCategoria == 1) {
 			return EconElementoElettrico.COLORE_PRESE;
 		}
@@ -1454,6 +1459,7 @@ public class Utility {
 	}
 
 	public static int getIdSfondoDaCategoria(int idCategoria) {
+		idCategoria = CategorieDisegno.classica(idCategoria);
 		if (idCategoria == 1) {
 			// return EconElementoElettrico.COLORE_PRESE;
 			return R.drawable.elemento_cat_prese;

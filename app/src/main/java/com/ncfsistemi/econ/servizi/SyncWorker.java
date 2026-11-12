@@ -159,6 +159,8 @@ public class SyncWorker extends Worker {
             MercuryApiService.SyncDownloadResponse dl;
             try (com.ncfsistemi.econ.api.DownloadSync scaricato = com.ncfsistemi.econ.api.DownloadSync.leggi(ctx, dlResp.body())) {
                 applyDownloadedData(ctx, scaricato);
+                com.ncfsistemi.econ.utils.IconeDb.azzera();
+                com.ncfsistemi.econ.utils.CategorieDisegno.azzera();
                 dl = scaricato.comeRisposta(); // timestamp e perimetro, senza le tabelle
             }
 

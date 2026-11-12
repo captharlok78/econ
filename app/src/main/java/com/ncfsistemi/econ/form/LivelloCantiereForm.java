@@ -46,7 +46,7 @@ public abstract class LivelloCantiereForm extends DefinizioneForm {
 
 	@Override
 	public String moduloFunzionalita() {
-		return FunzionalitaApp.ELETTRICO;
+		return FunzionalitaApp.STRUTTURA;
 	}
 
 	@Override

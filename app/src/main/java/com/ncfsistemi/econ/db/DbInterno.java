@@ -67,7 +67,7 @@ import com.ncfsistemi.econ.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECON.db";
 	public static final String DATABASE_NAME_ZIP = ".econ.db";
-	public static final int SCHEMA_VERSION = 44;
+	public static final int SCHEMA_VERSION = 45;
 
 	private Context cont = null;
 
@@ -146,6 +146,7 @@ public class DbInterno extends SQLiteOpenHelper {
 		db.execSQL(new IconeModificate().getSQL_create());
 		creaTabelleGiustificativi(db);
 		creaTabelleAssistenze(db);
+		creaTabellaIcone(db);
 
 		db.execSQL("VACUUM");
 
@@ -210,6 +211,7 @@ public class DbInterno extends SQLiteOpenHelper {
 		db.execSQL(new IconeModificate().getSQL_create());
 		creaTabelleGiustificativi(db);
 		creaTabelleAssistenze(db);
+		creaTabellaIcone(db);
 
 		/**
 		 * Inserimento dati di default
@@ -555,11 +557,20 @@ public class DbInterno extends SQLiteOpenHelper {
 				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
 			}
 		}
+		// Schema 45 (STUDIO_DESIGN.md §8.5 A2): icone del disegno dal server. Le icone sono nate sul server prima dell'ultima
+		// sync, quindi il delta non le porterebbe: download completo una tantum.
+		if (oldVersion<45){
+			if (oldVersion<newVersion){
+				creaTabellaIcone(db);
+				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
+			}
+		}
 		// Schema 39 (STUDIO_ASSISTENZE_TEMPO.md §10): assistenza a tempo, articoli in assistenza e assistenze (sola lettura),
 		// controlli segnati nei rapportini, mesi e testo sulle righe. Download completo una tantum per le assistenze gia' nate.
 		if (oldVersion<39){
 			if (oldVersion<newVersion){
 				creaTabelleAssistenze(db);
+		creaTabellaIcone(db);
 				String[][] colonne = {
 						{RapportiniDettaglio.NOME_TABELLA, RapportiniDettaglio.MESI_ASSISTENZA, "INTEGER DEFAULT 0"},
 						{RapportiniDettaglio.NOME_TABELLA, RapportiniDettaglio.TESTO_ASSISTENZA, "TEXT"},
@@ -795,6 +806,12 @@ public class DbInterno extends SQLiteOpenHelper {
 		db.execSQL(new com.ncfsistemi.econ.db.table.DitteArticoliAssistenza().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
 		db.execSQL(new com.ncfsistemi.econ.db.table.Assistenze().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
 		db.execSQL(new com.ncfsistemi.econ.db.table.AssistenzeControlli().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
+	}
+
+	/** Icone del disegno scaricate dal server (schema 45, STUDIO_DESIGN.md §5.2). */
+	private static void creaTabellaIcone(SQLiteDatabase db) {
+		db.execSQL(new com.ncfsistemi.econ.db.table.Icone().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
+		db.execSQL("CREATE INDEX IF NOT EXISTS idx_icone_nome ON " + com.ncfsistemi.econ.db.table.Icone.NOME_TABELLA + "(" + com.ncfsistemi.econ.db.table.Icone.NOME + ")");
 	}
 
 	/** Giustificativi della persona e loro tipologie (schema 38). */
