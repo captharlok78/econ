@@ -148,17 +148,19 @@ public class SyncWorker extends Worker {
 
             Log.i(TAG, "Avvio sync delta, since=" + since);
 
-            // 1. Scarica modifiche dal server
-            Response<MercuryApiService.SyncDownloadResponse> dlResp =
-                    api.syncDownload(since).execute();
+            // 1. Scarica modifiche dal server: letto a pezzi (DownloadSync), con lo storico del disegno sono decine di MB
+            Response<okhttp3.ResponseBody> dlResp = api.syncDownloadFlusso(since).execute();
 
             if (!dlResp.isSuccessful() || dlResp.body() == null) {
                 Log.e(TAG, "Download fallito: " + dlResp.code());
                 return Result.retry();
             }
 
-            MercuryApiService.SyncDownloadResponse dl = dlResp.body();
-            applyDownloadedData(ctx, dl);
+            MercuryApiService.SyncDownloadResponse dl;
+            try (com.ncfsistemi.econ.api.DownloadSync scaricato = com.ncfsistemi.econ.api.DownloadSync.leggi(ctx, dlResp.body())) {
+                applyDownloadedData(ctx, scaricato);
+                dl = scaricato.comeRisposta(); // timestamp e perimetro, senza le tabelle
+            }
 
             // 1b. Dati ditta e logo: scaricati solo se diversi da quelli locali. Un errore qui non ferma la sync.
             try {
@@ -230,36 +232,39 @@ public class SyncWorker extends Worker {
 
     // ── Download ────────────────────────────────────────────────────────────
 
-    private void applyDownloadedData(Context ctx, MercuryApiService.SyncDownloadResponse dl) {
-        if (dl.tables == null || dl.tables.isEmpty()) return;
+    /** Applica il download tabella per tabella a blocchi, in un'unica transazione come prima. */
+    private void applyDownloadedData(Context ctx, com.ncfsistemi.econ.api.DownloadSync dl) throws java.io.IOException {
+        if (dl.totale() == 0) return;
 
         SQLiteDatabase db = new DbInterno(ctx).getWritableDatabase();
         try {
             db.beginTransaction();
             try {
-                for (Map.Entry<String, List<JsonObject>> entry : dl.tables.entrySet()) {
-                    String nomeTabella = entry.getKey();
-                    List<JsonObject> records = entry.getValue();
-                    if (records == null || records.isEmpty()) continue;
-                    SyncUtil.svuotaSeElencoCompleto(db, nomeTabella, records);
+                for (String nomeTabella : dl.tabelle()) {
+                    if (dl.conta(nomeTabella) == 0) continue;
                     if (SyncUtil.TABELLA_OPERATORI.equals(nomeTabella)) {
+                        List<JsonObject> records = dl.tutte(nomeTabella);
+                        SyncUtil.svuotaSeElencoCompleto(db, nomeTabella, records);
                         SyncUtil.applicaOperatori(db, records);
                         continue;
                     }
 
                     String pkCol = getPkCol(nomeTabella);
-                    for (JsonObject record : records) {
-                        ContentValues cv = jsonToContentValues(record);
-                        // record modificato in locale e non ancora inviato: lo carica l'upload, non va sovrascritto
-                        if (SyncUtil.isModificatoInLocale(db, nomeTabella, pkCol, cv)) continue;
-                        cv.put("in_server", 1);
-                        SyncUtil.normalizzaDate(cv);
-                        SyncUtil.rimuoviColonneSconosciute(db, nomeTabella, cv);
-                        SyncUtil.normalizzaNulli(db, nomeTabella, cv);
-                        db.insertWithOnConflict(nomeTabella, null, cv,
-                                SQLiteDatabase.CONFLICT_REPLACE);
-                    }
-                    Log.d(TAG, "Applicati " + records.size() + " record in " + nomeTabella);
+                    dl.perBlocchi(nomeTabella, com.ncfsistemi.econ.api.DownloadSync.BLOCCO, (records, primo) -> {
+                        if (primo) SyncUtil.svuotaSeElencoCompleto(db, nomeTabella, records);
+                        for (JsonObject record : records) {
+                            ContentValues cv = jsonToContentValues(record);
+                            // record modificato in locale e non ancora inviato: lo carica l'upload, non va sovrascritto
+                            if (SyncUtil.isModificatoInLocale(db, nomeTabella, pkCol, cv)) continue;
+                            cv.put("in_server", 1);
+                            SyncUtil.normalizzaDate(cv);
+                            SyncUtil.rimuoviColonneSconosciute(db, nomeTabella, cv);
+                            SyncUtil.normalizzaNulli(db, nomeTabella, cv);
+                            db.insertWithOnConflict(nomeTabella, null, cv,
+                                    SQLiteDatabase.CONFLICT_REPLACE);
+                        }
+                    });
+                    Log.d(TAG, "Applicati " + dl.conta(nomeTabella) + " record in " + nomeTabella);
                 }
                 db.setTransactionSuccessful();
             } finally {

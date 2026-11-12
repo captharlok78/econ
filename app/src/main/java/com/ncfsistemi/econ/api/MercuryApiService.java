@@ -97,6 +97,14 @@ public interface MercuryApiService {
     Call<SyncDownloadResponse> syncDownload(@Query("since") String since);
 
     /**
+     * Stesso download letto come flusso, senza tenerlo in memoria: si apre con {@link DownloadSync#leggi}, che lo
+     * divide per tabella in file temporanei da applicare a blocchi (lo storico del disegno sono decine di MB).
+     */
+    @Streaming
+    @GET("api/mobile/sync/download")
+    Call<ResponseBody> syncDownloadFlusso(@Query("since") String since);
+
+    /**
      * Record eliminati sul server dopo `since`.
      * @param since ISO 8601
      */

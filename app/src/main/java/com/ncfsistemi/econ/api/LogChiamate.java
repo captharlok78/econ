@@ -28,6 +28,8 @@ final class LogChiamate implements Interceptor {
             return chain.proceed(chain.request());
         }
         String percorso = chain.request().url().encodedPath();
-        return percorso.contains("/api/auth/") ? soloTestate.intercept(chain) : completo.intercept(chain);
+        // auth: corpo con password e token; sync/download: decine di MB, letti a pezzi (DownloadSync) e mai in memoria
+        return percorso.contains("/api/auth/") || percorso.endsWith("/sync/download")
+                ? soloTestate.intercept(chain) : completo.intercept(chain);
     }
 }

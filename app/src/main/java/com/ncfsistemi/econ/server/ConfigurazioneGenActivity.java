@@ -218,30 +218,27 @@ public class ConfigurazioneGenActivity extends EconActivity {
 					);
 
 					// Tenta anche il download sync (dalla data 1970 per testare)
-					api.syncDownload("1970-01-01T00:00:00").enqueue(new Callback<MercuryApiService.SyncDownloadResponse>() {
-						@Override
-						public void onResponse(Call<MercuryApiService.SyncDownloadResponse> call2,
-											   Response<MercuryApiService.SyncDownloadResponse> r2) {
-							String syncMsg;
+					new Thread(() -> {
+						// letto a pezzi (DownloadSync): la risposta completa può essere di decine di MB
+						String syncMsg;
+						try {
+							retrofit2.Response<okhttp3.ResponseBody> r2 = api.syncDownloadFlusso("1970-01-01T00:00:00").execute();
 							if (r2.isSuccessful() && r2.body() != null) {
-								int totTabelle = r2.body().tables != null ? r2.body().tables.size() : 0;
-								syncMsg = "✓ Sync download OK\nTimestamp: " + r2.body().syncTimestamp
-										+ "\nTabelle ricevute: " + totTabelle;
+								try (com.ncfsistemi.econ.api.DownloadSync dl = com.ncfsistemi.econ.api.DownloadSync.leggi(ConfigurazioneGenActivity.this, r2.body())) {
+									syncMsg = "✓ Sync download OK\nTimestamp: " + dl.syncTimestamp
+											+ "\nTabelle ricevute: " + dl.tabelle().size() + " (" + dl.totale() + " righe)";
+								}
 							} else {
 								syncMsg = "✗ Sync download fallita: HTTP " + r2.code();
 							}
-							runOnUiThread(() ->
-								Utility.mostraDialog("Mercury — Sync", syncMsg, ConfigurazioneGenActivity.this, "OK")
-							);
+						} catch (Exception e) {
+							syncMsg = "✗ Sync download fallita: " + e.getMessage();
 						}
-
-						@Override
-						public void onFailure(Call<MercuryApiService.SyncDownloadResponse> call2, Throwable t) {
-							runOnUiThread(() ->
-								Utility.mostraDialog("Mercury — Sync fallita", t.getMessage(), ConfigurazioneGenActivity.this, "OK")
-							);
-						}
-					});
+						final String msgFinale = syncMsg;
+						runOnUiThread(() ->
+							Utility.mostraDialog("Mercury — Sync", msgFinale, ConfigurazioneGenActivity.this, "OK")
+						);
+					}).start();
 
 				} else {
 					String errMsg = "HTTP " + response.code();

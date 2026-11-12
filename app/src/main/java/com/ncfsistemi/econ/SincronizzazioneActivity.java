@@ -774,8 +774,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         String since = getLastSyncTimestamp();
         setStatus("Download da Mercury...", false);
 
-        Response<MercuryApiService.SyncDownloadResponse> resp =
-                api.syncDownload(since).execute();
+        // letto a pezzi (DownloadSync): con lo storico del disegno la risposta sono decine di MB
+        Response<okhttp3.ResponseBody> resp = api.syncDownloadFlusso(since).execute();
 
         if (!resp.isSuccessful() || resp.body() == null) {
             if (resp.code() == 401) {
@@ -790,18 +790,20 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             return;
         }
 
-        MercuryApiService.SyncDownloadResponse dl = resp.body();
-        Map<String, List<JsonObject>> tables = dl.tables;
+        setStatus("Ricezione dati...", false);
+        try (com.ncfsistemi.econ.api.DownloadSync dl = com.ncfsistemi.econ.api.DownloadSync.leggi(this, resp.body())) {
+            applicaDownload(api, since, dl);
+        }
+    }
 
+    private void applicaDownload(MercuryApiService api, String since, com.ncfsistemi.econ.api.DownloadSync dl) throws Exception {
         int totRec = 0;
-        if (tables != null) {
-            for (Map.Entry<String, List<JsonObject>> e : tables.entrySet()) {
-                RigaTabella riga = righe.get(e.getKey());
-                if (riga != null) {
-                    riga.total = e.getValue() != null ? e.getValue().size() : 0;
-                    totRec    += riga.total;
-                    aggiornaRiga(riga, riga.total > 0 ? STATO_PENDING : STATO_SALTO, 0, false);
-                }
+        for (String nome : dl.tabelle()) {
+            RigaTabella riga = righe.get(nome);
+            if (riga != null) {
+                riga.total = dl.conta(nome);
+                totRec    += riga.total;
+                aggiornaRiga(riga, riga.total > 0 ? STATO_PENDING : STATO_SALTO, 0, false);
             }
         }
         final int totRecFin = totRec;
@@ -816,19 +818,16 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         rilevaTabelleConInServer(sqliteDb);
         tabelleCompletate = 0;
 
-        if (tables != null) {
-            for (String[] entry : TABELLE) {
-                String           nome    = entry[0];
-                if (TABELLA_DITTA.equals(nome)) continue;
-                List<JsonObject> records = tables.get(nome);
-                RigaTabella      riga    = righe.get(nome);
-                if (records == null || records.isEmpty()) {
-                    if (riga != null) aggiornaRiga(riga, STATO_SALTO, 0, false);
-                    incrementaTabelleCompletate();
-                    continue;
-                }
-                applicaRecordTabella(sqliteDb, nome, records);
+        for (String[] entry : TABELLE) {
+            String      nome = entry[0];
+            if (TABELLA_DITTA.equals(nome)) continue;
+            RigaTabella riga = righe.get(nome);
+            if (dl.conta(nome) == 0) {
+                if (riga != null) aggiornaRiga(riga, STATO_SALTO, 0, false);
+                incrementaTabelleCompletate();
+                continue;
             }
+            applicaTabella(sqliteDb, nome, dl);
         }
         db.close();
 
@@ -850,8 +849,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         // Perimetro: toglie i dati usciti (disattivati, chiusi) e i documenti vecchi (ANAGRAFICHE_CODICI_E_SYNC.md)
         DbInterno dbPer = new DbInterno(this);
         try {
-            com.ncfsistemi.econ.utils.SyncUtil.applicaPerimetro(dbPer.getWritableDatabase(), dl);
-            com.ncfsistemi.econ.utils.SyncUtil.salvaGiorniStorico(this, dl);
+            com.ncfsistemi.econ.utils.SyncUtil.applicaPerimetro(dbPer.getWritableDatabase(), dl.comeRisposta());
+            com.ncfsistemi.econ.utils.SyncUtil.salvaGiorniStorico(this, dl.comeRisposta());
         } catch (Exception e) {
             Log.w(TAG, "Errore perimetro", e);
         } finally {
@@ -1258,67 +1257,41 @@ public class SincronizzazioneActivity extends AppCompatActivity {
 
     // ── Download helpers ──────────────────────────────────────────────────────
 
-    private void applicaRecordTabella(SQLiteDatabase db, String nomeTabella, List<JsonObject> records) {
+    /**
+     * Applica una tabella del download a blocchi ({@link com.ncfsistemi.econ.api.DownloadSync#BLOCCO} righe, una
+     * transazione per blocco): poca memoria anche con decine di migliaia di righe, e molto più veloce di una scrittura
+     * per riga. L'avanzamento si aggiorna a ogni blocco.
+     */
+    private void applicaTabella(SQLiteDatabase db, String nomeTabella, com.ncfsistemi.econ.api.DownloadSync dl) throws java.io.IOException {
         RigaTabella riga = righe.get(nomeTabella);
         if (riga == null) return;
         aggiornaRiga(riga, STATO_IN_CORSO, 0, false);
-        SyncUtil.svuotaSeElencoCompleto(db, nomeTabella, records);
         if (SyncUtil.TABELLA_OPERATORI.equals(nomeTabella)) {
             // operatori della ditta: aggiornamento dedicato (non sovrascrive le password dei vecchi utenti locali)
+            List<JsonObject> records = dl.tutte(nomeTabella);
+            SyncUtil.svuotaSeElencoCompleto(db, nomeTabella, records);
             int applicati = SyncUtil.applicaOperatori(db, records);
             aggiornaRiga(riga, STATO_FATTO, applicati, false);
             incrementaTabelleCompletate();
             return;
         }
         boolean haInServer = tabelleConInServer.contains(nomeTabella);
+        final int tot = dl.conta(nomeTabella);
+        final int[] fatti = {0};
 
-        for (int i = 0; i < records.size(); i++) {
+        dl.perBlocchi(nomeTabella, com.ncfsistemi.econ.api.DownloadSync.BLOCCO, (blocco, primo) -> {
+            db.beginTransaction();
             try {
-                JsonObject record = records.get(i);
-                android.content.ContentValues cv = jsonToContentValues(record);
-
-                // Catalogo eliminato da Mercury: cancella localmente invece di aggiornare
-                JsonElement statoEl = record.get("stato");
-                if (statoEl != null && !statoEl.isJsonNull() && "eliminato".equals(statoEl.getAsString())) {
-                    String pkColName = pkCol(nomeTabella);
-                    if (pkColName != null && cv.containsKey(pkColName)) {
-                        db.delete(nomeTabella, pkColName + " = ?",
-                            new String[]{cv.getAsString(pkColName)});
-                    } else if ("listini".equals(nomeTabella) && cv.containsKey("codice_articolo")) {
-                        db.delete("listini", "codice_articolo = ?",
-                            new String[]{cv.getAsString("codice_articolo")});
-                    }
-                    incrementaTabelleCompletate();
-                    continue;
+                if (primo) SyncUtil.svuotaSeElencoCompleto(db, nomeTabella, blocco);
+                for (JsonObject record : blocco) {
+                    applicaRecord(db, nomeTabella, record, haInServer, riga);
                 }
-
-                if (haInServer) {
-                    // Non sovrascrivere record modificati localmente (in_server=0): verranno caricati nell'upload
-                    String pkCol = pkCol(nomeTabella);
-                    if (pkCol != null && cv.containsKey(pkCol)) {
-                        long pkVal = cv.getAsLong(pkCol);
-                        boolean isDirty = false;
-                        try (Cursor ck = db.rawQuery(
-                                "SELECT in_server FROM " + nomeTabella + " WHERE " + pkCol + "=?",
-                                new String[]{String.valueOf(pkVal)})) {
-                            if (ck.moveToFirst() && ck.getInt(0) == 0) isDirty = true;
-                        }
-                        if (isDirty) {
-                            continue; // salta: il record locale ha modifiche non ancora uploadate
-                        }
-                    }
-                    cv.put("in_server", 1);
-                }
-                SyncUtil.normalizzaDate(cv);
-                SyncUtil.rimuoviColonneSconosciute(db, nomeTabella, cv);
-                SyncUtil.normalizzaNulli(db, nomeTabella, cv);
-                db.insertWithOnConflict(nomeTabella, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
-            } catch (Exception e) {
-                Log.w(TAG, "Errore inserimento " + nomeTabella + ": " + e.getMessage());
-                riga.errori++;
-                if (riga.errorMsg == null) riga.errorMsg = e.getMessage();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
             }
-            final int app = i + 1, tot = records.size();
+            fatti[0] += blocco.size();
+            final int app = fatti[0];
             uiHandler.post(() -> {
                 if (riga.tvCount    != null) riga.tvCount.setText(app + " / " + tot);
                 if (riga.progressBarra != null) {
@@ -1326,13 +1299,57 @@ public class SincronizzazioneActivity extends AppCompatActivity {
                     riga.progressBarra.setProgress(app);
                 }
             });
-        }
-        int ok = records.size() - riga.errori;
+        });
+        int ok = tot - riga.errori;
         aggiornaRiga(riga, riga.errori > 0 ? STATO_ERRORE : STATO_FATTO, ok, false);
         if (riga.errori > 0) {
             uiHandler.post(() -> riga.tvCount.setText(ok + " ✓  " + riga.errori + " ✗"));
         }
         incrementaTabelleCompletate();
+    }
+
+    private void applicaRecord(SQLiteDatabase db, String nomeTabella, JsonObject record, boolean haInServer, RigaTabella riga) {
+        try {
+            android.content.ContentValues cv = jsonToContentValues(record);
+
+            // Catalogo eliminato da Mercury: cancella localmente invece di aggiornare
+            JsonElement statoEl = record.get("stato");
+            if (statoEl != null && !statoEl.isJsonNull() && "eliminato".equals(statoEl.getAsString())) {
+                String pkColName = pkCol(nomeTabella);
+                if (pkColName != null && cv.containsKey(pkColName)) {
+                    db.delete(nomeTabella, pkColName + " = ?",
+                        new String[]{cv.getAsString(pkColName)});
+                } else if ("listini".equals(nomeTabella) && cv.containsKey("codice_articolo")) {
+                    db.delete("listini", "codice_articolo = ?",
+                        new String[]{cv.getAsString("codice_articolo")});
+                }
+                return;
+            }
+
+            if (haInServer) {
+                // Non sovrascrivere record modificati localmente (in_server=0): verranno caricati nell'upload
+                String pkCol = pkCol(nomeTabella);
+                if (pkCol != null && cv.containsKey(pkCol)) {
+                    long pkVal = cv.getAsLong(pkCol);
+                    try (Cursor ck = db.rawQuery(
+                            "SELECT in_server FROM " + nomeTabella + " WHERE " + pkCol + "=?",
+                            new String[]{String.valueOf(pkVal)})) {
+                        if (ck.moveToFirst() && ck.getInt(0) == 0) {
+                            return; // salta: il record locale ha modifiche non ancora uploadate
+                        }
+                    }
+                }
+                cv.put("in_server", 1);
+            }
+            SyncUtil.normalizzaDate(cv);
+            SyncUtil.rimuoviColonneSconosciute(db, nomeTabella, cv);
+            SyncUtil.normalizzaNulli(db, nomeTabella, cv);
+            db.insertWithOnConflict(nomeTabella, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+        } catch (Exception e) {
+            Log.w(TAG, "Errore inserimento " + nomeTabella + ": " + e.getMessage());
+            riga.errori++;
+            if (riga.errorMsg == null) riga.errorMsg = e.getMessage();
+        }
     }
 
     private void applicaEliminazioni(MercuryApiService.DeletedResponse resp) {
