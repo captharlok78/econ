@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ.fragments;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Color;
@@ -109,21 +110,21 @@ public class ComponentiCategoriaFragment extends EconFragment implements OnClick
 		}
 
 		String filtroPosti = "";
-		if (idCategoria == Componenti.COPRISCATOLA) {
+		if (CategorieDisegno.componente(idCategoria) == Componenti.COPRISCATOLA) {
 			int spazi_ospitati = getArguments().getInt(Componenti.SPAZI_OSPITATI);
 			if (spazi_ospitati > 0) {
 				filtroPosti = " and " + Componenti.SPAZI_OCCUPATI + "=" + spazi_ospitati;
 			}
 		}
 
-		if (idCategoria == Componenti.PORTAFRUTTI) {
+		if (CategorieDisegno.componente(idCategoria) == Componenti.PORTAFRUTTI) {
 			int spazi_ospitati = getArguments().getInt(Componenti.SPAZI_OSPITATI);
 			if (spazi_ospitati > 0) {
 				filtroPosti = " and " + Componenti.SPAZI_OSPITATI + "=" + spazi_ospitati;
 			}
 		}
 
-		if (idCategoria == Componenti.SCATOLE || idCategoria == Componenti.CENTRALINI) {
+		if (CategorieDisegno.componente(idCategoria) == Componenti.SCATOLE || CategorieDisegno.componente(idCategoria) == Componenti.CENTRALINI) {
 			int spazi_ospitati = getArguments().getInt(Componenti.SPAZI_OSPITATI);
 			if (spazi_ospitati > 0) {
 				filtroPosti = " and " + Componenti.SPAZI_OSPITATI + "=" + spazi_ospitati;

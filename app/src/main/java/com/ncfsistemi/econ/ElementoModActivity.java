@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -161,18 +162,18 @@ public class ElementoModActivity extends EconDettaglioActivity {
 
 		spinnerTubo = (EconSpinner) findViewById(R.id.econSpinner_tubo);
 		ContentValues filtroTubi = new ContentValues();
-		filtroTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.TUBI);
+		filtroTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.TUBI));
 		spinnerTubo.setFiltro(filtroTubi);
 		spinnerTubo.setTabella(new Elementi());
 
 		spinnerCavo = (EconSpinner) findViewById(R.id.econSpinner_cavo);
 		ContentValues filtroCavo = new ContentValues();
-		filtroCavo.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.CAVI);
+		filtroCavo.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.CAVI));
 		spinnerCavo.setFiltro(filtroCavo);
 		spinnerCavo.setTabella(new Elementi());
 
 		// nel caso di tubi o cavi nascondo i campi tubi cavi altezza icona e composizione
-		if (idCategoria == CategorieGenerali.CAVI || idCategoria == CategorieGenerali.TUBI) {
+		if (CategorieDisegno.classica(idCategoria) == CategorieGenerali.CAVI || CategorieDisegno.classica(idCategoria) == CategorieGenerali.TUBI) {
 			findViewById(R.id.linear_cavo).setVisibility(View.GONE);
 			findViewById(R.id.linear_tubo).setVisibility(View.GONE);
 			findViewById(R.id.linear_icona_composizione).setVisibility(View.GONE);
@@ -633,10 +634,10 @@ public class ElementoModActivity extends EconDettaglioActivity {
 									getIntent().putExtra("ID", id_elemenento_inserito);
 									setModalita(MODIFICA);
 									Class activityComposizione = ComposizioneLiberaActivity.class;
-									if (idCategoria == CategorieGenerali.QUADRI) {
+									if (CategorieDisegno.classica(idCategoria) == CategorieGenerali.QUADRI) {
 										activityComposizione = ComposizioneQuadroActivity.class;
 									}
-									if (idCategoria == CategorieGenerali.SCATOLE_PRESE || idCategoria==CategorieGenerali.SCATOLE_INTERRUTTORI) {
+									if (CategorieDisegno.classica(idCategoria) == CategorieGenerali.SCATOLE_PRESE || CategorieDisegno.classica(idCategoria)==CategorieGenerali.SCATOLE_INTERRUTTORI) {
 										activityComposizione = ComposizioneActivity.class;
 									}
 									Intent intent = new Intent(ElementoModActivity.this, activityComposizione);
@@ -651,10 +652,10 @@ public class ElementoModActivity extends EconDettaglioActivity {
 					});
 		} else {
 			Class activityComposizione = ComposizioneLiberaActivity.class;
-			if (idCategoria == CategorieGenerali.QUADRI) {
+			if (CategorieDisegno.classica(idCategoria) == CategorieGenerali.QUADRI) {
 				activityComposizione = ComposizioneQuadroActivity.class;
 			}
-			if (idCategoria == CategorieGenerali.SCATOLE_PRESE || idCategoria==CategorieGenerali.SCATOLE_INTERRUTTORI) {
+			if (CategorieDisegno.classica(idCategoria) == CategorieGenerali.SCATOLE_PRESE || CategorieDisegno.classica(idCategoria)==CategorieGenerali.SCATOLE_INTERRUTTORI) {
 				activityComposizione = ComposizioneActivity.class;
 			}
 			Intent intent = new Intent(ElementoModActivity.this, activityComposizione);

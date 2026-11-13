@@ -155,4 +155,7 @@ dependencies {
 
     // ── Annotazioni ────────────────────────────────────────────────────────
     implementation 'org.jetbrains:annotations:26.1.0'
+
+    // test JVM della logica senza interfaccia (STUDIO_DESIGN_GRAFICA.md §4.3)
+    testImplementation 'junit:junit:4.13.2'
 }

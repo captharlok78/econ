@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ.db.table;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import android.content.ContentValues;
 import android.content.Context;
 
@@ -399,7 +400,7 @@ public class Preventivi extends AbstractTable {
 				// saranno i collegamenti nell'ordine a conteggiare tubi e cavi
 				String idCatGen = rigaCurr.getAsString(Elementi.ID_CATEGORIA_GENERALE);
 				if (rigaCurr.getAsString(PreventiviDettaglio.TIPO).equals(PreventiviDettaglio.MATERIALE) && idCatGen != null) {
-					if (idCatGen.equals("" + CategorieGenerali.TUBI) || idCatGen.equals("" + CategorieGenerali.CAVI)) {
+					if (idCatGen.equals("" + CategorieDisegno.idElementi(CategorieGenerali.TUBI)) || idCatGen.equals("" + CategorieDisegno.idElementi(CategorieGenerali.CAVI))) {
 						continue;
 					}
 				}

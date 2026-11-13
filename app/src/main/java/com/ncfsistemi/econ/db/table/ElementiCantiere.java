@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ.db.table;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import android.content.ContentValues;
 
 import java.util.ArrayList;
@@ -613,7 +614,7 @@ public class ElementiCantiere extends AbstractTable {
 
 		if (escludiUtilizzatori){
             SQL = "Select " + getNomeCampoTabella("*") + " from " + NOME_TABELLA + j1.getSQLJoin() + j0.getSQLJoin()+ " where " + ID_LOCALE + "="
-                    + idLocale + " and (" + Preventivi.TIPO + " is null or " + Preventivi.TIPO + "='" + Preventivi.TIPO_ORDINE + "') and " + Elementi.ID_CATEGORIA_GENERALE+"<>"+CategorieGenerali.UTILIZZATORI + " order by "
+                    + idLocale + " and (" + Preventivi.TIPO + " is null or " + Preventivi.TIPO + "='" + Preventivi.TIPO_ORDINE + "') and " + Elementi.ID_CATEGORIA_GENERALE+"<>"+CategorieDisegno.idElementi(CategorieGenerali.UTILIZZATORI) + " order by "
                     + ElementiCantiere.NUMERO_IDENTIFICATIVO;
         }
         else{

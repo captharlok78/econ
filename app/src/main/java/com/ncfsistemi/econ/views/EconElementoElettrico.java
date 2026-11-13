@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ.views;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import androidx.appcompat.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -515,10 +516,10 @@ public class EconElementoElettrico extends AbstractEconElemento {
 		if (recordCat != null && recordCat.getAsInteger(CategorieGenerali.CONFIGURABILE_SN) == 1) {
 			// ComposizioneActivity
 			Class activityComposizione = ComposizioneLiberaActivity.class;
-			if (idCategoria == CategorieGenerali.QUADRI) {
+			if (CategorieDisegno.classica(idCategoria) == CategorieGenerali.QUADRI) {
 				activityComposizione = ComposizioneQuadroActivity.class;
 			}
-			if (idCategoria == CategorieGenerali.SCATOLE_PRESE || idCategoria == CategorieGenerali.SCATOLE_INTERRUTTORI) {
+			if (CategorieDisegno.classica(idCategoria) == CategorieGenerali.SCATOLE_PRESE || CategorieDisegno.classica(idCategoria) == CategorieGenerali.SCATOLE_INTERRUTTORI) {
 				activityComposizione = ComposizioneActivity.class;
 			}
 

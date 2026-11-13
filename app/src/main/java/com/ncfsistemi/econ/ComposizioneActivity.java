@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -299,15 +300,15 @@ public class ComposizioneActivity extends EconActivity implements OnItemClickLis
 			if (isComponenteAggiuntivoScatola(comp)){
 				continue;
 			}
-			if (comp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.SCATOLE) {
+			if (CategorieDisegno.componente(comp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.SCATOLE) {
 				System.out.println("Econ: ComposizioneActivity ricerca IS Componenti.SCATOLE");
 				componenteScatola = comp;
 			}
-			if (comp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.PORTAFRUTTI) {
+			if (CategorieDisegno.componente(comp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.PORTAFRUTTI) {
 				System.out.println("Econ: ComposizioneActivity ricerca IS Componenti.PORTAFRUTTI");
 				componentePortaFrutti = comp;
 			}
-			if (comp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.COPRISCATOLA) {
+			if (CategorieDisegno.componente(comp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.COPRISCATOLA) {
 				System.out.println("Econ: ComposizioneActivity ricerca IS Componenti.COPRISCATOLA");
 				componenteCopriScatola = comp;
 			}
@@ -324,7 +325,7 @@ public class ComposizioneActivity extends EconActivity implements OnItemClickLis
 				cvpf.put(Composizioni.MODULI_OCCUPATI, "");
 				cvpf.put(Componenti.NOME_COMPONENTE, "-");
 				cvpf.put(Componenti.ICONA, "");
-				cvpf.put(Componenti.ID_CATEGORIA_COMPONENTE, Componenti.PORTAFRUTTI);
+				cvpf.put(Componenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.PORTAFRUTTI));
 				componenti.add(1, cvpf);
 			}*/
 
@@ -334,7 +335,7 @@ public class ComposizioneActivity extends EconActivity implements OnItemClickLis
 				cvcs.put(Composizioni.MODULI_OCCUPATI, "");
 				cvcs.put(Componenti.NOME_COMPONENTE, "-");
 				cvcs.put(Componenti.ICONA, "");
-				cvcs.put(Componenti.ID_CATEGORIA_COMPONENTE, Componenti.COPRISCATOLA);
+				cvcs.put(Componenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.COPRISCATOLA));
 				componenteCopriScatola = cvcs;
 				componenti.add(1, cvcs);
 			}
@@ -573,7 +574,7 @@ public class ComposizioneActivity extends EconActivity implements OnItemClickLis
 	private void _selezionaScatola(boolean modifica,int numSpazi) {
 		System.out.println("Econ: ComposizioneActivity _selezionaScatola ENTER");
 		Intent intent = new Intent(this, FinestraComponentiActivity.class);
-		intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, Componenti.SCATOLE);
+		intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.SCATOLE));
 		if (idElemento != 0) {
 			intent.putExtra(Elementi.ID_ELEMENTO, idElemento);
 		}
@@ -760,19 +761,19 @@ public class ComposizioneActivity extends EconActivity implements OnItemClickLis
 
 				}
 
-				if (item.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.SCATOLE) {
+				if (CategorieDisegno.componente(item.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.SCATOLE) {
 					menu.add(Menu.NONE, 1, Menu.NONE, getString(R.string.cambia_scatola));
 					menu.add(Menu.NONE, 2, Menu.NONE, getString(R.string.modifica_scatola));
 				}
 
-				if (item.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.PORTAFRUTTI) {
+				if (CategorieDisegno.componente(item.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.PORTAFRUTTI) {
 					menu.add(Menu.NONE, 1, Menu.NONE, getString(R.string.cambia_portafrutti));
 					menu.add(Menu.NONE, 2, Menu.NONE, getString(R.string.modifica_portafrutti));
 					menu.add(Menu.NONE, 3, Menu.NONE, getString(R.string.sostituisci_con_copriscatola));
 					menu.add(Menu.NONE, 4, Menu.NONE, getString(R.string.elimina));
 
 				}
-				if (item.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.COPRISCATOLA) {
+				if (CategorieDisegno.componente(item.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.COPRISCATOLA) {
 					menu.add(Menu.NONE, 1, Menu.NONE, getString(R.string.cambia_copriscatola));
 					menu.add(Menu.NONE, 2, Menu.NONE, getString(R.string.modifica_copriscatola));
 					menu.add(Menu.NONE, 3, Menu.NONE, getString(R.string.sostituisci_con_portafrutti));
@@ -911,7 +912,7 @@ public class ComposizioneActivity extends EconActivity implements OnItemClickLis
 					}
 				}
 
-				if (componenteSelezionato.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.SCATOLE) {
+				if (CategorieDisegno.componente(componenteSelezionato.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.SCATOLE) {
 					if (item.getItemId() == 1) {
 						if (controllaBloccoModifiche()) {
 							if (mappaCollegamenti.size() > 0 || mappaRelazioni.size()>0) {
@@ -948,11 +949,11 @@ public class ComposizioneActivity extends EconActivity implements OnItemClickLis
 					}
 				}
 
-				if (componenteSelezionato.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.COPRISCATOLA) {
+				if (CategorieDisegno.componente(componenteSelezionato.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.COPRISCATOLA) {
 					if (item.getItemId() == 1) {
 						if (controllaBloccoModifiche()) {
 							Intent intent = new Intent(this, FinestraComponentiActivity.class);
-							intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, Componenti.COPRISCATOLA);
+							intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.COPRISCATOLA));
 							if (idElemento != 0) {
 								intent.putExtra(Elementi.ID_ELEMENTO, idElemento);
 							}
@@ -982,7 +983,7 @@ public class ComposizioneActivity extends EconActivity implements OnItemClickLis
 					if (item.getItemId() == 3) {
 						if (controllaBloccoModifiche()) {
 							Intent intent = new Intent(this, FinestraComponentiActivity.class);
-							intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, Componenti.PORTAFRUTTI);
+							intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.PORTAFRUTTI));
 							if (idElemento != 0) {
 								intent.putExtra(Elementi.ID_ELEMENTO, idElemento);
 							}
@@ -998,11 +999,11 @@ public class ComposizioneActivity extends EconActivity implements OnItemClickLis
 
 				}
 
-				if (componenteSelezionato.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.PORTAFRUTTI) {
+				if (CategorieDisegno.componente(componenteSelezionato.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.PORTAFRUTTI) {
 					if (item.getItemId() == 1) {
 						if (controllaBloccoModifiche()) {
 							Intent intent = new Intent(this, FinestraComponentiActivity.class);
-							intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, Componenti.PORTAFRUTTI);
+							intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.PORTAFRUTTI));
 							if (idElemento != 0) {
 								intent.putExtra(Elementi.ID_ELEMENTO, idElemento);
 							}
@@ -1036,7 +1037,7 @@ public class ComposizioneActivity extends EconActivity implements OnItemClickLis
 									public void onClick(DialogInterface dialogInterface, int i) {
 										if (i==DialogInterface.BUTTON_POSITIVE){
 											Intent intent = new Intent(ComposizioneActivity.this, FinestraComponentiActivity.class);
-											intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, Componenti.COPRISCATOLA);
+											intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.COPRISCATOLA));
 											if (idElemento != 0) {
 												intent.putExtra(Elementi.ID_ELEMENTO, idElemento);
 											}
@@ -1051,7 +1052,7 @@ public class ComposizioneActivity extends EconActivity implements OnItemClickLis
 								//Toast.makeText(this, getString(R.string.messaggio_sostituzione_portafrutti_relazioni), Toast.LENGTH_SHORT).show();
 							} else {
 								Intent intent = new Intent(this, FinestraComponentiActivity.class);
-								intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, Componenti.COPRISCATOLA);
+								intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.COPRISCATOLA));
 								if (idElemento != 0) {
 									intent.putExtra(Elementi.ID_ELEMENTO, idElemento);
 								}
@@ -1202,9 +1203,9 @@ public class ComposizioneActivity extends EconActivity implements OnItemClickLis
 		ArrayList<Object> locali = tabColl.caricaLocaliCantiere(db, idElementoCantiere);
 
 		ContentValues whereTubi = new ContentValues();
-		whereTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.TUBI);
+		whereTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.TUBI));
 		ContentValues whereCavi = new ContentValues();
-		whereCavi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.CAVI);
+		whereCavi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.CAVI));
 		ArrayList<Object> tubi = db.eseguiSelect(new Elementi(), whereTubi, null);
 		ArrayList<Object> cavi = db.eseguiSelect(new Elementi(), whereCavi, null);
 
@@ -1326,12 +1327,12 @@ public class ComposizioneActivity extends EconActivity implements OnItemClickLis
 			int idCatgeoriaComp = comp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE);
 			int idComponente = comp.getAsInteger(ComponentiCantiere.ID_COMPONENTE_CANT);
 			// se sono nella scatola cerco i tubi (id componente = 0)
-			if (idCatgeoriaComp == Componenti.SCATOLE) {
+			if (CategorieDisegno.componente(idCatgeoriaComp) == Componenti.SCATOLE) {
 				_aggiungiCollegamenti(idComponente, relazioni, db, CollegamentoActivity.TUBO);
                 //aggiungo anche i collegamenti cavi sulle scatole (aggiunta del 13/02/2015)
                 _aggiungiCollegamenti(idComponente, relazioni, db, CollegamentoActivity.CAVO);
 			} else {
-				if (idCatgeoriaComp != Componenti.COPRISCATOLA && idCatgeoriaComp != Componenti.PORTAFRUTTI) {
+				if (CategorieDisegno.componente(idCatgeoriaComp) != Componenti.COPRISCATOLA && CategorieDisegno.componente(idCatgeoriaComp) != Componenti.PORTAFRUTTI) {
 					_aggiungiCollegamenti(idComponente, relazioni, db, CollegamentoActivity.CAVO);
 				}
 			}
@@ -1502,7 +1503,7 @@ public class ComposizioneActivity extends EconActivity implements OnItemClickLis
             int idCatgeoriaComp = comp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE);
             int idComponente = comp.getAsInteger(ComponentiCantiere.ID_COMPONENTE_CANT);
 
-            if (idCatgeoriaComp != Componenti.COPRISCATOLA && idCatgeoriaComp != Componenti.PORTAFRUTTI && idCatgeoriaComp!=Componenti.SCATOLE) {
+            if (CategorieDisegno.componente(idCatgeoriaComp) != Componenti.COPRISCATOLA && CategorieDisegno.componente(idCatgeoriaComp) != Componenti.PORTAFRUTTI && CategorieDisegno.componente(idCatgeoriaComp)!=Componenti.SCATOLE) {
                     _aggiungiRelazioni(idComponente, relazioniLogiche, db, CollegamentoActivity.CAVO);
                 }
 

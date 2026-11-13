@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ.adapters;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -107,7 +108,7 @@ public class ComposizioneAdapter extends EconListViewAdapter implements OnClickL
                     && !isModificheBloccate()
                     && idCategoriaComponente != 0
                     && !isComponenteAggiuntivoScatola(val)
-                    && ((idCategoriaComponente != Componenti.PORTAFRUTTI && idCategoriaComponente != Componenti.COPRISCATOLA) || isComposizioneLibera())) {
+                    && ((CategorieDisegno.componente(idCategoriaComponente) != Componenti.PORTAFRUTTI && CategorieDisegno.componente(idCategoriaComponente) != Componenti.COPRISCATOLA) || isComposizioneLibera())) {
                 ((ComposizioneViewHolder) viewholder).buttonRelazioni.setVisibility(View.VISIBLE);
             } else {
                 ((ComposizioneViewHolder) viewholder).buttonRelazioni.setVisibility(View.GONE);
@@ -180,7 +181,7 @@ public class ComposizioneAdapter extends EconListViewAdapter implements OnClickL
 
 
 					/*if (val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.SCATOLE
-							|| val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.CENTRALINI) {
+							|| CategorieDisegno.componente(val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.CENTRALINI) {
 						intent.putExtra("TIPO_FISSO", CollegamentoActivity.TUBO);
 					}*/
                             context.startActivity(intent);
@@ -217,15 +218,15 @@ public class ComposizioneAdapter extends EconListViewAdapter implements OnClickL
             posizione = "";
         }
 
-        if (idCategoriaComponente == Componenti.CENTRALINI || idCategoriaComponente == 0 || isComposizioneLibera()) {
+        if (CategorieDisegno.componente(idCategoriaComponente) == Componenti.CENTRALINI || idCategoriaComponente == 0 || isComposizioneLibera()) {
             ((ComposizioneViewHolder) viewholder).posizione.setVisibility(View.INVISIBLE);
         } else {
             ((ComposizioneViewHolder) viewholder).posizione.setVisibility(View.VISIBLE);
         }
 
         if (!isComposizioneLibera()
-                && (idCategoriaComponente == Componenti.SCATOLE || idCategoriaComponente == Componenti.PORTAFRUTTI
-                || idCategoriaComponente == Componenti.COPRISCATOLA || idCategoriaComponente == Componenti.CENTRALINI)
+                && (CategorieDisegno.componente(idCategoriaComponente) == Componenti.SCATOLE || CategorieDisegno.componente(idCategoriaComponente) == Componenti.PORTAFRUTTI
+                || CategorieDisegno.componente(idCategoriaComponente) == Componenti.COPRISCATOLA || CategorieDisegno.componente(idCategoriaComponente) == Componenti.CENTRALINI)
                 || idCategoriaComponente == 0 || isComponenteAggiuntivoScatola(val)  ) {
             ((ComposizioneViewHolder) viewholder).buttonDown.setVisibility(View.GONE);
             ((ComposizioneViewHolder) viewholder).buttonUp.setVisibility(View.GONE);
@@ -259,7 +260,7 @@ public class ComposizioneAdapter extends EconListViewAdapter implements OnClickL
                 }
             }
 
-            if ((idCategoriaComponente == Componenti.COMPONENTI_QUADRI || isComposizioneLibera()) && position == getCount() - 2) {
+            if ((CategorieDisegno.componente(idCategoriaComponente) == Componenti.COMPONENTI_QUADRI || isComposizioneLibera()) && position == getCount() - 2) {
                 ((ComposizioneViewHolder) viewholder).buttonDown.setVisibility(View.INVISIBLE);
             } else {
                 if (position == getCount() - 1) {
@@ -326,7 +327,7 @@ public class ComposizioneAdapter extends EconListViewAdapter implements OnClickL
     }
 
     private boolean isComponenteAggiuntivQuadro(ContentValues val) {
-        if (context instanceof ComposizioneQuadroActivity && val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)!=Componenti.COMPONENTI_QUADRI && val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)!=Componenti.CENTRALINI && val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)!=0){
+        if (context instanceof ComposizioneQuadroActivity && CategorieDisegno.componente(val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE))!=Componenti.COMPONENTI_QUADRI && CategorieDisegno.componente(val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE))!=Componenti.CENTRALINI && val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)!=0){
             return true;
         }
         return false;
@@ -345,7 +346,7 @@ public class ComposizioneAdapter extends EconListViewAdapter implements OnClickL
         if (idCatComp == 0) {
             return false;
         }
-        if (idCatComp == Componenti.SCATOLE || idCatComp == Componenti.COPRISCATOLA || idCatComp == Componenti.PORTAFRUTTI || idCatComp == Componenti.CENTRALINI) {
+        if (CategorieDisegno.componente(idCatComp) == Componenti.SCATOLE || CategorieDisegno.componente(idCatComp) == Componenti.COPRISCATOLA || CategorieDisegno.componente(idCatComp) == Componenti.PORTAFRUTTI || CategorieDisegno.componente(idCatComp) == Componenti.CENTRALINI) {
             return false;
         }
         return true;

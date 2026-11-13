@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
@@ -65,9 +66,9 @@ public class CollegamentiElementoActivity extends EconActivity implements OnItem
 		ArrayList<Object> locali = _caricaLocaliCantiere(db, idElemento);
 
 		ContentValues whereTubi = new ContentValues();
-		whereTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.TUBI);
+		whereTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.TUBI));
 		ContentValues whereCavi = new ContentValues();
-		whereCavi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.CAVI);
+		whereCavi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.CAVI));
 		ArrayList<Object> tubi = db.eseguiSelect(new Elementi(), whereTubi, null);
 		ArrayList<Object> cavi = db.eseguiSelect(new Elementi(), whereCavi, null);
 

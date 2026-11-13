@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
@@ -108,7 +109,7 @@ public class FinestraElementiActivity extends EconActivity implements OnClickLis
 
                 args.putInt(CategorieComponenti.ID_CATEGORIA_COMPONENTE, idCategoria);
 
-                if (idCategoria == Componenti.COPRISCATOLA || idCategoria == Componenti.PORTAFRUTTI) {
+                if (CategorieDisegno.componente(idCategoria) == Componenti.COPRISCATOLA || CategorieDisegno.componente(idCategoria) == Componenti.PORTAFRUTTI) {
                     args.putInt(Componenti.SPAZI_OSPITATI, getIntent().getIntExtra(Componenti.SPAZI_OSPITATI, 0));
                 }
 

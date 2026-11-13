@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -287,12 +288,12 @@ public class CollegamentoActivity extends EconActivity implements OnItemClickLis
 		});
 
 		ContentValues filtroTubi = new ContentValues();
-		filtroTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.TUBI);
+		filtroTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.TUBI));
 		spinnerTubo.setFiltro(filtroTubi);
 		spinnerTubo.setTabella(new Elementi());
 
 		ContentValues filtroCavo = new ContentValues();
-		filtroCavo.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.CAVI);
+		filtroCavo.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.CAVI));
 		spinnerCavo.setFiltro(filtroCavo);
 		spinnerCavo.setTabella(new Elementi());
 
@@ -605,7 +606,7 @@ public class CollegamentoActivity extends EconActivity implements OnItemClickLis
 							ContentValues valElem = db.getRecord(new Elementi(), whereElem);
 							if (valElem != null) {
 								int idCategoria = valElem.getAsInteger(Elementi.ID_CATEGORIA_GENERALE);
-								if (idCategoria == CategorieGenerali.UTILIZZATORI) {
+								if (CategorieDisegno.classica(idCategoria) == CategorieGenerali.UTILIZZATORI) {
 									cmTotali = cmTotali + cmCodaUtilizzatoriDitta;
 								} else {
 									cmTotali = cmTotali + cmCodaScatoleDitta;
@@ -624,7 +625,7 @@ public class CollegamentoActivity extends EconActivity implements OnItemClickLis
 							ContentValues valElem = db.getRecord(new Elementi(), whereElem);
 							if (valElem != null) {
 								int idCategoria = valElem.getAsInteger(Elementi.ID_CATEGORIA_GENERALE);
-								if (idCategoria == CategorieGenerali.UTILIZZATORI) {
+								if (CategorieDisegno.classica(idCategoria) == CategorieGenerali.UTILIZZATORI) {
 									cmTotali = cmTotali + cmCodaUtilizzatoriDitta;
 								} else {
 									cmTotali = cmTotali + cmCodaScatoleDitta;

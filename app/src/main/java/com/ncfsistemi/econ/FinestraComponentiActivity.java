@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.graphics.drawable.BitmapDrawable;
@@ -84,11 +85,11 @@ public class FinestraComponentiActivity extends EconActivity implements OnClickL
 
 			args.putInt(CategorieComponenti.ID_CATEGORIA_COMPONENTE, idCategoria);
 
-			if (idCategoria == Componenti.COPRISCATOLA || idCategoria == Componenti.PORTAFRUTTI || idCategoria == Componenti.CENTRALINI) {
+			if (CategorieDisegno.componente(idCategoria) == Componenti.COPRISCATOLA || CategorieDisegno.componente(idCategoria) == Componenti.PORTAFRUTTI || CategorieDisegno.componente(idCategoria) == Componenti.CENTRALINI) {
 				args.putInt(Componenti.SPAZI_OSPITATI, getIntent().getIntExtra(Componenti.SPAZI_OSPITATI, 0));
 			}
 
-			if ((idCategoria == Componenti.SCATOLE || idCategoria==Componenti.CENTRALINI) && numSpazi>0){
+			if ((CategorieDisegno.componente(idCategoria) == Componenti.SCATOLE || CategorieDisegno.componente(idCategoria)==Componenti.CENTRALINI) && numSpazi>0){
 				args.putInt(Componenti.SPAZI_OSPITATI, numSpazi);
 
 			}
@@ -322,7 +323,7 @@ public class FinestraComponentiActivity extends EconActivity implements OnClickL
 						});
 			} else {
 
-				if (val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.SCATOLE) {
+				if (CategorieDisegno.componente(val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.SCATOLE) {
 					//se non posso sostituire i componenti perchè ci sono relazioni allora cambio solo la scatola e mantengo
 					//i frutti
 					if (numSpazi>0 && idElementoCantIntent!=0){
@@ -404,7 +405,7 @@ public class FinestraComponentiActivity extends EconActivity implements OnClickL
 					}
 				}
 
-				if (valCAT.getAsInteger(CategorieComponenti.ID_CATEGORIA_COMPONENTE) == Componenti.COPRISCATOLA) {
+				if (CategorieDisegno.componente(valCAT.getAsInteger(CategorieComponenti.ID_CATEGORIA_COMPONENTE)) == Componenti.COPRISCATOLA) {
 					DbInterno db = new DbInterno(this);
 					if (idElementoIntent != 0) {
 						Composizioni tabComposizioni = new Composizioni();
@@ -421,7 +422,7 @@ public class FinestraComponentiActivity extends EconActivity implements OnClickL
 					finish();
 				}
 
-				if (valCAT.getAsInteger(CategorieComponenti.ID_CATEGORIA_COMPONENTE) == Componenti.PORTAFRUTTI) {
+				if (CategorieDisegno.componente(valCAT.getAsInteger(CategorieComponenti.ID_CATEGORIA_COMPONENTE)) == Componenti.PORTAFRUTTI) {
 					DbInterno db = new DbInterno(this);
 
 					if (idElementoIntent != 0) {
@@ -456,7 +457,7 @@ public class FinestraComponentiActivity extends EconActivity implements OnClickL
 					finish();
 				}
 
-				if (val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.CENTRALINI) {
+				if (CategorieDisegno.componente(val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.CENTRALINI) {
 					DbInterno db = new DbInterno(this);
 					if (numSpazi>0 && idElementoCantIntent!=0){
 						ComposizioniCantiere tabComposizioni = new ComposizioniCantiere();
@@ -481,7 +482,7 @@ public class FinestraComponentiActivity extends EconActivity implements OnClickL
 					finish();
 				}
 
-				if (val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.COMPONENTI_QUADRI) {
+				if (CategorieDisegno.componente(val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.COMPONENTI_QUADRI) {
 					DbInterno db = new DbInterno(this);
 
 					if (idElementoIntent != 0) {
@@ -497,7 +498,7 @@ public class FinestraComponentiActivity extends EconActivity implements OnClickL
 					finish();
 				}
 
-				if (val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.COMPONENTI_INTERRUTTORI) {
+				if (CategorieDisegno.componente(val.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.COMPONENTI_INTERRUTTORI) {
 					DbInterno db = new DbInterno(this);
 					if (idComponenteIntent != 0) {
 						ComponentiComposti tabComp = new ComponentiComposti();

@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ.export;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import android.content.ContentValues;
 import android.content.Context;
 import android.os.Environment;
@@ -108,9 +109,9 @@ public class ComposizioneScatoleXLS {
 			locali = tabLocali.getLocaliCantiereOrdineAlfabetico(db, idCantiere);
 
 			ContentValues whereTubi = new ContentValues();
-			whereTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.TUBI);
+			whereTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.TUBI));
 			ContentValues whereCavi = new ContentValues();
-			whereCavi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.CAVI);
+			whereCavi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.CAVI));
 			tubi = db.eseguiSelect(new Elementi(), whereTubi, null);
 			cavi = db.eseguiSelect(new Elementi(), whereCavi, null);
 

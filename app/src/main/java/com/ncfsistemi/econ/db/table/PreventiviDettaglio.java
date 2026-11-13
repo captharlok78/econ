@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ.db.table;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import android.content.ContentValues;
 
 import java.net.ConnectException;
@@ -113,7 +114,7 @@ public class PreventiviDettaglio extends AbstractTable {
 					ContentValues whereComp = new ContentValues();
 					whereComp.put(Componenti.ID_COMPONENTE, idComponente);
 					ContentValues valComp = db.getRecord(tabComp, whereComp);
-					if (valComp != null && valComp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.COMPONENTI_INTERRUTTORI) {
+					if (valComp != null && CategorieDisegno.componente(valComp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.COMPONENTI_INTERRUTTORI) {
 						aggiornamentoDaEseguire = false;
 					}
 				}
@@ -145,7 +146,7 @@ public class PreventiviDettaglio extends AbstractTable {
 					ContentValues whereComp = new ContentValues();
 					whereComp.put(Componenti.ID_COMPONENTE, idComponente);
 					ContentValues valComp = db.getRecord(tabComp, whereComp);
-					if (valComp != null && valComp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.COMPONENTI_INTERRUTTORI) {
+					if (valComp != null && CategorieDisegno.componente(valComp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.COMPONENTI_INTERRUTTORI) {
 						aggiornamentoDaEseguire = false;
 					}
 				}
@@ -401,7 +402,7 @@ public class PreventiviDettaglio extends AbstractTable {
 
 				String SQLTUBI = "Select " + getNomeCampoTabella("*") + " from " + NOME_TABELLA + jElem.getSQLJoin() + " where "
 						+ ID_PREVENTIVO + "=" + idPreventivo + " and " + ID_LOCALE + "=" + idLocale + " and " + Elementi.ID_CATEGORIA_GENERALE
-						+ "=" + CategorieGenerali.TUBI;
+						+ "=" + CategorieDisegno.idElementi(CategorieGenerali.TUBI);
 
 				ArrayList<Object> tubiPrev = db.eseguiSelect(SQLTUBI, null);
 				for (int i = 0; i < tubiPrev.size(); i++) {
@@ -422,7 +423,7 @@ public class PreventiviDettaglio extends AbstractTable {
 
 				String SQLCAVI = "Select " + getNomeCampoTabella("*") + " from " + NOME_TABELLA + jElem.getSQLJoin() + " where "
 						+ ID_PREVENTIVO + "=" + idPreventivo + " and " + ID_LOCALE + "=" + idLocale + " and " + Elementi.ID_CATEGORIA_GENERALE
-						+ "=" + CategorieGenerali.CAVI;
+						+ "=" + CategorieDisegno.idElementi(CategorieGenerali.CAVI);
 				ArrayList<Object> caviPrev = db.eseguiSelect(SQLCAVI, null);
 				for (int i = 0; i < caviPrev.size(); i++) {
 					ContentValues valCavo = (ContentValues) caviPrev.get(i);

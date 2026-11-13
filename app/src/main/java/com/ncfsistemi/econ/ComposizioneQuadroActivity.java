@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -239,11 +240,11 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 
 		for (int i = 0; i < componenti.size(); i++) {
 			ContentValues comp = (ContentValues) componenti.get(i);
-			if (comp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.CENTRALINI) {
+			if (CategorieDisegno.componente(comp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.CENTRALINI) {
 				componenteScatola = comp;
 			}
 
-			if (comp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.COMPONENTI_QUADRI) {
+			if (CategorieDisegno.componente(comp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.COMPONENTI_QUADRI) {
 				comp.put(CategorieComponenti.TIPO, CategorieComponenti.TIPO_COMPONENTE_QUADRO);
 				float spaziOccupatiCurr = 0;
 
@@ -425,7 +426,7 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 					public void onClick(DialogInterface dialogInterface, int i) {
 						if (i==DialogInterface.BUTTON_POSITIVE){
 							Intent intent = new Intent(ComposizioneQuadroActivity.this, FinestraComponentiActivity.class);
-							intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, Componenti.CENTRALINI);
+							intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.CENTRALINI));
 							if (idElemento != 0) {
 								intent.putExtra(Elementi.ID_ELEMENTO, idElemento);
 							}
@@ -445,7 +446,7 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 			} else {
 
 				Intent intent = new Intent(this, FinestraComponentiActivity.class);
-				intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, Componenti.CENTRALINI);
+				intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.CENTRALINI));
 				if (idElemento != 0) {
 					intent.putExtra(Elementi.ID_ELEMENTO, idElemento);
 				}
@@ -619,7 +620,7 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 		 * } }
 		 */
 
-		if (item.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.CENTRALINI) {
+		if (CategorieDisegno.componente(item.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.CENTRALINI) {
 			menu.add(Menu.NONE, 1, Menu.NONE, getString(R.string.sostituisci_centralino));
 			menu.add(Menu.NONE, 2, Menu.NONE, getString(R.string.modifica_centralino));
 			if (idElementoCantiere != 0) {
@@ -628,7 +629,7 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 
 		}
 
-		if (item.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) != Componenti.CENTRALINI && item.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) != 0) {
+		if (CategorieDisegno.componente(item.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) != Componenti.CENTRALINI && item.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) != 0) {
 			menu.add(Menu.NONE, 1, Menu.NONE, getString(R.string.elimina));
 			menu.add(Menu.NONE, 2, Menu.NONE, getString(R.string.modifica_frutto));
 			if (idElementoCantiere != 0) {
@@ -648,7 +649,7 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 					intent.putExtra("COMPOSIZIONELIBERA", true);
 				}
 				else{
-					intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, Componenti.COMPONENTI_QUADRI);
+					intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.COMPONENTI_QUADRI));
 				}
 				if (idElemento != 0) {
 					intent.putExtra(Elementi.ID_ELEMENTO, idElemento);
@@ -685,7 +686,7 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 		// TODO Auto-generated method stub
 		if (componenteSelezionato != null) {
 			aggiornaPreventivo = true;
-			if (componenteSelezionato.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) == Componenti.CENTRALINI) {
+			if (CategorieDisegno.componente(componenteSelezionato.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) == Componenti.CENTRALINI) {
 				if (item.getItemId() == 1) {
 
 					_selezionaScatola(true);
@@ -708,7 +709,7 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 				}
 			}
 
-			if (componenteSelezionato.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) != Componenti.CENTRALINI) {
+			if (CategorieDisegno.componente(componenteSelezionato.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) != Componenti.CENTRALINI) {
 				if (item.getItemId() == 1) {
 					if (controllaBloccoModifiche()) {
 						Utility.mostraConfermaCancellazioneDialog(this, new DialogInterface.OnClickListener() {
@@ -840,9 +841,9 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 		ArrayList<Object> locali = tabColl.caricaLocaliCantiere(db, idElementoCantiere);
 
 		ContentValues whereTubi = new ContentValues();
-		whereTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.TUBI);
+		whereTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.TUBI));
 		ContentValues whereCavi = new ContentValues();
-		whereCavi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.CAVI);
+		whereCavi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.CAVI));
 		ArrayList<Object> tubi = db.eseguiSelect(new Elementi(), whereTubi, null);
 		ArrayList<Object> cavi = db.eseguiSelect(new Elementi(), whereCavi, null);
 
@@ -965,12 +966,12 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 			int idCatgeoriaComp = comp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE);
 			int idComponente = comp.getAsInteger(ComponentiCantiere.ID_COMPONENTE_CANT);
 			// se sono nella scatola cerco i tubi (id componente = 0)
-			if (idCatgeoriaComp == Componenti.CENTRALINI) {
+			if (CategorieDisegno.componente(idCatgeoriaComp) == Componenti.CENTRALINI) {
 				_aggiungiCollegamenti(idComponente, relazioni, db, CollegamentoActivity.TUBO);
                 //aggiungo anche i collegamenti cavi sulle scatole (aggiunta del 13/02/2015)
                 _aggiungiCollegamenti(idComponente, relazioni, db, CollegamentoActivity.CAVO);
 			} else {
-				if (idCatgeoriaComp != Componenti.COPRISCATOLA && idCatgeoriaComp != Componenti.PORTAFRUTTI) {
+				if (CategorieDisegno.componente(idCatgeoriaComp) != Componenti.COPRISCATOLA && CategorieDisegno.componente(idCatgeoriaComp) != Componenti.PORTAFRUTTI) {
 					_aggiungiCollegamenti(idComponente, relazioni, db, CollegamentoActivity.CAVO);
 				}
 			}
@@ -1135,7 +1136,7 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
             int idCatgeoriaComp = comp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE);
             int idComponente = comp.getAsInteger(ComponentiCantiere.ID_COMPONENTE_CANT);
 
-            if (idCatgeoriaComp != Componenti.COPRISCATOLA && idCatgeoriaComp != Componenti.PORTAFRUTTI && idCatgeoriaComp!=Componenti.SCATOLE) {
+            if (CategorieDisegno.componente(idCatgeoriaComp) != Componenti.COPRISCATOLA && CategorieDisegno.componente(idCatgeoriaComp) != Componenti.PORTAFRUTTI && CategorieDisegno.componente(idCatgeoriaComp)!=Componenti.SCATOLE) {
                 _aggiungiRelazioni(idComponente, relazioniLogiche, db, CollegamentoActivity.CAVO);
             }
 

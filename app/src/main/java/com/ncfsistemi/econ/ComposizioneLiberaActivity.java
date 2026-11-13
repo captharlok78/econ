@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -593,9 +594,9 @@ public class ComposizioneLiberaActivity extends EconActivity implements OnItemCl
 		ArrayList<Object> locali = tabColl.caricaLocaliCantiere(db, idElementoCantiere);
 
 		ContentValues whereTubi = new ContentValues();
-		whereTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.TUBI);
+		whereTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.TUBI));
 		ContentValues whereCavi = new ContentValues();
-		whereCavi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.CAVI);
+		whereCavi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.CAVI));
 		ArrayList<Object> tubi = db.eseguiSelect(new Elementi(), whereTubi, null);
 		ArrayList<Object> cavi = db.eseguiSelect(new Elementi(), whereCavi, null);
 
@@ -731,13 +732,13 @@ public class ComposizioneLiberaActivity extends EconActivity implements OnItemCl
 			int idCatgeoriaComp = comp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE);
 			int idComponente = comp.getAsInteger(ComponentiCantiere.ID_COMPONENTE_CANT);
 			// se sono nella scatola cerco i tubi (id componente = 0)
-			if (idCatgeoriaComp == Componenti.SCATOLE && !tubiAggiunti) {
+			if (CategorieDisegno.componente(idCatgeoriaComp) == Componenti.SCATOLE && !tubiAggiunti) {
 				_aggiungiCollegamenti(idComponente, relazioni, db, CollegamentoActivity.TUBO);
                 //aggiungo anche i collegamenti cavi sulle scatole (aggiunta del 13/02/2015)
                 _aggiungiCollegamenti(idComponente, relazioni, db, CollegamentoActivity.CAVO);
 				tubiAggiunti = true;
 			} else {
-				if (idCatgeoriaComp != Componenti.COPRISCATOLA && idCatgeoriaComp != Componenti.PORTAFRUTTI) {
+				if (CategorieDisegno.componente(idCatgeoriaComp) != Componenti.COPRISCATOLA && CategorieDisegno.componente(idCatgeoriaComp) != Componenti.PORTAFRUTTI) {
 					_aggiungiCollegamenti(idComponente, relazioni, db, CollegamentoActivity.CAVO);
 				}
 			}
@@ -907,7 +908,7 @@ public class ComposizioneLiberaActivity extends EconActivity implements OnItemCl
             int idCatgeoriaComp = comp.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE);
             int idComponente = comp.getAsInteger(ComponentiCantiere.ID_COMPONENTE_CANT);
 
-            if (idCatgeoriaComp != Componenti.COPRISCATOLA && idCatgeoriaComp != Componenti.PORTAFRUTTI && idCatgeoriaComp!=Componenti.SCATOLE) {
+            if (CategorieDisegno.componente(idCatgeoriaComp) != Componenti.COPRISCATOLA && CategorieDisegno.componente(idCatgeoriaComp) != Componenti.PORTAFRUTTI && CategorieDisegno.componente(idCatgeoriaComp)!=Componenti.SCATOLE) {
                 _aggiungiRelazioni(idComponente, relazioniLogiche, db, CollegamentoActivity.CAVO);
             }
         }

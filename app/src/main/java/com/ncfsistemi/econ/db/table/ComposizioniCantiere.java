@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ.db.table;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import android.content.ContentValues;
 
 import java.util.ArrayList;
@@ -262,7 +263,7 @@ public class ComposizioniCantiere extends AbstractTable {
 
 		ArrayList<Object> recs = db.eseguiSelect("Select " + ComponentiCantiere.SPAZI_OSPITATI_CANT + " from "
 				+ ComposizioniCantiere.NOME_TABELLA + j0.getSQLJoin() + j1.getSQLJoin() + " where " + ComposizioniCantiere.ID_ELEMENTO_CANT
-				+ "=" + idElementoIntent + " and " + Componenti.ID_CATEGORIA_COMPONENTE + "=" + Componenti.SCATOLE + " and " + ComposizioniCantiere.POSIZIONE_INIZIALE +"<100", null);
+				+ "=" + idElementoIntent + " and " + Componenti.ID_CATEGORIA_COMPONENTE + "=" + CategorieDisegno.idComponenti(Componenti.SCATOLE) + " and " + ComposizioniCantiere.POSIZIONE_INIZIALE +"<100", null);
 		if (recs.size() > 0) {
 			ContentValues valScatolaOld = (ContentValues) recs.get(0);
 			int spaziOspitatiScatola = valScatolaOld.getAsInteger(ComponentiCantiere.SPAZI_OSPITATI_CANT);
@@ -366,7 +367,7 @@ public class ComposizioniCantiere extends AbstractTable {
 				// moduli ospitati della scatola
 				if (portafrutti){
 					ContentValues wherePortafrutti = new ContentValues();
-					wherePortafrutti.put(Componenti.ID_CATEGORIA_COMPONENTE, Componenti.PORTAFRUTTI);
+					wherePortafrutti.put(Componenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.PORTAFRUTTI));
 					wherePortafrutti.put(Componenti.SPAZI_OSPITATI, spaziOspitatiNEW);
 					ArrayList<Object> recsPortafrutti = db.eseguiSelect(new Componenti(), wherePortafrutti,
 							new String[] { Componenti.ID_COMPONENTE });
@@ -398,7 +399,7 @@ public class ComposizioniCantiere extends AbstractTable {
 				// Prendo il primo copriscatola che abbia lo stesso numero di
 				// moduli ospitati della scatola
 				ContentValues whereCopriscatola = new ContentValues();
-				whereCopriscatola.put(Componenti.ID_CATEGORIA_COMPONENTE, Componenti.COPRISCATOLA);
+				whereCopriscatola.put(Componenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.COPRISCATOLA));
 				whereCopriscatola.put(Componenti.SPAZI_OCCUPATI, spaziOspitatiNEW);
 				ArrayList<Object> recsCopriscatola = db.eseguiSelect(new Componenti(), whereCopriscatola,
 						new String[] { Componenti.ID_COMPONENTE });
@@ -517,7 +518,7 @@ public class ComposizioniCantiere extends AbstractTable {
 		j2.addCampiDiJoin(Componenti.ID_CATEGORIA_COMPONENTE, CategorieComponenti.ID_CATEGORIA_COMPONENTE);
 		ArrayList<Object> recsCS = db.eseguiSelect("Select " + getNomeCampoTabella(ID_COMPONENTE_CANT) + " from "
 				+ ComposizioniCantiere.NOME_TABELLA + j0.getSQLJoin() + j1.getSQLJoin() + " where " + ComposizioniCantiere.ID_ELEMENTO_CANT
-				+ "=" + idElementoCantIntent + " and " + Componenti.ID_CATEGORIA_COMPONENTE + "=" + Componenti.COPRISCATOLA+" and "+ComposizioniCantiere.POSIZIONE_INIZIALE+"<100", null);
+				+ "=" + idElementoCantIntent + " and " + Componenti.ID_CATEGORIA_COMPONENTE + "=" + CategorieDisegno.idComponenti(Componenti.COPRISCATOLA)+" and "+ComposizioniCantiere.POSIZIONE_INIZIALE+"<100", null);
 		for (int i = 0; i < recsCS.size(); i++) {
 			ContentValues recCS = (ContentValues) recsCS.get(i);
 			ContentValues wherecs = new ContentValues();
@@ -530,7 +531,7 @@ public class ComposizioniCantiere extends AbstractTable {
 		ArrayList<Object> recsPF = db.eseguiSelect("Select " + getNomeCampoTabella(ID_COMPONENTE_CANT) + "," + Componenti.SPAZI_OSPITATI
 				+ " from " + ComposizioniCantiere.NOME_TABELLA + j0.getSQLJoin() + j1.getSQLJoin() + " where "
 				+ ComposizioniCantiere.ID_ELEMENTO_CANT + "=" + idElementoCantIntent + " and " + Componenti.ID_CATEGORIA_COMPONENTE + "="
-				+ Componenti.PORTAFRUTTI+" and "+ComposizioniCantiere.POSIZIONE_INIZIALE+"<100", null);
+				+ CategorieDisegno.idComponenti(Componenti.PORTAFRUTTI)+" and "+ComposizioniCantiere.POSIZIONE_INIZIALE+"<100", null);
 		for (int i = 0; i < recsPF.size(); i++) {
 			ContentValues recPF = (ContentValues) recsPF.get(i);
 			// se sto modificando un elemento a preventivo allora ricalcolo le placche
@@ -593,7 +594,7 @@ public class ComposizioniCantiere extends AbstractTable {
 		j2.addCampiDiJoin(Componenti.ID_CATEGORIA_COMPONENTE, CategorieComponenti.ID_CATEGORIA_COMPONENTE);
 		ArrayList<Object> recsCS = db.eseguiSelect("Select " + getNomeCampoTabella(ID_COMPONENTE_CANT) + " from "
 				+ ComposizioniCantiere.NOME_TABELLA + j0.getSQLJoin() + j1.getSQLJoin() + " where " + ComposizioniCantiere.ID_ELEMENTO_CANT
-				+ "=" + idElementoCantIntent + " and " + Componenti.ID_CATEGORIA_COMPONENTE + "=" + Componenti.COPRISCATOLA+" and " + ComposizioniCantiere.POSIZIONE_INIZIALE+"<100", null);
+				+ "=" + idElementoCantIntent + " and " + Componenti.ID_CATEGORIA_COMPONENTE + "=" + CategorieDisegno.idComponenti(Componenti.COPRISCATOLA)+" and " + ComposizioniCantiere.POSIZIONE_INIZIALE+"<100", null);
 		for (int i = 0; i < recsCS.size(); i++) {
 			ContentValues recCS = (ContentValues) recsCS.get(i);
 			ContentValues wherecs = new ContentValues();
@@ -606,7 +607,7 @@ public class ComposizioniCantiere extends AbstractTable {
 		ArrayList<Object> recsPF = db.eseguiSelect("Select " + getNomeCampoTabella(ID_COMPONENTE_CANT) + "," + Componenti.SPAZI_OSPITATI
 				+ " from " + ComposizioniCantiere.NOME_TABELLA + j0.getSQLJoin() + j1.getSQLJoin() + " where "
 				+ ComposizioniCantiere.ID_ELEMENTO_CANT + "=" + idElementoCantIntent + " and " + Componenti.ID_CATEGORIA_COMPONENTE + "="
-				+ Componenti.PORTAFRUTTI+" and "+ComposizioniCantiere.POSIZIONE_INIZIALE+"<100", null);
+				+ CategorieDisegno.idComponenti(Componenti.PORTAFRUTTI)+" and "+ComposizioniCantiere.POSIZIONE_INIZIALE+"<100", null);
 		for (int i = 0; i < recsPF.size(); i++) {
 			ContentValues recPF = (ContentValues) recsPF.get(i);
 
@@ -654,7 +655,7 @@ public class ComposizioniCantiere extends AbstractTable {
 		ArrayList<Object> recs = db.eseguiSelect("Select " + getNomeCampoTabella(ComposizioniCantiere.ID_COMPONENTE_CANT) + ","
 				+ ComponentiCantiere.SPAZI_OSPITATI_CANT + " from " + ComposizioniCantiere.NOME_TABELLA + j0.getSQLJoin() + j1.getSQLJoin()
 				+ " where " + ComposizioniCantiere.ID_ELEMENTO_CANT + "=" + idElementoCantIntent + " and "
-				+ Componenti.ID_CATEGORIA_COMPONENTE + "=" + Componenti.SCATOLE, null);
+				+ Componenti.ID_CATEGORIA_COMPONENTE + "=" + CategorieDisegno.idComponenti(Componenti.SCATOLE), null);
 		if (recs.size() > 0) {
 			ContentValues valScatolaOld = (ContentValues) recs.get(0);
 			int spaziOspitatiScatola = valScatolaOld.getAsInteger(ComponentiCantiere.SPAZI_OSPITATI_CANT);
@@ -887,7 +888,7 @@ public class ComposizioniCantiere extends AbstractTable {
 		Componenti tabComponenti = new Componenti();
 
 		ContentValues pfDefault = tabComponenti.getValoriLogInserimento(db);
-		pfDefault.put(Componenti.ID_CATEGORIA_COMPONENTE, Componenti.COPRISCATOLA);
+		pfDefault.put(Componenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.COPRISCATOLA));
 		pfDefault.put(Componenti.NOME_COMPONENTE,
 				db.getResources().getString(R.string.coperchio) + " " + val.getAsInteger(Componenti.SPAZI_OSPITATI) + "M");
 		pfDefault.put(Componenti.SPAZI_OCCUPATI, val.getAsInteger(Componenti.SPAZI_OSPITATI));
@@ -917,7 +918,7 @@ public class ComposizioniCantiere extends AbstractTable {
 		Componenti tabComponenti = new Componenti();
 
 		ContentValues pfDefault = tabComponenti.getValoriLogInserimento(db);
-		pfDefault.put(Componenti.ID_CATEGORIA_COMPONENTE, Componenti.PORTAFRUTTI);
+		pfDefault.put(Componenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.PORTAFRUTTI));
 		pfDefault.put(Componenti.NOME_COMPONENTE,
 				db.getResources().getString(R.string.portaelementi) + " " + val.getAsInteger(Componenti.SPAZI_OSPITATI) + "M");
 		pfDefault.put(Componenti.SPAZI_OSPITATI, val.getAsInteger(Componenti.SPAZI_OSPITATI));
@@ -1055,7 +1056,7 @@ public class ComposizioniCantiere extends AbstractTable {
 		String sql = "Select " + NOME_TABELLA + ".*," + ComponentiCantiere.NOME_TABELLA + ".*,"
 				+ tabComp.getNomeCampoTabella(CategorieComponenti.TIPO) + " from " + NOME_TABELLA + j0.getSQLJoin() + j1.getSQLJoin()
 				+ j2.getSQLJoin() + " where " + ID_ELEMENTO_CANT + " = " + idElemento + " and "
-				+ tabComp.getNomeCampoTabella(CategorieComponenti.ID_CATEGORIA_COMPONENTE) + "=" + Componenti.COMPONENTI_QUADRI
+				+ tabComp.getNomeCampoTabella(CategorieComponenti.ID_CATEGORIA_COMPONENTE) + "=" + CategorieDisegno.idComponenti(Componenti.COMPONENTI_QUADRI)
 				+ " order by " + POSIZIONE_INIZIALE;
 
 		ArrayList<Object> result = db.eseguiSelect(sql, null);

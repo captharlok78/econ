@@ -1,0 +1,774 @@
+{
+ "versione": 1,
+ "font": "simboli_disegno",
+ "gruppi": [
+  {
+   "codice": "elettrico",
+   "nome": "Elettrico",
+   "simboli": [
+    {
+     "nome": "outlet",
+     "etichetta": "Presa",
+     "parole": "presa schuko bipasso spina",
+     "codice": "f1d4"
+    },
+    {
+     "nome": "power",
+     "etichetta": "Spina",
+     "parole": "spina alimentazione",
+     "codice": "e63c"
+    },
+    {
+     "nome": "toggle_on",
+     "etichetta": "Interruttore",
+     "parole": "interruttore deviatore invertitore comando",
+     "codice": "e9f6"
+    },
+    {
+     "nome": "radio_button_checked",
+     "etichetta": "Pulsante",
+     "parole": "pulsante campanello comando",
+     "codice": "e837"
+    },
+    {
+     "nome": "power_settings_new",
+     "etichetta": "Accensione",
+     "parole": "accensione spegnimento",
+     "codice": "f8c7"
+    },
+    {
+     "nome": "electrical_services",
+     "etichetta": "Quadro elettrico",
+     "parole": "quadro centralino",
+     "codice": "f102"
+    },
+    {
+     "nome": "electric_meter",
+     "etichetta": "Contatore",
+     "parole": "contatore misura energia",
+     "codice": "ec1b"
+    },
+    {
+     "nome": "bolt",
+     "etichetta": "Energia",
+     "parole": "linea alimentazione fase",
+     "codice": "ea0b"
+    },
+    {
+     "nome": "electric_bolt",
+     "etichetta": "Alimentazione",
+     "parole": "alimentatore trasformatore",
+     "codice": "ec1c"
+    },
+    {
+     "nome": "cable",
+     "etichetta": "Cavo",
+     "parole": "cavo filo conduttore",
+     "codice": "efe6"
+    },
+    {
+     "nome": "conversion_path",
+     "etichetta": "Tubo",
+     "parole": "tubo corrugato guaina canalina",
+     "codice": "f0c1"
+    },
+    {
+     "nome": "check_box_outline_blank",
+     "etichetta": "Scatola",
+     "parole": "scatola derivazione componibile incasso",
+     "codice": "e835"
+    },
+    {
+     "nome": "view_column",
+     "etichetta": "Portafrutti",
+     "parole": "portafrutti supporto telaio",
+     "codice": "e8ec"
+    },
+    {
+     "nome": "crop_square",
+     "etichetta": "Copriscatola",
+     "parole": "copriscatola coperchio",
+     "codice": "e3c6"
+    },
+    {
+     "nome": "dns",
+     "etichetta": "Armadio",
+     "parole": "armadio rack",
+     "codice": "e875"
+    },
+    {
+     "nome": "developer_board",
+     "etichetta": "Scheda",
+     "parole": "scheda modulo elettronica",
+     "codice": "e30d"
+    },
+    {
+     "nome": "memory",
+     "etichetta": "Modulo",
+     "parole": "modulo domotica attuatore",
+     "codice": "e322"
+    },
+    {
+     "nome": "battery_charging_full",
+     "etichetta": "Batteria",
+     "parole": "batteria ups accumulo",
+     "codice": "e1a3"
+    },
+    {
+     "nome": "ev_station",
+     "etichetta": "Ricarica auto",
+     "parole": "wallbox colonnina ricarica",
+     "codice": "e56d"
+    },
+    {
+     "nome": "solar_power",
+     "etichetta": "Fotovoltaico",
+     "parole": "fotovoltaico pannello solare inverter",
+     "codice": "ec0f"
+    },
+    {
+     "nome": "speed",
+     "etichetta": "Misura",
+     "parole": "strumento misura",
+     "codice": "e9e4"
+    }
+   ]
+  },
+  {
+   "codice": "luce",
+   "nome": "Illuminazione",
+   "simboli": [
+    {
+     "nome": "lightbulb",
+     "etichetta": "Punto luce",
+     "parole": "punto luce lampada lampadina",
+     "codice": "e90f"
+    },
+    {
+     "nome": "light",
+     "etichetta": "Lampadario",
+     "parole": "lampadario sospensione",
+     "codice": "f02a"
+    },
+    {
+     "nome": "wall_lamp",
+     "etichetta": "Applique",
+     "parole": "applique parete",
+     "codice": "e2b4"
+    },
+    {
+     "nome": "fluorescent",
+     "etichetta": "Plafoniera",
+     "parole": "plafoniera neon fluorescente",
+     "codice": "f07d"
+    },
+    {
+     "nome": "emoji_objects",
+     "etichetta": "Lampada",
+     "parole": "lampada luce",
+     "codice": "ea24"
+    },
+    {
+     "nome": "light_group",
+     "etichetta": "Gruppo luci",
+     "parole": "gruppo luci faretti",
+     "codice": "e28b"
+    },
+    {
+     "nome": "emergency_home",
+     "etichetta": "Emergenza",
+     "parole": "lampada emergenza sicurezza",
+     "codice": "e82a"
+    },
+    {
+     "nome": "wb_sunny",
+     "etichetta": "Esterno",
+     "parole": "luce esterna giardino",
+     "codice": "e430"
+    }
+   ]
+  },
+  {
+   "codice": "sicurezza",
+   "nome": "Sicurezza",
+   "simboli": [
+    {
+     "nome": "sensors",
+     "etichetta": "Sensore",
+     "parole": "sensore rilevatore volumetrico",
+     "codice": "e51e"
+    },
+    {
+     "nome": "motion_sensor_active",
+     "etichetta": "Rilevatore movimento",
+     "parole": "rilevatore movimento volumetrico pir",
+     "codice": "e792"
+    },
+    {
+     "nome": "sensor_door",
+     "etichetta": "Contatto porta",
+     "parole": "contatto magnetico porta",
+     "codice": "f1b5"
+    },
+    {
+     "nome": "sensor_window",
+     "etichetta": "Contatto finestra",
+     "parole": "contatto magnetico finestra",
+     "codice": "f1b4"
+    },
+    {
+     "nome": "detector_smoke",
+     "etichetta": "Rilevatore fumo",
+     "parole": "fumo incendio",
+     "codice": "e285"
+    },
+    {
+     "nome": "detector_alarm",
+     "etichetta": "Allarme",
+     "parole": "allarme centrale",
+     "codice": "e1f7"
+    },
+    {
+     "nome": "siren",
+     "etichetta": "Sirena",
+     "parole": "sirena",
+     "codice": "f3a7"
+    },
+    {
+     "nome": "dialpad",
+     "etichetta": "Tastiera",
+     "parole": "tastiera inseritore",
+     "codice": "e0bc"
+    },
+    {
+     "nome": "local_fire_department",
+     "etichetta": "Antincendio",
+     "parole": "antincendio fuoco",
+     "codice": "ef55"
+    },
+    {
+     "nome": "lock",
+     "etichetta": "Serratura",
+     "parole": "serratura elettrica",
+     "codice": "e899"
+    },
+    {
+     "nome": "key",
+     "etichetta": "Chiave",
+     "parole": "chiave inseritore",
+     "codice": "e73c"
+    }
+   ]
+  },
+  {
+   "codice": "citofonia",
+   "nome": "Citofonia e TVCC",
+   "simboli": [
+    {
+     "nome": "doorbell",
+     "etichetta": "Citofono",
+     "parole": "citofono pulsantiera campanello",
+     "codice": "efff"
+    },
+    {
+     "nome": "video_camera_front",
+     "etichetta": "Videocitofono",
+     "parole": "videocitofono monitor",
+     "codice": "f080"
+    },
+    {
+     "nome": "videocam",
+     "etichetta": "Telecamera",
+     "parole": "telecamera tvcc videosorveglianza",
+     "codice": "e04b"
+    },
+    {
+     "nome": "nest_cam_outdoor",
+     "etichetta": "Telecamera esterna",
+     "parole": "telecamera esterna bullet",
+     "codice": "f121"
+    },
+    {
+     "nome": "nest_cam_indoor",
+     "etichetta": "Telecamera interna",
+     "parole": "telecamera interna dome",
+     "codice": "f11e"
+    },
+    {
+     "nome": "camera_outdoor",
+     "etichetta": "Videosorveglianza",
+     "parole": "videosorveglianza nvr",
+     "codice": "efea"
+    },
+    {
+     "nome": "speaker",
+     "etichetta": "Altoparlante",
+     "parole": "altoparlante diffusore audio",
+     "codice": "e32d"
+    }
+   ]
+  },
+  {
+   "codice": "reti",
+   "nome": "Reti e TV",
+   "simboli": [
+    {
+     "nome": "router",
+     "etichetta": "Router",
+     "parole": "router modem",
+     "codice": "e328"
+    },
+    {
+     "nome": "lan",
+     "etichetta": "Rete dati",
+     "parole": "rete lan rj45 switch",
+     "codice": "eb2f"
+    },
+    {
+     "nome": "wifi",
+     "etichetta": "Wi-Fi",
+     "parole": "wifi access point",
+     "codice": "e63e"
+    },
+    {
+     "nome": "phone",
+     "etichetta": "Telefono",
+     "parole": "telefono presa telefonica",
+     "codice": "f0d4"
+    },
+    {
+     "nome": "call",
+     "etichetta": "Chiamata",
+     "parole": "interno telefonico",
+     "codice": "f0d4"
+    },
+    {
+     "nome": "tv",
+     "etichetta": "TV",
+     "parole": "presa tv televisione",
+     "codice": "e63b"
+    },
+    {
+     "nome": "settings_input_antenna",
+     "etichetta": "Antenna",
+     "parole": "antenna terrestre",
+     "codice": "e8bf"
+    },
+    {
+     "nome": "satellite_alt",
+     "etichetta": "Parabola",
+     "parole": "parabola satellite",
+     "codice": "eb3a"
+    },
+    {
+     "nome": "settings_remote",
+     "etichetta": "Telecomando",
+     "parole": "telecomando ricevitore radio",
+     "codice": "e8c7"
+    }
+   ]
+  },
+  {
+   "codice": "automazione",
+   "nome": "Automazione",
+   "simboli": [
+    {
+     "nome": "gate",
+     "etichetta": "Cancello",
+     "parole": "cancello automazione",
+     "codice": "e277"
+    },
+    {
+     "nome": "garage",
+     "etichetta": "Garage",
+     "parole": "basculante garage",
+     "codice": "f011"
+    },
+    {
+     "nome": "garage_home",
+     "etichetta": "Box",
+     "parole": "box porta garage",
+     "codice": "e82d"
+    },
+    {
+     "nome": "door_front",
+     "etichetta": "Porta",
+     "parole": "porta ingresso",
+     "codice": "effd"
+    },
+    {
+     "nome": "roller_shades",
+     "etichetta": "Tapparella",
+     "parole": "tapparella avvolgibile motore",
+     "codice": "ec12"
+    },
+    {
+     "nome": "blinds",
+     "etichetta": "Tenda",
+     "parole": "tenda veneziana",
+     "codice": "e286"
+    },
+    {
+     "nome": "home_iot_device",
+     "etichetta": "Domotica",
+     "parole": "domotica dispositivo",
+     "codice": "e283"
+    },
+    {
+     "nome": "thermostat",
+     "etichetta": "Termostato",
+     "parole": "termostato cronotermostato",
+     "codice": "f076"
+    },
+    {
+     "nome": "stairs",
+     "etichetta": "Scale",
+     "parole": "scale",
+     "codice": "f1a9"
+    },
+    {
+     "nome": "elevator",
+     "etichetta": "Ascensore",
+     "parole": "ascensore montacarichi",
+     "codice": "f1a0"
+    }
+   ]
+  },
+  {
+   "codice": "clima",
+   "nome": "Clima",
+   "simboli": [
+    {
+     "nome": "ac_unit",
+     "etichetta": "Condizionatore",
+     "parole": "condizionatore split clima",
+     "codice": "eb3b"
+    },
+    {
+     "nome": "hvac",
+     "etichetta": "Climatizzazione",
+     "parole": "ventilazione climatizzazione",
+     "codice": "f10e"
+    },
+    {
+     "nome": "heat_pump",
+     "etichetta": "Pompa di calore",
+     "parole": "pompa calore",
+     "codice": "ec18"
+    },
+    {
+     "nome": "mode_heat",
+     "etichetta": "Riscaldamento",
+     "parole": "riscaldamento radiatore",
+     "codice": "f16a"
+    },
+    {
+     "nome": "air",
+     "etichetta": "Ventilazione",
+     "parole": "aspiratore ventola",
+     "codice": "efd8"
+    },
+    {
+     "nome": "mode_fan",
+     "etichetta": "Ventilatore",
+     "parole": "ventilatore",
+     "codice": "f168"
+    },
+    {
+     "nome": "thermometer",
+     "etichetta": "Sonda",
+     "parole": "sonda temperatura",
+     "codice": "e846"
+    }
+   ]
+  },
+  {
+   "codice": "idraulica",
+   "nome": "Idraulica",
+   "simboli": [
+    {
+     "nome": "water_heater",
+     "etichetta": "Caldaia",
+     "parole": "caldaia boiler scaldabagno",
+     "codice": "e284"
+    },
+    {
+     "nome": "valve",
+     "etichetta": "Valvola",
+     "parole": "valvola rubinetto",
+     "codice": "e224"
+    },
+    {
+     "nome": "plumbing",
+     "etichetta": "Tubazione",
+     "parole": "tubazione idraulica",
+     "codice": "f107"
+    },
+    {
+     "nome": "faucet",
+     "etichetta": "Rubinetto",
+     "parole": "rubinetto miscelatore",
+     "codice": "e278"
+    },
+    {
+     "nome": "shower",
+     "etichetta": "Doccia",
+     "parole": "doccia",
+     "codice": "f061"
+    },
+    {
+     "nome": "bathtub",
+     "etichetta": "Vasca",
+     "parole": "vasca bagno",
+     "codice": "ea41"
+    },
+    {
+     "nome": "wc",
+     "etichetta": "WC",
+     "parole": "wc sanitari",
+     "codice": "e63d"
+    },
+    {
+     "nome": "water_drop",
+     "etichetta": "Acqua",
+     "parole": "acqua scarico",
+     "codice": "e798"
+    },
+    {
+     "nome": "sprinkler",
+     "etichetta": "Irrigazione",
+     "parole": "irrigazione",
+     "codice": "e29a"
+    },
+    {
+     "nome": "heat",
+     "etichetta": "Collettore",
+     "parole": "collettore",
+     "codice": "f537"
+    }
+   ]
+  },
+  {
+   "codice": "utenze",
+   "nome": "Utenze",
+   "simboli": [
+    {
+     "nome": "kitchen",
+     "etichetta": "Frigorifero",
+     "parole": "frigorifero",
+     "codice": "eb47"
+    },
+    {
+     "nome": "oven_gen",
+     "etichetta": "Forno",
+     "parole": "forno cucina",
+     "codice": "e843"
+    },
+    {
+     "nome": "microwave",
+     "etichetta": "Microonde",
+     "parole": "microonde",
+     "codice": "f204"
+    },
+    {
+     "nome": "dishwasher",
+     "etichetta": "Lavastoviglie",
+     "parole": "lavastoviglie",
+     "codice": "e9a0"
+    },
+    {
+     "nome": "local_laundry_service",
+     "etichetta": "Lavatrice",
+     "parole": "lavatrice asciugatrice",
+     "codice": "e54a"
+    },
+    {
+     "nome": "iron",
+     "etichetta": "Ferro",
+     "parole": "ferro stiro",
+     "codice": "e583"
+    },
+    {
+     "nome": "chair_alt",
+     "etichetta": "Arredo",
+     "parole": "arredo",
+     "codice": "efee"
+    },
+    {
+     "nome": "yard",
+     "etichetta": "Giardino",
+     "parole": "giardino esterno",
+     "codice": "f089"
+    }
+   ]
+  },
+  {
+   "codice": "edile",
+   "nome": "Edile",
+   "simboli": [
+    {
+     "nome": "view_quilt",
+     "etichetta": "Muratura",
+     "parole": "muratura mattone tramezzo forato blocco muro parete",
+     "codice": "e8f1"
+    },
+    {
+     "nome": "foundation",
+     "etichetta": "Fondazione",
+     "parole": "fondazione plinto cordolo",
+     "codice": "f200"
+    },
+    {
+     "nome": "roofing",
+     "etichetta": "Tetto",
+     "parole": "tetto copertura coppi tegole",
+     "codice": "f201"
+    },
+    {
+     "nome": "window",
+     "etichetta": "Finestra",
+     "parole": "finestra serramento infisso",
+     "codice": "f088"
+    },
+    {
+     "nome": "door_sliding",
+     "etichetta": "Porta scorrevole",
+     "parole": "porta scorrevole controtelaio",
+     "codice": "effe"
+    },
+    {
+     "nome": "grid_on",
+     "etichetta": "Pavimento",
+     "parole": "pavimento piastrelle rivestimento",
+     "codice": "e3ec"
+    },
+    {
+     "nome": "format_paint",
+     "etichetta": "Tinteggiatura",
+     "parole": "tinteggiatura pittura",
+     "codice": "e243"
+    },
+    {
+     "nome": "imagesearch_roller",
+     "etichetta": "Intonaco",
+     "parole": "intonaco rasatura",
+     "codice": "e9b4"
+    },
+    {
+     "nome": "layers",
+     "etichetta": "Massetto",
+     "parole": "massetto sottofondo isolamento",
+     "codice": "e53b"
+    },
+    {
+     "nome": "house_siding",
+     "etichetta": "Facciata",
+     "parole": "facciata cappotto",
+     "codice": "f202"
+    },
+    {
+     "nome": "water_damage",
+     "etichetta": "Impermeabilizzazione",
+     "parole": "impermeabilizzazione guaina",
+     "codice": "f203"
+    },
+    {
+     "nome": "construction",
+     "etichetta": "Opere edili",
+     "parole": "opere edili demolizione",
+     "codice": "ea3c"
+    },
+    {
+     "nome": "carpenter",
+     "etichetta": "Carpenteria",
+     "parole": "carpenteria legno",
+     "codice": "f1f8"
+    },
+    {
+     "nome": "fence",
+     "etichetta": "Recinzione",
+     "parole": "recinzione",
+     "codice": "f1f6"
+    },
+    {
+     "nome": "deck",
+     "etichetta": "Esterni",
+     "parole": "esterni pergola",
+     "codice": "ea42"
+    },
+    {
+     "nome": "square_foot",
+     "etichetta": "Superficie",
+     "parole": "superficie mq",
+     "codice": "ea49"
+    },
+    {
+     "nome": "straighten",
+     "etichetta": "Misura",
+     "parole": "misura metro lineare",
+     "codice": "e41c"
+    },
+    {
+     "nome": "pallet",
+     "etichetta": "Fornitura",
+     "parole": "fornitura bancale materiale",
+     "codice": "f86a"
+    },
+    {
+     "nome": "handyman",
+     "etichetta": "Manutenzione",
+     "parole": "manutenzione riparazione",
+     "codice": "f10b"
+    },
+    {
+     "nome": "architecture",
+     "etichetta": "Progetto",
+     "parole": "progetto disegno",
+     "codice": "ea3b"
+    }
+   ]
+  },
+  {
+   "codice": "generico",
+   "nome": "Generico",
+   "simboli": [
+    {
+     "nome": "category",
+     "etichetta": "Materiale vario",
+     "parole": "vario generico",
+     "codice": "e72c"
+    },
+    {
+     "nome": "inventory_2",
+     "etichetta": "Materiale",
+     "parole": "materiale scatola",
+     "codice": "e1a1"
+    },
+    {
+     "nome": "build",
+     "etichetta": "Lavoro",
+     "parole": "lavoro manodopera",
+     "codice": "f8cd"
+    },
+    {
+     "nome": "fiber_manual_record",
+     "etichetta": "Punto",
+     "parole": "punto",
+     "codice": "e061"
+    },
+    {
+     "nome": "star",
+     "etichetta": "Preferito",
+     "parole": "preferito",
+     "codice": "f09a"
+    },
+    {
+     "nome": "help",
+     "etichetta": "Altro",
+     "parole": "altro",
+     "codice": "e8fd"
+    }
+   ]
+  }
+ ]
+}

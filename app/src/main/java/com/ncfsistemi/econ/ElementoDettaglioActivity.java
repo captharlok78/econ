@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -278,9 +279,9 @@ public class ElementoDettaglioActivity extends EconActivity implements OnClickLi
         ArrayList<Object> locali = tabColl.caricaLocaliCantiere(db, idElementoCantiere);
 
         ContentValues whereTubi = new ContentValues();
-        whereTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.TUBI);
+        whereTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.TUBI));
         ContentValues whereCavi = new ContentValues();
-        whereCavi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.CAVI);
+        whereCavi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.CAVI));
         ArrayList<Object> tubi = db.eseguiSelect(new Elementi(), whereTubi, null);
         ArrayList<Object> cavi = db.eseguiSelect(new Elementi(), whereCavi, null);
 

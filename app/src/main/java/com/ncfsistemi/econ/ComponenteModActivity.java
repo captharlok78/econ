@@ -1,5 +1,6 @@
 package com.ncfsistemi.econ;
 
+import com.ncfsistemi.econ.utils.CategorieDisegno;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -104,19 +105,19 @@ public class ComponenteModActivity extends EconDettaglioActivity implements OnIt
 
 		}
 
-		if (idCategoria == Componenti.SCATOLE || idCategoria == Componenti.CENTRALINI) {
+		if (CategorieDisegno.componente(idCategoria) == Componenti.SCATOLE || CategorieDisegno.componente(idCategoria) == Componenti.CENTRALINI) {
 			findViewById(R.id.linear_cavo).setVisibility(View.GONE);
 			findViewById(R.id.linear_tubo).setVisibility(View.VISIBLE);
 		}
 
-		if (idCategoria == Componenti.INTERRUTTORI || idCategoria==Componenti.PRESE){
+		if (CategorieDisegno.componente(idCategoria) == Componenti.INTERRUTTORI || CategorieDisegno.componente(idCategoria)==Componenti.PRESE){
 
 			findViewById(R.id.linear_cavo).setVisibility(View.VISIBLE);
 			findViewById(R.id.linear_tubo).setVisibility(View.GONE);
 
 		}
 
-		if (idCategoria == Componenti.COMPONENTI_INTERRUTTORI) {
+		if (CategorieDisegno.componente(idCategoria) == Componenti.COMPONENTI_INTERRUTTORI) {
 			findViewById(R.id.linear_tappo).setVisibility(View.GONE);
 			findViewById(R.id.linear_cavo).setVisibility(View.GONE);
 			findViewById(R.id.linear_tubo).setVisibility(View.GONE);
@@ -124,7 +125,7 @@ public class ComponenteModActivity extends EconDettaglioActivity implements OnIt
 			findViewById(R.id.linear_lista_comp).setVisibility(View.GONE);
 		}
 
-		if (idCategoria == Componenti.SCATOLE || idCategoria == Componenti.PORTAFRUTTI || idCategoria == Componenti.CENTRALINI) {
+		if (CategorieDisegno.componente(idCategoria) == Componenti.SCATOLE || CategorieDisegno.componente(idCategoria) == Componenti.PORTAFRUTTI || CategorieDisegno.componente(idCategoria) == Componenti.CENTRALINI) {
 			setText(R.id.textView_posti, getString(R.string.posti_ospitati));
 		} else {
 			setText(R.id.textView_posti, getString(R.string.posti_occupati));
@@ -134,13 +135,13 @@ public class ComponenteModActivity extends EconDettaglioActivity implements OnIt
 
 		spinnerTubo = (EconSpinner) findViewById(R.id.econSpinner_tubo);
 		ContentValues filtroTubi = new ContentValues();
-		filtroTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.TUBI);
+		filtroTubi.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.TUBI));
 		spinnerTubo.setFiltro(filtroTubi);
 		spinnerTubo.setTabella(new Elementi());
 
 		spinnerCavo = (EconSpinner) findViewById(R.id.econSpinner_cavo);
 		ContentValues filtroCavo = new ContentValues();
-		filtroCavo.put(Elementi.ID_CATEGORIA_GENERALE, CategorieGenerali.CAVI);
+		filtroCavo.put(Elementi.ID_CATEGORIA_GENERALE, CategorieDisegno.idElementi(CategorieGenerali.CAVI));
 		spinnerCavo.setFiltro(filtroCavo);
 		spinnerCavo.setTabella(new Elementi());
 		System.out.println("Econ: ComponenteModActivity onCreate EXIT");
@@ -172,7 +173,7 @@ public class ComponenteModActivity extends EconDettaglioActivity implements OnIt
 				setText(R.id.econSpinner_cavo, val.getAsString(ComponentiCantiere.ID_ELEMENTO_CAVO));
 				setText(R.id.editText_metricavo, Utility.formatNumero(val.getAsDouble(ComponentiCantiere.METRI_CAVO_CANT)));
 				setText(R.id.editText_metritubo, Utility.formatNumero(val.getAsDouble(ComponentiCantiere.METRI_TUBO_CANT)));
-				if (idCategoria == Componenti.SCATOLE || idCategoria == Componenti.PORTAFRUTTI) {
+				if (CategorieDisegno.componente(idCategoria) == Componenti.SCATOLE || CategorieDisegno.componente(idCategoria) == Componenti.PORTAFRUTTI) {
 					setText(R.id.editText_posti, val.getAsString(ComponentiCantiere.SPAZI_OSPITATI_CANT));
 				} else {
 					setText(R.id.editText_posti, Utility.formatNumero(val.getAsDouble(ComponentiCantiere.SPAZI_OCCUPATI_CANT)));
@@ -220,7 +221,7 @@ public class ComponenteModActivity extends EconDettaglioActivity implements OnIt
 				setText(R.id.econSpinner_cavo, val.getAsString(Componenti.ID_ELEMENTO_CAVO));
 				setText(R.id.editText_metricavo, Utility.formatNumero(val.getAsDouble(Componenti.METRI_CAVO)));
 				setText(R.id.editText_metritubo, Utility.formatNumero(val.getAsDouble(Componenti.METRI_TUBO)));
-				if (idCategoria == Componenti.SCATOLE || idCategoria == Componenti.PORTAFRUTTI || idCategoria == Componenti.CENTRALINI) {
+				if (CategorieDisegno.componente(idCategoria) == Componenti.SCATOLE || CategorieDisegno.componente(idCategoria) == Componenti.PORTAFRUTTI || CategorieDisegno.componente(idCategoria) == Componenti.CENTRALINI) {
 					setText(R.id.editText_posti, val.getAsString(Componenti.SPAZI_OSPITATI));
 				} else {
 					setText(R.id.editText_posti, Utility.formatNumero(val.getAsDouble(Componenti.SPAZI_OCCUPATI)));
@@ -262,8 +263,8 @@ public class ComponenteModActivity extends EconDettaglioActivity implements OnIt
 			return getString(R.string.errore_selezione_udm);
 		}
 
-		if (getTesto(R.id.editText_posti).equals("") && idCategoria != Componenti.COMPONENTI_INTERRUTTORI) {
-			if (idCategoria == Componenti.SCATOLE || idCategoria == Componenti.PORTAFRUTTI || idCategoria == Componenti.CENTRALINI) {
+		if (getTesto(R.id.editText_posti).equals("") && CategorieDisegno.componente(idCategoria) != Componenti.COMPONENTI_INTERRUTTORI) {
+			if (CategorieDisegno.componente(idCategoria) == Componenti.SCATOLE || CategorieDisegno.componente(idCategoria) == Componenti.PORTAFRUTTI || CategorieDisegno.componente(idCategoria) == Componenti.CENTRALINI) {
 				editPosti.setError(getString(R.string.errore_posti_ospitati));
 				return getString(R.string.errore_posti_ospitati);
 			} else {
@@ -283,7 +284,7 @@ public class ComponenteModActivity extends EconDettaglioActivity implements OnIt
 		val.put(Componenti.ID_ELEMENTO_CAVO, Utility.formatNumeroDB(spinnerCavo.getValue()));
 		val.put(Componenti.METRI_TUBO, Utility.formatNumeroDB(getTesto(R.id.editText_metritubo)));
 		val.put(Componenti.ID_ELEMENTO_TUBO, Utility.formatNumeroDB(spinnerTubo.getValue()));
-		if (idCategoria == Componenti.SCATOLE || idCategoria == Componenti.PORTAFRUTTI || idCategoria == Componenti.CENTRALINI) {
+		if (CategorieDisegno.componente(idCategoria) == Componenti.SCATOLE || CategorieDisegno.componente(idCategoria) == Componenti.PORTAFRUTTI || CategorieDisegno.componente(idCategoria) == Componenti.CENTRALINI) {
 			val.put(Componenti.SPAZI_OSPITATI, Utility.formatNumeroDB(getTesto(R.id.editText_posti)));
 		} else {
 			val.put(Componenti.SPAZI_OCCUPATI, Utility.formatNumeroDB(getTesto(R.id.editText_posti)));
@@ -324,8 +325,8 @@ public class ComponenteModActivity extends EconDettaglioActivity implements OnIt
 			return getString(R.string.errore_selezione_udm);
 		}
 
-		if (getTesto(R.id.editText_posti).equals("") && idCategoria != Componenti.COMPONENTI_INTERRUTTORI) {
-			if (idCategoria == Componenti.SCATOLE || idCategoria == Componenti.PORTAFRUTTI || idCategoria == Componenti.CENTRALINI) {
+		if (getTesto(R.id.editText_posti).equals("") && CategorieDisegno.componente(idCategoria) != Componenti.COMPONENTI_INTERRUTTORI) {
+			if (CategorieDisegno.componente(idCategoria) == Componenti.SCATOLE || CategorieDisegno.componente(idCategoria) == Componenti.PORTAFRUTTI || CategorieDisegno.componente(idCategoria) == Componenti.CENTRALINI) {
 				editPosti.setError(getString(R.string.errore_posti_ospitati));
 				return getString(R.string.errore_posti_ospitati);
 			} else {
@@ -344,7 +345,7 @@ public class ComponenteModActivity extends EconDettaglioActivity implements OnIt
 			val.put(ComponentiCantiere.ID_ELEMENTO_CAVO, Utility.formatNumeroDB(spinnerCavo.getValue()));
 			val.put(ComponentiCantiere.METRI_TUBO_CANT, Utility.formatNumeroDB(getTesto(R.id.editText_metritubo)));
 			val.put(ComponentiCantiere.ID_ELEMENTO_TUBO, Utility.formatNumeroDB(spinnerTubo.getValue()));
-			if (idCategoria == Componenti.SCATOLE || idCategoria == Componenti.PORTAFRUTTI || idCategoria == Componenti.CENTRALINI) {
+			if (CategorieDisegno.componente(idCategoria) == Componenti.SCATOLE || CategorieDisegno.componente(idCategoria) == Componenti.PORTAFRUTTI || CategorieDisegno.componente(idCategoria) == Componenti.CENTRALINI) {
 				val.put(ComponentiCantiere.SPAZI_OSPITATI_CANT, Utility.formatNumeroDB(getTesto(R.id.editText_posti)));
 			} else {
 				val.put(ComponentiCantiere.SPAZI_OCCUPATI_CANT, Utility.formatNumeroDB(getTesto(R.id.editText_posti)));
@@ -363,7 +364,7 @@ public class ComponenteModActivity extends EconDettaglioActivity implements OnIt
 			val.put(Componenti.ID_ELEMENTO_CAVO, Utility.formatNumeroDB(spinnerCavo.getValue()));
 			val.put(Componenti.METRI_TUBO, Utility.formatNumeroDB(getTesto(R.id.editText_metritubo)));
 			val.put(Componenti.ID_ELEMENTO_TUBO, Utility.formatNumeroDB(spinnerTubo.getValue()));
-			if (idCategoria == Componenti.SCATOLE || idCategoria == Componenti.PORTAFRUTTI || idCategoria == Componenti.CENTRALINI) {
+			if (CategorieDisegno.componente(idCategoria) == Componenti.SCATOLE || CategorieDisegno.componente(idCategoria) == Componenti.PORTAFRUTTI || CategorieDisegno.componente(idCategoria) == Componenti.CENTRALINI) {
 				val.put(Componenti.SPAZI_OSPITATI, getTesto(R.id.editText_posti));
 			} else {
 				val.put(Componenti.SPAZI_OCCUPATI, Utility.formatNumeroDB(getTesto(R.id.editText_posti)));
@@ -486,7 +487,7 @@ public class ComponenteModActivity extends EconDettaglioActivity implements OnIt
 				setModalita(MODIFICA);
 				Intent intent = new Intent(this, FinestraComponentiActivity.class);
 				intent.putExtra(Componenti.ID_COMPONENTE, getIDModifica());
-				intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, Componenti.COMPONENTI_INTERRUTTORI);
+				intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.COMPONENTI_INTERRUTTORI));
 				startActivity(intent);
 			}
 
@@ -498,7 +499,7 @@ public class ComponenteModActivity extends EconDettaglioActivity implements OnIt
 				intent.putExtra(Componenti.ID_COMPONENTE, getIDModifica());
 			}
 
-			intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, Componenti.COMPONENTI_INTERRUTTORI);
+			intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.COMPONENTI_INTERRUTTORI));
 			startActivity(intent);
 		}
 		System.out.println("Econ: ComponenteModActivity nuovoComponente EXIT");
@@ -660,7 +661,7 @@ public class ComponenteModActivity extends EconDettaglioActivity implements OnIt
 			intent.putExtra("ID", item.getAsInteger(Componenti.ID_COMPONENTE));
 		}
 
-		intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, Componenti.COMPONENTI_INTERRUTTORI);
+		intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE, CategorieDisegno.idComponenti(Componenti.COMPONENTI_INTERRUTTORI));
 		apriFinestraModifica(intent, 0);
 		System.out.println("Econ: ComponenteModActivity _apriModifica EXIT");
 	}
