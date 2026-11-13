@@ -309,10 +309,7 @@ public class ComposizioneAdapter extends EconListViewAdapter implements OnClickL
         } else {
             ((ComposizioneViewHolder) viewholder).icona.setVisibility(View.VISIBLE);
         }
-        android.graphics.drawable.Drawable simbolo = com.ncfsistemi.econ.utils.SimboliDisegno.drawableComponente(context, val);
-        if (simbolo != null) ((ComposizioneViewHolder) viewholder).icona.setImageDrawable(simbolo);
-        else ((ComposizioneViewHolder) viewholder).icona.setImageBitmap(Utility.getIconaThumb(context, Componenti.PATH_ICONE,
-                val.getAsString(Componenti.ICONA)));
+        ((ComposizioneViewHolder) viewholder).icona.setImageDrawable(com.ncfsistemi.econ.utils.SimboliDisegno.fotoOppureSimboloComponente(context, val));
         ((ComposizioneViewHolder) viewholder).icona.setTag(position);
         System.out.println("Econ: ComposizioneAdapter personalizzaView EXIT");
         super.personalizzaView(position, viewholder);

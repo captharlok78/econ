@@ -78,9 +78,9 @@ public class GrigliaElementiAdapter extends EconListViewAdapter {
 			((ElementoViewHolder) viewholder).nome.setText(val.getAsString(Elementi.NOME_ELEMENTO));
 			((ElementoViewHolder) viewholder).nome.setTag(position);
 
-			// simbolo e colore della categoria al posto della foto (STUDIO_DESIGN_GRAFICA.md G1)
-			((ElementoViewHolder) viewholder).icona.setImageDrawable(
-					com.ncfsistemi.econ.utils.SimboliDisegno.drawableElemento(context, val.getAsInteger(Elementi.ID_ELEMENTO)));
+			// la foto dell'elemento, il simbolo della categoria se non c'è (STUDIO_DESIGN_GRAFICA.md G1)
+			((ElementoViewHolder) viewholder).icona.setImageDrawable(com.ncfsistemi.econ.utils.SimboliDisegno.fotoOppureSimbolo(context, Elementi.PATH_ICONE,
+					val.getAsString(Elementi.ICONA), com.ncfsistemi.econ.utils.SimboliDisegno.elemento(val.getAsInteger(Elementi.ID_ELEMENTO))));
 			//((ElementoViewHolder) viewholder).icona.setImageBitmap(Utility.getIconaThumb(context, Elementi.PATH_ICONE, icona));
 			((ElementoViewHolder) viewholder).icona.setTag(position);
 		}
@@ -89,8 +89,7 @@ public class GrigliaElementiAdapter extends EconListViewAdapter {
 			((ElementoViewHolder) viewholder).nome.setText(val.getAsString(Componenti.NOME_COMPONENTE));
 			((ElementoViewHolder) viewholder).nome.setTag(position);
 
-			((ElementoViewHolder) viewholder).icona.setImageDrawable(
-					com.ncfsistemi.econ.utils.SimboliDisegno.drawableComponente(context, val.getAsInteger(Componenti.ID_COMPONENTE)));
+			((ElementoViewHolder) viewholder).icona.setImageDrawable(com.ncfsistemi.econ.utils.SimboliDisegno.fotoOppureSimboloComponente(context, val));
 			//((ElementoViewHolder) viewholder).icona.setImageBitmap(Utility.getIconaThumb(context, Componenti.PATH_ICONE, icona));
 			((ElementoViewHolder) viewholder).icona.setTag(position);
 		}

@@ -245,7 +245,8 @@ public class ComposizioneLiberaActivity extends EconActivity implements OnItemCl
 			ContentValues valElem = db.getRecord(new Elementi(), where_elem);
 			if (valElem != null) {
 				idCategoria = valElem.getAsInteger(Elementi.ID_CATEGORIA_GENERALE);
-				iconaElemento.setImageDrawable(com.ncfsistemi.econ.utils.SimboliDisegno.drawableElemento(this, valElem.getAsInteger(Elementi.ID_ELEMENTO)));
+				iconaElemento.setImageDrawable(com.ncfsistemi.econ.utils.SimboliDisegno.fotoOppureSimbolo(this, Elementi.PATH_ICONE, valElem.getAsString(Elementi.ICONA),
+						com.ncfsistemi.econ.utils.SimboliDisegno.elemento(valElem.getAsInteger(Elementi.ID_ELEMENTO))));
 
 			}
 		}

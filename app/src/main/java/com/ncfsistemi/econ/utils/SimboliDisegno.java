@@ -31,8 +31,12 @@ import java.util.Map;
 
 /**
  * Simboli del disegno (STUDIO_DESIGN_GRAFICA.md §3.2, G1): un cerchio del colore della categoria con il simbolo bianco
- * (Material Symbols ridotto, res/font/simboli_disegno.ttf; nomi e codici in assets/simboli_disegno.json), al posto delle
- * foto nella piantina, nelle tavolozze e nelle composizioni. La foto resta facoltativa e si vede solo nelle schede.
+ * (Material Symbols ridotto, res/font/simboli_disegno.ttf; nomi e codici in assets/simboli_disegno.json).
+ * <ul>
+ * <li>categorie (linguette) e piantina: sempre il simbolo;</li>
+ * <li>elementi e componenti: la loro foto (file sul tablet o icona arrivata dal server), il simbolo solo se la foto non
+ * c'è ({@link #fotoOppureSimbolo}).</li>
+ * </ul>
  * <p>
  * Simbolo di un elemento o componente: il suo, se no quello della categoria; colore: quello della categoria. Le categorie
  * arrivano dal server con simbolo e colore (schema 46); se mancano (DB vecchi) valgono quelli di sistema del numero
@@ -133,6 +137,43 @@ public final class SimboliDisegno {
 
     public static Drawable drawableComponente(Context ctx, Integer idComponente) {
         return drawable(ctx, componente(idComponente));
+    }
+
+    /** La foto dell'elemento o del componente (file nella cartella dell'app, se no icona dal server), null se non c'è. */
+    public static android.graphics.Bitmap foto(Context ctx, String dir, String icona) {
+        if (vuoto(icona) || "null".equals(icona.trim())) return null;
+        try {
+            java.io.File file = new java.io.File(ctx.getDir(dir, Context.MODE_PRIVATE), icona);
+            if (file.exists()) {
+                android.graphics.Bitmap b = android.graphics.BitmapFactory.decodeFile(file.getAbsolutePath());
+                if (b != null) return b;
+            }
+        } catch (Exception e) {
+            // si prova con le icone del server
+        }
+        return IconeDb.bitmap(ctx, icona);
+    }
+
+    /** La foto se c'è, se no il simbolo della voce. */
+    public static Drawable fotoOppureSimbolo(Context ctx, String dir, String icona, Voce v) {
+        android.graphics.Bitmap b = foto(ctx, dir, icona);
+        return b != null ? new android.graphics.drawable.BitmapDrawable(ctx.getResources(), b) : drawable(ctx, v);
+    }
+
+    /** Come {@link #fotoOppureSimbolo}, sempre immagine (finestre che vogliono una BitmapDrawable). */
+    public static android.graphics.drawable.BitmapDrawable fotoOppureSimboloBitmap(Context ctx, String dir, String icona, Voce v, int lato) {
+        android.graphics.Bitmap b = foto(ctx, dir, icona);
+        if (b != null) {
+            return new android.graphics.drawable.BitmapDrawable(ctx.getResources(),
+                    android.media.ThumbnailUtils.extractThumbnail(b, lato, lato));
+        }
+        return bitmap(ctx, v, lato);
+    }
+
+    /** Riga di libreria o di composizione con id_componente e icona: foto o simbolo. */
+    public static Drawable fotoOppureSimboloComponente(Context ctx, android.content.ContentValues riga) {
+        return fotoOppureSimbolo(ctx, Componenti.PATH_ICONE, riga != null ? riga.getAsString(Componenti.ICONA) : null,
+                componente(riga != null ? riga.getAsInteger(Componenti.ID_COMPONENTE) : null));
     }
 
     /** Il simbolo come immagine (per le finestre che vogliono una BitmapDrawable), lato in pixel. */

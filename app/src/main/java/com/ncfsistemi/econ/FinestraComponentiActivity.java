@@ -286,7 +286,7 @@ public class FinestraComponentiActivity extends EconActivity implements OnClickL
 
 				Utility.mostraDialogPersonalizzato(
 						val.getAsString(Componenti.NOME_COMPONENTE).toUpperCase(Locale.getDefault()),
-						com.ncfsistemi.econ.utils.SimboliDisegno.bitmap(this, com.ncfsistemi.econ.utils.SimboliDisegno.componente(val.getAsInteger(Componenti.ID_COMPONENTE)), getResources().getDimensionPixelSize(R.dimen.altezza_menu_categorie)), this, campi, this.getString(R.string.conferma),
+						com.ncfsistemi.econ.utils.SimboliDisegno.fotoOppureSimboloBitmap(this, Componenti.PATH_ICONE, val.getAsString(Componenti.ICONA), com.ncfsistemi.econ.utils.SimboliDisegno.componente(val.getAsInteger(Componenti.ID_COMPONENTE)), getResources().getDimensionPixelSize(R.dimen.altezza_menu_categorie)), this, campi, this.getString(R.string.conferma),
 						this.getString(R.string.annulla), new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialogInterface, int i) {

@@ -271,7 +271,7 @@ public class FinestraListinoBaseActivity extends FinestraElementiActivity {
 
                 Utility.mostraDialogPersonalizzato(
                         val.getAsString(Elementi.NOME_ELEMENTO).toUpperCase(Locale.getDefault()),
-                        com.ncfsistemi.econ.utils.SimboliDisegno.bitmap(this, com.ncfsistemi.econ.utils.SimboliDisegno.elemento(val.getAsInteger(Elementi.ID_ELEMENTO)), getResources().getDimensionPixelSize(R.dimen.altezza_menu_categorie)),
+                        com.ncfsistemi.econ.utils.SimboliDisegno.fotoOppureSimboloBitmap(this, Elementi.PATH_ICONE, val.getAsString(Elementi.ICONA), com.ncfsistemi.econ.utils.SimboliDisegno.elemento(val.getAsInteger(Elementi.ID_ELEMENTO)), getResources().getDimensionPixelSize(R.dimen.altezza_menu_categorie)),
                         this, campi, this.getString(R.string.conferma), this.getString(R.string.annulla), listener);
             }
 
@@ -281,7 +281,7 @@ public class FinestraListinoBaseActivity extends FinestraElementiActivity {
 
                 Utility.mostraDialogPersonalizzato(
                         val.getAsString(Componenti.NOME_COMPONENTE).toUpperCase(Locale.getDefault()),
-                        com.ncfsistemi.econ.utils.SimboliDisegno.bitmap(this, com.ncfsistemi.econ.utils.SimboliDisegno.componente(val.getAsInteger(Componenti.ID_COMPONENTE)), getResources().getDimensionPixelSize(R.dimen.altezza_menu_categorie)), this, campi, this.getString(R.string.conferma),
+                        com.ncfsistemi.econ.utils.SimboliDisegno.fotoOppureSimboloBitmap(this, Componenti.PATH_ICONE, val.getAsString(Componenti.ICONA), com.ncfsistemi.econ.utils.SimboliDisegno.componente(val.getAsInteger(Componenti.ID_COMPONENTE)), getResources().getDimensionPixelSize(R.dimen.altezza_menu_categorie)), this, campi, this.getString(R.string.conferma),
                         this.getString(R.string.annulla), listener);
 
             }
