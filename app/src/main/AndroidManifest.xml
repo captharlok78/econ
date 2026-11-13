@@ -137,6 +137,13 @@
             android:configChanges="orientation|screenSize"
             android:label="@string/dettaglio_locale"></activity>
         <activity
+            android:name=".disegno.DisegnoActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustPan"
+            android:label="Disegno" />
+        <activity
             android:name=".PiantinaLocaleModActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize"

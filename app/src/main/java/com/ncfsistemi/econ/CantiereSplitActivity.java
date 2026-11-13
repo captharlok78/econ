@@ -667,6 +667,10 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 			} else {
 				menuinferiore.setVisibility(View.VISIBLE);
 			}
+			// disegno a tre pannelli (STUDIO_DESIGN_GRAFICA.md §8), salvo chi ha scelto il classico
+			if (!com.ncfsistemi.econ.disegno.DisegnoActivity.classico(this)) {
+				apriDisegno(val.getAsInteger("ID"));
+			}
 
 		} else {
 			if (tipoElementoSelezionato == PREVENTIVO) {
@@ -691,6 +695,9 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 		menu.setHeaderTitle(CantiereMenuAdapter.getTipoStringa(item, this) + ": " + item.getAsString("NOME"));
 		menu.add(Menu.NONE, 1, Menu.NONE, getString(R.string.modifica));
 		menu.add(Menu.NONE, 2, Menu.NONE, getString(R.string.elimina));
+		if (item.getAsInteger("TIPO") == LOCALE) {
+			menu.add(Menu.NONE, 3, Menu.NONE, "Disegno nuovo");
+		}
 
 		System.out.println("Econ: CantiereSplitActivity onCreateContextMenu EXIT");
 	}
@@ -703,6 +710,11 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 		ContentValues val = (ContentValues) lista.getItemAtPosition(info.position);
 		int tipo = val.getAsInteger("TIPO");
 		int idElemento = val.getAsInteger("ID");
+		if (item.getItemId() == 3 && tipo == LOCALE) {
+			com.ncfsistemi.econ.disegno.DisegnoActivity.setClassico(this, false);
+			apriDisegno(idElemento);
+			return true;
+		}
 		if (item.getItemId() == 1) {
 			if (tipo == PREVENTIVO) {
 				Intent intent = new Intent(this, PreventiviDettaglioModActivity.class);
@@ -1022,6 +1034,15 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 		if (requestCode == 100 && resultCode == Activity.RESULT_OK) {
 			fragmentPagerPreventivo.importaDaFileXLS(arg2.getStringExtra("PATH"));
 		}
+	}
+
+	/** Apre il disegno a tre pannelli del locale (com.ncfsistemi.econ.disegno.DisegnoActivity). */
+	private void apriDisegno(int idLocale) {
+		Intent intent = new Intent(this, com.ncfsistemi.econ.disegno.DisegnoActivity.class);
+		intent.putExtra(Cantieri.ID_CANTIERE, cantiere);
+		intent.putExtra(Locali.ID_LOCALE, idLocale);
+		intent.putExtra("MODIFICHE_BLOCCATE", isModificheBloccate());
+		startActivityForResult(intent, 1);
 	}
 
 	private void aggiornaElementiPiantina(boolean dragattivo) {
