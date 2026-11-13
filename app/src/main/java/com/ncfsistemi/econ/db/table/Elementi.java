@@ -11,6 +11,10 @@ import com.ncfsistemi.econ.db.DbInterno;
 import com.ncfsistemi.econ.utils.Utility;
 
 public class Elementi extends AbstractTable {
+	/** Schema 46 (STUDIO_DESIGN_GRAFICA.md §3.4): dal server, disegno con simboli e articoli della ditta. */
+	public static final String SIMBOLO = "simbolo";
+	public static final String ID_ICONA = "id_icona";
+	public static final String ID_ARTICOLO_DITTA = "id_articolo_ditta";
 	public static final String NOME_TABELLA = "elementi";
 
 	public static final String ID_ELEMENTO = "id_elemento";
@@ -44,6 +48,9 @@ public class Elementi extends AbstractTable {
 		aggiungiCampo(ALTEZZA_DA_TERRA, INTEGER);
 		aggiungiCampo(PREFERITO_SN, INTEGER);
 		aggiungiCampo(PLACCA_SN, INTEGER);
+		aggiungiCampo(SIMBOLO, TEXT);
+		aggiungiCampo(ID_ICONA, INTEGER);
+		aggiungiCampo(ID_ARTICOLO_DITTA, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

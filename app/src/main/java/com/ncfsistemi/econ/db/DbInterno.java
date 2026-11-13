@@ -67,7 +67,7 @@ import com.ncfsistemi.econ.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECON.db";
 	public static final String DATABASE_NAME_ZIP = ".econ.db";
-	public static final int SCHEMA_VERSION = 45;
+	public static final int SCHEMA_VERSION = 46;
 
 	private Context cont = null;
 
@@ -562,6 +562,43 @@ public class DbInterno extends SQLiteOpenHelper {
 		if (oldVersion<45){
 			if (oldVersion<newVersion){
 				creaTabellaIcone(db);
+				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
+			}
+		}
+		// Schema 46 (STUDIO_DESIGN_GRAFICA.md §3.4): categorie del disegno come oggetti del server (codice, comportamento,
+		// colore, simbolo, ordine, attiva, settore), simbolo/foto di elementi e componenti, simbolo e colore dei settori,
+		// articolo della ditta sugli elementi e sulle righe del disegno. Download completo una tantum.
+		if (oldVersion<46){
+			if (oldVersion<newVersion){
+				String[][] colonne = {
+						{CategorieGenerali.NOME_TABELLA, CategorieGenerali.CODICE, "TEXT"},
+						{CategorieGenerali.NOME_TABELLA, CategorieGenerali.COMPORTAMENTO, "TEXT"},
+						{CategorieGenerali.NOME_TABELLA, CategorieGenerali.COLORE, "TEXT"},
+						{CategorieGenerali.NOME_TABELLA, CategorieGenerali.SIMBOLO, "TEXT"},
+						{CategorieGenerali.NOME_TABELLA, CategorieGenerali.ORDINE, "INTEGER DEFAULT 0"},
+						{CategorieGenerali.NOME_TABELLA, CategorieGenerali.ATTIVO, "INTEGER DEFAULT 1"},
+						{CategorieGenerali.NOME_TABELLA, CategorieGenerali.ID_SETTORE, "INTEGER DEFAULT 0"},
+						{CategorieComponenti.NOME_TABELLA, CategorieComponenti.CODICE, "TEXT"},
+						{CategorieComponenti.NOME_TABELLA, CategorieComponenti.COLORE, "TEXT"},
+						{CategorieComponenti.NOME_TABELLA, CategorieComponenti.SIMBOLO, "TEXT"},
+						{CategorieComponenti.NOME_TABELLA, CategorieComponenti.ORDINE, "INTEGER DEFAULT 0"},
+						{CategorieComponenti.NOME_TABELLA, CategorieComponenti.ATTIVO, "INTEGER DEFAULT 1"},
+						{CategorieComponenti.NOME_TABELLA, CategorieComponenti.ID_SETTORE, "INTEGER DEFAULT 0"},
+						{Elementi.NOME_TABELLA, Elementi.SIMBOLO, "TEXT"},
+						{Elementi.NOME_TABELLA, Elementi.ID_ICONA, "INTEGER DEFAULT 0"},
+						{Elementi.NOME_TABELLA, Elementi.ID_ARTICOLO_DITTA, "INTEGER DEFAULT 0"},
+						{Componenti.NOME_TABELLA, Componenti.SIMBOLO, "TEXT"},
+						{Componenti.NOME_TABELLA, Componenti.ID_ICONA, "INTEGER DEFAULT 0"},
+						{com.ncfsistemi.econ.db.table.SettoriArticolo.NOME_TABELLA, com.ncfsistemi.econ.db.table.SettoriArticolo.SIMBOLO, "TEXT"},
+						{com.ncfsistemi.econ.db.table.SettoriArticolo.NOME_TABELLA, com.ncfsistemi.econ.db.table.SettoriArticolo.COLORE, "TEXT"},
+						{ElementiCantiere.NOME_TABELLA, ElementiCantiere.ID_ARTICOLO_DITTA, "INTEGER DEFAULT 0"},
+						{ElementiCantiere.NOME_TABELLA, ElementiCantiere.QUANTITA, "NUMERIC DEFAULT 0"},
+				};
+				for (String[] c : colonne) {
+					if (!getTableColumns(db, c[0]).isEmpty() && !getTableColumns(db, c[0]).contains(c[1])) {
+						db.execSQL("ALTER TABLE " + c[0] + " ADD COLUMN " + c[1] + " " + c[2]);
+					}
+				}
 				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
 			}
 		}

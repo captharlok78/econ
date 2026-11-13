@@ -23,7 +23,9 @@ public final class SyncUtil {
      * rimasti da vecchie versioni dell'app non restano in giro.
      */
     private static final String[] TABELLE_ELENCO_COMPLETO = { "unita_misura", "rapportini_dettaglio_tipi", "stati_documento",
-            "stati_documento_transizioni", "modelli_stampa", "tipologie_modello", "ditte_modelli_stampa" };
+            "stati_documento_transizioni", "modelli_stampa", "tipologie_modello", "ditte_modelli_stampa",
+            // categorie del disegno gia' risolte per la ditta dal server (schema 46, STUDIO_DESIGN_GRAFICA.md §3.4)
+            "categorie_generali", "categorie_componenti" };
 
     /** Tabelle locali con una colonna unita' di misura (chiave esterna verso unita_misura sul server). */
     private static final String[] TABELLE_CON_UNITA_MISURA = { "elementi", "componenti", "elementi_cantiere",

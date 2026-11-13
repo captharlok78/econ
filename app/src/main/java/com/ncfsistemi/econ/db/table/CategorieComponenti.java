@@ -5,6 +5,13 @@ import android.content.res.Resources;
 import com.ncfsistemi.econ.R;
 
 public class CategorieComponenti extends AbstractTable {
+	/** Schema 46 (STUDIO_DESIGN_GRAFICA.md §3.4): dal server, disegno con simboli e articoli della ditta. */
+	public static final String CODICE = "codice";
+	public static final String COLORE = "colore";
+	public static final String SIMBOLO = "simbolo";
+	public static final String ORDINE = "ordine";
+	public static final String ATTIVO = "attivo";
+	public static final String ID_SETTORE = "id_settore";
 	public static final String NOME_TABELLA = "categorie_componenti";
 
 	public static final String ID_CATEGORIA_COMPONENTE = "id_categoria_componente";
@@ -32,6 +39,12 @@ public class CategorieComponenti extends AbstractTable {
 		aggiungiCampo(ICONA, TEXT);
 		aggiungiCampo(TIPO, TEXT);
 		aggiungiCampo(ID_FAMIGLIA, INTEGER);
+		aggiungiCampo(CODICE, TEXT);
+		aggiungiCampo(COLORE, TEXT);
+		aggiungiCampo(SIMBOLO, TEXT);
+		aggiungiCampo(ORDINE, INTEGER);
+		aggiungiCampo(ATTIVO, INTEGER);
+		aggiungiCampo(ID_SETTORE, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

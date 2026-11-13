@@ -10,6 +10,9 @@ import com.ncfsistemi.econ.db.DbInterno;
 import com.ncfsistemi.econ.utils.Utility;
 
 public class Componenti extends AbstractTable {
+	/** Schema 46 (STUDIO_DESIGN_GRAFICA.md §3.4): dal server, disegno con simboli e articoli della ditta. */
+	public static final String SIMBOLO = "simbolo";
+	public static final String ID_ICONA = "id_icona";
 	public static final String NOME_TABELLA = "componenti";
 
 	public static final String ID_COMPONENTE = "id_componente";
@@ -55,6 +58,8 @@ public class Componenti extends AbstractTable {
 		aggiungiCampo(ICONA, TEXT);
 		aggiungiCampo(UNITA_MISURA, TEXT);
 		aggiungiCampo(PREFERITO_SN, INTEGER);
+		aggiungiCampo(SIMBOLO, TEXT);
+		aggiungiCampo(ID_ICONA, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

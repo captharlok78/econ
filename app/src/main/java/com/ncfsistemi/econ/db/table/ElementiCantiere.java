@@ -10,6 +10,9 @@ import com.ncfsistemi.econ.db.Join;
 import com.ncfsistemi.econ.utils.Sessione;
 
 public class ElementiCantiere extends AbstractTable {
+	/** Schema 46 (STUDIO_DESIGN_GRAFICA.md §3.4): dal server, disegno con simboli e articoli della ditta. */
+	public static final String ID_ARTICOLO_DITTA = "id_articolo_ditta";
+	public static final String QUANTITA = "quantita";
 	public static final String NOME_TABELLA = "elementi_cantiere";
 
 	public static final String ID_ELEMENTO_CANT = "id_elemento_cant";
@@ -67,6 +70,8 @@ public class ElementiCantiere extends AbstractTable {
 		aggiungiCampo(NON_CONTEGGIARE_PREVENTIVI,INTEGER);
 		aggiungiCampo(ID_LINEA, INTEGER);
 		aggiungiCampo(ID_PLACCA, INTEGER);
+		aggiungiCampo(ID_ARTICOLO_DITTA, INTEGER);
+		aggiungiCampo(QUANTITA, NUMERIC);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

@@ -5,6 +5,9 @@ package com.ncfsistemi.econ.db.table;
  * quelli aggiunti dalla ditta. Si scelgono (e si aggiungono) nel nuovo articolo del rapportino.
  */
 public class SettoriArticolo extends AbstractTable {
+	/** Schema 46 (STUDIO_DESIGN_GRAFICA.md §3.4): dal server, disegno con simboli e articoli della ditta. */
+	public static final String SIMBOLO = "simbolo";
+	public static final String COLORE = "colore";
 	public static final String NOME_TABELLA = "settori_articolo";
 
 	public static final String ID = "id";
@@ -23,6 +26,8 @@ public class SettoriArticolo extends AbstractTable {
 		aggiungiCampo(ORDINE, INTEGER);
 		aggiungiCampo(ATTIVO, INTEGER);
 		aggiungiCampo(ID_DITTA, INTEGER);
+		aggiungiCampo(SIMBOLO, TEXT);
+		aggiungiCampo(COLORE, TEXT);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);
