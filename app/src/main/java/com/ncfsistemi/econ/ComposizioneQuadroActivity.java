@@ -226,7 +226,7 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 			ContentValues valElem = db.getRecord(new Elementi(), where_elem);
 			if (valElem != null) {
 				idCategoria = valElem.getAsInteger(Elementi.ID_CATEGORIA_GENERALE);
-				iconaElemento.setImageBitmap(Utility.getIconaScalata(this, Elementi.PATH_ICONE, valElem.getAsString(Elementi.ICONA)));
+				iconaElemento.setImageDrawable(com.ncfsistemi.econ.utils.SimboliDisegno.drawableElemento(this, valElem.getAsInteger(Elementi.ID_ELEMENTO)));
 
 			}
 

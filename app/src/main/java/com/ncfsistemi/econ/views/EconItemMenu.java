@@ -88,6 +88,11 @@ public class EconItemMenu extends RelativeLayout {
 
 	}
 
+	/** Simbolo del disegno al posto dell'icona (categorie di elementi e componenti, STUDIO_DESIGN_GRAFICA.md G1). */
+	public void setSimbolo(android.graphics.drawable.Drawable simbolo) {
+		icona.setImageDrawable(simbolo);
+	}
+
 	@Override
 	public void setSelected(boolean selected) {
 		// TODO Auto-generated method stub

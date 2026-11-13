@@ -72,6 +72,9 @@ public class EconComponenteScatola extends RelativeLayout {
 
 	public void setItem(ContentValues item) {
 		this.item = item;
+		// simbolo del componente al posto della foto (STUDIO_DESIGN_GRAFICA.md G1)
+		android.graphics.drawable.Drawable simbolo = com.ncfsistemi.econ.utils.SimboliDisegno.drawableComponente(getContext(), item);
+		if (simbolo != null) icona.setImageDrawable(simbolo);
 	}
 
 }

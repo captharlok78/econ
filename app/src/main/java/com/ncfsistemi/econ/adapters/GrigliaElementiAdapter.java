@@ -78,12 +78,9 @@ public class GrigliaElementiAdapter extends EconListViewAdapter {
 			((ElementoViewHolder) viewholder).nome.setText(val.getAsString(Elementi.NOME_ELEMENTO));
 			((ElementoViewHolder) viewholder).nome.setTag(position);
 
-			String icona = val.getAsString(Elementi.ICONA);
-			//((ElementoViewHolder)viewholder).icona.setVisibility(View.INVISIBLE);
-            BitmapWorkerTask task = new BitmapWorkerTask(context,Elementi.PATH_ICONE,((ElementoViewHolder) viewholder).icona,false);
-            int altezza = context.getResources().getDimensionPixelSize(R.dimen.larghezza_icona);
-           // task.setDimensioni(altezza,altezza);
-            task.caricaIcona(icona);
+			// simbolo e colore della categoria al posto della foto (STUDIO_DESIGN_GRAFICA.md G1)
+			((ElementoViewHolder) viewholder).icona.setImageDrawable(
+					com.ncfsistemi.econ.utils.SimboliDisegno.drawableElemento(context, val.getAsInteger(Elementi.ID_ELEMENTO)));
 			//((ElementoViewHolder) viewholder).icona.setImageBitmap(Utility.getIconaThumb(context, Elementi.PATH_ICONE, icona));
 			((ElementoViewHolder) viewholder).icona.setTag(position);
 		}
@@ -92,12 +89,8 @@ public class GrigliaElementiAdapter extends EconListViewAdapter {
 			((ElementoViewHolder) viewholder).nome.setText(val.getAsString(Componenti.NOME_COMPONENTE));
 			((ElementoViewHolder) viewholder).nome.setTag(position);
 
-			String icona = val.getAsString(Componenti.ICONA);
-			//((ElementoViewHolder)viewholder).icona.setVisibility(View.INVISIBLE);
-            BitmapWorkerTask task = new BitmapWorkerTask(context,Componenti.PATH_ICONE,((ElementoViewHolder) viewholder).icona,false);
-            int altezza = context.getResources().getDimensionPixelSize(R.dimen.larghezza_icona);
-           // task.setDimensioni(altezza,altezza);
-            task.caricaIcona(icona);
+			((ElementoViewHolder) viewholder).icona.setImageDrawable(
+					com.ncfsistemi.econ.utils.SimboliDisegno.drawableComponente(context, val.getAsInteger(Componenti.ID_COMPONENTE)));
 			//((ElementoViewHolder) viewholder).icona.setImageBitmap(Utility.getIconaThumb(context, Componenti.PATH_ICONE, icona));
 			((ElementoViewHolder) viewholder).icona.setTag(position);
 		}

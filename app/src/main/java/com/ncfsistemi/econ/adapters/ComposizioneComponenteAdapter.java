@@ -51,7 +51,9 @@ public class ComposizioneComponenteAdapter extends EconListViewAdapter {
 
 		}
 
-		((ComposizioneComponenteViewHolder) viewholder).icona.setImageBitmap(Utility.getIconaThumb(context, Componenti.PATH_ICONE,
+		android.graphics.drawable.Drawable simbolo = com.ncfsistemi.econ.utils.SimboliDisegno.drawableComponente(context, val);
+		if (simbolo != null) ((ComposizioneComponenteViewHolder) viewholder).icona.setImageDrawable(simbolo);
+		else ((ComposizioneComponenteViewHolder) viewholder).icona.setImageBitmap(Utility.getIconaThumb(context, Componenti.PATH_ICONE,
 				val.getAsString(Componenti.ICONA)));
 
 		((ComposizioneComponenteViewHolder) viewholder).descrizione.setTag(position);

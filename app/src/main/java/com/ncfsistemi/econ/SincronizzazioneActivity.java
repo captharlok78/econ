@@ -835,6 +835,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         // icone e categorie del disegno possono essere cambiate (STUDIO_DESIGN.md §8.5)
         com.ncfsistemi.econ.utils.IconeDb.azzera();
         com.ncfsistemi.econ.utils.CategorieDisegno.azzera();
+        com.ncfsistemi.econ.utils.SimboliDisegno.azzera();
 
         sincronizzaDitta(api);
         allineaCatalogo(api);

@@ -169,10 +169,8 @@ public class EconElementoElettrico extends AbstractEconElemento {
 		Utility.autoScaleTextViewTextToHeight(testoCollegamentiView, (int) (dimensione / 1.8), (int) (maxPixelSize / 1.5), 10);
 		Utility.autoScaleTextViewTextToHeight(testoCollegamentiTubiView, (int) (dimensione / 1.8), (int) (maxPixelSize / 1.5), 10);
 
-		int dimResult = Utility.autoScaleTextViewTextToHeight(testoNumeroView, (int) (dimensione / 1.1), (int) (maxPixelSize / 0.9), 12);
-		if (dimResult > dimensione) {
-			dimensione = dimResult;
-		}
+		// numero sotto il cerchio del simbolo (circa il 30% in basso del riquadro)
+		testoNumeroView.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, Math.max(10f, dimensione * 0.28f));
 
 		sfondo.getLayoutParams().height = dimensione;
 		sfondo.getLayoutParams().width = dimensione;
@@ -326,30 +324,24 @@ public class EconElementoElettrico extends AbstractEconElemento {
 
 	public void setIdCategoria(int idCategoria) {
 		this.idCategoria = idCategoria;
+		aggiornaSimbolo();
+	}
 
-		if (getIdPreventivo() == 0 || isElementoAltroOrdine()) {
-			// sfondo.setBackgroundColor(Color.parseColor(COLORE_CANTIERE));
-			if (getIdPreventivo()==0){
-				sfondo.setBackgroundResource(R.drawable.elemento_cantiere);
-				testoNumeroView.setTextColor(Color.parseColor(Utility.getColoreCategoria(idCategoria)));
-			}
-			if (isElementoAltroOrdine()){
-				sfondo.setBackgroundResource(R.drawable.elemento_altro_ordine);
-				testoNumeroView.setTextColor(Color.parseColor(Utility.getColoreCategoria(idCategoria)));
-			}
-
-
-		} else {
-			sfondo.setBackgroundResource(Utility.getIdSfondoDaCategoria(idCategoria));
-			//per le automazioni metto testo bianco sennò non si legge
-			if (com.ncfsistemi.econ.utils.CategorieDisegno.classica(idCategoria) == com.ncfsistemi.econ.utils.CategorieDisegno.AUTOMAZIONI) {
-				testoNumeroView.setTextColor(Color.parseColor("#FFFFFF"));
-			}
-
-
-			// sfondo.setBackgroundColor(Color.parseColor(Utility.getColoreCategoria(idCategoria)));
-
-		}
+	/**
+	 * Cerchio del colore della categoria con il simbolo dell'elemento e il numero sotto (STUDIO_DESIGN_GRAFICA.md G1),
+	 * come nella pagina Disegno del portale: pieno se l'elemento è nel documento scelto, chiaro se è solo nel cantiere,
+	 * grigio col bordo colorato se è di un altro ordine.
+	 */
+	private void aggiornaSimbolo() {
+		com.ncfsistemi.econ.utils.SimboliDisegno.Voce voce = idElementoListino > 0
+				? com.ncfsistemi.econ.utils.SimboliDisegno.elemento(idElementoListino)
+				: com.ncfsistemi.econ.utils.SimboliDisegno.categoriaElementi(idCategoria);
+		int stile = isElementoAltroOrdine() ? com.ncfsistemi.econ.utils.SimboliDisegno.Simbolo.ALTRO_ORDINE
+				: getIdPreventivo() == 0 ? com.ncfsistemi.econ.utils.SimboliDisegno.Simbolo.SOLO_CANTIERE
+				: com.ncfsistemi.econ.utils.SimboliDisegno.Simbolo.NEL_DOCUMENTO;
+		sfondo.setBackground(new com.ncfsistemi.econ.utils.SimboliDisegno.Simbolo(getContext(), voce)
+				.setStile(stile).setAltezzaCerchio(0.7f));
+		testoNumeroView.setTextColor(Color.parseColor("#263238"));
 	}
 
 	public int getIdPreventivo() {
@@ -374,6 +366,7 @@ public class EconElementoElettrico extends AbstractEconElemento {
 
 	public void setIdElementoListino(int idElementoListino) {
 		this.idElementoListino = idElementoListino;
+		if (sfondo != null && idCategoria != 0) aggiornaSimbolo();
 
 	}
 

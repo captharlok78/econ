@@ -212,7 +212,8 @@ public class FinestraComponentiActivity extends EconActivity implements OnClickL
 			ContentValues val = (ContentValues) lista.get(i);
 			EconItemMenu item = new EconItemMenu(this);
 			item.setTesto(val.getAsString(CategorieComponenti.NOME));
-			item.setIcona(CategorieComponenti.PATH_ICONE, val.getAsString(CategorieComponenti.ICONA));
+			item.setSimbolo(com.ncfsistemi.econ.utils.SimboliDisegno.drawable(this,
+					com.ncfsistemi.econ.utils.SimboliDisegno.categoriaComponenti(val.getAsInteger(CategorieComponenti.ID_CATEGORIA_COMPONENTE))));
 
 			item.setOnClickListener(this);
 			item.setTag("" + i);
@@ -285,8 +286,7 @@ public class FinestraComponentiActivity extends EconActivity implements OnClickL
 
 				Utility.mostraDialogPersonalizzato(
 						val.getAsString(Componenti.NOME_COMPONENTE).toUpperCase(Locale.getDefault()),
-						new BitmapDrawable(getResources(), Utility.getIconaScalata(this, Componenti.PATH_ICONE,
-								val.getAsString(Componenti.ICONA))), this, campi, this.getString(R.string.conferma),
+						com.ncfsistemi.econ.utils.SimboliDisegno.bitmap(this, com.ncfsistemi.econ.utils.SimboliDisegno.componente(val.getAsInteger(Componenti.ID_COMPONENTE)), getResources().getDimensionPixelSize(R.dimen.altezza_menu_categorie)), this, campi, this.getString(R.string.conferma),
 						this.getString(R.string.annulla), new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialogInterface, int i) {

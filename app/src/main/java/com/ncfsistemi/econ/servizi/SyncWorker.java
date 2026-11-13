@@ -161,6 +161,7 @@ public class SyncWorker extends Worker {
                 applyDownloadedData(ctx, scaricato);
                 com.ncfsistemi.econ.utils.IconeDb.azzera();
                 com.ncfsistemi.econ.utils.CategorieDisegno.azzera();
+                com.ncfsistemi.econ.utils.SimboliDisegno.azzera();
                 dl = scaricato.comeRisposta(); // timestamp e perimetro, senza le tabelle
             }
 

@@ -259,7 +259,8 @@ public class FinestraElementiActivity extends EconActivity implements OnClickLis
             ContentValues val = (ContentValues) lista.get(i);
             EconItemMenu item = new EconItemMenu(this);
             item.setTesto(val.getAsString(CategorieGenerali.NOME));
-            item.setIcona(CategorieGenerali.PATH_ICONE, val.getAsString(CategorieGenerali.ICONA));
+            item.setSimbolo(com.ncfsistemi.econ.utils.SimboliDisegno.drawable(this,
+                    com.ncfsistemi.econ.utils.SimboliDisegno.categoriaElementi(val.getAsInteger(CategorieGenerali.ID_CATEGORIA_GENERALE))));
 
             item.setOnClickListener(this);
             item.setTag("" + i);

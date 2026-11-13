@@ -840,6 +840,8 @@ public class EconPiantinaGridView extends GridView implements OnTouchListener, V
 				elemento.setIdCategoria(1);
 			}
 			*/
+			Integer idElem = val.getAsInteger(ElementiCantiere.ID_ELEMENTO);
+			if (idElem != null) elemento.setIdElementoListino(idElem);
 			elemento.setIdCategoria(val.getAsInteger(Elementi.ID_CATEGORIA_GENERALE));
 			elemento.setIcona(val.getAsString(Elementi.ICONA));
 			elemento.setNumero("" + val.getAsInteger(ElementiCantiere.NUMERO_IDENTIFICATIVO));
