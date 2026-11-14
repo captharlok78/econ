@@ -38,6 +38,7 @@ public class CollegamentiElementoActivity extends EconActivity implements OnItem
 		super.onCreate(savedInstanceState);
         setVisualizzazionePopup();
 		setContentView(R.layout.activity_collegamenti_elemento);
+		setText(R.id.textView_titolo, getString(R.string.collegamenti));
 
 		idElemento = getIntent().getIntExtra("ID_ELEMENTO", 0);
 		lista = (ListView) findViewById(R.id.lista);

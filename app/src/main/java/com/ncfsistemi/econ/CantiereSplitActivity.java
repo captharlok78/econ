@@ -661,7 +661,8 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 			fragmentPagerLocale.setArguments(params);
 			impostaFragment(R.id.destra, fragmentPagerLocale);
 			findViewById(R.id.button_nuovo_elem).setVisibility(View.GONE);
-			if (isModificheBloccate()) {
+			// la barra in fondo serve solo alla piantina classica
+			if (isModificheBloccate() || !com.ncfsistemi.econ.disegno.DisegnoActivity.classico(this)) {
 				menuinferiore.setVisibility(View.GONE);
 
 			} else {
@@ -1037,7 +1038,7 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 	}
 
 	/** Apre il disegno a tre pannelli del locale (com.ncfsistemi.econ.disegno.DisegnoActivity). */
-	private void apriDisegno(int idLocale) {
+	public void apriDisegno(int idLocale) {
 		Intent intent = new Intent(this, com.ncfsistemi.econ.disegno.DisegnoActivity.class);
 		intent.putExtra(Cantieri.ID_CANTIERE, cantiere);
 		intent.putExtra(Locali.ID_LOCALE, idLocale);
@@ -1046,9 +1047,9 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 	}
 
 	private void aggiornaElementiPiantina(boolean dragattivo) {
-		if (tipoElementoSelezionato == LOCALE) {
+		if (tipoElementoSelezionato == LOCALE && fragmentPagerLocale != null) {
 			fragmentPagerLocale.aggiornaElementiPiantina(dragattivo, isModificheBloccate());
-			if (isModificheBloccate()) {
+			if (isModificheBloccate() || !com.ncfsistemi.econ.disegno.DisegnoActivity.classico(this)) {
 				menuinferiore.setVisibility(View.GONE);
 			} else {
 				menuinferiore.setVisibility(View.VISIBLE);
@@ -1057,6 +1058,25 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 	}
 
 	public void creaImmaginiPiantine(int inizio, int idPreventivoStampa) {
+		if (inizio == 0 && !com.ncfsistemi.econ.disegno.DisegnoActivity.classico(this)) {
+			// disegno nuovo: le piantine si disegnano direttamente (come nell'Excel di conformita'), senza aprire
+			// la piantina classica locale per locale
+			try {
+				java.util.Map<Integer, byte[]> png = com.ncfsistemi.econ.export.ConformitaXLS.piantine(this, cantiere);
+				for (java.util.Map.Entry<Integer, byte[]> e : png.entrySet()) {
+					java.io.FileOutputStream out = new java.io.FileOutputStream(Utility.getFileImmaginePiantina(e.getKey()));
+					try {
+						out.write(e.getValue());
+					} finally {
+						out.close();
+					}
+				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			stampaComposizioneScatole(idPreventivoStampa, true);
+			return;
+		}
 		split.collapse();
 		if (inizio == 0) {
 			AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this);

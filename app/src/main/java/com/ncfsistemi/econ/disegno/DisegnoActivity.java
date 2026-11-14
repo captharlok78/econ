@@ -89,6 +89,9 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
     private LinearLayout pannelloSinistro, contenutoSinistro, pannelloDestro, contenutoDestro;
     private ScrollView scrollSinistro;
     private PiantinaView piantina;
+    /** Schermo intero: pannelli laterali e barre di sistema nascosti, resta solo la piantina con la barra dei modi. */
+    private boolean schermoIntero = false;
+    private TextView pulsanteSchermoIntero;
 
     private DisegnoDati.Locale datiLocale;
     private List<DisegnoDati.Posato> posati = new ArrayList<>();
@@ -96,6 +99,8 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
     private DisegnoDati.VoceTavolozza daPosare;
     private int categoriaAperta = -1;
     private final Map<Integer, List<DisegnoDati.VoceTavolozza>> cacheTavolozza = new HashMap<>();
+    /** Filtro della tavolozza per categoria (0 = Preferiti): resta finché non lo si toglie con la ×. */
+    private final Map<Integer, String> filtriTavolozza = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +114,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         if (savedInstanceState != null) {
             locale = savedInstanceState.getInt("locale", locale);
             modo = savedInstanceState.getInt("modo", modo);
+            schermoIntero = savedInstanceState.getBoolean("schermoIntero", false);
         }
         preventivo = Sessione.getIdPreventivoSelezionato();
         bloccato = getIntent().getBooleanExtra("MODIFICHE_BLOCCATE", false) || DisegnoDati.documentoBloccato(this, preventivo);
@@ -116,6 +122,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
 
         setContentView(costruisci());
         getWindow().setStatusBarColor(BLU);
+        if (schermoIntero) applicaSchermoIntero();
     }
 
     @Override
@@ -123,6 +130,51 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         super.onSaveInstanceState(out);
         out.putInt("locale", locale);
         out.putInt("modo", modo);
+        out.putBoolean("schermoIntero", schermoIntero);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // indietro dallo schermo intero torna ai pannelli, non chiude il disegno
+        if (schermoIntero) {
+            impostaSchermoIntero(false);
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    // ------------------------------------------------------------------ schermo intero
+
+    private void impostaSchermoIntero(boolean si) {
+        if (schermoIntero == si) return;
+        schermoIntero = si;
+        applicaSchermoIntero();
+    }
+
+    private void applicaSchermoIntero() {
+        androidx.core.view.WindowInsetsControllerCompat wc =
+                androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (schermoIntero) {
+            pannelloSinistro.setVisibility(View.GONE);
+            pannelloDestro.setVisibility(View.GONE);
+            wc.setSystemBarsBehavior(androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            wc.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars());
+        } else {
+            wc.show(androidx.core.view.WindowInsetsCompat.Type.systemBars());
+            if (!stretto) pannelloSinistro.setVisibility(View.VISIBLE);
+            costruisciDestra();
+        }
+        if (pulsanteSchermoIntero != null) {
+            pulsanteSchermoIntero.setText(schermoIntero ? "\uf066" : "\uf065");
+            String d = schermoIntero ? "Esci dallo schermo intero" : "Schermo intero";
+            pulsanteSchermoIntero.setContentDescription(d);
+            androidx.appcompat.widget.TooltipCompat.setTooltipText(pulsanteSchermoIntero, d);
+        }
+    }
+
+    /** Mostra o nasconde un pannello laterale; a schermo intero restano nascosti. */
+    private void vedi(View pannello, boolean si) {
+        pannello.setVisibility(si && !schermoIntero ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -180,7 +232,9 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         zoom.setElevation(px(3));
         zoom.addView(iconaPulsante("", "Ingrandisci", v -> piantina.zoom(1.25f)));
         zoom.addView(iconaPulsante("", "Riduci", v -> piantina.zoom(0.8f)));
-        zoom.addView(iconaPulsante("", "Adatta", v -> piantina.adatta()));
+        pulsanteSchermoIntero = iconaPulsante("\uf065", "Schermo intero", v -> impostaSchermoIntero(!schermoIntero));
+        zoom.addView(pulsanteSchermoIntero);
+        zoom.addView(iconaPulsante("\uf05b", "Adatta alla stanza", v -> piantina.adatta()));
         FrameLayout.LayoutParams lpZ = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
                 Gravity.BOTTOM | Gravity.END);
         lpZ.setMargins(px(12), px(12), px(12), px(12));
@@ -212,7 +266,9 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         b.addView(iconaBianca("", "Indietro", v -> finish()));
         if (stretto) {
             b.addView(iconaBianca("", "Struttura e tavolozza", v -> {
-                pannelloSinistro.setVisibility(pannelloSinistro.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+                boolean apri = schermoIntero || pannelloSinistro.getVisibility() != View.VISIBLE;
+                impostaSchermoIntero(false);
+                vedi(pannelloSinistro, apri);
             }));
         }
 
@@ -254,6 +310,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         b.addView(modi);
         aggiornaModi();
 
+        b.addView(iconaBianca("\uf1c3", "Dichiarazione di conformità (Excel)", v -> esportaConformita()));
         b.addView(iconaBianca("", "Altro", this::menu));
         return b;
     }
@@ -265,6 +322,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
             pm.getMenu().add(0, 2, 0, "Forma del locale (6×6)");
         }
         pm.getMenu().add(0, 3, 0, "Adatta la piantina");
+        pm.getMenu().add(0, 5, 0, "Dichiarazione di conformità (Excel)");
         pm.getMenu().add(0, 4, 0, "Usa il disegno classico");
         pm.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
@@ -281,6 +339,9 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
                 }
                 case 3:
                     piantina.adatta();
+                    return true;
+                case 5:
+                    esportaConformita();
                     return true;
                 case 4:
                     new MaterialAlertDialogBuilder(this)
@@ -300,6 +361,67 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         pm.show();
     }
 
+    /**
+     * Excel per la dichiarazione di conformità di tutto il cantiere (un foglio per locale con piantina, elementi,
+     * componenti e collegamenti; stesso file del portale). Le piantine si disegnano qui, il file in background.
+     */
+    private void esportaConformita() {
+        androidx.appcompat.app.AlertDialog attesa = new MaterialAlertDialogBuilder(this)
+                .setMessage("Creo l'Excel per la dichiarazione di conformità…").setCancelable(false).create();
+        attesa.show();
+        // un giro sul thread della UI per far comparire la finestra prima di disegnare le piantine
+        piantina.post(() -> {
+            final Map<Integer, byte[]> piantine;
+            try {
+                piantine = com.ncfsistemi.econ.export.ConformitaXLS.piantine(this, cantiere);
+            } catch (Exception e) {
+                attesa.dismiss();
+                Toast.makeText(this, "Errore nel disegno delle piantine: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                return;
+            }
+            new Thread(() -> {
+                String percorso = null;
+                String errore = null;
+                try {
+                    percorso = new com.ncfsistemi.econ.export.ConformitaXLS(getApplicationContext()).genera(cantiere, piantine);
+                } catch (Exception e) {
+                    errore = e.getMessage();
+                }
+                final String file = percorso, err = errore;
+                runOnUiThread(() -> {
+                    if (isFinishing()) return;
+                    attesa.dismiss();
+                    if (file == null) {
+                        Toast.makeText(this, "Excel non creato: " + err, Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    apriFile(new java.io.File(file));
+                });
+            }).start();
+        });
+    }
+
+    private void apriFile(java.io.File file) {
+        android.net.Uri uri = com.ncfsistemi.econ.utils.Utility.uriCondivisibile(this, file);
+        Intent apri = new Intent(Intent.ACTION_VIEW);
+        apri.setDataAndType(uri, "application/vnd.ms-excel");
+        apri.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        try {
+            startActivity(apri);
+        } catch (android.content.ActivityNotFoundException e) {
+            // nessuna app per i fogli di calcolo: si propone di inviarlo
+            Intent invia = new Intent(Intent.ACTION_SEND);
+            invia.setType("application/vnd.ms-excel");
+            invia.putExtra(Intent.EXTRA_STREAM, uri);
+            invia.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            try {
+                startActivity(Intent.createChooser(invia, "Invia l'Excel"));
+            } catch (Exception ex) {
+                Toast.makeText(this, "Excel salvato in " + file.getPath(), Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
     private void cambiaModo(int m) {
         if (bloccato && m != PiantinaView.GUARDA && m != PiantinaView.COLLEGA) {
             Toast.makeText(this, "Il documento scelto non è aperto: il disegno si può solo guardare", Toast.LENGTH_SHORT).show();
@@ -307,7 +429,11 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         }
         modo = m;
         piantina.setModo(m);
-        if (m == PiantinaView.POSA && stretto) pannelloSinistro.setVisibility(View.VISIBLE);
+        if (m == PiantinaView.POSA) {
+            // per posare serve la tavolozza
+            impostaSchermoIntero(false);
+            if (stretto) vedi(pannelloSinistro, true);
+        }
         aggiornaModi();
         aggiornaSuggerimento();
     }
@@ -382,10 +508,10 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         if (!bloccato) {
             contenutoSinistro.addView(intestazione("TAVOLOZZA", null));
             contenutoSinistro.addView(rigaCategoria(0, "Preferiti", null));
-            if (categoriaAperta == 0) contenutoSinistro.addView(griglia(0));
+            if (categoriaAperta == 0) contenutoSinistro.addView(tavolozzaFiltrata(0, "Preferiti"));
             for (DisegnoDati.Categoria c : DisegnoDati.categorie(this)) {
                 contenutoSinistro.addView(rigaCategoria(c.id, c.nome, SimboliDisegno.drawable(this, SimboliDisegno.categoriaElementi(c.id))));
-                if (categoriaAperta == c.id) contenutoSinistro.addView(griglia(c.id));
+                if (categoriaAperta == c.id) contenutoSinistro.addView(tavolozzaFiltrata(c.id, c.nome));
             }
         }
         scrollSinistro.post(() -> scrollSinistro.scrollTo(0, scroll));
@@ -421,7 +547,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
                 scelto = null;
                 piantina.adatta();
                 ricarica();
-                if (stretto) pannelloSinistro.setVisibility(View.GONE);
+                if (stretto) vedi(pannelloSinistro, false);
             });
         }
         r.addView(nome, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
@@ -475,18 +601,109 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         return r;
     }
 
-    private View griglia(int idCategoria) {
+    private List<DisegnoDati.VoceTavolozza> vociTavolozza(int idCategoria) {
         List<DisegnoDati.VoceTavolozza> voci = cacheTavolozza.get(idCategoria);
         if (voci == null) {
             voci = DisegnoDati.tavolozza(this, idCategoria);
             cacheTavolozza.put(idCategoria, voci);
         }
+        return voci;
+    }
+
+    /**
+     * Categoria aperta della tavolozza: casella di ricerca (sul nome, tutte le parole scritte, maiuscole indifferenti)
+     * con la × che toglie il filtro, poi la griglia. Scrivendo si ridisegna solo la griglia, la tastiera resta aperta.
+     */
+    private View tavolozzaFiltrata(int idCategoria, String nomeCategoria) {
+        LinearLayout box = verticale();
+        List<DisegnoDati.VoceTavolozza> tutte = vociTavolozza(idCategoria);
+        FrameLayout contenitoreGriglia = new FrameLayout(this);
+        if (tutte.size() > 0) {
+            LinearLayout riga = new LinearLayout(this);
+            riga.setOrientation(LinearLayout.HORIZONTAL);
+            riga.setGravity(Gravity.CENTER_VERTICAL);
+            riga.setBackground(arrotondato(Color.WHITE, BORDO, 8));
+            riga.setPadding(px(8), 0, 0, 0);
+            TextView lente = new TextView(this);
+            lente.setTypeface(fa);
+            lente.setText("\uf002");
+            lente.setTextColor(TESTO2);
+            lente.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+            riga.addView(lente);
+            EditText cerca = new EditText(this);
+            cerca.setHint("Cerca in " + nomeCategoria);
+            cerca.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+            cerca.setSingleLine(true);
+            cerca.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+            cerca.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_DONE);
+            cerca.setBackground(null);
+            cerca.setPadding(px(8), px(8), px(4), px(8));
+            riga.addView(cerca, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+            TextView togli = iconaPulsante("\uf00d", "Togli il filtro", null);
+            togli.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+            togli.setLayoutParams(new LinearLayout.LayoutParams(px(38), px(38)));
+            riga.addView(togli);
+            LinearLayout.LayoutParams lpR = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lpR.setMargins(px(2), px(6), px(2), px(2));
+            box.addView(riga, lpR);
+
+            String filtro = filtriTavolozza.get(idCategoria);
+            if (filtro != null) cerca.setText(filtro);
+            togli.setVisibility(TextUtils.isEmpty(filtro) ? View.INVISIBLE : View.VISIBLE);
+            togli.setOnClickListener(v -> {
+                cerca.setText("");
+                nascondiTastiera(cerca);
+            });
+            cerca.addTextChangedListener(new android.text.TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence c, int a, int b, int d) { }
+                @Override public void onTextChanged(CharSequence c, int a, int b, int d) { }
+                @Override public void afterTextChanged(android.text.Editable e) {
+                    String f = e.toString();
+                    if (f.trim().isEmpty()) filtriTavolozza.remove(idCategoria);
+                    else filtriTavolozza.put(idCategoria, f);
+                    togli.setVisibility(f.isEmpty() ? View.INVISIBLE : View.VISIBLE);
+                    contenitoreGriglia.removeAllViews();
+                    contenitoreGriglia.addView(griglia(idCategoria));
+                }
+            });
+            cerca.setOnEditorActionListener((v, azione, ev) -> {
+                nascondiTastiera(cerca);
+                return true;
+            });
+        }
+        contenitoreGriglia.addView(griglia(idCategoria));
+        box.addView(contenitoreGriglia);
+        return box;
+    }
+
+    private void nascondiTastiera(View v) {
+        v.clearFocus();
+        android.view.inputmethod.InputMethodManager imm =
+                (android.view.inputmethod.InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+    }
+
+    private static boolean corrisponde(String nome, String filtro) {
+        if (filtro == null || filtro.trim().isEmpty()) return true;
+        String n = nome == null ? "" : nome.toLowerCase(Locale.ROOT);
+        for (String parola : filtro.toLowerCase(Locale.ROOT).trim().split("\\s+")) {
+            if (!n.contains(parola)) return false;
+        }
+        return true;
+    }
+
+    private View griglia(int idCategoria) {
+        List<DisegnoDati.VoceTavolozza> tutte = vociTavolozza(idCategoria);
+        String filtro = filtriTavolozza.get(idCategoria);
+        List<DisegnoDati.VoceTavolozza> voci = new ArrayList<>();
+        for (DisegnoDati.VoceTavolozza v : tutte) if (corrisponde(v.nome, filtro)) voci.add(v);
         GridLayout g = new GridLayout(this);
         g.setColumnCount(3);
         g.setPadding(0, px(4), 0, px(8));
         if (voci.isEmpty()) {
             TextView t = new TextView(this);
-            t.setText(idCategoria == 0 ? "Nessun preferito" : "Nessun elemento");
+            t.setText(!tutte.isEmpty() ? "Nessun elemento con \"" + filtro.trim() + "\""
+                    : idCategoria == 0 ? "Nessun preferito" : "Nessun elemento");
             t.setTextColor(TESTO2);
             t.setPadding(px(8), px(4), px(8), px(4));
             return t;
@@ -530,14 +747,14 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         contenutoDestro.removeAllViews();
         if (scelto == null) {
             if (stretto && modo != PiantinaView.GUARDA) {
-                pannelloDestro.setVisibility(View.GONE);
+                vedi(pannelloDestro, false);
                 return;
             }
-            pannelloDestro.setVisibility(View.VISIBLE);
+            vedi(pannelloDestro, true);
             riepilogoLocale();
             return;
         }
-        pannelloDestro.setVisibility(View.VISIBLE);
+        vedi(pannelloDestro, true);
         DisegnoDati.Posato p = scelto;
         DisegnoDati.Dettaglio d = DisegnoDati.dettaglio(this, p);
 
@@ -769,7 +986,8 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         if (modo == PiantinaView.POSA && !bloccato) {
             if (daPosare == null) {
                 Toast.makeText(this, "Scegli prima un elemento nella tavolozza", Toast.LENGTH_SHORT).show();
-                if (stretto) pannelloSinistro.setVisibility(View.VISIBLE);
+                impostaSchermoIntero(false);
+                if (stretto) vedi(pannelloSinistro, true);
                 return;
             }
             int id = DisegnoDati.posa(this, cantiere, locale, preventivo, daPosare.id, x, y);

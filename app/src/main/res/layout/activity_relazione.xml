@@ -1,42 +1,27 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Aperta dal disegno: testata blu e card, grafica del disegno (gli id restano quelli di prima) -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_econ_popup"
-    android:padding="@dimen/margine"
+    android:background="@color/disegno_sfondo"
+    android:orientation="vertical"
     tools:context=".CollegamentoActivity" >
+
+    <include layout="@layout/testata_disegno" />
 
     <RelativeLayout
         android:id="@+id/contenitore"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-
-        <TextView
-            android:id="@+id/textView_titolo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="@dimen/padding_bottone"
-            android:text="Collegamento"
-            android:textAllCaps="true"
-            android:visibility="invisible" />
-
-        <ImageButton
-            android:id="@+id/imageButton_chiudi"
-            style="@style/bottoneLista"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:background="@drawable/bg_bottone_grigio_arrotondato"
-            android:onClick="chiudi"
-            android:scaleType="fitXY"
-            android:src="@android:drawable/ic_delete" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="12dp" >
 
         <ScrollView
             android:id="@+id/scrollCampi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/footer_dett"
-            android:layout_below="@id/textView_titolo" >
+            android:layout_alignParentTop="true" >
 
             <RelativeLayout
                 android:id="@+id/relativeCampi"
@@ -48,7 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/padding_bottone"
-                android:background="@drawable/bg_econ_bordo_blu"
+                android:background="@drawable/bg_disegno_card"
                 android:orientation="vertical"
                 android:paddingBottom="@dimen/padding_drag"
                 android:paddingLeft="@dimen/padding_drag"
@@ -110,7 +95,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/margine"
-                    android:background="@drawable/bg_econ_bordo_blu"
+                    android:background="@drawable/bg_disegno_card"
                     android:orientation="vertical"
                     android:layout_below="@id/linearElementoA"
                     android:paddingBottom="@dimen/padding_drag"
@@ -208,4 +193,4 @@
         </LinearLayout>
     </RelativeLayout>
 
-</FrameLayout>
+</LinearLayout>

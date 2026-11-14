@@ -95,6 +95,7 @@ public class ComposizioneLiberaActivity extends EconActivity implements OnItemCl
 			findViewById(R.id.linearCampi).setVisibility(View.GONE);
 		}
 		iconaElemento = (ImageView) findViewById(R.id.imageView_iconaElemento);
+		iconaElemento.setVisibility(View.VISIBLE);
 
 		lista = (ListView) findViewById(R.id.listView_componenti);
 		lista.setOnItemClickListener(this);

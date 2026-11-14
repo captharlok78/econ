@@ -190,7 +190,7 @@
             android:exported="true"
             android:configChanges="orientation|screenSize"
             android:label=""
-            android:theme="@style/EconPopup"></activity>
+            android:theme="@style/Econ.Disegno"></activity>
         <activity
             android:name=".FinestraComponentiActivity"
             android:exported="true"
@@ -213,7 +213,7 @@
             android:exported="true"
             android:configChanges="orientation|screenSize"
             android:label=""
-            android:theme="@style/EconPopup"></activity>
+            android:theme="@style/Econ.Disegno"></activity>
         <activity
             android:name=".CodiciArticoliActivity"
             android:exported="true"
@@ -235,19 +235,19 @@
             android:exported="true"
             android:configChanges="orientation|screenSize"
             android:label=""
-            android:theme="@style/EconPopup"></activity>
+            android:theme="@style/Econ.Disegno"></activity>
         <activity
             android:name=".RelazioneActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize"
             android:label=""
-            android:theme="@style/EconPopup"></activity>
+            android:theme="@style/Econ.Disegno"></activity>
         <activity
             android:name=".CollegamentiElementoActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize"
             android:label=""
-            android:theme="@style/EconPopup"></activity>
+            android:theme="@style/Econ.Disegno"></activity>
         <activity
             android:name=".FinestraLocaliPreferitiActivity"
             android:exported="true"
@@ -259,7 +259,7 @@
             android:exported="true"
             android:configChanges="orientation|screenSize"
             android:label=""
-            android:theme="@style/EconPopup"></activity>
+            android:theme="@style/Econ.Disegno"></activity>
         <activity
             android:name=".EconFileChooserActivity"
             android:exported="true"
@@ -320,7 +320,7 @@
             android:exported="true"
             android:configChanges="orientation|screenSize"
             android:label=""
-            android:theme="@style/EconPopup"></activity>
+            android:theme="@style/Econ.Disegno"></activity>
         <activity
             android:name="com.ncfsistemi.general.simplecropimage.CropImage"
             android:exported="true"

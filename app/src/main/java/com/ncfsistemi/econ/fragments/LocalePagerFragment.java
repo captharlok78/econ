@@ -19,6 +19,12 @@ public class LocalePagerFragment extends EconFragment {
 	SectionsPagerAdapter mSectionsPagerAdapter;
 	ViewPager mViewPager;
 	LocalePiantinaFragment fragmentPiantina = null;
+	/** Disegno nuovo (DisegnoActivity): la prima linguetta e' l'anteprima nella grafica nuova, non la piantina classica. */
+	LocaleDisegnoFragment fragmentDisegno = null;
+
+	private boolean disegnoNuovo() {
+		return getActivity() != null && !com.ncfsistemi.econ.disegno.DisegnoActivity.classico(getActivity());
+	}
 
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
@@ -28,6 +34,11 @@ public class LocalePagerFragment extends EconFragment {
 
 		@Override
 		public Fragment getItem(int position) {
+			if (position == 0 && disegnoNuovo()) {
+				fragmentDisegno = new LocaleDisegnoFragment();
+				fragmentDisegno.setArguments(getArguments());
+				return fragmentDisegno;
+			}
 			if (position == 0) {
 				fragmentPiantina = new LocalePiantinaFragment();
 				fragmentPiantina.setArguments(getArguments());
@@ -63,7 +74,7 @@ public class LocalePagerFragment extends EconFragment {
 
 			switch (position) {
 			case 0:
-				return getString(R.string.piantina).toUpperCase(l);
+				return disegnoNuovo() ? "DISEGNO" : getString(R.string.piantina).toUpperCase(l);
 			case 1:
 				return getString(R.string.dati_locale).toUpperCase(l);
             case 2:
@@ -98,6 +109,10 @@ public class LocalePagerFragment extends EconFragment {
 
 	public void aggiornaElementiPiantina(boolean dragattivo, boolean modificheBloccate) {
 		// TODO Auto-generated method stub
+		if (fragmentPiantina == null) {
+			if (fragmentDisegno != null) fragmentDisegno.aggiorna();
+			return;
+		}
 		fragmentPiantina.aggiornaElementiPiantina(dragattivo);
 		fragmentPiantina.setModificheBloccate(modificheBloccate);
 
@@ -105,6 +120,10 @@ public class LocalePagerFragment extends EconFragment {
 
 	public void aggiornaElementiPortePiantina() {
 		// TODO Auto-generated method stub
+		if (fragmentPiantina == null) {
+			if (fragmentDisegno != null) fragmentDisegno.aggiorna();
+			return;
+		}
 		fragmentPiantina.aggiornaElementiPortePiantina();
 	}
 

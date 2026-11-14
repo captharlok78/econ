@@ -62,6 +62,8 @@ public class PiantinaView extends View {
     private Ascoltatore ascoltatore;
 
     private float scala = 1f, panX = 0f, panY = 0f;
+    /** true finché l'utente non zooma o sposta: la piantina resta adattata alla stanza anche se cambia la misura. */
+    private boolean adattata = true;
     private final ScaleGestureDetector scaleDetector;
     private final float slop;
     private final float dp;
@@ -138,6 +140,7 @@ public class PiantinaView extends View {
                 panY = cy - (cy - panY) * f;
                 scala = nuova;
                 scalato = true;
+                adattata = false;
                 invalidate();
                 return true;
             }
@@ -147,11 +150,13 @@ public class PiantinaView extends View {
     // ------------------------------------------------------------------ dati
 
     public void setDati(DisegnoDati.Locale locale, List<DisegnoDati.Posato> elementi, List<int[]> linee) {
+        boolean nuovoLocale = locale != null && (this.locale == null || this.locale.id != locale.id);
         this.locale = locale;
         this.elementi = elementi == null ? new ArrayList<>() : elementi;
         this.linee = linee == null ? new ArrayList<>() : linee;
         simboli.clear();
-        invalidate();
+        if (nuovoLocale || adattata) adatta();
+        else invalidate();
     }
 
     public void setAscoltatore(Ascoltatore a) {
@@ -169,16 +174,76 @@ public class PiantinaView extends View {
     }
 
     public void zoom(float fattore) {
-        scala = Math.max(0.6f, Math.min(4f, scala * fattore));
-        panX *= fattore;
-        panY *= fattore;
+        float nuova = Math.max(0.6f, Math.min(4f, scala * fattore));
+        float f = nuova / scala;
+        scala = nuova;
+        panX *= f;
+        panY *= f;
+        adattata = false;
         invalidate();
     }
 
+    /**
+     * Inquadra la stanza (quadretti pieni ed elementi posati), non tutta la griglia: zoom e centro calcolati sulla misura
+     * attuale della vista. Se la vista non è ancora misurata si rifà in onSizeChanged.
+     */
     public void adatta() {
+        adattata = true;
+        scala = 1f;
+        panX = panY = 0f;
+        if (locale == null || getWidth() == 0 || getHeight() == 0) {
+            invalidate();
+            return;
+        }
+        int n = locale.n;
+        float minX = 1f, minY = 1f, maxX = 0f, maxY = 0f;
+        boolean trovato = false;
+        for (int r = 0; r < n; r++) {
+            for (int k = 0; k < n; k++) {
+                if (!pieno(r, k)) continue;
+                trovato = true;
+                minX = Math.min(minX, k / (float) n);
+                maxX = Math.max(maxX, (k + 1) / (float) n);
+                minY = Math.min(minY, r / (float) n);
+                maxY = Math.max(maxY, (r + 1) / (float) n);
+            }
+        }
+        for (DisegnoDati.Posato p : elementi) {
+            // centro dell'elemento in frazione del lato, con un margine di mezzo cerchio
+            float cx = p.x / 200f + 1f / 32f, cy = p.y / 200f + 1f / 32f, m = 1f / 24f;
+            trovato = true;
+            minX = Math.min(minX, cx - m);
+            maxX = Math.max(maxX, cx + m);
+            minY = Math.min(minY, cy - m);
+            maxY = Math.max(maxY, cy + m);
+        }
+        if (!trovato) {
+            invalidate();
+            return;
+        }
+        float base = lato(); // con scala 1
+        float spazioW = getWidth() - 32 * dp, spazioH = getHeight() - 32 * dp;
+        float s = Math.min(spazioW / Math.max(0.05f, (maxX - minX) * base), spazioH / Math.max(0.05f, (maxY - minY) * base));
+        scala = Math.max(0.6f, Math.min(4f, s));
+        float L = lato();
+        panX = L * (0.5f - (minX + maxX) / 2f);
+        panY = L * (0.5f - (minY + maxY) / 2f);
+        invalidate();
+    }
+
+    /** Tutta la griglia del locale, senza zoom (per le immagini dell'Excel di conformità, come sul portale). */
+    public void inquadraTutto() {
+        adattata = false;
         scala = 1f;
         panX = panY = 0f;
         invalidate();
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        // pannelli aperti/chiusi o schermo intero: se l'utente non ha zoomato, si reinquadra la stanza
+        if (adattata) adatta();
     }
 
     // ------------------------------------------------------------------ geometria
@@ -445,6 +510,7 @@ public class PiantinaView extends View {
                 } else if (mosso && !scaleDetector.isInProgress() && e.getPointerCount() == 1 && !multiTocco) {
                     panX += x - ultimoX;
                     panY += y - ultimoY;
+                    adattata = false;
                     ultimoX = x;
                     ultimoY = y;
                     invalidate();

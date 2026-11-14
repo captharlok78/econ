@@ -1,211 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Riga di Componi (ComposizioneAdapter) nella grafica del disegno: card bianca, posizione con frecce, icona, tipo e nome,
+    a destra la pillola "a costo" (arancio = contabilizzato, tocca per toglierlo) e il collegamento; sotto relazioni e
+    collegamenti. Le icone sono glifi Font Awesome impostati dall'adapter. Gli id restano quelli di prima.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/linear_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/bg_disegno_riga"
+    android:descendantFocusability="blocksDescendants"
+    android:orientation="vertical"
+    android:padding="8dp">
 
-    android:orientation="vertical" >
-<LinearLayout
-                android:id="@+id/lista_relazioni_tubi_libere"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" >
-            </LinearLayout>
-    <RelativeLayout
+    <LinearLayout
+        android:id="@+id/lista_relazioni_tubi_libere"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+
+    <LinearLayout
         android:id="@+id/riga"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-         android:layout_marginBottom="@dimen/margine"
-        android:descendantFocusability="blocksDescendants"
-        android:paddingBottom="@dimen/padding_bottone" >
-
-        <RelativeLayout
-            android:id="@+id/relative_main"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="@dimen/margine"
-            android:layout_toRightOf="@+id/imageView_icona" >
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/linearLayout">
-
-                <ImageButton
-                    android:id="@+id/button_non_conteggiare"
-                    style="@style/bottoneListaGrande"
-                    android:background="@drawable/bg_bottone_rotondo_giallo"
-
-                    android:scaleType="fitXY"
-                    android:layout_toLeftOf="@+id/button_relazioni"
-                    android:src="@drawable/conteggia_in_ordine" />
-
-                <ImageButton
-                    android:id="@+id/button_relazioni"
-                    style="@style/bottoneListaGrande"
-                    android:layout_marginLeft="@dimen/margine"
-
-                    android:background="@drawable/bg_bottone_rotondo"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/nuova_relazione" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/LinearLayout1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_toLeftOf="@+id/linearLayout">
-
-                <TextView
-                    android:id="@+id/tipo"
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="SCATOLA"
-                    android:textAllCaps="true" />
-
-                <TextView
-                    android:id="@+id/descrizione"
-                    style="@style/TestoNeroPiccolo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Scatola 3 moduli" />
-
-                <TextView
-                    android:id="@+id/nota"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Nota"
-                    android:textColor="@android:color/darker_gray"
-                    android:textSize="@dimen/testo_immagine" />
-            </LinearLayout>
-        </RelativeLayout>
-        <LinearLayout
-            android:id="@+id/linear_relazioni"
-
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/relative_main"
-            android:layout_alignParentRight="true"
-            android:layout_below="@+id/relative_main"
-            android:orientation="vertical"
-            android:paddingTop="@dimen/padding_bottone" >
-            <RelativeLayout
-                android:id="@+id/relative_titolo_relazioni"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/textView_relazioni"
-                    style="@style/TestoIntestazioneNoPadding"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/relazioni"
-                    android:textAllCaps="true"
-                    android:textSize="@dimen/testo_immagine" />
-
-                <ImageView
-                    android:id="@+id/imageViewSeparatoreRelazioni"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginLeft="@dimen/padding_bottone"
-                    android:layout_toRightOf="@+id/textView_relazioni"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/divider_grigiochiaro" />
-            </RelativeLayout>
-
-            <LinearLayout
-                android:id="@+id/lista_relazioni_logiche"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" >
-            </LinearLayout>
-
-
-
-
-            </LinearLayout>
-        <LinearLayout
-            android:id="@+id/linear_collegamenti"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/relative_main"
-            android:layout_alignParentRight="true"
-            android:layout_below="@+id/linear_relazioni"
-            android:orientation="vertical"
-            android:paddingTop="@dimen/padding_bottone" >
-
-            <RelativeLayout
-                android:id="@+id/relative_titolo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/textView_collegamenti"
-                    style="@style/TestoIntestazioneNoPadding"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/collegamenti"
-                    android:textAllCaps="true"
-                    android:textSize="@dimen/testo_immagine" />
-
-                <ImageView
-                    android:id="@+id/imageViewSeparatore"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginLeft="@dimen/padding_bottone"
-                    android:layout_toRightOf="@+id/textView_collegamenti"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/divider_grigiochiaro" />
-            </RelativeLayout>
-
-            <LinearLayout
-                android:id="@+id/lista_relazioni"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" >
-            </LinearLayout>
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/imageView_icona"
-            android:layout_width="@dimen/altezza_campo_doppia"
-            android:layout_height="@dimen/altezza_campo_doppia"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="@dimen/padding_bottone"
-            android:layout_marginRight="@dimen/padding_bottone"
-            android:layout_marginTop="@dimen/margine"
-            android:layout_toRightOf="@+id/linear_posizione"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_launcher" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
         <LinearLayout
             android:id="@+id/linear_posizione"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:orientation="vertical" >
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
 
             <ImageButton
                 android:id="@+id/button_up"
-                style="@style/bottoneListaGrande"
-                android:layout_gravity="center_horizontal"
-                android:background="@drawable/bg_bottone_grigio_arrotondato"
-                android:scaleType="centerInside"
-                android:src="@drawable/up" />
+                style="@style/Disegno.Azione"
+                android:layout_width="34dp"
+                android:layout_height="30dp"
+                android:padding="7dp"
+                android:contentDescription="Sposta su" />
 
             <TextView
                 android:id="@+id/textView_posizione"
-                style="@style/TestoNeroPiccolo"
-                android:layout_width="@dimen/altezza_campo_doppia"
+                android:layout_width="40dp"
                 android:layout_height="wrap_content"
                 android:clickable="true"
                 android:focusable="true"
@@ -213,17 +51,129 @@
                 android:gravity="center"
                 android:scrollHorizontally="true"
                 android:singleLine="true"
-                android:text="12"
-                android:textColor="@android:color/darker_gray" />
+                android:textColor="@color/disegno_testo2"
+                android:textSize="12sp"
+                android:textStyle="bold" />
 
             <ImageButton
                 android:id="@+id/button_down"
-                style="@style/bottoneListaGrande"
-                android:layout_gravity="center_horizontal"
-                android:background="@drawable/bg_bottone_grigio_arrotondato"
-                android:scaleType="centerInside"
-                android:src="@drawable/down" />
+                style="@style/Disegno.Azione"
+                android:layout_width="34dp"
+                android:layout_height="30dp"
+                android:padding="7dp"
+                android:contentDescription="Sposta giù" />
         </LinearLayout>
-    </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/imageView_icona"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="10dp"
+            android:scaleType="fitCenter" />
+
+        <LinearLayout
+            android:id="@+id/LinearLayout1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tipo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAllCaps="true"
+                android:textColor="@color/disegno_testo2"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/descrizione"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/disegno_testo"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/nota"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/disegno_testo2"
+                android:textSize="12sp"
+                android:textStyle="italic" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/button_non_conteggiare"
+                android:layout_width="52dp"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_disegno_conteggiato"
+                android:contentDescription="Contabilizzato: tocca per toglierlo"
+                android:padding="8dp"
+                android:scaleType="fitCenter" />
+
+            <ImageButton
+                android:id="@+id/button_relazioni"
+                style="@style/Disegno.Azione"
+                android:layout_marginLeft="4dp"
+                android:contentDescription="@string/nuovo_collegamento" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_relazioni"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="44dp"
+        android:orientation="vertical"
+        android:paddingTop="6dp">
+
+        <TextView
+            android:id="@+id/textView_relazioni"
+            style="@style/Disegno.TitoloSezione"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:text="@string/relazioni"
+            android:textSize="11sp" />
+
+        <LinearLayout
+            android:id="@+id/lista_relazioni_logiche"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_collegamenti"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="44dp"
+        android:orientation="vertical"
+        android:paddingTop="6dp">
+
+        <TextView
+            android:id="@+id/textView_collegamenti"
+            style="@style/Disegno.TitoloSezione"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:text="@string/collegamenti"
+            android:textSize="11sp" />
+
+        <LinearLayout
+            android:id="@+id/lista_relazioni"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </LinearLayout>
 
 </LinearLayout>

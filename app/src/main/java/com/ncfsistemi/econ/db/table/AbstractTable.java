@@ -528,11 +528,10 @@ public abstract class AbstractTable {
 		if (getNomeTabella().equals(ComponentiCantiere.NOME_TABELLA) ){
 			//System.out.println("Econ: AbstractTable inserisciRecord ComponentiCantiere Sessione.getIdPreventivoSelezionato())" + Sessione.getIdPreventivoSelezionato());
 			val.put(ComponentiCantiere.ID_PREVENTIVO,Sessione.getIdPreventivoSelezionato());
-			if (Sessione.getIdPreventivoSelezionato()!=0){
+			// un componente aggiunto (Componi) e' sempre gia' contabilizzato, anche senza documento scelto: va a
+			// costo; si toglie toccando la pillola nella riga (ComposizioneAdapter.conteggiaSN)
+			if (!val.containsKey(ComponentiCantiere.NON_CONTEGGIARE_PREVENTIVI) || val.get(ComponentiCantiere.NON_CONTEGGIARE_PREVENTIVI) == null) {
 				val.put(ComponentiCantiere.NON_CONTEGGIARE_PREVENTIVI,0);
-			}
-			else {
-				val.put(ComponentiCantiere.NON_CONTEGGIARE_PREVENTIVI,1);
 			}
 		}
 		long result = db.insert(getNomeTabella(), val);

@@ -121,6 +121,7 @@ public class ComposizioneActivity extends EconActivity implements OnItemClickLis
 		}
 
 		iconaElemento = (ImageView) findViewById(R.id.imageView_iconaElemento);
+		iconaElemento.setVisibility(View.VISIBLE);
 		scatola = (LinearLayout) findViewById(R.id.linear_scatola);
 		aggiungiScatola = (TextView) findViewById(R.id.aggiungi_scatola);
 		lista = (ListView) findViewById(R.id.listView_componenti);

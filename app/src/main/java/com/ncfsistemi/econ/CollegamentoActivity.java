@@ -170,6 +170,7 @@ public class CollegamentoActivity extends EconActivity implements OnItemClickLis
 		super.onCreate(savedInstanceState);
         setVisualizzazionePopup();
 		setContentView(R.layout.activity_collegamento);
+		setText(R.id.textView_titolo, "Collegamento");
 
 
 		// prendo i cm di coda dall'azienda
@@ -991,9 +992,9 @@ public class CollegamentoActivity extends EconActivity implements OnItemClickLis
 		buttonCavo.setSelected(false);
 		buttonTuboCavo.setSelected(false);
 
-		buttonTubo.setTextColor(getResources().getColor(android.R.color.black));
-		buttonCavo.setTextColor(getResources().getColor(android.R.color.black));
-		buttonTuboCavo.setTextColor(getResources().getColor(android.R.color.black));
+		buttonTubo.setTextColor(getResources().getColor(R.color.disegno_testo));
+		buttonCavo.setTextColor(getResources().getColor(R.color.disegno_testo));
+		buttonTuboCavo.setTextColor(getResources().getColor(R.color.disegno_testo));
 
 		v.setSelected(true);
 		((Button) v).setTextColor(getResources().getColor(android.R.color.white));

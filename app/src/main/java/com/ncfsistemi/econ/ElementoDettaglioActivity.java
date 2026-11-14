@@ -70,6 +70,7 @@ public class ElementoDettaglioActivity extends EconActivity implements OnClickLi
         idElementoCantiere = getIntent().getIntExtra(ElementiCantiere.ID_ELEMENTO_CANT, 0);
         elementoAltroOrdine = getIntent().getBooleanExtra("ELEMENTO_ALTRO_ORDINE",false);
         iconaElemento = (ImageView) findViewById(R.id.imageView_iconaElemento);
+		iconaElemento.setVisibility(View.VISIBLE);
         buttonrelazioni = (ImageButton) findViewById(R.id.button_relazioni);
         buttonmodificca = (ImageButton) findViewById(R.id.button_edit_elemento);
         buttonNonConteggiare = (ImageButton) findViewById(R.id.button_non_conteggiare);
@@ -136,11 +137,10 @@ public class ElementoDettaglioActivity extends EconActivity implements OnClickLi
 
                 }
                 else{
-                    nonConteggiarePreventivi = 1;
-                    if (idPreventivoSelezionato==0){
-                        buttonNonConteggiare.setVisibility(View.GONE);
-                    }
-
+                    // elemento del cantiere (nessun documento): contabilizzato o no come dice il record (va a costo)
+                    buttonNonConteggiare.setVisibility(View.VISIBLE);
+                    nonConteggiarePreventivi = valElem.get(ElementiCantiere.NON_CONTEGGIARE_PREVENTIVI) == null
+                            || valElem.getAsInteger(ElementiCantiere.NON_CONTEGGIARE_PREVENTIVI) == 0 ? 0 : 1;
                 }
                 _impostaSfondoBottoneNonConteggiare();
                 if (elementoAltroOrdine){
@@ -172,12 +172,15 @@ public class ElementoDettaglioActivity extends EconActivity implements OnClickLi
     }
 
     private void _impostaSfondoBottoneNonConteggiare() {
-        if (nonConteggiarePreventivi==0){
-            buttonNonConteggiare.setBackgroundResource(R.drawable.bg_bottone_rotondo_giallo);
-        }
-        else{
-            buttonNonConteggiare.setBackgroundResource(R.drawable.bg_bottone_rotondo);
-        }
+        // grafica del disegno: pillola arancio = contabilizzato (va a costo), tratteggiata = no
+        boolean contabilizzato = nonConteggiarePreventivi == 0;
+        buttonNonConteggiare.setImageDrawable(com.ncfsistemi.econ.utils.FaIcone.drawable(this, "\uf51e", 20));
+        buttonNonConteggiare.setBackgroundResource(contabilizzato ? R.drawable.bg_disegno_conteggiato : R.drawable.bg_disegno_non_conteggiato);
+        buttonNonConteggiare.setImageTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(
+                contabilizzato ? R.color.disegno_arancio : R.color.colore_icona)));
+        String suggerimento = contabilizzato ? "Contabilizzato (va a costo): tocca per toglierlo" : "Non contabilizzato: tocca per metterlo a costo";
+        buttonNonConteggiare.setContentDescription(suggerimento);
+        androidx.appcompat.widget.TooltipCompat.setTooltipText(buttonNonConteggiare, suggerimento);
     }
 
     private void _caricaRelazioniLogiche(DbInterno db) {

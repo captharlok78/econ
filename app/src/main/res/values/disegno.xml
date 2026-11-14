@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Grafica del disegno (DisegnoActivity, STUDIO_DESIGN_GRAFICA.md §8) per le maschere che si aprono dal disegno:
+    composizione, dettaglio elemento, collegamenti, collegamento, relazione. Stessi colori dei pannelli del disegno.
+-->
+<resources>
+    <color name="disegno_blu">#1565C0</color>
+    <color name="disegno_blu_chiaro">#E3F2FD</color>
+    <color name="disegno_sfondo">#F4F6FA</color>
+    <color name="disegno_bordo">#DDE3EA</color>
+    <color name="disegno_testo">#212121</color>
+    <color name="disegno_testo2">#5F6B7A</color>
+    <color name="disegno_arancio">#FB8C00</color>
+    <color name="disegno_arancio_chiaro">#FFF3E0</color>
+
+    <!-- Pagina intera, fondo grigio chiaro, barra di stato blu -->
+    <style name="Econ.Disegno" parent="EconPopup">
+        <item name="android:windowBackground">@color/disegno_sfondo</item>
+        <item name="android:statusBarColor">@color/disegno_blu</item>
+    </style>
+
+    <!-- padre (vuoto) degli stili Disegno.* -->
+    <style name="Disegno" />
+
+    <!-- Card bianca con bordo, come i pannelli del disegno -->
+    <style name="Disegno.Card">
+        <item name="android:background">@drawable/bg_disegno_card</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:layout_marginBottom">12dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <!-- Titolo di sezione dentro una card: piccolo, grigio, maiuscolo -->
+    <style name="Disegno.TitoloSezione">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/disegno_testo2</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.05</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
+    <!-- Etichetta sopra un campo -->
+    <style name="Disegno.Etichetta">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/disegno_testo2</item>
+        <item name="android:layout_marginBottom">4dp</item>
+    </style>
+
+    <!-- Campo bordato -->
+    <style name="Disegno.Campo">
+        <item name="android:background">@drawable/bg_disegno_campo</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/disegno_testo</item>
+        <item name="android:minHeight">44dp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
+    </style>
+
+    <!-- Icona azione sulle righe: glifo Font Awesome grigio, senza cerchio -->
+    <style name="Disegno.Azione">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:padding">9dp</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
+    </style>
+
+    <!-- Glifo Font Awesome in una TextView (testata) -->
+    <style name="Disegno.Glifo">
+        <item name="android:layout_width">46dp</item>
+        <item name="android:layout_height">46dp</item>
+        <item name="android:fontFamily">@font/fa_solid_900</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+</resources>

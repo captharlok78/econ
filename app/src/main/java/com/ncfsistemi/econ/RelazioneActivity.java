@@ -132,6 +132,7 @@ public class RelazioneActivity extends EconActivity {
 		super.onCreate(savedInstanceState);
         setVisualizzazionePopup(50,3);
 		setContentView(R.layout.activity_relazione);
+		setText(R.id.textView_titolo, getString(R.string.punti_di_comando));
 
 
 		idElementoPartenza = getIntent().getIntExtra("ID_ELEMENTO", 0);

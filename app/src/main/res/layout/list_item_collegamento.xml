@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="5sp" >
+    android:background="@drawable/bg_disegno_riga"
+    android:padding="12dp" >
 
     <RelativeLayout
         android:id="@+id/relative_prev"
@@ -54,7 +55,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="47"
-            android:background="@drawable/bg_econ_bordo_blu"
+            android:background="@drawable/bg_disegno_campo"
             android:orientation="vertical"
            android:paddingTop="@dimen/padding_bottone"
             android:paddingLeft="@dimen/margine"
@@ -112,7 +113,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="47"
-            android:background="@drawable/bg_econ_bordo_blu"
+            android:background="@drawable/bg_disegno_campo"
             android:orientation="vertical"
             android:paddingTop="@dimen/padding_bottone"
             android:paddingLeft="@dimen/margine"

@@ -77,6 +77,11 @@ public class ComposizioneAdapter extends EconListViewAdapter implements OnClickL
         holder.listaRelazioniLibereTubi = (LinearLayout) convertView.findViewById(R.id.lista_relazioni_tubi_libere);
         holder.listaRelazioniLogiche = (LinearLayout) convertView.findViewById(R.id.lista_relazioni_logiche);
         holder.buttonNonConteggiare = (ImageButton) convertView.findViewById(R.id.button_non_conteggiare);
+        // icone della grafica del disegno (glifi Font Awesome)
+        holder.buttonUp.setImageDrawable(com.ncfsistemi.econ.utils.FaIcone.drawable(context, "\uf077", 18));
+        holder.buttonDown.setImageDrawable(com.ncfsistemi.econ.utils.FaIcone.drawable(context, "\uf078", 18));
+        holder.buttonRelazioni.setImageDrawable(com.ncfsistemi.econ.utils.FaIcone.drawable(context, "\uf0c1", 20));
+        holder.buttonNonConteggiare.setImageDrawable(com.ncfsistemi.econ.utils.FaIcone.drawable(context, "\uf51e", 20));
         return holder;
     }
 
@@ -114,18 +119,18 @@ public class ComposizioneAdapter extends EconListViewAdapter implements OnClickL
                 ((ComposizioneViewHolder) viewholder).buttonRelazioni.setVisibility(View.GONE);
             }
             ((ComposizioneViewHolder) viewholder).buttonNonConteggiare.setVisibility(View.VISIBLE);
-            ((ComposizioneViewHolder) viewholder).buttonNonConteggiare.setBackgroundResource(R.drawable.bg_bottone_rotondo);
             if ( idCategoriaComponente != 0){
-
-                if (val.get(ComponentiCantiere.ID_PREVENTIVO)!=null && val.getAsInteger(ComponentiCantiere.ID_PREVENTIVO)!=0 && (val.get(ComponentiCantiere.NON_CONTEGGIARE_PREVENTIVI)==null || val.getAsInteger(ComponentiCantiere.NON_CONTEGGIARE_PREVENTIVI)==0)){
-                    ((ComposizioneViewHolder) viewholder).buttonNonConteggiare.setBackgroundResource(R.drawable.bg_bottone_rotondo_giallo);
-                }
-                else{
-
-                    ((ComposizioneViewHolder) viewholder).buttonNonConteggiare.setBackgroundResource(R.drawable.bg_bottone_rotondo);
-
-
-                }
+                // contabilizzato (va a costo) = non_conteggiare_preventivi 0, con o senza documento: pillola arancio;
+                // non contabilizzato: pillola vuota tratteggiata. Si cambia toccandola.
+                boolean contabilizzato = val.get(ComponentiCantiere.NON_CONTEGGIARE_PREVENTIVI) == null
+                        || val.getAsInteger(ComponentiCantiere.NON_CONTEGGIARE_PREVENTIVI) == 0;
+                ImageButton b = ((ComposizioneViewHolder) viewholder).buttonNonConteggiare;
+                b.setBackgroundResource(contabilizzato ? R.drawable.bg_disegno_conteggiato : R.drawable.bg_disegno_non_conteggiato);
+                b.setImageTintList(android.content.res.ColorStateList.valueOf(context.getResources().getColor(
+                        contabilizzato ? R.color.disegno_arancio : R.color.colore_icona)));
+                String suggerimento = contabilizzato ? "Contabilizzato (va a costo): tocca per toglierlo" : "Non contabilizzato: tocca per metterlo a costo";
+                b.setContentDescription(suggerimento);
+                androidx.appcompat.widget.TooltipCompat.setTooltipText(b, suggerimento);
                 if (!isModificheBloccate()){
                     ((ComposizioneViewHolder) viewholder).buttonNonConteggiare.setOnClickListener(new OnClickListener() {
                         @Override
@@ -831,6 +836,7 @@ public class ComposizioneAdapter extends EconListViewAdapter implements OnClickL
         int nonConteggiarePreventivi = 0;
         int idPreventivo = 0;
         if (riga.get(ComponentiCantiere.NON_CONTEGGIARE_PREVENTIVI)!=null && riga.getAsInteger(ComponentiCantiere.NON_CONTEGGIARE_PREVENTIVI)==1){
+            // torna a costo: nel documento scelto, se c'e', altrimenti del cantiere (id_preventivo 0)
             nonConteggiarePreventivi = 0;
             idPreventivo = getIdpreventivo();
         }
