@@ -412,6 +412,9 @@ public class ElementiCantiere extends AbstractTable {
             tabRelazioni.cancellaRecord(db, valcoll);
         }
 
+		// e il materiale aggiunto all'elemento (schema 47)
+		new ElementiCantiereMateriali().cancellaDiElemento(db, idElementoCantiere);
+
 		super.eliminaCorrelati(db, val);
 	}
 
@@ -440,6 +443,7 @@ public class ElementiCantiere extends AbstractTable {
 
 
 			ContentValues recCopia = copiaRecord(db, curr, nuoviValori);
+			new ElementiCantiereMateriali().copia(db, curr.getAsInteger(ID_ELEMENTO_CANT), recCopia.getAsInteger(ID_ELEMENTO_CANT));
 
 			// ATTENZIONE CHE IN FASE DI COPIA DEVO COPIARE LE COMPOSIZIONI NON DALLA TABELLA COMPOSIZIONI MA DA
 			// COMPOSIZIONI_CANTIERE
@@ -537,6 +541,7 @@ public class ElementiCantiere extends AbstractTable {
 			}*/
 			nuoviValori.put(NON_CONTEGGIARE_PREVENTIVI,0);
 			ContentValues recCopia = copiaRecord(db, curr, nuoviValori);
+			new ElementiCantiereMateriali().copia(db, curr.getAsInteger(ID_ELEMENTO_CANT), recCopia.getAsInteger(ID_ELEMENTO_CANT));
 
 			// ATTENZIONE CHE IN FASE DI COPIA DEVO COPIARE LE COMPOSIZIONI NON DALLA TABELLA COMPOSIZIONI MA DA
 			// COMPOSIZIONI_CANTIERE

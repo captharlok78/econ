@@ -167,6 +167,8 @@ public class ElementoDettaglioActivity extends EconActivity implements OnClickLi
                 buttonrelazioni.setVisibility(View.GONE);
                 buttonNonConteggiare.setVisibility(View.GONE);
             }
+            // materiale aggiunto all'elemento (schema 47, STUDIO_DESIGN_GRAFICA.md §10)
+            ((com.ncfsistemi.econ.disegno.MaterialiElementoView) findViewById(R.id.materiali_elemento)).carica(idElementoCantiere, modificheBloccate);
         }
         System.out.println("Econ: ElementoDettaglioActivity ricerca EXIT");
     }

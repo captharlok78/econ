@@ -73,6 +73,7 @@ public class SyncWorker extends Worker {
         {"componenti_cant_composti", null},            // PK composita
         {"collegamenti",           "id_collegamento"},
         {"relazioni",              "id_relazione"},
+        {"elementi_cantiere_materiali", "id"},       // schema 47
         {"preventivi",             "id_preventivo"},
         {"preventivi_dettaglio",   "id_preventivo_dettaglio"},
         // dallo schema 26 rapportini e righe usano i nomi del server (chiave "id")
@@ -121,6 +122,8 @@ public class SyncWorker extends Worker {
         {"elementi_cantiere", "id_elemento_cant","composizioni_cantiere", "id_elemento_cant"},
         {"elementi_cantiere", "id_elemento_cant","relazioni",             "id_elemento_cant1"},
         {"elementi_cantiere", "id_elemento_cant","relazioni",             "id_elemento_cant2"},
+        {"elementi_cantiere", "id_elemento_cant","elementi_cantiere_materiali", "id_elemento_cant"},
+        {"listini",           "id",              "elementi_cantiere_materiali", "id_listino"},
         {"componenti_cantiere","id_componente_cant","composizioni_cantiere","id_componente_cant"},
         {"componenti_cantiere","id_componente_cant","relazioni",          "id_componente_cant1"},
         {"componenti_cantiere","id_componente_cant","relazioni",          "id_componente_cant2"},

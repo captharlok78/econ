@@ -63,18 +63,21 @@ public class ConformitaXLS {
         this.ctx = ctx;
     }
 
-    /** Locali del cantiere che hanno elementi: id → [unità, area, nome]. */
+    /**
+     * Locali del cantiere che hanno elementi: id → [unità, area, nome, livello dell'area]; in ordine di unità, livello
+     * dell'area (dal più basso), area e locale in ordine alfabetico (STUDIO_DESIGN_GRAFICA.md §11).
+     */
     public static LinkedHashMap<Integer, String[]> locali(Context ctx, int idCantiere) {
         LinkedHashMap<Integer, String[]> out = new LinkedHashMap<>();
         DbInterno db = new DbInterno(ctx);
         try {
-            for (Object o : db.eseguiSelect("select l.id_locale, l.nome, a.nome as area, u.nome as unita from locali l"
+            for (Object o : db.eseguiSelect("select l.id_locale, l.nome, a.nome as area, coalesce(a.livello,0) as livello, u.nome as unita from locali l"
                     + " inner join aree a on a.id_area=l.id_area inner join unita u on u.id_unita=a.id_unita"
                     + " where u.id_cantiere=" + idCantiere
                     + " and exists (select 1 from elementi_cantiere e where e.id_locale=l.id_locale)"
-                    + " order by u.id_unita, a.id_area, l.id_locale", null)) {
+                    + " order by u.id_unita, coalesce(a.livello,0), lower(a.nome), a.id_area, lower(l.nome), l.id_locale", null)) {
                 ContentValues v = (ContentValues) o;
-                out.put(v.getAsInteger("id_locale"), new String[]{s(v, "unita"), s(v, "area"), s(v, "nome")});
+                out.put(v.getAsInteger("id_locale"), new String[]{s(v, "unita"), s(v, "area"), s(v, "nome"), s(v, "livello")});
             }
         } finally {
             db.close();
@@ -185,7 +188,8 @@ public class ConformitaXLS {
     private HSSFSheet f;
 
     private void foglioLocale(DbInterno db, int idLocale, String[] percorso, String nomeCantiere, byte[] png, Set<String> usati) {
-        f = wb.createSheet(nomeFoglio(percorso[2], usati));
+        // etichetta del foglio "area - locale" (STUDIO_DESIGN_GRAFICA.md §11)
+        f = wb.createSheet(nomeFoglio(percorso[1].trim().isEmpty() ? percorso[2] : percorso[1].trim() + " - " + percorso[2], usati));
         f.setDisplayGridlines(false);
         f.getPrintSetup().setLandscape(true);
         f.setAutobreaks(true);
@@ -202,7 +206,10 @@ public class ConformitaXLS {
         }
 
         StringBuilder tit = new StringBuilder();
-        for (String p : percorso) {
+        int livello = 0;
+        try { livello = Integer.parseInt(percorso[3]); } catch (Exception ignored) { }
+        String[] parti = {percorso[0], percorso[1].trim().isEmpty() ? "" : percorso[1] + " (" + nomeLivello(livello) + ")", percorso[2]};
+        for (String p : parti) {
             if (p == null || p.isEmpty()) continue;
             if (tit.length() > 0) tit.append(" › ");
             tit.append(p);
@@ -251,6 +258,17 @@ public class ConformitaXLS {
                 for (ContentValues sc : composti(db, idc)) {
                     riga(new Object[]{"", "– " + s(sc, "nome_componente_cant"), s(sc, "codice"), "", "", "", "", "", ""}, sDettaglio);
                 }
+            }
+            // materiale aggiunto all'elemento in Componi (schema 47, STUDIO_DESIGN_GRAFICA.md §10)
+            for (ContentValues m : com.ncfsistemi.econ.db.table.ElementiCantiereMateriali.diElemento(db, id)) {
+                Double q = m.getAsDouble("quantita");
+                String qt = q == null ? "0" : (q == Math.rint(q) ? String.valueOf(q.longValue())
+                        : String.format(java.util.Locale.ITALY, "%.3f", q).replaceAll("0+$", ""));
+                List<String> nm = new ArrayList<>();
+                nm.add("q.tà " + qt + (s(m, "um").isEmpty() ? "" : " " + s(m, "um")));
+                if (!s(m, "nota").isEmpty()) nm.add(s(m, "nota"));
+                riga(new Object[]{"Mat.", s(m, "descrizione").isEmpty() ? s(m, "codice_articolo") : s(m, "descrizione"), s(m, "codice_articolo"),
+                        "", "", "", "", "", unisci(nm)}, sComponente);
             }
             r++; // riga vuota tra un elemento e l'altro
         }
@@ -393,6 +411,14 @@ public class ConformitaXLS {
     // ------------------------------------------------------------------ utilità
 
     /** Nome di foglio valido e unico (max 31 caratteri, senza []:*?/\). */
+    /** -1 scantinato, 0 piano terra, 1 piano 1... (come il portale, ConformitaExcel::nomeLivello). */
+    public static String nomeLivello(int n) {
+        if (n < -1) return "interrato " + n;
+        if (n == -1) return "scantinato";
+        if (n == 0) return "piano terra";
+        return "piano " + n;
+    }
+
     private static String nomeFoglio(String nome, Set<String> usati) {
         String base = (nome == null ? "" : nome).replaceAll("[\\[\\]:*?/\\\\]+", " ").trim();
         if (base.isEmpty()) base = "Locale";

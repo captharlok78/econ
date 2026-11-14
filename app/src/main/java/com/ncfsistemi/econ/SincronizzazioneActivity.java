@@ -132,6 +132,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "iva",                      "IVA" },
         { "unita_misura",             "Unità di misura" },
         { "relazioni",                "Relazioni" },
+        { "elementi_cantiere_materiali", "Materiale elementi" },
         { "collegamenti",             "Collegamenti" },
         // icone del disegno (schema 45, STUDIO_DESIGN.md §8.5 A2)
         { "icone",                    "Icone" },
@@ -184,6 +185,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "componenti_cant_composti", "Comp. Composti Cantiere" },
         { "collegamenti",             "Collegamenti" },
         { "relazioni",                "Relazioni" },
+        { "elementi_cantiere_materiali", "Materiale elementi" },
         { "foto",                     "Foto" },
     };
 
@@ -206,6 +208,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             case "componenti_cantiere":      return "id_componente_cant";
             case "collegamenti":             return "id_collegamento";
             case "relazioni":                return "id_relazione";
+            case "elementi_cantiere_materiali": return "id";
             case "foto":                     return "id_foto";
             case "costruttori":              return "id_costruttore";
             case "linee":                    return "id_linea";
@@ -249,6 +252,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         {"elementi_cantiere", "id_elemento_cant", "composizioni_cantiere",  "id_elemento_cant"},
         {"elementi_cantiere", "id_elemento_cant", "relazioni",              "id_elemento_cant1"},
         {"elementi_cantiere", "id_elemento_cant", "relazioni",              "id_elemento_cant2"},
+        {"elementi_cantiere", "id_elemento_cant", "elementi_cantiere_materiali", "id_elemento_cant"},
+        {"listini",           "id",               "elementi_cantiere_materiali", "id_listino"},
         {"componenti_cantiere","id_componente_cant","composizioni_cantiere","id_componente_cant"},
         {"componenti_cantiere","id_componente_cant","relazioni",            "id_componente_cant1"},
         {"componenti_cantiere","id_componente_cant","relazioni",            "id_componente_cant2"},

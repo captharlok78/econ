@@ -86,8 +86,9 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
 
     private TextView titolo, sottotitolo, suggerimento;
     private final TextView[] pulsantiModo = new TextView[5];
-    private LinearLayout pannelloSinistro, contenutoSinistro, pannelloDestro, contenutoDestro;
-    private ScrollView scrollSinistro;
+    private LinearLayout pannelloSinistro, contenutoSinistro, contenutoTavolozza, bloccoTavolozza, pannelloDestro, contenutoDestro;
+    /** Struttura e tavolozza in due blocchi distinti, ognuno scorre per conto suo. */
+    private ScrollView scrollSinistro, scrollTavolozza;
     private PiantinaView piantina;
     /** Schermo intero: pannelli laterali e barre di sistema nascosti, resta solo la piantina con la barra dei modi. */
     private boolean schermoIntero = false;
@@ -196,15 +197,25 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         corpo.setOrientation(LinearLayout.HORIZONTAL);
         root.addView(corpo, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
-        // sinistra: struttura + tavolozza
+        // sinistra: due blocchi distinti, struttura (unità, aree, locali) sopra e tavolozza (elementi) sotto; ognuno ha
+        // la sua intestazione fissa e scorre dentro il proprio riquadro
         pannelloSinistro = new LinearLayout(this);
         pannelloSinistro.setOrientation(LinearLayout.VERTICAL);
-        pannelloSinistro.setBackgroundColor(Color.WHITE);
+        pannelloSinistro.setBackgroundColor(SFONDO);
+        pannelloSinistro.setPadding(px(8), px(8), px(8), px(8));
         scrollSinistro = new ScrollView(this);
         contenutoSinistro = verticale();
-        contenutoSinistro.setPadding(px(12), px(8), px(12), px(16));
+        contenutoSinistro.setPadding(px(10), 0, px(10), px(10));
         scrollSinistro.addView(contenutoSinistro);
-        pannelloSinistro.addView(scrollSinistro, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        pannelloSinistro.addView(blocco("STRUTTURA", scrollSinistro), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 2f));
+        scrollTavolozza = new ScrollView(this);
+        contenutoTavolozza = verticale();
+        contenutoTavolozza.setPadding(px(10), 0, px(10), px(10));
+        scrollTavolozza.addView(contenutoTavolozza);
+        bloccoTavolozza = blocco("TAVOLOZZA", scrollTavolozza);
+        LinearLayout.LayoutParams lpTav = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 3f);
+        lpTav.topMargin = px(8);
+        pannelloSinistro.addView(bloccoTavolozza, lpTav);
         corpo.addView(pannelloSinistro, new LinearLayout.LayoutParams(px(stretto ? 230 : 260), ViewGroup.LayoutParams.MATCH_PARENT));
         corpo.addView(separatore(), new LinearLayout.LayoutParams(px(1), ViewGroup.LayoutParams.MATCH_PARENT));
         if (stretto) pannelloSinistro.setVisibility(View.GONE);
@@ -500,21 +511,39 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
 
     private void costruisciSinistra() {
         int scroll = scrollSinistro.getScrollY();
+        int scrollTav = scrollTavolozza.getScrollY();
         contenutoSinistro.removeAllViews();
-        contenutoSinistro.addView(intestazione("STRUTTURA", null));
         for (DisegnoDati.Nodo n : DisegnoDati.struttura(this, cantiere)) {
             contenutoSinistro.addView(rigaStruttura(n));
         }
+        contenutoTavolozza.removeAllViews();
+        // documento bloccato: niente tavolozza, la struttura prende tutto il pannello
+        bloccoTavolozza.setVisibility(bloccato ? View.GONE : View.VISIBLE);
         if (!bloccato) {
-            contenutoSinistro.addView(intestazione("TAVOLOZZA", null));
-            contenutoSinistro.addView(rigaCategoria(0, "Preferiti", null));
-            if (categoriaAperta == 0) contenutoSinistro.addView(tavolozzaFiltrata(0, "Preferiti"));
+            contenutoTavolozza.addView(rigaCategoria(0, "Preferiti", null));
+            if (categoriaAperta == 0) contenutoTavolozza.addView(tavolozzaFiltrata(0, "Preferiti"));
             for (DisegnoDati.Categoria c : DisegnoDati.categorie(this)) {
-                contenutoSinistro.addView(rigaCategoria(c.id, c.nome, SimboliDisegno.drawable(this, SimboliDisegno.categoriaElementi(c.id))));
-                if (categoriaAperta == c.id) contenutoSinistro.addView(tavolozzaFiltrata(c.id, c.nome));
+                contenutoTavolozza.addView(rigaCategoria(c.id, c.nome, SimboliDisegno.drawable(this, SimboliDisegno.categoriaElementi(c.id))));
+                if (categoriaAperta == c.id) contenutoTavolozza.addView(tavolozzaFiltrata(c.id, c.nome));
             }
         }
         scrollSinistro.post(() -> scrollSinistro.scrollTo(0, scroll));
+        scrollTavolozza.post(() -> scrollTavolozza.scrollTo(0, scrollTav));
+    }
+
+    /** Riquadro bianco con intestazione fissa e contenuto che scorre dentro (pannello di sinistra). */
+    private LinearLayout blocco(String titolo, ScrollView scorri) {
+        LinearLayout b = verticale();
+        b.setBackground(arrotondato(Color.WHITE, BORDO, 12));
+        b.setClipToOutline(true);
+        TextView t = intestazione(titolo, null);
+        t.setPadding(px(14), px(10), px(14), px(6));
+        b.addView(t);
+        View riga = separatore();
+        b.addView(riga, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, px(1)));
+        scorri.setFillViewport(false);
+        b.addView(scorri, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        return b;
     }
 
     private View rigaStruttura(DisegnoDati.Nodo n) {

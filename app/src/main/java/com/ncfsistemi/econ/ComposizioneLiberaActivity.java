@@ -297,6 +297,9 @@ public class ComposizioneLiberaActivity extends EconActivity implements OnItemCl
 
 		}
 
+		// materiale aggiunto all'elemento (schema 47, STUDIO_DESIGN_GRAFICA.md §10)
+		((com.ncfsistemi.econ.disegno.MaterialiElementoView) findViewById(R.id.materiali_elemento)).carica(idElementoCantiere, modificheBloccate);
+
 		if (idElementoCantiere!=0 && aggiornaPreventivo){
 			aggiornaPreventivo = false;
 			DbInterno dbAggPrev = new DbInterno(this);

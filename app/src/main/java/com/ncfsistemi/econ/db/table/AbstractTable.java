@@ -990,6 +990,9 @@ public abstract class AbstractTable {
         if (tabella.equalsIgnoreCase(Relazioni.NOME_TABELLA)) {
             return new Relazioni();
         }
+        if (tabella.equalsIgnoreCase(ElementiCantiereMateriali.NOME_TABELLA)) {
+            return new ElementiCantiereMateriali();
+        }
         if (tabella.equalsIgnoreCase(Rapportini.NOME_TABELLA)) {
             return new Rapportini();
         }

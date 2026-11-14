@@ -185,6 +185,10 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 	/** Moduli della persona: preventivi/ordini (scelta del documento in alto) e gestione elettrica (GESTIONE_ELETTRICA.md). */
 	private boolean documenti = true;
 	private boolean elettrico = true;
+	/** Ordine della struttura (STUDIO_DESIGN_GRAFICA.md §11): aree per livello dal più basso, locali in ordine alfabetico. */
+	private static final String PREF_ORDINE_LIVELLI = "STRUTTURA_ORDINE_LIVELLI", PREF_LOCALI_ALFABETICI = "STRUTTURA_LOCALI_ALFABETICI";
+	private boolean ordinaLivelli = true, localiAlfabetici = true;
+	private com.google.android.material.button.MaterialButton bottoneLivelli, bottoneAlfabetico;
 	private boolean menuRidottoGestito = false;
 
 	@Override
@@ -234,6 +238,7 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 		piu.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 22);
 		lista.setOnItemClickListener(this);
 		registerForContextMenu(lista);
+		creaOrdinamentoStruttura();
 		split = (EconSplitPaneLayout) findViewById(R.id.split);
 
 		categorie = (LinearLayout) findViewById(R.id.categorie);
@@ -302,7 +307,14 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 			whereUnita.put(Unita.ID_CANTIERE, cantiere);
 			unita = db.eseguiSelect(new Unita(), whereUnita, new String[] { Unita.ID_UNITA + " desc" });
 			aree = new Aree().getAreeCantiere(db, cantiere);
-			locali = new Locali().getLocaliCantiereOrdineAlfabetico(db, cantiere);
+			if (ordinaLivelli) {
+				// dal livello piu' basso (scantinato) al piu' alto; a parita' di livello l'ordine di prima (piu' recenti in alto)
+				java.util.Collections.sort(aree, (x, y) -> Integer.compare(livello((ContentValues) x), livello((ContentValues) y)));
+			}
+			locali = localiAlfabetici ? new Locali().getLocaliCantiereOrdineAlfabetico(db, cantiere)
+					: db.eseguiSelect("select l.* from " + Locali.NOME_TABELLA + " l inner join " + Aree.NOME_TABELLA + " a on a." + Aree.ID_AREA
+							+ "=l." + Locali.ID_AREA + " inner join " + Unita.NOME_TABELLA + " u on u." + Unita.ID_UNITA + "=a." + Aree.ID_UNITA
+							+ " where u." + Unita.ID_CANTIERE + "=" + cantiere + " order by l." + Locali.ID_LOCALE, null);
 		}
 		db.close();
 
@@ -338,6 +350,7 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 					val_a.put("TIPO", AREA);
 					val_a.put("NOME", valArea.getAsString(Aree.NOME));
 					val_a.put("ID", valArea.getAsInteger(Aree.ID_AREA));
+					val_a.put("LIVELLO", livello(valArea));
 					dati.add(val_a);
 
 					// Itero i locali
@@ -367,6 +380,97 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 		}
 
 		System.out.println("Econ: CantiereSplitActivity creaMenu EXIT");
+	}
+
+	private static int livello(ContentValues area) {
+		Integer l = area.getAsInteger(Aree.LIVELLO);
+		return l == null ? 0 : l;
+	}
+
+	/**
+	 * Pulsanti in cima al menu laterale (solo con la struttura): "Per livello" ordina le aree dal livello piu' basso al piu'
+	 * alto, "A-Z" mette i locali di ogni area in ordine alfabetico (spenti: ordine di inserimento). Si ricordano.
+	 */
+	private void creaOrdinamentoStruttura() {
+		if (!elettrico || !(lista.getParent() instanceof android.widget.FrameLayout)) return;
+		android.content.SharedPreferences pref = getSharedPreferences("ECON", MODE_PRIVATE);
+		ordinaLivelli = pref.getBoolean(PREF_ORDINE_LIVELLI, true);
+		localiAlfabetici = pref.getBoolean(PREF_LOCALI_ALFABETICI, true);
+		float dp = getResources().getDisplayMetrics().density;
+		LinearLayout barra = new LinearLayout(this);
+		barra.setOrientation(LinearLayout.HORIZONTAL);
+		barra.setGravity(Gravity.CENTER_VERTICAL);
+		barra.setPadding(Math.round(6 * dp), Math.round(4 * dp), Math.round(6 * dp), Math.round(4 * dp));
+		barra.setBackgroundColor(0xFFF4F6FA);
+		bottoneLivelli = bottoneOrdine("Per livello", com.ncfsistemi.econ.utils.FaIcone.AREA, "Aree dal livello piu' basso (scantinato) al piu' alto");
+		bottoneAlfabetico = bottoneOrdine("Locali A-Z", "\uf15d", "Locali di ogni area in ordine alfabetico");
+		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+		lp.rightMargin = Math.round(4 * dp);
+		barra.addView(bottoneLivelli, lp);
+		barra.addView(bottoneAlfabetico, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+		bottoneLivelli.setOnClickListener(v -> {
+			ordinaLivelli = !ordinaLivelli;
+			pref.edit().putBoolean(PREF_ORDINE_LIVELLI, ordinaLivelli).apply();
+			aggiornaBottoniOrdine();
+			riordinaMantenendoSelezione();
+		});
+		bottoneAlfabetico.setOnClickListener(v -> {
+			localiAlfabetici = !localiAlfabetici;
+			pref.edit().putBoolean(PREF_LOCALI_ALFABETICI, localiAlfabetici).apply();
+			aggiornaBottoniOrdine();
+			riordinaMantenendoSelezione();
+		});
+		android.widget.FrameLayout pannello = (android.widget.FrameLayout) lista.getParent();
+		int alto = Math.round(48 * dp);
+		pannello.addView(barra, new android.widget.FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, alto, Gravity.TOP));
+		android.widget.FrameLayout.LayoutParams lpLista = (android.widget.FrameLayout.LayoutParams) lista.getLayoutParams();
+		lpLista.topMargin = alto;
+		lista.setLayoutParams(lpLista);
+		aggiornaBottoniOrdine();
+	}
+
+	/** Ricostruisce il menu col nuovo ordine e tiene selezionata la stessa riga (stesso tipo e id). */
+	private void riordinaMantenendoSelezione() {
+		ContentValues prima = selezionato >= 0 && selezionato < dati.size() ? (ContentValues) dati.get(selezionato) : null;
+		creaMenu();
+		if (prima == null) return;
+		for (int i = 0; i < dati.size(); i++) {
+			ContentValues v = (ContentValues) dati.get(i);
+			if (v.getAsInteger("TIPO").equals(prima.getAsInteger("TIPO")) && v.getAsInteger("ID").equals(prima.getAsInteger("ID"))) {
+				selezionato = i;
+				break;
+			}
+		}
+		if (adapter != null) adapter.notifyDataSetChanged();
+	}
+
+	private com.google.android.material.button.MaterialButton bottoneOrdine(String testo, String glifo, String suggerimento) {
+		com.google.android.material.button.MaterialButton b = new com.google.android.material.button.MaterialButton(this, null,
+				com.google.android.material.R.attr.materialButtonOutlinedStyle);
+		b.setText(testo);
+		b.setAllCaps(false);
+		b.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 13);
+		b.setSingleLine(true);
+		b.setInsetTop(0);
+		b.setInsetBottom(0);
+		b.setMinHeight(Math.round(38 * getResources().getDisplayMetrics().density));
+		b.setIcon(com.ncfsistemi.econ.utils.FaIcone.drawable(this, glifo, 16));
+		b.setIconPadding(Math.round(6 * getResources().getDisplayMetrics().density));
+		b.setContentDescription(suggerimento);
+		androidx.appcompat.widget.TooltipCompat.setTooltipText(b, suggerimento);
+		return b;
+	}
+
+	private void aggiornaBottoniOrdine() {
+		for (com.google.android.material.button.MaterialButton b : new com.google.android.material.button.MaterialButton[]{bottoneLivelli, bottoneAlfabetico}) {
+			if (b == null) continue;
+			boolean attivo = b == bottoneLivelli ? ordinaLivelli : localiAlfabetici;
+			int blu = 0xFF1565C0;
+			b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(attivo ? blu : 0xFFFFFFFF));
+			b.setTextColor(attivo ? 0xFFFFFFFF : blu);
+			b.setIconTint(android.content.res.ColorStateList.valueOf(attivo ? 0xFFFFFFFF : blu));
+			b.setStrokeColor(android.content.res.ColorStateList.valueOf(blu));
+		}
 	}
 
 	private void _mostraRigaPreventivo(boolean notifyDatSetChanged) {

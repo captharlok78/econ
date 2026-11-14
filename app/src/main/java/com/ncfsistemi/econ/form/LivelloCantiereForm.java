@@ -52,11 +52,16 @@ public abstract class LivelloCantiereForm extends DefinizioneForm {
 	@Override
 	public void sezioni(Form f) {
 		String titolo = etichetta().substring(0, 1).toUpperCase() + etichetta().substring(1);
-		f.sezione(icona(), titolo)
-				.testo(NOME, titolo).max(50)
-				.scelta(ID_LINEA, contesto.getString(R.string.linea_standard), new Linee()).metaRiga().nuovaRiga()
+		Sezione s = f.sezione(icona(), titolo)
+				.testo(NOME, titolo).max(50);
+		campiAggiuntivi(s);
+		s.scelta(ID_LINEA, contesto.getString(R.string.linea_standard), new Linee()).metaRiga().nuovaRiga()
 				.scelta(ID_PLACCA, contesto.getString(R.string.placca_standard), new Placche()).collegataA(ID_LINEA).metaRiga()
 				.note(NOTE, "Note").max(255);
+	}
+
+	/** Campi del solo livello (es. il piano dell'area), dopo il nome. */
+	protected void campiAggiuntivi(Sezione s) {
 	}
 
 	@Override

@@ -147,6 +147,12 @@
             </LinearLayout>
         </LinearLayout>
 
+        <com.ncfsistemi.econ.disegno.MaterialiElementoView
+            android:id="@+id/materiali_elemento"
+            style="@style/Disegno.Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <LinearLayout
             android:id="@+id/linear_dettaglio"
             style="@style/Disegno.Card"

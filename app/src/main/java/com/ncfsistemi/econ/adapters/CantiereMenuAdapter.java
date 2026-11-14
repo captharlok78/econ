@@ -90,7 +90,10 @@ public class CantiereMenuAdapter extends MenuLateraleAdapter {
 			return context.getResources().getString(R.string.unita);
 		}
 		if (tipo == CantiereSplitActivity.AREA) {
-			return context.getResources().getString(R.string.area);
+			// con il livello (piano) dell'area: "Area · Scantinato" (STUDIO_DESIGN_GRAFICA.md §11)
+			Integer livello = item.getAsInteger("LIVELLO");
+			return context.getResources().getString(R.string.area)
+					+ (livello == null ? "" : " · " + com.ncfsistemi.econ.form.AreaForm.nomeLivello(livello));
 		}
 		if (tipo == CantiereSplitActivity.LOCALE) {
 			return context.getResources().getString(R.string.locale);

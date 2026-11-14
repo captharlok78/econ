@@ -20,6 +20,8 @@ public class Aree extends AbstractTable {
 	public static final String ID_LINEA = "id_linea";
 	public static final String ID_PLACCA = "id_placca";
 	public static final String NOTE = "note";
+	/** Livello (piano): -1 scantinato, 0 piano terra, 1 primo piano... (schema 48, STUDIO_DESIGN_GRAFICA.md §11). */
+	public static final String LIVELLO = "livello";
 
 	public Aree() {
 		setNomeTabella(NOME_TABELLA);
@@ -32,6 +34,7 @@ public class Aree extends AbstractTable {
 		aggiungiCampo(ID_LINEA, INTEGER);
 		aggiungiCampo(ID_PLACCA, INTEGER);
 		aggiungiCampo(NOTE, TEXT);
+		aggiungiCampo(LIVELLO, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);

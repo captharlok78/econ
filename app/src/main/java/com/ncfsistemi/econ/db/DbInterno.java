@@ -67,7 +67,7 @@ import com.ncfsistemi.econ.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECON.db";
 	public static final String DATABASE_NAME_ZIP = ".econ.db";
-	public static final int SCHEMA_VERSION = 46;
+	public static final int SCHEMA_VERSION = 48;
 
 	private Context cont = null;
 
@@ -147,6 +147,7 @@ public class DbInterno extends SQLiteOpenHelper {
 		creaTabelleGiustificativi(db);
 		creaTabelleAssistenze(db);
 		creaTabellaIcone(db);
+		creaTabellaMaterialiElementi(db);
 
 		db.execSQL("VACUUM");
 
@@ -212,6 +213,7 @@ public class DbInterno extends SQLiteOpenHelper {
 		creaTabelleGiustificativi(db);
 		creaTabelleAssistenze(db);
 		creaTabellaIcone(db);
+		creaTabellaMaterialiElementi(db);
 
 		/**
 		 * Inserimento dati di default
@@ -602,6 +604,22 @@ public class DbInterno extends SQLiteOpenHelper {
 				Sessione.setDataUltimaSincronizzazione("19700101000000", getContext());
 			}
 		}
+		// Schema 47 (STUDIO_DESIGN_GRAFICA.md §10): materiale aggiunto agli elementi del disegno da Componi. Tabella nuova,
+		// sul server nasce adesso: nessun download completo.
+		if (oldVersion<47){
+			if (oldVersion<newVersion){
+				creaTabellaMaterialiElementi(db);
+			}
+		}
+		// Schema 48 (STUDIO_DESIGN_GRAFICA.md §11): livello (piano) delle aree. Sul server nasce a 0 per tutte: nessun
+		// download completo, le aree cambiate dopo arrivano col delta.
+		if (oldVersion<48){
+			if (oldVersion<newVersion){
+				if (!getTableColumns(db, Aree.NOME_TABELLA).isEmpty() && !getTableColumns(db, Aree.NOME_TABELLA).contains(Aree.LIVELLO)) {
+					db.execSQL("ALTER TABLE " + Aree.NOME_TABELLA + " ADD COLUMN " + Aree.LIVELLO + " INTEGER DEFAULT 0");
+				}
+			}
+		}
 		// Schema 39 (STUDIO_ASSISTENZE_TEMPO.md §10): assistenza a tempo, articoli in assistenza e assistenze (sola lettura),
 		// controlli segnati nei rapportini, mesi e testo sulle righe. Download completo una tantum per le assistenze gia' nate.
 		if (oldVersion<39){
@@ -843,6 +861,13 @@ public class DbInterno extends SQLiteOpenHelper {
 		db.execSQL(new com.ncfsistemi.econ.db.table.DitteArticoliAssistenza().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
 		db.execSQL(new com.ncfsistemi.econ.db.table.Assistenze().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
 		db.execSQL(new com.ncfsistemi.econ.db.table.AssistenzeControlli().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
+	}
+
+	/** Materiale sugli elementi del disegno (schema 47, STUDIO_DESIGN_GRAFICA.md §10). */
+	private static void creaTabellaMaterialiElementi(SQLiteDatabase db) {
+		db.execSQL(new com.ncfsistemi.econ.db.table.ElementiCantiereMateriali().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
+		db.execSQL("CREATE INDEX IF NOT EXISTS idx_materiali_elemento ON " + com.ncfsistemi.econ.db.table.ElementiCantiereMateriali.NOME_TABELLA
+				+ "(" + com.ncfsistemi.econ.db.table.ElementiCantiereMateriali.ID_ELEMENTO_CANT + ")");
 	}
 
 	/** Icone del disegno scaricate dal server (schema 45, STUDIO_DESIGN.md §5.2). */
