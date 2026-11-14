@@ -71,13 +71,13 @@ public class ConformitaXLS {
         LinkedHashMap<Integer, String[]> out = new LinkedHashMap<>();
         DbInterno db = new DbInterno(ctx);
         try {
-            for (Object o : db.eseguiSelect("select l.id_locale, l.nome, a.nome as area, coalesce(a.livello,0) as livello, u.nome as unita from locali l"
+            for (Object o : db.eseguiSelect("select l.id_locale, l.nome, a.id_area, a.nome as area, coalesce(a.livello,0) as livello, u.nome as unita, l.note from locali l"
                     + " inner join aree a on a.id_area=l.id_area inner join unita u on u.id_unita=a.id_unita"
                     + " where u.id_cantiere=" + idCantiere
                     + " and exists (select 1 from elementi_cantiere e where e.id_locale=l.id_locale)"
                     + " order by u.id_unita, coalesce(a.livello,0), lower(a.nome), a.id_area, lower(l.nome), l.id_locale", null)) {
                 ContentValues v = (ContentValues) o;
-                out.put(v.getAsInteger("id_locale"), new String[]{s(v, "unita"), s(v, "area"), s(v, "nome"), s(v, "livello")});
+                out.put(v.getAsInteger("id_locale"), new String[]{s(v, "unita"), s(v, "area"), s(v, "nome"), s(v, "livello"), s(v, "id_area"), s(v, "note")});
             }
         } finally {
             db.close();
@@ -275,7 +275,7 @@ public class ConformitaXLS {
     }
 
     /** Collegato a, componente, locale, collegamento, metri: visti dall'elemento id. */
-    private static Object[] collegamento(ContentValues k, int id) {
+    public static Object[] collegamento(ContentValues k, int id) {
         String s = i(k, "id_elemento_cant1") == id ? "2" : "1";
         List<String> tipo = new ArrayList<>();
         if (!s(k, "cavo").isEmpty()) tipo.add("Cavo: " + s(k, "cavo") + (i(k, "qta_cavo") > 1 ? " ×" + i(k, "qta_cavo") : ""));
@@ -291,7 +291,7 @@ public class ConformitaXLS {
     private static final String CODICE_COMPONENTE = "(select min(ec.codice_articolo) from elementi_codici ec"
             + " where ec.id_componente=cc.id_componente and ec.id_elemento=0) as codice";
 
-    private List<ContentValues> elementi(DbInterno db, int idLocale) {
+    public static List<ContentValues> elementi(DbInterno db, int idLocale) {
         return lista(db.eseguiSelect("select e.*, li.nome_linea, pl.nome_placca, p.numero as prev_numero, p.anno as prev_anno, p.tipo as prev_tipo,"
                 + " (select min(ec.codice_articolo) from elementi_codici ec where ec.id_elemento=e.id_elemento and ec.id_componente=0"
                 + " and ec.id_placca_moduli=0) as codice_elemento"
@@ -300,19 +300,19 @@ public class ConformitaXLS {
                 + " where e.id_locale=" + idLocale + " order by e.numero_identificativo, e.id_elemento_cant", null));
     }
 
-    private List<ContentValues> componenti(DbInterno db, int idElementoCant) {
+    public static List<ContentValues> componenti(DbInterno db, int idElementoCant) {
         return lista(db.eseguiSelect("select x.moduli_occupati_cant, x.posizione_iniziale, cc.id_componente_cant, cc.nome_componente_cant, cc.nota, "
                 + CODICE_COMPONENTE + " from composizioni_cantiere x inner join componenti_cantiere cc on cc.id_componente_cant=x.id_componente_cant"
                 + " where x.id_elemento_cant=" + idElementoCant + " order by x.posizione_iniziale, cc.id_componente_cant", null));
     }
 
-    private List<ContentValues> composti(DbInterno db, int idComponenteCant) {
+    public static List<ContentValues> composti(DbInterno db, int idComponenteCant) {
         return lista(db.eseguiSelect("select cc.nome_componente_cant, " + CODICE_COMPONENTE + " from componenti_cant_composti p"
                 + " inner join componenti_cantiere cc on cc.id_componente_cant=p.id_componente_cant_figlio"
                 + " where p.id_componente_cant_padre=" + idComponenteCant + " order by cc.id_componente_cant", null));
     }
 
-    private List<ContentValues> collegamenti(DbInterno db, int idElementoCant) {
+    public static List<ContentValues> collegamenti(DbInterno db, int idElementoCant) {
         return lista(db.eseguiSelect("select k.*, e1.numero_identificativo as num1, e1.nome_elemento_cant as nome1, l1.nome as locale1,"
                 + " c1.nome_componente_cant as comp1, e2.numero_identificativo as num2, e2.nome_elemento_cant as nome2, l2.nome as locale2,"
                 + " c2.nome_componente_cant as comp2, cv.nome_elemento as cavo, tb.nome_elemento as tubo from collegamenti k"

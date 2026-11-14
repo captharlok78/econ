@@ -18,6 +18,8 @@ public class ModelliStampa extends AbstractTable {
 	public static final String ID_TIPOLOGIA = "id_tipologia";
 
 	public static final String DOC_RAPPORTINO = "rapportino";
+	/** Dichiarazione di conformità del disegno (STUDIO_DESIGN_GRAFICA.md §12). */
+	public static final String DOC_CONFORMITA = "conformita";
 
 	public ModelliStampa() {
 		setNomeTabella(NOME_TABELLA);

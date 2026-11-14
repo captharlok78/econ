@@ -322,6 +322,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         aggiornaModi();
 
         b.addView(iconaBianca("\uf1c3", "Dichiarazione di conformità (Excel)", v -> esportaConformita()));
+        b.addView(iconaBianca("\uf02f", "Dichiarazione di conformità da stampare (PDF)", v -> stampaConformita()));
         b.addView(iconaBianca("", "Altro", this::menu));
         return b;
     }
@@ -334,6 +335,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         }
         pm.getMenu().add(0, 3, 0, "Adatta la piantina");
         pm.getMenu().add(0, 5, 0, "Dichiarazione di conformità (Excel)");
+        pm.getMenu().add(0, 6, 0, "Dichiarazione di conformità da stampare (PDF)");
         pm.getMenu().add(0, 4, 0, "Usa il disegno classico");
         pm.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
@@ -354,6 +356,9 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
                 case 5:
                     esportaConformita();
                     return true;
+                case 6:
+                    stampaConformita();
+                    return true;
                 case 4:
                     new MaterialAlertDialogBuilder(this)
                             .setTitle("Disegno classico")
@@ -370,6 +375,15 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
             return false;
         });
         pm.show();
+    }
+
+    /**
+     * Dichiarazione di conformità da stampare (STUDIO_DESIGN_GRAFICA.md §12): stesso modello del portale, un blocco A4 per
+     * locale; si stampa o si salva in PDF dalla stampa di Android. Le piantine si disegnano sul thread della UI.
+     */
+    private void stampaConformita() {
+        Toast.makeText(this, "Preparo la stampa della conformità…", Toast.LENGTH_SHORT).show();
+        piantina.post(() -> com.ncfsistemi.econ.stampa.StampaConformita.stampa(this, cantiere));
     }
 
     /**

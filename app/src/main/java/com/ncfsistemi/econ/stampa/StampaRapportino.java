@@ -84,7 +84,11 @@ public final class StampaRapportino {
             Toast.makeText(activity, "Stampa non riuscita: " + e.getMessage(), Toast.LENGTH_LONG).show();
             return;
         }
-        String titolo = "Rapportino " + idRapportino;
+        stampaHtml(activity, "Rapportino " + idRapportino, html);
+    }
+
+    /** Manda l'HTML alla stampa di Android (stampante o "Salva come PDF"), A4. */
+    public static void stampaHtml(Activity activity, String titolo, String html) {
         WebView web = new WebView(activity);
         web.setWebViewClient(new WebViewClient() {
             @Override
@@ -103,10 +107,15 @@ public final class StampaRapportino {
      * dalla ditta (ditte_modelli_stampa), poi il predefinito, poi gli altri.
      */
     public static List<ContentValues> modelli(DbInterno db) {
+        return modelli(db, ModelliStampa.DOC_RAPPORTINO);
+    }
+
+    /** Modelli attivi di un documento (rapportino, conformita...), nello stesso ordine del server. */
+    public static List<ContentValues> modelli(DbInterno db, String documento) {
         String d = com.ncfsistemi.econ.db.table.DitteModelliStampa.NOME_TABELLA;
         List<ContentValues> ris = new ArrayList<>();
         for (Object o : db.eseguiSelect("select m.* from " + ModelliStampa.NOME_TABELLA + " m where m." + ModelliStampa.DOCUMENTO + "='"
-                + ModelliStampa.DOC_RAPPORTINO + "' and coalesce(m." + ModelliStampa.ATTIVO + ",1)=1 order by case when exists (select 1 from " + d
+                + documento.replace("'", "") + "' and coalesce(m." + ModelliStampa.ATTIVO + ",1)=1 order by case when exists (select 1 from " + d
                 + " x where x.id_modello = m.id and x.documento = m.documento and x.id_ditta = " + Sessione.getDittaSelezionata()
                 + ") then 0 else 1 end, m." + ModelliStampa.PREDEFINITO + " desc, m." + ModelliStampa.ORDINE + ", m." + ModelliStampa.NOME, null)) {
             ris.add((ContentValues) o);
@@ -225,16 +234,21 @@ public final class StampaRapportino {
         totali.put("ha_viaggi", !viaggi.isEmpty());
         totali.put("ha_materiali", !materiali.isEmpty());
         c.put("totali", totali);
+        c.put("stampa", infoStampa(ctx));
+        return c;
+    }
+
+    /** Data e ora della stampa e versioni (variabile "stampa" dei modelli). */
+    static Map<String, Object> infoStampa(Context ctx) {
         Map<String, Object> st = new LinkedHashMap<>();
         st.put("data_ora", new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.ITALY).format(new Date()));
         // "1.0.48 / 1.0.44": versione del server (ultima vista) / versione di questa app
         String server = com.ncfsistemi.econ.utils.VersioneApp.server(ctx), app = com.ncfsistemi.econ.utils.VersioneApp.salvata(ctx);
         st.put("versione", (server != null ? server : "?") + " / " + (app != null ? app : com.ncfsistemi.econ.BuildConfig.VERSION_NAME));
-        c.put("stampa", st);
-        return c;
+        return st;
     }
 
-    private static Map<String, Object> ditta(Context ctx) throws Exception {
+    static Map<String, Object> ditta(Context ctx) throws Exception {
         Map<String, Object> m = new LinkedHashMap<>();
         MercuryApiService.DittaDati d = DittaLocale.getDati(ctx);
         m.put("ragione_sociale", d != null && d.ragioneSociale != null ? d.ragioneSociale : "");
@@ -259,7 +273,7 @@ public final class StampaRapportino {
         return m;
     }
 
-    private static String indirizzo(String via, String civico, String cap, String citta, String prov) {
+    static String indirizzo(String via, String civico, String cap, String citta, String prov) {
         String v = (via + " " + civico).trim();
         String luogo = (cap + " " + citta + (prov.isEmpty() ? "" : " (" + prov + ")")).trim();
         return (v + (!v.isEmpty() && !luogo.isEmpty() ? ", " : "") + luogo).trim();
