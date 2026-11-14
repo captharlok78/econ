@@ -100,8 +100,6 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
     private DisegnoDati.VoceTavolozza daPosare;
     private int categoriaAperta = -1;
     private final Map<Integer, List<DisegnoDati.VoceTavolozza>> cacheTavolozza = new HashMap<>();
-    /** Filtro della tavolozza per categoria (0 = Preferiti): resta finché non lo si toglie con la ×. */
-    private final Map<Integer, String> filtriTavolozza = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -654,69 +652,195 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
     }
 
     /**
-     * Categoria aperta della tavolozza: casella di ricerca (sul nome, tutte le parole scritte, maiuscole indifferenti)
-     * con la × che toglie il filtro, poi la griglia. Scrivendo si ridisegna solo la griglia, la tastiera resta aperta.
+     * Categoria aperta della tavolozza: casella "Cerca…" con il pulsantino azzurro della lente, poi la griglia. La casella
+     * e il pulsante aprono la finestra di ricerca (cercaElementi): nel pannello la tastiera copriva la griglia.
      */
     private View tavolozzaFiltrata(int idCategoria, String nomeCategoria) {
         LinearLayout box = verticale();
-        List<DisegnoDati.VoceTavolozza> tutte = vociTavolozza(idCategoria);
-        FrameLayout contenitoreGriglia = new FrameLayout(this);
-        if (tutte.size() > 0) {
-            LinearLayout riga = new LinearLayout(this);
-            riga.setOrientation(LinearLayout.HORIZONTAL);
-            riga.setGravity(Gravity.CENTER_VERTICAL);
-            riga.setBackground(arrotondato(Color.WHITE, BORDO, 8));
-            riga.setPadding(px(8), 0, 0, 0);
-            TextView lente = new TextView(this);
-            lente.setTypeface(fa);
-            lente.setText("\uf002");
-            lente.setTextColor(TESTO2);
-            lente.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
-            riga.addView(lente);
-            EditText cerca = new EditText(this);
-            cerca.setHint("Cerca in " + nomeCategoria);
-            cerca.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-            cerca.setSingleLine(true);
-            cerca.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-            cerca.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_DONE);
-            cerca.setBackground(null);
-            cerca.setPadding(px(8), px(8), px(4), px(8));
-            riga.addView(cerca, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-            TextView togli = iconaPulsante("\uf00d", "Togli il filtro", null);
-            togli.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-            togli.setLayoutParams(new LinearLayout.LayoutParams(px(38), px(38)));
-            riga.addView(togli);
-            LinearLayout.LayoutParams lpR = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            lpR.setMargins(px(2), px(6), px(2), px(2));
-            box.addView(riga, lpR);
-
-            String filtro = filtriTavolozza.get(idCategoria);
-            if (filtro != null) cerca.setText(filtro);
-            togli.setVisibility(TextUtils.isEmpty(filtro) ? View.INVISIBLE : View.VISIBLE);
-            togli.setOnClickListener(v -> {
-                cerca.setText("");
-                nascondiTastiera(cerca);
-            });
-            cerca.addTextChangedListener(new android.text.TextWatcher() {
-                @Override public void beforeTextChanged(CharSequence c, int a, int b, int d) { }
-                @Override public void onTextChanged(CharSequence c, int a, int b, int d) { }
-                @Override public void afterTextChanged(android.text.Editable e) {
-                    String f = e.toString();
-                    if (f.trim().isEmpty()) filtriTavolozza.remove(idCategoria);
-                    else filtriTavolozza.put(idCategoria, f);
-                    togli.setVisibility(f.isEmpty() ? View.INVISIBLE : View.VISIBLE);
-                    contenitoreGriglia.removeAllViews();
-                    contenitoreGriglia.addView(griglia(idCategoria));
-                }
-            });
-            cerca.setOnEditorActionListener((v, azione, ev) -> {
-                nascondiTastiera(cerca);
-                return true;
-            });
-        }
-        contenitoreGriglia.addView(griglia(idCategoria));
-        box.addView(contenitoreGriglia);
+        LinearLayout riga = new LinearLayout(this);
+        riga.setOrientation(LinearLayout.HORIZONTAL);
+        riga.setGravity(Gravity.CENTER_VERTICAL);
+        TextView casella = new TextView(this);
+        casella.setText("Cerca in " + nomeCategoria + "…");
+        casella.setTextColor(TESTO2);
+        casella.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        casella.setSingleLine(true);
+        casella.setEllipsize(TextUtils.TruncateAt.END);
+        casella.setBackground(arrotondato(Color.WHITE, BORDO, 8));
+        casella.setPadding(px(10), px(9), px(8), px(9));
+        casella.setOnClickListener(v -> cercaElementi(idCategoria, ""));
+        riga.addView(casella, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        TextView lente = new TextView(this);
+        lente.setTypeface(fa);
+        lente.setText("\uf002");
+        lente.setTextColor(Color.WHITE);
+        lente.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        lente.setGravity(Gravity.CENTER);
+        lente.setBackground(arrotondato(0xFF1E88E5, 0, 8));
+        lente.setContentDescription("Cerca un elemento");
+        lente.setOnClickListener(v -> cercaElementi(idCategoria, ""));
+        LinearLayout.LayoutParams lpL = new LinearLayout.LayoutParams(px(36), px(36));
+        lpL.setMargins(px(6), 0, 0, 0);
+        riga.addView(lente, lpL);
+        LinearLayout.LayoutParams lpR = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lpR.setMargins(px(2), px(6), px(2), px(2));
+        box.addView(riga, lpR);
+        box.addView(griglia(idCategoria));
         return box;
+    }
+
+    /**
+     * Finestra di ricerca degli elementi da posare: testo (tutte le parole, maiuscole indifferenti) e categoria (tutte,
+     * preferiti o una sola), risultati che si aggiornano scrivendo. Toccando un risultato lo si prende per posarlo.
+     */
+    private void cercaElementi(int idCategoriaIniziale, String testoIniziale) {
+        List<DisegnoDati.Categoria> categorie = DisegnoDati.categorie(this);
+        List<String> nomiCat = new ArrayList<>();
+        List<Integer> idCat = new ArrayList<>();
+        nomiCat.add("Tutte le categorie");
+        idCat.add(-1);
+        nomiCat.add("Preferiti");
+        idCat.add(0);
+        Map<Integer, String> nomePerId = new HashMap<>();
+        for (DisegnoDati.Categoria c : categorie) {
+            nomiCat.add(c.nome);
+            idCat.add(c.id);
+            nomePerId.put(c.id, c.nome);
+        }
+
+        LinearLayout box = verticale();
+        box.setPadding(px(20), px(8), px(20), 0);
+        LinearLayout riga = new LinearLayout(this);
+        riga.setOrientation(LinearLayout.HORIZONTAL);
+        riga.setGravity(Gravity.CENTER_VERTICAL);
+        EditText cerca = new EditText(this);
+        cerca.setHint("Nome dell'elemento");
+        cerca.setText(testoIniziale);
+        cerca.setSingleLine(true);
+        cerca.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        cerca.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);
+        riga.addView(cerca, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        TextView lente = new TextView(this);
+        lente.setTypeface(fa);
+        lente.setText("\uf002");
+        lente.setTextColor(Color.WHITE);
+        lente.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        lente.setGravity(Gravity.CENTER);
+        lente.setBackground(arrotondato(0xFF1E88E5, 0, 8));
+        lente.setContentDescription("Cerca");
+        LinearLayout.LayoutParams lpL = new LinearLayout.LayoutParams(px(40), px(40));
+        lpL.setMargins(px(6), 0, 0, 0);
+        riga.addView(lente, lpL);
+        box.addView(riga);
+
+        android.widget.Spinner categoria = new android.widget.Spinner(this);
+        android.widget.ArrayAdapter<String> ad = new android.widget.ArrayAdapter<>(this, android.R.layout.simple_spinner_item, nomiCat);
+        ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        categoria.setAdapter(ad);
+        int pos = idCat.indexOf(idCategoriaIniziale);
+        categoria.setSelection(pos < 0 ? 0 : pos);
+        box.addView(categoria);
+
+        TextView conteggio = new TextView(this);
+        conteggio.setTextColor(TESTO2);
+        conteggio.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        conteggio.setPadding(px(4), px(6), px(4), px(4));
+        box.addView(conteggio);
+
+        ScrollView scorri = new ScrollView(this);
+        LinearLayout risultati = verticale();
+        scorri.addView(risultati);
+        box.addView(scorri, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, px(300)));
+
+        androidx.appcompat.app.AlertDialog dlg = new MaterialAlertDialogBuilder(this)
+                .setTitle("Cerca un elemento da posare")
+                .setView(box)
+                .setNegativeButton("Chiudi", null)
+                .create();
+
+        Runnable aggiorna = () -> {
+            int idc = idCat.get(Math.max(0, categoria.getSelectedItemPosition()));
+            String filtro = cerca.getText().toString();
+            List<DisegnoDati.VoceTavolozza> trovati = new ArrayList<>();
+            if (idc >= 0) {
+                for (DisegnoDati.VoceTavolozza v : vociTavolozza(idc)) if (corrisponde(v.nome, filtro)) trovati.add(v);
+            } else {
+                for (DisegnoDati.Categoria c : categorie) {
+                    for (DisegnoDati.VoceTavolozza v : vociTavolozza(c.id)) if (corrisponde(v.nome, filtro)) trovati.add(v);
+                }
+                java.util.Collections.sort(trovati, (x, y) -> x.nome.compareToIgnoreCase(y.nome));
+            }
+            risultati.removeAllViews();
+            int max = 200;
+            conteggio.setText(trovati.isEmpty() ? "Nessun elemento trovato"
+                    : trovati.size() == 1 ? "1 elemento" : trovati.size() > max ? trovati.size() + " elementi, ne vedi " + max + ": scrivi di più"
+                    : trovati.size() + " elementi");
+            for (int i = 0; i < trovati.size() && i < max; i++) {
+                DisegnoDati.VoceTavolozza v = trovati.get(i);
+                LinearLayout r = new LinearLayout(this);
+                r.setOrientation(LinearLayout.HORIZONTAL);
+                r.setGravity(Gravity.CENTER_VERTICAL);
+                r.setPadding(px(4), px(6), px(4), px(6));
+                boolean sel = daPosare != null && daPosare.id == v.id;
+                r.setBackground(sel ? arrotondato(0xFFFFF3E0, ARANCIO, 8) : selezionabile());
+                ImageView iv = new ImageView(this);
+                iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                iv.setImageDrawable(SimboliDisegno.fotoOppureSimbolo(this, Elementi.PATH_ICONE, v.icona, SimboliDisegno.elemento(v.id)));
+                r.addView(iv, new LinearLayout.LayoutParams(px(40), px(40)));
+                LinearLayout testi = verticale();
+                testi.setPadding(px(12), 0, px(4), 0);
+                TextView n = new TextView(this);
+                n.setText(v.nome);
+                n.setTextColor(TESTO);
+                n.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+                testi.addView(n);
+                String nc = nomePerId.get(v.idCategoria);
+                if (nc != null) {
+                    TextView c = new TextView(this);
+                    c.setText(nc + (v.preferito ? " · preferito" : ""));
+                    c.setTextColor(TESTO2);
+                    c.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+                    testi.addView(c);
+                }
+                r.addView(testi, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+                r.setOnClickListener(x -> {
+                    daPosare = v;
+                    if (v.idCategoria > 0) categoriaAperta = v.idCategoria;
+                    if (modo != PiantinaView.POSA) cambiaModo(PiantinaView.POSA);
+                    nascondiTastiera(cerca);
+                    dlg.dismiss();
+                    costruisciSinistra();
+                    aggiornaSuggerimento();
+                });
+                risultati.addView(r);
+            }
+            scorri.scrollTo(0, 0);
+        };
+        cerca.addTextChangedListener(new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence c, int a, int b, int d) { }
+            @Override public void onTextChanged(CharSequence c, int a, int b, int d) { }
+            @Override public void afterTextChanged(android.text.Editable e) { aggiorna.run(); }
+        });
+        cerca.setOnEditorActionListener((v, azione, ev) -> {
+            aggiorna.run();
+            nascondiTastiera(cerca);
+            return true;
+        });
+        lente.setOnClickListener(v -> {
+            aggiorna.run();
+            nascondiTastiera(cerca);
+        });
+        categoria.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(android.widget.AdapterView<?> p, View v, int i, long id) { aggiorna.run(); }
+            @Override public void onNothingSelected(android.widget.AdapterView<?> p) { }
+        });
+        if (dlg.getWindow() != null) {
+            dlg.getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+                    | android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        }
+        dlg.show();
+        cerca.requestFocus();
+        aggiorna.run();
     }
 
     private void nascondiTastiera(View v) {
@@ -737,16 +861,13 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
 
     private View griglia(int idCategoria) {
         List<DisegnoDati.VoceTavolozza> tutte = vociTavolozza(idCategoria);
-        String filtro = filtriTavolozza.get(idCategoria);
-        List<DisegnoDati.VoceTavolozza> voci = new ArrayList<>();
-        for (DisegnoDati.VoceTavolozza v : tutte) if (corrisponde(v.nome, filtro)) voci.add(v);
+        List<DisegnoDati.VoceTavolozza> voci = tutte;
         GridLayout g = new GridLayout(this);
         g.setColumnCount(3);
         g.setPadding(0, px(4), 0, px(8));
         if (voci.isEmpty()) {
             TextView t = new TextView(this);
-            t.setText(!tutte.isEmpty() ? "Nessun elemento con \"" + filtro.trim() + "\""
-                    : idCategoria == 0 ? "Nessun preferito" : "Nessun elemento");
+            t.setText(idCategoria == 0 ? "Nessun preferito" : "Nessun elemento");
             t.setTextColor(TESTO2);
             t.setPadding(px(8), px(4), px(8), px(4));
             return t;
