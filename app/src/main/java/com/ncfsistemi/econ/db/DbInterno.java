@@ -67,7 +67,7 @@ import com.ncfsistemi.econ.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECON.db";
 	public static final String DATABASE_NAME_ZIP = ".econ.db";
-	public static final int SCHEMA_VERSION = 51;
+	public static final int SCHEMA_VERSION = 52;
 
 	private Context cont = null;
 
@@ -671,6 +671,16 @@ public class DbInterno extends SQLiteOpenHelper {
 							db.execSQL("ALTER TABLE " + t + " ADD COLUMN " + c[0] + " " + c[1]);
 						}
 					}
+				}
+			}
+		}
+		// Schema 52 (STUDIO_DESIGN_GRAFICA.md §22): articoli della ditta posati sul disegno con quantita' e unita' di misura,
+		// come sul server (id_unita_misura); la colonna di testo unita_misura resta per gli elementi della libreria.
+		if (oldVersion<52){
+			if (oldVersion<newVersion){
+				if (!getTableColumns(db, ElementiCantiere.NOME_TABELLA).isEmpty()
+						&& !getTableColumns(db, ElementiCantiere.NOME_TABELLA).contains(ElementiCantiere.ID_UNITA_MISURA)) {
+					db.execSQL("ALTER TABLE " + ElementiCantiere.NOME_TABELLA + " ADD COLUMN " + ElementiCantiere.ID_UNITA_MISURA + " INTEGER");
 				}
 			}
 		}

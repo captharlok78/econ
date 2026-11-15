@@ -304,6 +304,10 @@ public final class DisegnoDati {
         public double altezza;
         public String icona;
         public int cavi, tubi, relazioni, componentiDocumento;
+        /** Articolo della ditta posato direttamente (§3.5 A): id, quantità, unità, settore (simbolo e colore). */
+        public int idArticolo, idUnita, idSettore;
+        public double quantita;
+        public String um = "";
         /** Elemento di un altro documento (stile grigio, come nella piantina classica). */
         public boolean altroOrdine;
     }
@@ -333,7 +337,9 @@ public final class DisegnoDati {
                     + "(select count(*) from collegamenti where (id_elemento_cant1=elementi_cantiere.id_elemento_cant or"
                     + " id_elemento_cant2=elementi_cantiere.id_elemento_cant) and id_tubo<>0) as n_tubi,"
                     + "(select count(*) from relazioni where id_elemento_cant1=elementi_cantiere.id_elemento_cant or"
-                    + " id_elemento_cant2=elementi_cantiere.id_elemento_cant) as n_relazioni"
+                    + " id_elemento_cant2=elementi_cantiere.id_elemento_cant) as n_relazioni,"
+                    + "(select id_settore from listini where listini.id=elementi_cantiere.id_articolo_ditta) as id_settore_art,"
+                    + "(select unita_misura from unita_misura where unita_misura.id=elementi_cantiere.id_unita_misura) as um_art"
                     + " from elementi_cantiere left join elementi on elementi_cantiere.id_elemento=elementi.id_elemento"
                     + " left join preventivi on elementi_cantiere.id_preventivo=preventivi.id_preventivo where id_locale = " + idLocale;
             String sql = chiuso ? campi + " and elementi_cantiere.id_preventivo=" + idPreventivo
@@ -367,6 +373,18 @@ public final class DisegnoDati {
                 p.tubi = intero(v, "n_tubi");
                 p.relazioni = intero(v, "n_relazioni");
                 p.componentiDocumento = intero(v, "num_componenti_prev_selezionato");
+                p.idArticolo = intero(v, ElementiCantiere.ID_ARTICOLO_DITTA);
+                if (p.idElemento <= 0 && p.idArticolo != 0) {
+                    p.idUnita = intero(v, ElementiCantiere.ID_UNITA_MISURA);
+                    p.idSettore = intero(v, "id_settore_art");
+                    Double q = v.getAsDouble(ElementiCantiere.QUANTITA);
+                    p.quantita = q == null || q <= 0 ? 1 : q;
+                    String um = v.getAsString("um_art");
+                    if (um == null || um.isEmpty()) um = v.getAsString(ElementiCantiere.UNITA_MISURA);
+                    p.um = um == null ? "" : um;
+                } else {
+                    p.idArticolo = 0;
+                }
                 p.altroOrdine = p.idPreventivo != idPreventivo && p.componentiDocumento == 0;
                 // dismesso (sostituito o tolto con un rapportino): resta sulla piantina, in grigio (STUDIO_STORICO_DISEGNO.md S6)
                 if ("DISMESSO".equals(v.getAsString(ElementiCantiere.STATO))) p.altroOrdine = true;
@@ -465,6 +483,146 @@ public final class DisegnoDati {
         public String nome = "";
         public String icona;
         public boolean preferito;
+        /** Articolo della ditta (id di listini = articoli_ditta sul server), 0 per gli elementi della libreria. */
+        public int idArticolo;
+        public int idSettore;
+        public String codice = "";
+        /** Foto dell'articolo in base64 (listini.foto), null se non c'è. */
+        public String foto;
+    }
+
+    /** Filtro della finestra di scelta per gli articoli della ditta (STUDIO_DESIGN_GRAFICA.md §22). */
+    public static final int ARTICOLI = -2;
+
+    /**
+     * Elementi e componenti della libreria (categorie, Componi, collegamenti, conformità) solo con il modulo Elettro: con il
+     * solo Design sul disegno si posano gli articoli della ditta (STUDIO_DESIGN_GRAFICA.md §22).
+     */
+    public static boolean conElettro(Context ctx) {
+        return com.ncfsistemi.econ.utils.FunzionalitaApp.haModulo(ctx, com.ncfsistemi.econ.utils.FunzionalitaApp.ELETTRICO);
+    }
+
+    /** Articoli della ditta proposti per il disegno (quelli del listino della ditta, non quelli nati in una riga). */
+    public static List<VoceTavolozza> articoli(Context ctx) {
+        List<VoceTavolozza> out = new ArrayList<>();
+        DbInterno db = new DbInterno(ctx);
+        try {
+            for (Object o : db.eseguiSelect("select id, codice_articolo, codice_ditta, descrizione, id_settore, foto from listini"
+                    + " where coalesce(id, 0) <> 0 and coalesce(nel_listino, 1) = 1 order by descrizione collate nocase limit 2000", null)) {
+                ContentValues v = (ContentValues) o;
+                VoceTavolozza t = new VoceTavolozza();
+                t.idArticolo = intero(v, "id");
+                t.id = -t.idArticolo; // non si confonde con gli elementi della libreria nella stessa griglia
+                t.idCategoria = ARTICOLI;
+                String cod = v.getAsString("codice_ditta");
+                if (cod == null || cod.trim().isEmpty()) cod = v.getAsString("codice_articolo");
+                t.codice = cod == null ? "" : cod.trim();
+                t.nome = v.getAsString("descrizione") == null ? t.codice : v.getAsString("descrizione").trim();
+                t.idSettore = intero(v, "id_settore");
+                String foto = v.getAsString("foto");
+                t.foto = foto == null || foto.trim().isEmpty() ? null : foto;
+                out.add(t);
+            }
+        } finally {
+            db.close();
+        }
+        return out;
+    }
+
+    /** Unità di misura proponibili per un articolo posato: {id, codice, nome}, senza ore e minuti. */
+    public static List<String[]> unitaMisura(Context ctx) {
+        List<String[]> out = new ArrayList<>();
+        DbInterno db = new DbInterno(ctx);
+        try {
+            for (Object o : db.eseguiSelect("select id, unita_misura, nome from unita_misura where coalesce(minuti_per_unita, 0) = 0"
+                    + " order by id", null)) {
+                ContentValues v = (ContentValues) o;
+                out.add(new String[]{String.valueOf(intero(v, "id")), v.getAsString("unita_misura"), v.getAsString("nome")});
+            }
+        } finally {
+            db.close();
+        }
+        return out;
+    }
+
+    /** Quantità e unità dell'ultima posa di questo articolo sul tablet (per proporle), {quantita, id_unita} o null. */
+    public static double[] ultimaPosa(Context ctx, int idArticolo) {
+        DbInterno db = new DbInterno(ctx);
+        try {
+            ContentValues r = db.getRecord("select quantita, id_unita_misura from elementi_cantiere where id_articolo_ditta=" + idArticolo
+                    + " and coalesce(id_elemento, 0) = 0 order by data_ins desc, id_elemento_cant desc limit 1");
+            if (r == null) return null;
+            Double q = r.getAsDouble("quantita");
+            return new double[]{q == null ? 1 : q, intero(r, "id_unita_misura")};
+        } catch (Exception e) {
+            return null;
+        } finally {
+            db.close();
+        }
+    }
+
+    /**
+     * Posa un articolo della ditta nel locale (STUDIO_DESIGN_GRAFICA.md §3.5 A): riga di elementi_cantiere senza elemento
+     * della libreria, con articolo, quantità e unità di misura. Torna l'id_elemento_cant.
+     */
+    public static int posaArticolo(Context ctx, int idCantiere, int idLocale, int idPreventivo, VoceTavolozza a,
+                                   double quantita, int idUnita, int x, int y) {
+        DbInterno db = new DbInterno(ctx);
+        try {
+            ElementiCantiere tab = new ElementiCantiere();
+            ContentValues val = tab.getValoriLogInserimento(db);
+            val.put(ElementiCantiere.ID_LOCALE, idLocale);
+            val.put(ElementiCantiere.ID_ELEMENTO, 0);
+            val.put(ElementiCantiere.ID_ARTICOLO_DITTA, a.idArticolo);
+            val.put(ElementiCantiere.NOME_ELEMENTO_CANT, a.nome);
+            val.put(ElementiCantiere.QUANTITA, quantita);
+            if (idUnita > 0) {
+                val.put(ElementiCantiere.ID_UNITA_MISURA, idUnita);
+                ContentValues u = db.getRecord("select unita_misura from unita_misura where id=" + idUnita);
+                if (u != null) val.put(ElementiCantiere.UNITA_MISURA, u.getAsString("unita_misura"));
+            }
+            val.put(ElementiCantiere.ID_PREVENTIVO, idPreventivo);
+            if (idPreventivo == 0) val.put(ElementiCantiere.ID_CANTIERE, idCantiere);
+            val.put(ElementiCantiere.POS_X, x);
+            val.put(ElementiCantiere.POS_Y, y);
+            val.put(ElementiCantiere.NUMERO_IDENTIFICATIVO, tab.getProssimoNumero(db, idCantiere));
+            tab.inserisciRecord(db, val);
+            Integer id = val.getAsInteger(ElementiCantiere.ID_ELEMENTO_CANT);
+            return id == null ? 0 : id;
+        } finally {
+            db.close();
+        }
+    }
+
+    /** Articolo della ditta (listini): codice (aziendale se c'è), descrizione, foto; null se non è sul tablet. */
+    public static ContentValues articolo(Context ctx, int idArticolo) {
+        DbInterno db = new DbInterno(ctx);
+        try {
+            return db.getRecord("select coalesce(nullif(codice_ditta, ''), codice_articolo) as codice, descrizione, foto from listini where id=" + idArticolo);
+        } catch (Exception e) {
+            return null;
+        } finally {
+            db.close();
+        }
+    }
+
+    /** Nuova quantità (e unità) di un articolo posato. */
+    public static void salvaQuantita(Context ctx, int idElementoCant, double quantita, int idUnita) {
+        DbInterno db = new DbInterno(ctx);
+        try {
+            ContentValues c = new ElementiCantiere().getValoriLogModifica(db);
+            c.put(ElementiCantiere.QUANTITA, quantita);
+            if (idUnita > 0) {
+                c.put(ElementiCantiere.ID_UNITA_MISURA, idUnita);
+                ContentValues u = db.getRecord("select unita_misura from unita_misura where id=" + idUnita);
+                if (u != null) c.put(ElementiCantiere.UNITA_MISURA, u.getAsString("unita_misura"));
+            }
+            ContentValues where = new ContentValues();
+            where.put(ElementiCantiere.ID_ELEMENTO_CANT, idElementoCant);
+            new ElementiCantiere().aggiornaRecord(db, c, where);
+        } finally {
+            db.close();
+        }
     }
 
     public static List<Categoria> categorie(Context ctx) {

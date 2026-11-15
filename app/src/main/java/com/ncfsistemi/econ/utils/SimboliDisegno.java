@@ -296,7 +296,42 @@ public final class SimboliDisegno {
     /** Da chiamare dopo una sync: categorie, elementi e componenti possono essere cambiati. */
     public static synchronized void azzera() {
         catElementi = catComponenti = elementi = componenti = null;
+        settori = null;
     }
+
+    /** settore → voce (simbolo e colore del settore dell'articolo). */
+    private static Map<Integer, Voce> settori;
+
+    /**
+     * Articolo della ditta posato sul disegno (STUDIO_DESIGN_GRAFICA.md §3.5 A, §22): simbolo e colore del suo settore,
+     * se no "inventory_2" blu-grigio (come il portale).
+     */
+    public static synchronized Voce articolo(Integer idSettore) {
+        if (settori == null) {
+            settori = new HashMap<>();
+            Context ctx = com.ncfsistemi.econ.EconApplication.contesto();
+            if (ctx != null) {
+                DbInterno db = new DbInterno(ctx);
+                try {
+                    for (Object o : db.eseguiSelect("select id, simbolo, colore from settori_articolo", null)) {
+                        android.content.ContentValues v = (android.content.ContentValues) o;
+                        Integer id = v.getAsInteger("id");
+                        if (id == null) continue;
+                        String sim = v.getAsString("simbolo");
+                        settori.put(id, new Voce(vuoto(sim) ? "inventory_2" : sim, colore(v.getAsString("colore"), 0xFF607D8B)));
+                    }
+                } catch (Exception e) {
+                    // DB senza settori: si usa il simbolo predefinito
+                } finally {
+                    db.close();
+                }
+            }
+        }
+        Voce v = idSettore != null ? settori.get(idSettore) : null;
+        return v != null ? v : new Voce("inventory_2", 0xFF607D8B);
+    }
+
+
 
     // ------------------------------------------------------------------ caricamento
 

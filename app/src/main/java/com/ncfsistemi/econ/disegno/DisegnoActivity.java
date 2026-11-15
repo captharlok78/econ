@@ -1,6 +1,7 @@
 package com.ncfsistemi.econ.disegno;
 
 import android.content.Context;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
@@ -83,6 +84,8 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
     private Typeface fa;
     private float dp;
     private boolean stretto;
+    /** Modulo Elettro: libreria (elementi, componenti), Collega, conformità; senza, si posano gli articoli della ditta (§22). */
+    private boolean conElettro;
 
     private TextView titolo, sottotitolo, suggerimento;
     private final TextView[] pulsantiModo = new TextView[5];
@@ -121,6 +124,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         stretto = getResources().getConfiguration().screenWidthDp < 840;
 
         cantiere = getIntent().getIntExtra(Cantieri.ID_CANTIERE, 0);
+        conElettro = DisegnoDati.conElettro(this);
         locale = getIntent().getIntExtra(Locali.ID_LOCALE, 0);
         if (savedInstanceState != null) {
             locale = savedInstanceState.getInt("locale", locale);
@@ -129,7 +133,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         }
         preventivo = Sessione.getIdPreventivoSelezionato();
         bloccato = getIntent().getBooleanExtra("MODIFICHE_BLOCCATE", false) || DisegnoDati.documentoBloccato(this, preventivo);
-        if (bloccato) modo = PiantinaView.GUARDA;
+        if (bloccato || (!conElettro && modo == PiantinaView.COLLEGA)) modo = PiantinaView.GUARDA;
 
         setContentView(costruisci());
         getWindow().setStatusBarColor(BLU);
@@ -351,6 +355,8 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
             modi.addView(t);
         }
         b.addView(modi);
+        // Collega (cavi e tubi) è della gestione elettrica
+        if (!conElettro) pulsantiModo[PiantinaView.COLLEGA].setVisibility(View.GONE);
         aggiornaModi();
 
         // Excel e stampa della conformità solo nel menu dei tre punti
@@ -365,12 +371,14 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
             pm.getMenu().add(0, 2, 0, "Forma del locale (6×6)");
         }
         pm.getMenu().add(0, 3, 0, "Adatta la piantina");
-        pm.getMenu().add(0, 5, 0, "Dichiarazione di conformità (Excel)");
-        pm.getMenu().add(0, 6, 0, "Dichiarazione di conformità da stampare (PDF)");
+        if (conElettro) {
+            pm.getMenu().add(0, 5, 0, "Dichiarazione di conformità (Excel)");
+            pm.getMenu().add(0, 6, 0, "Dichiarazione di conformità da stampare (PDF)");
+        }
         int daRapportino = RapportinoDalDisegno.conta(this, cantiere);
         pm.getMenu().add(0, 7, 0, "Rapportino dal disegno" + (daRapportino > 0 ? " (" + daRapportino + " da inserire)" : ""));
         pm.getMenu().add(0, 8, 0, "Storico del disegno");
-        pm.getMenu().add(0, 4, 0, "Usa il disegno classico");
+        if (conElettro) pm.getMenu().add(0, 4, 0, "Usa il disegno classico");
         pm.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
                 case 1:
@@ -523,7 +531,8 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         String s;
         switch (modo) {
             case PiantinaView.POSA:
-                s = daPosare == null ? "Scegli un elemento in Componenti, poi tocca la piantina dove va"
+                s = daPosare == null ? (conElettro ? "Scegli un elemento in Componenti, poi tocca la piantina dove va"
+                        : "Scegli un articolo in Articoli, poi tocca la piantina dove va")
                         : "Tocca la piantina per posare: " + daPosare.nome;
                 break;
             case PiantinaView.SPOSTA:
@@ -552,7 +561,8 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
     private void aggiornaEtichette() {
         if (etichettaStruttura == null) return;
         testoEtichetta(etichettaStruttura, "\uf0e8", "Struttura");
-        testoEtichetta(etichettaTavolozza, "\uf1b3", daPosare == null ? "Componenti" : "Componenti · " + daPosare.nome);
+        String tav = conElettro ? "Componenti" : "Articoli";
+        testoEtichetta(etichettaTavolozza, conElettro ? "\uf1b3" : "\uf466", daPosare == null ? tav : tav + " · " + daPosare.nome);
         etichettaTavolozza.setVisibility(bloccato ? View.GONE : View.VISIBLE);
     }
 
@@ -688,7 +698,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
     private List<DisegnoDati.VoceTavolozza> vociTavolozza(int idCategoria) {
         List<DisegnoDati.VoceTavolozza> voci = cacheTavolozza.get(idCategoria);
         if (voci == null) {
-            voci = DisegnoDati.tavolozza(this, idCategoria);
+            voci = idCategoria == DisegnoDati.ARTICOLI ? DisegnoDati.articoli(this) : DisegnoDati.tavolozza(this, idCategoria);
             cacheTavolozza.put(idCategoria, voci);
         }
         return voci;
@@ -717,8 +727,15 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         h.setGravity(Gravity.CENTER_VERTICAL);
         ImageView iv = new ImageView(this);
         iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        SimboliDisegno.Voce voce = p.idElemento > 0 ? SimboliDisegno.elemento(p.idElemento) : SimboliDisegno.categoriaElementi(p.idCategoria);
-        iv.setImageDrawable(SimboliDisegno.fotoOppureSimbolo(this, Elementi.PATH_ICONE, p.icona, voce));
+        ContentValues articolo = p.idArticolo != 0 ? DisegnoDati.articolo(this, p.idArticolo) : null;
+        if (p.idArticolo != 0) {
+            android.graphics.Bitmap foto = SceltaComponenti.fotoArticolo(articolo == null ? null : articolo.getAsString("foto"));
+            iv.setImageDrawable(foto != null ? new android.graphics.drawable.BitmapDrawable(getResources(), foto)
+                    : SimboliDisegno.drawable(this, SimboliDisegno.articolo(p.idSettore)));
+        } else {
+            SimboliDisegno.Voce voce = p.idElemento > 0 ? SimboliDisegno.elemento(p.idElemento) : SimboliDisegno.categoriaElementi(p.idCategoria);
+            iv.setImageDrawable(SimboliDisegno.fotoOppureSimbolo(this, Elementi.PATH_ICONE, p.icona, voce));
+        }
         h.addView(iv, new LinearLayout.LayoutParams(px(52), px(52)));
         LinearLayout ht = verticale();
         ht.setPadding(px(12), 0, 0, 0);
@@ -729,7 +746,12 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         n.setTypeface(Typeface.DEFAULT_BOLD);
         ht.addView(n);
         TextView sub = new TextView(this);
-        sub.setText((d.categoria.isEmpty() ? "" : d.categoria + " · ") + "elemento " + p.numero);
+        if (p.idArticolo != 0) {
+            String cod = articolo == null ? "" : articolo.getAsString("codice");
+            sub.setText("Articolo" + (cod == null || cod.isEmpty() ? "" : " " + cod) + " · n. " + p.numero);
+        } else {
+            sub.setText((d.categoria.isEmpty() ? "" : d.categoria + " · ") + "elemento " + p.numero);
+        }
         sub.setTextColor(TESTO2);
         sub.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
         ht.addView(sub);
@@ -762,6 +784,10 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         }
 
         boolean modificabile = !bloccato && !DisegnoDati.serveCopia(this, p, preventivo);
+        if (p.idArticolo != 0) {
+            dettaglioArticolo(p, modificabile);
+            return;
+        }
         EditText etichetta = campo("Etichetta", p.nome, false, modificabile);
         EditText altezza = campo("Altezza da terra (cm)", formatta(p.altezza), true, modificabile);
         if (modificabile) {
@@ -796,13 +822,60 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         LinearLayout.LayoutParams lpAz = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lpAz.topMargin = px(16);
         az.addView(pulsante(d.configurabile ? "Componi" : "Dettaglio", true, v -> apri(p)), pesato());
-        az.addView(pulsante("Collega", false, v -> collega(p)), pesato());
+        if (conElettro) az.addView(pulsante("Collega", false, v -> collega(p)), pesato());
         contenutoDestro.addView(az, lpAz);
         LinearLayout az2 = new LinearLayout(this);
         az2.setOrientation(LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams lpAz2 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lpAz2.topMargin = px(8);
-        az2.addView(pulsante("Relazione", false, v -> relazione(p)), pesato());
+        if (conElettro) az2.addView(pulsante("Relazione", false, v -> relazione(p)), pesato());
+        az2.addView(pulsante("Storico", false, v -> FinestraStorico.oggetto(this, cantiere, "ELEMENTO", p.id, p.nome)), pesato());
+        if (modificabile) {
+            TextView el = pulsante("Elimina", false, v -> elimina(p));
+            el.setTextColor(ROSSO);
+            el.setBackground(arrotondato(Color.WHITE, ROSSO, 20));
+            az2.addView(el, pesato());
+        }
+        contenutoDestro.addView(az2, lpAz2);
+    }
+
+    /**
+     * Dettaglio di un articolo della ditta posato (STUDIO_DESIGN_GRAFICA.md §22): quantità e unità (si cambiano),
+     * etichetta, Storico ed Elimina. Niente composizione, collegamenti e relazioni (sono della gestione elettrica).
+     */
+    private void dettaglioArticolo(DisegnoDati.Posato p, boolean modificabile) {
+        TextView q = new TextView(this);
+        q.setText("Quantità: " + formatta(p.quantita) + (p.um.isEmpty() ? "" : " " + p.um));
+        q.setTextColor(TESTO);
+        q.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+        q.setTypeface(Typeface.DEFAULT_BOLD);
+        LinearLayout.LayoutParams lpQ = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lpQ.topMargin = px(14);
+        contenutoDestro.addView(q, lpQ);
+
+        EditText etichetta = campo("Etichetta", p.nome, false, modificabile);
+        LinearLayout az = new LinearLayout(this);
+        az.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams lpAz = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lpAz.topMargin = px(12);
+        if (modificabile) {
+            az.addView(pulsante("Quantità", true, v -> chiediQuantita(p.nome, new double[]{p.quantita, p.idUnita}, (nq, idUnita) -> {
+                DisegnoDati.salvaQuantita(this, p.id, nq, idUnita);
+                ricarica();
+            })), pesato());
+            az.addView(pulsante("Salva etichetta", false, v -> {
+                String nome = etichetta.getText().toString().trim();
+                if (nome.isEmpty()) nome = p.nome;
+                DisegnoDati.salvaEtichettaAltezza(this, p.id, nome, null);
+                Toast.makeText(this, "Salvato", Toast.LENGTH_SHORT).show();
+                ricarica();
+            }), pesato());
+            contenutoDestro.addView(az, lpAz);
+        }
+        LinearLayout az2 = new LinearLayout(this);
+        az2.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams lpAz2 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lpAz2.topMargin = px(8);
         az2.addView(pulsante("Storico", false, v -> FinestraStorico.oggetto(this, cantiere, "ELEMENTO", p.id, p.nome)), pesato());
         if (modificabile) {
             TextView el = pulsante("Elimina", false, v -> elimina(p));
@@ -951,17 +1024,95 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
     public void toccoVuoto(int x, int y) {
         if (modo == PiantinaView.POSA && !bloccato) {
             if (daPosare == null) {
-                Toast.makeText(this, "Scegli prima un elemento in Componenti", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, conElettro ? "Scegli prima un elemento in Componenti" : "Scegli prima un articolo", Toast.LENGTH_SHORT).show();
                 apriComponenti();
                 return;
             }
+            if (daPosare.idArticolo != 0) {
+                chiediQuantita(daPosare.nome, DisegnoDati.ultimaPosa(this, daPosare.idArticolo), (q, idUnita) -> {
+                    int id = DisegnoDati.posaArticolo(this, cantiere, locale, preventivo, daPosare, q, idUnita, x, y);
+                    dopoPosa(id);
+                });
+                return;
+            }
             int id = DisegnoDati.posa(this, cantiere, locale, preventivo, daPosare.id, x, y);
-            scelto = null;
-            ricarica();
-            for (DisegnoDati.Posato p : posati) if (p.id == id) seleziona(p);
+            dopoPosa(id);
             return;
         }
         seleziona(null);
+    }
+
+    private void dopoPosa(int id) {
+        scelto = null;
+        ricarica();
+        for (DisegnoDati.Posato p : posati) if (p.id == id) seleziona(p);
+    }
+
+    private interface QuantitaScelta {
+        void scelta(double quantita, int idUnita);
+    }
+
+    /**
+     * Quantità e unità di misura di un articolo della ditta (STUDIO_DESIGN_GRAFICA.md §22): l'articolo non ha l'unità,
+     * la si sceglie qui; si propongono quelle dell'ultima posa dello stesso articolo.
+     */
+    private void chiediQuantita(String nome, double[] proposta, QuantitaScelta fatto) {
+        List<String[]> unita = DisegnoDati.unitaMisura(this);
+        LinearLayout corpo = verticale();
+        corpo.setPadding(px(24), px(8), px(24), 0);
+        LinearLayout riga = new LinearLayout(this);
+        riga.setOrientation(LinearLayout.HORIZONTAL);
+        riga.setGravity(Gravity.CENTER_VERTICAL);
+        EditText q = new EditText(this);
+        q.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        q.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        q.setHint("Quantità");
+        q.setText(proposta == null ? "1" : formatta(proposta[0]));
+        q.setSelectAllOnFocus(true);
+        riga.addView(q, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        android.widget.Spinner sp = new android.widget.Spinner(this);
+        List<String> nomi = new java.util.ArrayList<>();
+        int sel = 0;
+        for (int i = 0; i < unita.size(); i++) {
+            String[] u = unita.get(i);
+            nomi.add(u[2] + " (" + u[1] + ")");
+            if (proposta != null && String.valueOf((int) proposta[1]).equals(u[0])) sel = i;
+            else if (proposta == null && "PZ".equalsIgnoreCase(u[1])) sel = i;
+        }
+        android.widget.ArrayAdapter<String> ad = new android.widget.ArrayAdapter<>(this, android.R.layout.simple_spinner_item, nomi);
+        ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sp.setAdapter(ad);
+        sp.setSelection(sel);
+        LinearLayout.LayoutParams lpU = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.3f);
+        lpU.leftMargin = px(12);
+        riga.addView(sp, lpU);
+        corpo.addView(riga);
+        androidx.appcompat.app.AlertDialog d = new MaterialAlertDialogBuilder(this)
+                .setTitle(nome)
+                .setView(corpo)
+                .setPositiveButton("Posa", null)
+                .setNegativeButton("Annulla", null)
+                .create();
+        d.setOnShowListener(x -> {
+            q.requestFocus();
+            d.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                double val;
+                try {
+                    val = Double.parseDouble(q.getText().toString().trim().replace(',', '.'));
+                } catch (NumberFormatException e) {
+                    val = 0;
+                }
+                if (val <= 0) {
+                    q.setError("Quantità maggiore di zero");
+                    return;
+                }
+                int idUnita = unita.isEmpty() ? 0 : Integer.parseInt(unita.get(sp.getSelectedItemPosition())[0]);
+                d.dismiss();
+                fatto.scelta(val, idUnita);
+            });
+        });
+        if (d.getWindow() != null) d.getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        d.show();
     }
 
     @Override

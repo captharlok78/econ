@@ -439,6 +439,7 @@ public class PiantinaView extends View {
         SimboliDisegno.Simbolo s = simboli.get(p.id);
         if (s == null) {
             SimboliDisegno.Voce v = p.idElemento > 0 ? SimboliDisegno.elemento(p.idElemento)
+                    : p.idArticolo != 0 ? SimboliDisegno.articolo(p.idSettore)
                     : SimboliDisegno.categoriaElementi(p.idCategoria);
             s = new SimboliDisegno.Simbolo(getContext(), v);
             s.setStile(p.altroOrdine ? SimboliDisegno.Simbolo.ALTRO_ORDINE

@@ -54,6 +54,8 @@ public final class SceltaComponenti {
 
     /** Categoria "tutte" del filtro (0 = preferiti, >0 = categoria). */
     public static final int TUTTE = -1;
+    /** Filtro di un settore degli articoli: SETTORE - idSettore (STUDIO_DESIGN_GRAFICA.md §22). */
+    public static final int SETTORE = -1000;
 
     public interface Scelta {
         /** Componente scelto; categoria = filtro attivo (da ricordare per la prossima apertura). */
@@ -69,6 +71,8 @@ public final class SceltaComponenti {
     private final Typeface fa;
     private final List<DisegnoDati.Categoria> categorie;
     private final Map<Integer, String> nomeCategoria = new HashMap<>();
+    /** Con Elettro: elementi della libreria e articoli; senza: solo gli articoli della ditta. */
+    private final boolean conElettro;
 
     private Dialog dlg;
     private EditText cerca;
@@ -85,13 +89,38 @@ public final class SceltaComponenti {
         this.voci = voci;
         this.dp = act.getResources().getDisplayMetrics().density;
         this.fa = ResourcesCompat.getFont(act, R.font.fa_solid_900);
-        this.categorie = DisegnoDati.categorie(act);
-        righeFiltro.add(new Object[]{TUTTE, "Tutti"});
-        righeFiltro.add(new Object[]{0, "Preferiti"});
-        for (DisegnoDati.Categoria c : categorie) {
-            righeFiltro.add(new Object[]{c.id, c.nome});
-            nomeCategoria.put(c.id, c.nome);
+        this.conElettro = DisegnoDati.conElettro(act);
+        this.categorie = conElettro ? DisegnoDati.categorie(act) : new ArrayList<>();
+        if (conElettro) {
+            righeFiltro.add(new Object[]{TUTTE, "Tutti"});
+            righeFiltro.add(new Object[]{0, "Preferiti"});
+            for (DisegnoDati.Categoria c : categorie) {
+                righeFiltro.add(new Object[]{c.id, c.nome});
+                nomeCategoria.put(c.id, c.nome);
+            }
         }
+        // articoli della ditta (sempre), poi i loro settori
+        righeFiltro.add(new Object[]{DisegnoDati.ARTICOLI, "Articoli della ditta"});
+        for (Object[] st : settoriArticoli(act)) righeFiltro.add(st);
+    }
+
+    /** Settori che hanno articoli della ditta: {SETTORE - id, nome}. */
+    private static List<Object[]> settoriArticoli(Activity act) {
+        List<Object[]> out = new ArrayList<>();
+        com.ncfsistemi.econ.db.DbInterno db = new com.ncfsistemi.econ.db.DbInterno(act);
+        try {
+            for (Object o : db.eseguiSelect("select s.id, s.nome from settori_articolo s where exists (select 1 from listini l"
+                    + " where l.id_settore = s.id and coalesce(l.id, 0) <> 0 and coalesce(l.nel_listino, 1) = 1) order by s.ordine, s.nome", null)) {
+                android.content.ContentValues v = (android.content.ContentValues) o;
+                Integer id = v.getAsInteger("id");
+                if (id != null && id > 0) out.add(new Object[]{SETTORE - id, "  " + v.getAsString("nome")});
+            }
+        } catch (Exception e) {
+            // senza settori resta "Articoli della ditta"
+        } finally {
+            db.close();
+        }
+        return out;
     }
 
     private int px(float v) {
@@ -103,7 +132,7 @@ public final class SceltaComponenti {
         filtro = categoriaIniziale;
         boolean esiste = false;
         for (Object[] r : righeFiltro) if ((int) r[0] == filtro) esiste = true;
-        if (!esiste) filtro = TUTTE;
+        if (!esiste) filtro = conElettro ? TUTTE : DisegnoDati.ARTICOLI;
 
         LinearLayout root = new LinearLayout(act);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -121,7 +150,7 @@ public final class SceltaComponenti {
         chiudi.setOnClickListener(v -> chiudi());
         barra.addView(chiudi, new LinearLayout.LayoutParams(px(48), px(48)));
         TextView titolo = new TextView(act);
-        titolo.setText("Componenti");
+        titolo.setText(conElettro ? "Componenti" : "Articoli");
         titolo.setTextColor(Color.WHITE);
         titolo.setTextSize(TypedValue.COMPLEX_UNIT_SP, 19);
         titolo.setTypeface(Typeface.DEFAULT_BOLD);
@@ -136,7 +165,7 @@ public final class SceltaComponenti {
         TextView lente = glifo("", TESTO2, 15);
         casella.addView(lente, new LinearLayout.LayoutParams(px(22), px(40)));
         cerca = new EditText(act);
-        cerca.setHint("Cerca un componente (tutte le parole)");
+        cerca.setHint(conElettro ? "Cerca un componente o un articolo (tutte le parole)" : "Cerca un articolo: codice o descrizione");
         cerca.setSingleLine(true);
         cerca.setBackground(null);
         cerca.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
@@ -225,7 +254,7 @@ public final class SceltaComponenti {
         vuoto.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         vuoto.setGravity(Gravity.CENTER);
         vuoto.setPadding(px(16), px(32), px(16), px(16));
-        vuoto.setText("Nessun componente trovato");
+        vuoto.setText(conElettro ? "Nessun componente trovato" : "Nessun articolo trovato: gli articoli si aggiungono in Catalogo › Articoli");
         destra.addView(vuoto, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         griglia.setEmptyView(vuoto);
         corpo.addView(destra, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f));
@@ -271,15 +300,20 @@ public final class SceltaComponenti {
     private void aggiorna() {
         String testo = cerca == null ? "" : cerca.getText().toString();
         trovati.clear();
-        if (filtro >= 0) {
-            for (DisegnoDati.VoceTavolozza v : voci.apply(filtro)) if (corrisponde(v.nome, testo)) trovati.add(v);
+        if (filtro >= 0 || filtro == DisegnoDati.ARTICOLI) {
+            for (DisegnoDati.VoceTavolozza v : voci.apply(filtro)) if (corrisponde(v.codice + " " + v.nome, testo)) trovati.add(v);
+        } else if (filtro <= SETTORE) {
+            for (DisegnoDati.VoceTavolozza v : voci.apply(DisegnoDati.ARTICOLI)) {
+                if (v.idSettore == SETTORE - filtro && corrisponde(v.codice + " " + v.nome, testo)) trovati.add(v);
+            }
         } else {
             for (DisegnoDati.Categoria c : categorie) {
                 for (DisegnoDati.VoceTavolozza v : voci.apply(c.id)) if (corrisponde(v.nome, testo)) trovati.add(v);
             }
             Collections.sort(trovati, (x, y) -> x.nome.compareToIgnoreCase(y.nome));
         }
-        conteggio.setText(trovati.size() == 1 ? "1 componente" : trovati.size() + " componenti");
+        boolean art = filtro == DisegnoDati.ARTICOLI || filtro <= SETTORE;
+        conteggio.setText(trovati.size() + (trovati.size() == 1 ? (art ? " articolo" : " componente") : (art ? " articoli" : " componenti")));
         adapterGriglia.notifyDataSetChanged();
         if (griglia != null) griglia.setSelection(0);
     }
@@ -326,10 +360,15 @@ public final class SceltaComponenti {
         t.setTextColor(sel ? BLU : TESTO);
         t.setTypeface(sel ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
         r.setBackground(sel ? arrotondato(BLU_CHIARO, 0, 10) : null);
-        if (id > 0) {
+        if (id > 0 || id <= SETTORE) {
             iv.setVisibility(View.VISIBLE);
             st.setVisibility(View.GONE);
-            iv.setImageDrawable(SimboliDisegno.drawable(act, SimboliDisegno.categoriaElementi(id)));
+            iv.setImageDrawable(SimboliDisegno.drawable(act, id > 0 ? SimboliDisegno.categoriaElementi(id) : SimboliDisegno.articolo(SETTORE - id)));
+        } else if (id == DisegnoDati.ARTICOLI) {
+            iv.setVisibility(View.GONE);
+            st.setVisibility(View.VISIBLE);
+            st.setText("\uf466"); // box
+            st.setTextColor(BLU);
         } else {
             iv.setVisibility(View.GONE);
             st.setVisibility(View.VISIBLE);
@@ -377,6 +416,16 @@ public final class SceltaComponenti {
         }
         boolean sel = v.id == idScelto;
         c.setBackground(sel ? arrotondato(0xFFFFF3E0, ARANCIO, 12) : arrotondato(Color.WHITE, BORDO, 12));
+        if (v.idArticolo != 0) {
+            // articolo della ditta: la sua foto, se no il simbolo del settore
+            android.graphics.Bitmap b = fotoArticolo(v.foto);
+            iv.setImageDrawable(b != null ? new android.graphics.drawable.BitmapDrawable(act.getResources(), b)
+                    : SimboliDisegno.drawable(act, SimboliDisegno.articolo(v.idSettore)));
+            nome.setText(v.nome);
+            cat.setText(v.codice);
+            cat.setVisibility(v.codice.isEmpty() ? View.GONE : View.VISIBLE);
+            return c;
+        }
         iv.setImageDrawable(SimboliDisegno.fotoOppureSimbolo(act, Elementi.PATH_ICONE, v.icona, SimboliDisegno.elemento(v.id)));
         nome.setText(v.nome);
         String nc = nomeCategoria.get(v.idCategoria);
@@ -384,6 +433,20 @@ public final class SceltaComponenti {
         cat.setText(filtro == TUTTE || filtro == 0 ? (nc == null ? "" : nc) + (v.preferito ? " ★" : "") : (v.preferito ? "★ preferito" : ""));
         cat.setVisibility(cat.getText().length() > 0 ? View.VISIBLE : View.GONE);
         return c;
+    }
+
+    /** Foto dell'articolo (base64, anche con l'intestazione data:), ridotta; null se non c'è o non si legge. */
+    static android.graphics.Bitmap fotoArticolo(String foto) {
+        if (foto == null || foto.isEmpty()) return null;
+        try {
+            String b64 = foto.contains(",") && foto.startsWith("data:") ? foto.substring(foto.indexOf(',') + 1) : foto;
+            byte[] dati = android.util.Base64.decode(b64, android.util.Base64.DEFAULT);
+            android.graphics.BitmapFactory.Options o = new android.graphics.BitmapFactory.Options();
+            o.inSampleSize = dati.length > 200_000 ? 4 : dati.length > 60_000 ? 2 : 1;
+            return android.graphics.BitmapFactory.decodeByteArray(dati, 0, dati.length, o);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private TextView glifo(String g, int colore, int sp) {

@@ -39,6 +39,8 @@ public class ElementiCantiere extends AbstractTable {
 	public static final String POS_X = "pos_x";
 	public static final String POS_Y = "pos_y";
 	public static final String UNITA_MISURA = "unita_misura";
+	/** Schema 52: unita' di misura dell'articolo posato (id di unita_misura, come sul server). */
+	public static final String ID_UNITA_MISURA = "id_unita_misura";
 	public static final String NOTA = "nota";
 	public static final String NON_CONTEGGIARE_PREVENTIVI = "non_conteggiare_preventivi";
 	public static final String ID_LINEA = "id_linea";
@@ -70,6 +72,7 @@ public class ElementiCantiere extends AbstractTable {
 		aggiungiCampo(POS_X, INTEGER);
 		aggiungiCampo(POS_Y, INTEGER);
 		aggiungiCampo(UNITA_MISURA, TEXT);
+		aggiungiCampo(ID_UNITA_MISURA, INTEGER);
 		aggiungiCampo(NOTA, TEXT);
 		aggiungiCampo(NON_CONTEGGIARE_PREVENTIVI,INTEGER);
 		aggiungiCampo(ID_LINEA, INTEGER);

@@ -87,7 +87,8 @@ public final class RapportinoDalDisegno {
                     + " and x.id_oggetto = %s and x.documento_tipo = '" + CollegamentiDisegno.RAPPORTINO + "')";
             String attivo = " and coalesce(%s.non_conteggiare_preventivi, 0) = 0 and coalesce(%s.stato, '') <> '" + CollegamentiDisegno.STATO_DISMESSO + "'";
             String elementi = "select e.id_elemento_cant id, e.nome_elemento_cant nome, e.id_elemento, e.id_articolo_ditta, e.quantita,"
-                    + " e.unita_misura um, coalesce(l.nome, '') locale from elementi_cantiere e left join locali l on l.id_locale = e.id_locale"
+                    + " coalesce((select u.unita_misura from unita_misura u where u.id = e.id_unita_misura), e.unita_misura) um,"
+                    + " coalesce(l.nome, '') locale from elementi_cantiere e left join locali l on l.id_locale = e.id_locale"
                     + " where e.id_cantiere = " + idCantiere + " and coalesce(e.id_elemento_cant_origine, 0) = 0"
                     + String.format(attivo, "e", "e") + String.format(senzaRapportino, CollegamentiDisegno.ELEMENTO, "e.id_elemento_cant")
                     + " order by locale, nome";
