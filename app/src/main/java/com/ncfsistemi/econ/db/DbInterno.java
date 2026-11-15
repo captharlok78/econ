@@ -67,7 +67,7 @@ import com.ncfsistemi.econ.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECON.db";
 	public static final String DATABASE_NAME_ZIP = ".econ.db";
-	public static final int SCHEMA_VERSION = 50;
+	public static final int SCHEMA_VERSION = 51;
 
 	private Context cont = null;
 
@@ -150,6 +150,7 @@ public class DbInterno extends SQLiteOpenHelper {
 		creaTabellaMaterialiElementi(db);
 		creaTabellaElementiDisegno(db);
 		creaTabellaLivelliArea(db);
+		creaTabellaCollegamentiDisegno(db);
 
 		db.execSQL("VACUUM");
 
@@ -218,6 +219,7 @@ public class DbInterno extends SQLiteOpenHelper {
 		creaTabellaMaterialiElementi(db);
 		creaTabellaElementiDisegno(db);
 		creaTabellaLivelliArea(db);
+		creaTabellaCollegamentiDisegno(db);
 
 		/**
 		 * Inserimento dati di default
@@ -651,6 +653,27 @@ public class DbInterno extends SQLiteOpenHelper {
 				creaTabellaLivelliArea(db);
 			}
 		}
+		// Schema 51 (STUDIO_STORICO_DISEGNO.md): collegamenti degli oggetti del disegno ai documenti e, sugli oggetti, stato,
+		// data di posa e di assistenza (li calcola il server). Stato iniziale PREVISTO come sul server: niente download completo.
+		if (oldVersion<51){
+			if (oldVersion<newVersion){
+				creaTabellaCollegamentiDisegno(db);
+				String[] tabelle = {ElementiCantiere.NOME_TABELLA, ComponentiCantiere.NOME_TABELLA,
+						com.ncfsistemi.econ.db.table.ElementiCantiereMateriali.NOME_TABELLA};
+				String[][] colonne = {
+						{ElementiCantiere.STATO, "TEXT DEFAULT 'PREVISTO'"},
+						{ElementiCantiere.DATA_POSA, "TEXT"},
+						{ElementiCantiere.DATA_ASSISTENZA, "TEXT"},
+				};
+				for (String t : tabelle) {
+					for (String[] c : colonne) {
+						if (!getTableColumns(db, t).isEmpty() && !getTableColumns(db, t).contains(c[0])) {
+							db.execSQL("ALTER TABLE " + t + " ADD COLUMN " + c[0] + " " + c[1]);
+						}
+					}
+				}
+			}
+		}
 		// Schema 39 (STUDIO_ASSISTENZE_TEMPO.md §10): assistenza a tempo, articoli in assistenza e assistenze (sola lettura),
 		// controlli segnati nei rapportini, mesi e testo sulle righe. Download completo una tantum per le assistenze gia' nate.
 		if (oldVersion<39){
@@ -899,6 +922,14 @@ public class DbInterno extends SQLiteOpenHelper {
 		db.execSQL(new com.ncfsistemi.econ.db.table.ElementiCantiereMateriali().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
 		db.execSQL("CREATE INDEX IF NOT EXISTS idx_materiali_elemento ON " + com.ncfsistemi.econ.db.table.ElementiCantiereMateriali.NOME_TABELLA
 				+ "(" + com.ncfsistemi.econ.db.table.ElementiCantiereMateriali.ID_ELEMENTO_CANT + ")");
+	}
+
+	/** Collegamenti oggetti del disegno ↔ documenti (schema 51, STUDIO_STORICO_DISEGNO.md). */
+	private static void creaTabellaCollegamentiDisegno(SQLiteDatabase db) {
+		String t = com.ncfsistemi.econ.db.table.CollegamentiDisegno.NOME_TABELLA;
+		db.execSQL(new com.ncfsistemi.econ.db.table.CollegamentiDisegno().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
+		db.execSQL("CREATE INDEX IF NOT EXISTS idx_coll_disegno_oggetto ON " + t + "(oggetto_tipo, id_oggetto)");
+		db.execSQL("CREATE INDEX IF NOT EXISTS idx_coll_disegno_documento ON " + t + "(documento_tipo, id_documento)");
 	}
 
 	/** Livelli (piani) delle aree dal server (schema 50, STUDIO_DESIGN_GRAFICA.md §20). */

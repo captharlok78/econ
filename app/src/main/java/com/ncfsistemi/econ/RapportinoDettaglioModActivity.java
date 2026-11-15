@@ -93,6 +93,9 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     private String dataCaricata = null;
     /** Cantiere creato da qui per un cliente che non ne aveva (resta sceglibile anche se non e' pianificato). */
     private int idCantiereCreato = 0;
+    /** Rapportino dal disegno (STUDIO_STORICO_DISEGNO.md §8.1): cantiere e oggetti senza articolo da segnare posati al salvataggio. */
+    private int disegnoCantiere = 0;
+    private final List<com.ncfsistemi.econ.disegno.RapportinoDalDisegno.Oggetto> disegnoSenzaArticolo = new ArrayList<>();
     /** Stato a cui porta il salvataggio in corso (Salva: lo stesso o l'iniziale; Conferma: Confermato). */
     private int idStatoDestino = 0;
 
@@ -149,6 +152,25 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             if (dataProposta > 0) data.setValue(String.valueOf(dataProposta));
             stato = RegoleRapportino.statoIniziale(db);
             impostaOperatore(utente.idUtenteDitta);
+            // dal disegno: cantiere, cliente, ordine comune e righe di materiale gia' pronte (si salvano solo con Salva)
+            int daDisegno = getIntent().getIntExtra(com.ncfsistemi.econ.disegno.RapportinoDalDisegno.EXTRA_CANTIERE, 0);
+            String oggetti = getIntent().getStringExtra(com.ncfsistemi.econ.disegno.RapportinoDalDisegno.EXTRA_OGGETTI);
+            if (daDisegno != 0 && oggetti != null) {
+                disegnoCantiere = daDisegno;
+                idCantiereCreato = daDisegno;
+                idCantiere = daDisegno;
+                ContentValues cant = db.getRecord("select " + Cantieri.ID_ANAGRAFICA + " from " + Cantieri.NOME_TABELLA + " where "
+                        + Cantieri.ID_CANTIERE + "=" + daDisegno);
+                idCliente = cant != null ? RigheRapportino.intero(cant, Cantieri.ID_ANAGRAFICA) : 0;
+                com.ncfsistemi.econ.disegno.RapportinoDalDisegno.Preparato prep =
+                        com.ncfsistemi.econ.disegno.RapportinoDalDisegno.prepara(this, daDisegno, oggetti, utente.idUtenteDitta);
+                for (ContentValues r : prep.righe) {
+                    r.put(DA_SALVARE, 1);
+                    righe.add(r);
+                }
+                disegnoSenzaArticolo.addAll(prep.senzaArticolo);
+                idOrdine = prep.idOrdine;
+            }
             // nuovo rapportino pulito (21/10): cliente, cantiere e ordine si scelgono, niente ripresi dall'ultimo
         }
         // stato modificabile e, per un rapportino esistente, la funzionalita' MODIFICA del pacchetto per il ruolo
@@ -186,6 +208,13 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         disponiSoggetti();
         com.ncfsistemi.econ.views.BarraPulsanti.inUnaRiga((android.widget.LinearLayout) findViewById(R.id.pulsanti_righe));
         preparaFisarmonica();
+
+        if (disegnoCantiere != 0) {
+            ordinaRighe();
+            adapter.notifyDataSetChanged();
+            modificato = true;
+            Toast.makeText(this, "Rapportino preparato dal disegno: aggiungi le ore e salva.", Toast.LENGTH_LONG).show();
+        }
 
         String messaggio = getIntent().getStringExtra(EXTRA_SALVATO);
         if (messaggio != null) {
@@ -966,6 +995,8 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
     private void riapri(String messaggio) {
         Intent intent = new Intent(getIntent());
         intent.removeExtra(EXTRA_DATA);
+        intent.removeExtra(com.ncfsistemi.econ.disegno.RapportinoDalDisegno.EXTRA_CANTIERE);
+        intent.removeExtra(com.ncfsistemi.econ.disegno.RapportinoDalDisegno.EXTRA_OGGETTI);
         intent.putExtra("ID", idSalvato);
         intent.putExtra(EXTRA_SALVATO, messaggio);
         intent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
@@ -1621,6 +1652,14 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
                 where.put(RapportiniDettaglio.ID, id);
                 tab.aggiornaRecord(db, val, where);
             }
+            // riga preparata dal disegno: i suoi oggetti si segnano posati con questo rapportino (solo ora, al salvataggio)
+            if (disegnoCantiere != 0) {
+                Integer idRiga = id != null ? id : val.getAsInteger(RapportiniDettaglio.ID);
+                com.ncfsistemi.econ.disegno.RapportinoDalDisegno.collegaRiga(db, disegnoCantiere, idRapportino, idRiga != null ? idRiga : 0, r);
+            }
+        }
+        if (disegnoCantiere != 0) {
+            com.ncfsistemi.econ.disegno.RapportinoDalDisegno.collegaSenzaRiga(db, disegnoCantiere, idRapportino, disegnoSenzaArticolo);
         }
         return SALVATAGGIO_OK;
     }

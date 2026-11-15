@@ -14,6 +14,10 @@ public class ElementiCantiere extends AbstractTable {
 	public static final String ID_ARTICOLO_DITTA = "id_articolo_ditta";
 	public static final String QUANTITA = "quantita";
 	public static final String NOME_TABELLA = "elementi_cantiere";
+	/** Stato, data di posa e di assistenza (schema 51, STUDIO_STORICO_DISEGNO.md §2.1): li calcola il server. */
+	public static final String STATO = "stato";
+	public static final String DATA_POSA = "data_posa";
+	public static final String DATA_ASSISTENZA = "data_assistenza";
 
 	public static final String ID_ELEMENTO_CANT = "id_elemento_cant";
 	public static final String ID_ELEMENTO = "id_elemento";
@@ -71,6 +75,9 @@ public class ElementiCantiere extends AbstractTable {
 		aggiungiCampo(ID_LINEA, INTEGER);
 		aggiungiCampo(ID_PLACCA, INTEGER);
 		aggiungiCampo(ID_ARTICOLO_DITTA, INTEGER);
+		aggiungiCampo(STATO, TEXT);
+		aggiungiCampo(DATA_POSA, TEXT);
+		aggiungiCampo(DATA_ASSISTENZA, TEXT);
 		aggiungiCampo(QUANTITA, NUMERIC);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);

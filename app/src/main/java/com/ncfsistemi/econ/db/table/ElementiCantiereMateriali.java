@@ -14,6 +14,10 @@ import java.util.ArrayList;
  */
 public class ElementiCantiereMateriali extends AbstractTable {
 	public static final String NOME_TABELLA = "elementi_cantiere_materiali";
+	/** Stato, data di posa e di assistenza (schema 51, STUDIO_STORICO_DISEGNO.md §2.1): li calcola il server. */
+	public static final String STATO = "stato";
+	public static final String DATA_POSA = "data_posa";
+	public static final String DATA_ASSISTENZA = "data_assistenza";
 
 	public static final String ID = "id";
 	public static final String ID_ELEMENTO_CANT = "id_elemento_cant";
@@ -43,6 +47,9 @@ public class ElementiCantiereMateriali extends AbstractTable {
 		aggiungiCampo(NON_CONTEGGIARE_PREVENTIVI, INTEGER);
 		aggiungiCampo(ORDINE, INTEGER);
 		aggiungiCampo(NOTA, TEXT);
+		aggiungiCampo(STATO, TEXT);
+		aggiungiCampo(DATA_POSA, TEXT);
+		aggiungiCampo(DATA_ASSISTENZA, TEXT);
 		aggiungiCampo(ID_DITTA, INTEGER);
 		aggiungiCampo(ID_OPERATORE_INS, INTEGER);
 		aggiungiCampo(DATA_INS, DATE);

@@ -367,6 +367,9 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         pm.getMenu().add(0, 3, 0, "Adatta la piantina");
         pm.getMenu().add(0, 5, 0, "Dichiarazione di conformità (Excel)");
         pm.getMenu().add(0, 6, 0, "Dichiarazione di conformità da stampare (PDF)");
+        int daRapportino = RapportinoDalDisegno.conta(this, cantiere);
+        pm.getMenu().add(0, 7, 0, "Rapportino dal disegno" + (daRapportino > 0 ? " (" + daRapportino + " da inserire)" : ""));
+        pm.getMenu().add(0, 8, 0, "Storico del disegno");
         pm.getMenu().add(0, 4, 0, "Usa il disegno classico");
         pm.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
@@ -389,6 +392,12 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
                     return true;
                 case 6:
                     stampaConformita();
+                    return true;
+                case 7:
+                    RapportinoDalDisegno.scegli(this, cantiere);
+                    return true;
+                case 8:
+                    FinestraStorico.cantiere(this, cantiere);
                     return true;
                 case 4:
                     new MaterialAlertDialogBuilder(this)
@@ -739,6 +748,18 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         LinearLayout.LayoutParams lpSt = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lpSt.topMargin = px(10);
         contenutoDestro.addView(stato, lpSt);
+        String posa = DisegnoDati.statoPosa(this, p.id);
+        if (!posa.isEmpty()) {
+            TextView tp = new TextView(this);
+            tp.setText(posa);
+            tp.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+            tp.setTextColor(posa.startsWith("Posato") ? 0xFF2E7D32 : TESTO2);
+            tp.setPadding(px(10), px(3), px(10), px(3));
+            tp.setBackground(arrotondato(posa.startsWith("Posato") ? 0xFFE8F5E9 : 0xFFECEFF1, 0, 12));
+            LinearLayout.LayoutParams lpP = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lpP.topMargin = px(6);
+            contenutoDestro.addView(tp, lpP);
+        }
 
         boolean modificabile = !bloccato && !DisegnoDati.serveCopia(this, p, preventivo);
         EditText etichetta = campo("Etichetta", p.nome, false, modificabile);
@@ -782,6 +803,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         LinearLayout.LayoutParams lpAz2 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lpAz2.topMargin = px(8);
         az2.addView(pulsante("Relazione", false, v -> relazione(p)), pesato());
+        az2.addView(pulsante("Storico", false, v -> FinestraStorico.oggetto(this, cantiere, "ELEMENTO", p.id, p.nome)), pesato());
         if (modificabile) {
             TextView el = pulsante("Elimina", false, v -> elimina(p));
             el.setTextColor(ROSSO);

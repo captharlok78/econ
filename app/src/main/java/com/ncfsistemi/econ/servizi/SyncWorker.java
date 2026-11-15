@@ -79,6 +79,8 @@ public class SyncWorker extends Worker {
         // dallo schema 26 rapportini e righe usano i nomi del server (chiave "id")
         {"rapportini",             "id"},
         {"rapportini_dettaglio",   "id"},
+        // oggetti del disegno ↔ documenti (schema 51): dopo oggetti e rapportini, il server traduce gli id del tablet
+        {"collegamenti_disegno",   "id"},
         {"foto",                   "id_foto"},
     };
 
@@ -411,6 +413,8 @@ public class SyncWorker extends Worker {
                                             new String[]{String.valueOf(oldId)});
                                 }
                             }
+                            // collegamenti del disegno: oggetto, documento e riga non sono chiavi esterne (schema 51)
+                            com.ncfsistemi.econ.db.table.CollegamentiDisegno.rimappa(db, tableName, oldId, newId);
 
                             Log.d(TAG, "Rimappato " + tableName + " " + oldId + "→" + newId);
                         }

@@ -58,6 +58,13 @@ public interface MercuryApiService {
     @GET("api/mobile/giustificativi")
     Call<com.google.gson.JsonObject> getGiustificativi();
 
+    /**
+     * Storico del disegno di un cantiere (STUDIO_STORICO_DISEGNO.md §8.2): non va con la sync, si chiede per date.
+     * Filtri: cantiere (obbligatorio), oggetto_tipo + id_oggetto, id_locale, periodo (7|30|90|tutto), dal, al.
+     */
+    @GET("api/mobile/storico-disegno")
+    Call<com.google.gson.JsonObject> getStoricoDisegno(@retrofit2.http.QueryMap java.util.Map<String, String> filtri);
+
     /** Invio delle richieste: { nuovi, modificati, eliminati }; risponde con gli esiti e lo stato come la GET. */
     @POST("api/mobile/giustificativi")
     Call<com.google.gson.JsonObject> inviaGiustificativi(@Body com.google.gson.JsonObject richieste);

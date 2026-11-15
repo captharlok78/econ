@@ -10,6 +10,10 @@ import com.ncfsistemi.econ.utils.Sessione;
 
 public class ComponentiCantiere extends AbstractTable {
 	public static final String NOME_TABELLA = "componenti_cantiere";
+	/** Stato, data di posa e di assistenza (schema 51, STUDIO_STORICO_DISEGNO.md §2.1): li calcola il server. */
+	public static final String STATO = "stato";
+	public static final String DATA_POSA = "data_posa";
+	public static final String DATA_ASSISTENZA = "data_assistenza";
 
 	public static final String ID_COMPONENTE_CANT = "id_componente_cant";
 	public static final String ID_COMPONENTE = "id_componente";
@@ -61,6 +65,9 @@ public class ComponentiCantiere extends AbstractTable {
 		aggiungiCampo(ID_OPERATORE_MOD, INTEGER);
 		aggiungiCampo(DATA_MOD, DATE);
 		aggiungiCampo(IN_SERVER, INTEGER);
+		aggiungiCampo(STATO, TEXT);
+		aggiungiCampo(DATA_POSA, TEXT);
+		aggiungiCampo(DATA_ASSISTENZA, TEXT);
 
 		aggiungiCampoChiave(ID_COMPONENTE_CANT);
 	}

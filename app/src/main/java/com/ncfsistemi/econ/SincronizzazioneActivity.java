@@ -140,6 +140,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "elementi_disegno",         "Elementi di disegno" },
         // livelli (piani) delle aree (schema 50, STUDIO_DESIGN_GRAFICA.md §20)
         { "livelli_area",             "Livelli delle aree" },
+        // oggetti del disegno ↔ documenti (schema 51, STUDIO_STORICO_DISEGNO.md)
+        { "collegamenti_disegno",     "Documenti del disegno" },
     };
 
     /** Tabelle scaricate dal server (senza la voce dei dati ditta, che non e' una tabella): utils.DatiLocali. */
@@ -190,6 +192,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "collegamenti",             "Collegamenti" },
         { "relazioni",                "Relazioni" },
         { "elementi_cantiere_materiali", "Materiale elementi" },
+        // dopo oggetti e rapportini: il server traduce gli id nati sul tablet (schema 51)
+        { "collegamenti_disegno",     "Documenti del disegno" },
         { "foto",                     "Foto" },
     };
 
@@ -213,6 +217,7 @@ public class SincronizzazioneActivity extends AppCompatActivity {
             case "collegamenti":             return "id_collegamento";
             case "relazioni":                return "id_relazione";
             case "elementi_cantiere_materiali": return "id";
+            case "collegamenti_disegno":     return "id";
             case "foto":                     return "id_foto";
             case "costruttori":              return "id_costruttore";
             case "linee":                    return "id_linea";
@@ -1230,6 +1235,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
                                         new String[]{String.valueOf(oldId)});
                             }
                         }
+                        // collegamenti del disegno: oggetto, documento e riga non sono chiavi esterne (schema 51)
+                        com.ncfsistemi.econ.db.table.CollegamentiDisegno.rimappa(sqlite, tableName, oldId, newId);
                         if ("rapportini".equals(tableName) && oldId == idRapportino) idRapportino = newId;
                         Log.d(TAG, "Rimappato " + tableName + " " + oldId + "→" + newId);
                     }

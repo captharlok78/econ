@@ -368,6 +368,8 @@ public final class DisegnoDati {
                 p.relazioni = intero(v, "n_relazioni");
                 p.componentiDocumento = intero(v, "num_componenti_prev_selezionato");
                 p.altroOrdine = p.idPreventivo != idPreventivo && p.componentiDocumento == 0;
+                // dismesso (sostituito o tolto con un rapportino): resta sulla piantina, in grigio (STUDIO_STORICO_DISEGNO.md S6)
+                if ("DISMESSO".equals(v.getAsString(ElementiCantiere.STATO))) p.altroOrdine = true;
                 out.add(p);
             }
         } finally {
@@ -654,6 +656,44 @@ public final class DisegnoDati {
         } finally {
             db.close();
         }
+    }
+
+    /**
+     * Stato di posa dell'elemento (STUDIO_STORICO_DISEGNO.md): "Posato il 15/11/2026", "Ordinato", "Dismesso", oppure ""
+     * se e' solo previsto. Stato e date li calcola il server e arrivano con la sincronizzazione.
+     */
+    public static String statoPosa(Context ctx, int idElementoCant) {
+        DbInterno db = new DbInterno(ctx);
+        try {
+            ContentValues r = db.getRecord("select stato, data_posa, data_assistenza from elementi_cantiere where id_elemento_cant=" + idElementoCant);
+            if (r == null) return "";
+            String stato = r.getAsString("stato") == null ? "" : r.getAsString("stato");
+            String posa = r.getAsString("data_posa"), ass = r.getAsString("data_assistenza");
+            String testo;
+            switch (stato) {
+                case "POSATO":
+                    testo = "Posato" + (posa != null && posa.length() >= 10 ? " il " + dataIt(posa) : "");
+                    break;
+                case "ORDINATO":
+                    testo = "Ordinato, da posare";
+                    break;
+                case "DISMESSO":
+                    testo = "Dismesso";
+                    break;
+                default:
+                    return "";
+            }
+            if (ass != null && ass.length() >= 10) testo += " · assistenza " + dataIt(ass);
+            return testo;
+        } catch (Exception e) {
+            return "";
+        } finally {
+            db.close();
+        }
+    }
+
+    private static String dataIt(String iso) {
+        return iso.substring(8, 10) + "/" + iso.substring(5, 7) + "/" + iso.substring(0, 4);
     }
 
     static int intero(ContentValues v, String k) {
