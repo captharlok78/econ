@@ -353,7 +353,17 @@ public class ComponenteModActivity extends EconDettaglioActivity implements OnIt
 
 			ContentValues where = new ContentValues();
 			where.put(ComponentiCantiere.ID_COMPONENTE_CANT, getIDModifica());
-			compCant.aggiornaRecord(db, val, where);
+			compCant.aggiornaRecord(db, new ContentValues(val), where);
+			// Componi: i pezzi uguali mostrati in una riga sola (QuantitaComponenti) cambiano tutti insieme
+			int[] gruppo = getIntent().getIntArrayExtra("IDS_GRUPPO");
+			if (gruppo != null) {
+				for (int idPezzo : gruppo) {
+					if (idPezzo == getIDModifica()) continue;
+					ContentValues wherePezzo = new ContentValues();
+					wherePezzo.put(ComponentiCantiere.ID_COMPONENTE_CANT, idPezzo);
+					compCant.aggiornaRecord(db, new ContentValues(val), wherePezzo);
+				}
+			}
 		} else {
 			Componenti comp = new Componenti();
 

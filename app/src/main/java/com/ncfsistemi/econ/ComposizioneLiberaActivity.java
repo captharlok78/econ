@@ -45,7 +45,7 @@ import com.ncfsistemi.econ.db.table.PreventiviDettaglio;
 import com.ncfsistemi.econ.db.table.Relazioni;
 import com.ncfsistemi.econ.utils.Utility;
 
-public class ComposizioneLiberaActivity extends EconActivity implements OnItemClickListener, OnClickListener {
+public class ComposizioneLiberaActivity extends EconActivity implements OnItemClickListener, OnClickListener, com.ncfsistemi.econ.disegno.QuantitaComponenti.Ospite {
 
 	private int idElemento = 0;
 	private int idElementoCantiere = 0;
@@ -261,7 +261,14 @@ public class ComposizioneLiberaActivity extends EconActivity implements OnItemCl
 		}
 		dati.clear();
 
-		dati.addAll(componenti);
+		// componenti uguali in una riga sola con la quantità (solo a video, STUDIO_DESIGN_GRAFICA.md §14)
+		dati.addAll(com.ncfsistemi.econ.disegno.QuantitaComponenti.raggruppa(this, componenti, idElementoCantiere != 0,
+				new com.ncfsistemi.econ.disegno.QuantitaComponenti.Filtro() {
+					@Override
+					public boolean libero(ContentValues riga) {
+						return true;
+					}
+				}, mappaCollegamenti, mappaRelazioni));
 
 		// aggiungo la riga per aggiungere un nuovo componente
 
@@ -421,6 +428,9 @@ public class ComposizioneLiberaActivity extends EconActivity implements OnItemCl
 				startActivity(intent);
 			}
 		} else {
+			if (com.ncfsistemi.econ.disegno.QuantitaComponenti.raggruppabile(item) && !modificheBloccate) {
+				menu.add(Menu.NONE, 30, Menu.NONE, getString(R.string.quantita) + "…");
+			}
 			menu.add(Menu.NONE, 1, Menu.NONE, getString(R.string.elimina));
 			menu.add(Menu.NONE, 2, Menu.NONE, getString(R.string.modifica_frutto));
 			if (idElementoCantiere != 0) {
@@ -460,6 +470,9 @@ public class ComposizioneLiberaActivity extends EconActivity implements OnItemCl
                              Utility.mostraDialog(getString(R.string.attenzione), "Un elemento componibile deve avere almeno un componente", ComposizioneLiberaActivity.this, "OK");
 
                         }
+                        else if (com.ncfsistemi.econ.disegno.QuantitaComponenti.quantita(componenteSelezionato) > 1) {
+                            com.ncfsistemi.econ.disegno.QuantitaComponenti.eliminaGruppo(this, componenteSelezionato, idElemento, idElementoCantiere, dopoQuantita());
+                        }
                         else {
                             Utility.mostraConfermaCancellazioneDialog(this, new DialogInterface.OnClickListener() {
 
@@ -484,6 +497,8 @@ public class ComposizioneLiberaActivity extends EconActivity implements OnItemCl
 					if (idElementoCantiere != 0) {
 						intent.putExtra("ID", componenteSelezionato.getAsInteger(ComponentiCantiere.ID_COMPONENTE_CANT));
 						intent.putExtra("CANTIERE", "SI");
+						// la modifica vale per tutti i pezzi della riga
+						intent.putExtra("IDS_GRUPPO", com.ncfsistemi.econ.disegno.QuantitaComponenti.idsArray(componenteSelezionato, true));
 					}
 					intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE,
 							componenteSelezionato.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE));
@@ -507,7 +522,8 @@ public class ComposizioneLiberaActivity extends EconActivity implements OnItemCl
 									componenteSelezionato.getAsInteger(ComponentiCantiere.ID_COMPONENTE_CANT));
 							ContentValues valUpd = tabComp.getValoriLogModifica(db);
 							valUpd.put(ComponentiCantiere.NOTA, campoNota.getText().toString());
-							tabComp.aggiornaRecord(db, valUpd, where);
+							// tutti i pezzi della riga
+							com.ncfsistemi.econ.disegno.QuantitaComponenti.aggiornaTutti(db, componenteSelezionato, valUpd);
 							db.close();
 							componenteSelezionato.put(ComponentiCantiere.NOTA, campoNota.getText().toString());
 							adapter.notifyDataSetChanged();
@@ -521,6 +537,10 @@ public class ComposizioneLiberaActivity extends EconActivity implements OnItemCl
 						getString(R.string.conferma), getString(R.string.annulla), listener);
 			}
 
+
+            if (item.getItemId() == 30) {
+                chiediQuantita(componenteSelezionato);
+            }
 
             if (item.getItemId() == 11) {
                 Intent intent = new Intent(this, RelazioneActivity.class);
@@ -540,6 +560,24 @@ public class ComposizioneLiberaActivity extends EconActivity implements OnItemCl
 		}
 		System.out.println("Econ: ComposizioneLiberaActivity onContextItemSelected EXIT");
 		return super.onContextItemSelected(item);
+	}
+
+	@Override
+	public void chiediQuantita(ContentValues riga) {
+		if (!controllaBloccoModifiche()) return;
+		// nel cantiere l'elemento componibile deve avere almeno un componente: con una riga sola il minimo è 1
+		int minimo = (dati.size() == 2 && idElementoCantiere != 0) ? 1 : 0;
+		com.ncfsistemi.econ.disegno.QuantitaComponenti.chiediQuantita(this, riga, idElemento, idElementoCantiere, minimo, dopoQuantita());
+	}
+
+	private Runnable dopoQuantita() {
+		return new Runnable() {
+			@Override
+			public void run() {
+				aggiornaPreventivo = true;
+				ricerca();
+			}
+		};
 	}
 
 	@Override

@@ -47,7 +47,7 @@ import com.ncfsistemi.econ.db.table.Relazioni;
 import com.ncfsistemi.econ.utils.Utility;
 import com.ncfsistemi.econ.views.EconComponenteScatola;
 
-public class ComposizioneQuadroActivity extends EconActivity implements OnItemClickListener, OnClickListener {
+public class ComposizioneQuadroActivity extends EconActivity implements OnItemClickListener, OnClickListener, com.ncfsistemi.econ.disegno.QuantitaComponenti.Ospite {
 
 	private LinearLayout scatola = null;
 	private TextView aggiungiScatola = null;
@@ -313,7 +313,15 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 		}
 		dati.clear();
 
-		dati.addAll(componenti);
+		// componenti extra uguali (non moduli del quadro) in una riga sola con la quantità (STUDIO_DESIGN_GRAFICA.md §14)
+		dati.addAll(com.ncfsistemi.econ.disegno.QuantitaComponenti.raggruppa(this, componenti, idElementoCantiere != 0,
+				new com.ncfsistemi.econ.disegno.QuantitaComponenti.Filtro() {
+					@Override
+					public boolean libero(ContentValues riga) {
+						int tipo = CategorieDisegno.componente(riga.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE));
+						return tipo != Componenti.COMPONENTI_QUADRI && tipo != Componenti.CENTRALINI;
+					}
+				}, mappaCollegamenti, mappaRelazioni));
 
 		// aggiungo gli spazi vuoti
 
@@ -635,6 +643,9 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 		}
 
 		if (CategorieDisegno.componente(item.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) != Componenti.CENTRALINI && item.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE) != 0) {
+			if (com.ncfsistemi.econ.disegno.QuantitaComponenti.raggruppabile(item) && !modificheBloccate) {
+				menu.add(Menu.NONE, 30, Menu.NONE, getString(R.string.quantita) + "…");
+			}
 			menu.add(Menu.NONE, 1, Menu.NONE, getString(R.string.elimina));
 			menu.add(Menu.NONE, 2, Menu.NONE, getString(R.string.modifica_frutto));
 			if (idElementoCantiere != 0) {
@@ -716,7 +727,10 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 
 			if (CategorieDisegno.componente(componenteSelezionato.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE)) != Componenti.CENTRALINI) {
 				if (item.getItemId() == 1) {
-					if (controllaBloccoModifiche()) {
+					if (controllaBloccoModifiche() && com.ncfsistemi.econ.disegno.QuantitaComponenti.quantita(componenteSelezionato) > 1) {
+						com.ncfsistemi.econ.disegno.QuantitaComponenti.eliminaGruppo(this, componenteSelezionato, idElemento, idElementoCantiere, dopoQuantita());
+					}
+					else if (controllaBloccoModifiche()) {
 						Utility.mostraConfermaCancellazioneDialog(this, new DialogInterface.OnClickListener() {
 
 							@Override
@@ -739,10 +753,16 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 					if (idElementoCantiere != 0) {
 						intent.putExtra("ID", componenteSelezionato.getAsInteger(ComponentiCantiere.ID_COMPONENTE_CANT));
 						intent.putExtra("CANTIERE", "SI");
+						// la modifica vale per tutti i pezzi della riga
+						intent.putExtra("IDS_GRUPPO", com.ncfsistemi.econ.disegno.QuantitaComponenti.idsArray(componenteSelezionato, true));
 					}
 					intent.putExtra(CategorieComponenti.ID_CATEGORIA_COMPONENTE,
 							componenteSelezionato.getAsInteger(Componenti.ID_CATEGORIA_COMPONENTE));
 					startActivity(intent);
+				}
+
+				if (item.getItemId() == 30) {
+					chiediQuantita(componenteSelezionato);
 				}
 			}
 
@@ -762,7 +782,8 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 									componenteSelezionato.getAsInteger(ComponentiCantiere.ID_COMPONENTE_CANT));
 							ContentValues valUpd = tabComp.getValoriLogModifica(db);
 							valUpd.put(ComponentiCantiere.NOTA, campoNota.getText().toString());
-							tabComp.aggiornaRecord(db, valUpd, where);
+							// tutti i pezzi della riga (per centralino e componenti singoli è la riga stessa)
+							com.ncfsistemi.econ.disegno.QuantitaComponenti.aggiornaTutti(db, componenteSelezionato, valUpd);
 							db.close();
 							componenteSelezionato.put(ComponentiCantiere.NOTA, campoNota.getText().toString());
 							adapter.notifyDataSetChanged();
@@ -794,6 +815,22 @@ public class ComposizioneQuadroActivity extends EconActivity implements OnItemCl
 
 		}
 		return super.onContextItemSelected(item);
+	}
+
+	@Override
+	public void chiediQuantita(ContentValues riga) {
+		if (!controllaBloccoModifiche()) return;
+		com.ncfsistemi.econ.disegno.QuantitaComponenti.chiediQuantita(this, riga, idElemento, idElementoCantiere, 0, dopoQuantita());
+	}
+
+	private Runnable dopoQuantita() {
+		return new Runnable() {
+			@Override
+			public void run() {
+				aggiornaPreventivo = true;
+				ricerca();
+			}
+		};
 	}
 
 	@Override

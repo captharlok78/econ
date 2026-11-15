@@ -279,7 +279,9 @@ public class FinestraComponentiActivity extends EconActivity implements OnClickL
 					}
 				}
 				db.close();
-				componentiTxt.setText("Componenti uguali già aggiunti in questo elemento: " + numPresenti);
+				componentiTxt.setText(numPresenti > 0
+						? "Già presenti in questo elemento: " + numPresenti + ". Nella composizione si vedono nella stessa riga, con la quantità."
+						: "Nella composizione si vedono in una riga sola, con la quantità.");
 				qta.setText("1");
 
 				etichetta.setText(getString(R.string.quantita) + " " + val.getAsString(Componenti.UNITA_MISURA).trim());

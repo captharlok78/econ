@@ -836,7 +836,7 @@ public class ComposizioniCantiere extends AbstractTable {
 		inserisciRecord(db, valInsertPF);
 	}
 
-	public void aggiungiComponenteLibero(DbInterno db, ContentValues val, int idElementoCantIntent,boolean componente_aggiuntivo_scatola) {
+	public ContentValues aggiungiComponenteLibero(DbInterno db, ContentValues val, int idElementoCantIntent,boolean componente_aggiuntivo_scatola) {
 		// TODO Auto-generated method stub
 
 		ComponentiCantiere tabCompCant = new ComponentiCantiere();
@@ -871,9 +871,8 @@ public class ComposizioniCantiere extends AbstractTable {
 		//valInsertPF.put(ComposizioniCantiere.MODULI_OCCUPATI_CANT, posizioneIniziale);
 		inserisciRecord(db, valInsertPF);
 
-
-
-
+		// il componente del cantiere appena creato (serve a QuantitaComponenti per copiare i dati del gruppo)
+		return valCompCS;
 	}
 
 	/**

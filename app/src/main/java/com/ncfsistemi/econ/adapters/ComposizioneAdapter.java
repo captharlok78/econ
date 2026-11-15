@@ -39,6 +39,7 @@ import com.ncfsistemi.econ.db.table.ElementiCantiere;
 import com.ncfsistemi.econ.db.table.Preventivi;
 import com.ncfsistemi.econ.db.table.PreventiviDettaglio;
 import com.ncfsistemi.econ.db.table.Relazioni;
+import com.ncfsistemi.econ.disegno.QuantitaComponenti;
 import com.ncfsistemi.econ.utils.Sessione;
 import com.ncfsistemi.econ.utils.Utility;
 
@@ -77,6 +78,7 @@ public class ComposizioneAdapter extends EconListViewAdapter implements OnClickL
         holder.listaRelazioniLibereTubi = (LinearLayout) convertView.findViewById(R.id.lista_relazioni_tubi_libere);
         holder.listaRelazioniLogiche = (LinearLayout) convertView.findViewById(R.id.lista_relazioni_logiche);
         holder.buttonNonConteggiare = (ImageButton) convertView.findViewById(R.id.button_non_conteggiare);
+        holder.quantita = (TextView) convertView.findViewById(R.id.textView_quantita);
         // icone della grafica del disegno (glifi Font Awesome)
         holder.buttonUp.setImageDrawable(com.ncfsistemi.econ.utils.FaIcone.drawable(context, "\uf077", 18));
         holder.buttonDown.setImageDrawable(com.ncfsistemi.econ.utils.FaIcone.drawable(context, "\uf078", 18));
@@ -273,6 +275,34 @@ public class ComposizioneAdapter extends EconListViewAdapter implements OnClickL
                 }
             }
 
+        }
+        // componenti liberi uguali in una riga sola (QuantitaComponenti): pillola "× N", il gruppo non si sposta
+        TextView pillolaQta = ((ComposizioneViewHolder) viewholder).quantita;
+        if (QuantitaComponenti.raggruppabile(val)) {
+            pillolaQta.setVisibility(View.VISIBLE);
+            pillolaQta.setText(QuantitaComponenti.etichetta(val));
+            String suggerimentoQta = isModificheBloccate() ? "Quantità" : "Quantità: tocca per cambiarla";
+            pillolaQta.setContentDescription(suggerimentoQta);
+            androidx.appcompat.widget.TooltipCompat.setTooltipText(pillolaQta, suggerimentoQta);
+            pillolaQta.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (isModificheBloccate()) {
+                        Toast.makeText(context, getString(R.string.modifiche_non_permesse), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (context instanceof QuantitaComponenti.Ospite) {
+                        ((QuantitaComponenti.Ospite) context).chiediQuantita(val);
+                    }
+                }
+            });
+            if (QuantitaComponenti.quantita(val) > 1) {
+                ((ComposizioneViewHolder) viewholder).buttonUp.setVisibility(View.INVISIBLE);
+                ((ComposizioneViewHolder) viewholder).buttonDown.setVisibility(View.INVISIBLE);
+            }
+        } else {
+            pillolaQta.setVisibility(View.GONE);
+            pillolaQta.setOnClickListener(null);
         }
         ((ComposizioneViewHolder) viewholder).buttonDown.setTag(position);
         ((ComposizioneViewHolder) viewholder).buttonUp.setTag(position);
@@ -828,6 +858,7 @@ public class ComposizioneAdapter extends EconListViewAdapter implements OnClickL
 
         LinearLayout linearRelazioniLogiche = null;
         LinearLayout listaRelazioniLogiche = null;
+        TextView quantita = null;
     }
 
     private void conteggiaSN(ContentValues riga){
@@ -848,11 +879,8 @@ public class ComposizioneAdapter extends EconListViewAdapter implements OnClickL
         valUpd.put(ComponentiCantiere.ID_PREVENTIVO,idPreventivo);
         riga.put(ComponentiCantiere.NON_CONTEGGIARE_PREVENTIVI, nonConteggiarePreventivi);
         riga.put(ComponentiCantiere.ID_PREVENTIVO, idPreventivo);
-        ContentValues where = new ContentValues();
-        where.put(ComposizioniCantiere.ID_COMPONENTE_CANT, riga.getAsInteger(ComponentiCantiere.ID_COMPONENTE_CANT));
-        ComponentiCantiere tab = new ComponentiCantiere();
-
-        tab.aggiornaRecord(db, valUpd, where);
+        // tutte le righe del gruppo (componenti liberi uguali mostrati insieme)
+        QuantitaComponenti.aggiornaTutti(db, riga, valUpd);
 
         //aggiorno il preventivo/ordine
         PreventiviDettaglio tabPrevDett = new PreventiviDettaglio();
