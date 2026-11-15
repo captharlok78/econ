@@ -732,6 +732,8 @@ public class EconPiantinaGridView extends GridView implements OnTouchListener, V
 		for (int i = 0; i < porte.size(); i++) {
 
 			ContentValues val = (ContentValues) porte.get(i);
+			// elementi a pavimento del disegno nuovo (schema 49): la piantina classica disegna solo porte e finestre
+			if ("E".equalsIgnoreCase(val.getAsString(LocaliPorteFinestre.TIPO))) continue;
 			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,
 					FrameLayout.LayoutParams.WRAP_CONTENT);
 

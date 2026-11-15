@@ -47,7 +47,7 @@ import java.util.Map;
 
 /**
  * Disegno del locale a tre pannelli (STUDIO_DESIGN_GRAFICA.md §8, proposta B): in alto i modi sempre visibili
- * (Guarda, Posa, Sposta, Collega, Pareti), a sinistra la struttura del cantiere e la tavolozza, al centro la piantina
+ * (Guarda, Posa, Sposta, Collega, Disegno), sulla piantina le etichette Struttura e Componenti, al centro la piantina
  * con lo zoom, a destra il dettaglio dell'elemento scelto. Dal menu ⋮ si torna al disegno classico.
  */
 public class DisegnoActivity extends AppCompatActivity implements PiantinaView.Ascoltatore {
@@ -73,7 +73,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
     private static final int ARANCIO = 0xFFFB8C00;
     private static final int ROSSO = 0xFFB3261E;
 
-    private static final String[] NOMI_MODI = {"Guarda", "Posa", "Sposta", "Collega", "Pareti"};
+    private static final String[] NOMI_MODI = {"Guarda", "Posa", "Sposta", "Collega", "Disegno"};
     private static final String[] ICONE_MODI = {"", "", "", "", ""};
 
     private int cantiere, locale, preventivo;
@@ -86,9 +86,21 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
 
     private TextView titolo, sottotitolo, suggerimento;
     private final TextView[] pulsantiModo = new TextView[5];
-    private LinearLayout pannelloSinistro, contenutoSinistro, contenutoTavolozza, bloccoTavolozza, pannelloDestro, contenutoDestro;
-    /** Struttura e tavolozza in due blocchi distinti, ognuno scorre per conto suo. */
-    private ScrollView scrollSinistro, scrollTavolozza;
+    private LinearLayout bloccoStruttura, pannelloDestro, contenutoDestro;
+    /**
+     * Struttura e componenti non occupano più una colonna: sono due etichette in alto a sinistra sulla piantina; la
+     * struttura si apre in una finestra, i componenti nella finestra a tutto schermo SceltaComponenti (§16-17).
+     */
+    private LinearLayout etichette;
+    private TextView etichettaStruttura, etichettaTavolozza;
+    private android.app.Dialog modale;
+    /** Il suggerimento sulla piantina sparisce da solo dopo 5 secondi. */
+    private final Runnable nascondiSuggerimento = () -> { if (suggerimento != null) suggerimento.animate().alpha(0f).setDuration(300)
+            .withEndAction(() -> suggerimento.setVisibility(View.GONE)).start(); };
+    /** Struttura: componente unico con la scheda del cantiere (StrutturaCantiere). */
+    private android.widget.ListView listaStruttura;
+    private final java.util.ArrayList<Object> righeStruttura = new java.util.ArrayList<>();
+    private StrutturaCantiere.Adapter adapterStruttura;
     private PiantinaView piantina;
     /** Schermo intero: pannelli laterali e barre di sistema nascosti, resta solo la piantina con la barra dei modi. */
     private boolean schermoIntero = false;
@@ -154,13 +166,12 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         androidx.core.view.WindowInsetsControllerCompat wc =
                 androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
         if (schermoIntero) {
-            pannelloSinistro.setVisibility(View.GONE);
+            chiudiModale();
             pannelloDestro.setVisibility(View.GONE);
             wc.setSystemBarsBehavior(androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
             wc.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars());
         } else {
             wc.show(androidx.core.view.WindowInsetsCompat.Type.systemBars());
-            if (!stretto) pannelloSinistro.setVisibility(View.VISIBLE);
             costruisciDestra();
         }
         if (pulsanteSchermoIntero != null) {
@@ -195,28 +206,43 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         corpo.setOrientation(LinearLayout.HORIZONTAL);
         root.addView(corpo, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
-        // sinistra: due blocchi distinti, struttura (unità, aree, locali) sopra e tavolozza (elementi) sotto; ognuno ha
-        // la sua intestazione fissa e scorre dentro il proprio riquadro
-        pannelloSinistro = new LinearLayout(this);
-        pannelloSinistro.setOrientation(LinearLayout.VERTICAL);
-        pannelloSinistro.setBackgroundColor(SFONDO);
-        pannelloSinistro.setPadding(px(8), px(8), px(8), px(8));
-        scrollSinistro = new ScrollView(this);
-        contenutoSinistro = verticale();
-        contenutoSinistro.setPadding(px(10), 0, px(10), px(10));
-        scrollSinistro.addView(contenutoSinistro);
-        pannelloSinistro.addView(blocco("STRUTTURA", scrollSinistro), new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 2f));
-        scrollTavolozza = new ScrollView(this);
-        contenutoTavolozza = verticale();
-        contenutoTavolozza.setPadding(px(10), 0, px(10), px(10));
-        scrollTavolozza.addView(contenutoTavolozza);
-        bloccoTavolozza = blocco("TAVOLOZZA", scrollTavolozza);
-        LinearLayout.LayoutParams lpTav = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 3f);
-        lpTav.topMargin = px(8);
-        pannelloSinistro.addView(bloccoTavolozza, lpTav);
-        corpo.addView(pannelloSinistro, new LinearLayout.LayoutParams(px(stretto ? 230 : 260), ViewGroup.LayoutParams.MATCH_PARENT));
-        corpo.addView(separatore(), new LinearLayout.LayoutParams(px(1), ViewGroup.LayoutParams.MATCH_PARENT));
-        if (stretto) pannelloSinistro.setVisibility(View.GONE);
+        // struttura: riquadro che si apre in una finestra dall'etichetta sulla piantina; ha la sua
+        // intestazione fissa e scorre dentro il proprio riquadro
+        // struttura: stesso componente della scheda del cantiere (ordine Per livello / Locali A-Z, livello a sinistra delle aree)
+        LinearLayout struttura = verticale();
+        struttura.addView(StrutturaCantiere.barraOrdine(this, this::caricaStruttura));
+        View sepStruttura = separatore();
+        struttura.addView(sepStruttura, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, px(1)));
+        listaStruttura = new android.widget.ListView(this);
+        StrutturaCantiere.stileLista(listaStruttura);
+        adapterStruttura = new StrutturaCantiere.Adapter(this, righeStruttura, new StrutturaCantiere.Selezione() {
+            @Override
+            public boolean selezionata(int posizione, android.content.ContentValues riga) {
+                return riga.getAsInteger(StrutturaCantiere.TIPO) == com.ncfsistemi.econ.CantiereSplitActivity.LOCALE
+                        && riga.getAsInteger(StrutturaCantiere.ID) == locale;
+            }
+
+            @Override
+            public boolean attiva(int posizione, android.content.ContentValues riga) {
+                // nel disegno si sceglie il locale
+                return riga.getAsInteger(StrutturaCantiere.TIPO) == com.ncfsistemi.econ.CantiereSplitActivity.LOCALE;
+            }
+        });
+        listaStruttura.setAdapter(adapterStruttura);
+        listaStruttura.setOnItemClickListener((parent, view, pos, id) -> {
+            android.content.ContentValues r = (android.content.ContentValues) righeStruttura.get(pos);
+            int idLocale = r.getAsInteger(StrutturaCantiere.ID);
+            if (idLocale == locale) return;
+            locale = idLocale;
+            scelto = null;
+            piantina.adatta();
+            ricarica();
+            chiudiModale();
+        });
+        struttura.addView(listaStruttura, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        bloccoStruttura = blocco("STRUTTURA", struttura);
+        // matita sull'area: nome e livello (componente unico); si rilegge struttura e sottotitolo
+        adapterStruttura.setDopoModificaArea(this::ricarica);
 
         // centro: piantina
         FrameLayout centro = new FrameLayout(this);
@@ -225,12 +251,27 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         piantina.setModo(modo);
         centro.addView(piantina, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
+        // etichette in alto a sinistra: Struttura (finestra) e Componenti (finestra a tutto schermo)
+        etichette = new LinearLayout(this);
+        etichette.setOrientation(LinearLayout.HORIZONTAL);
+        etichettaStruttura = etichetta("\uf0e8", "Struttura", v -> apriModale(bloccoStruttura));
+        etichettaTavolozza = etichetta("\uf1b3", "Componenti", v -> apriComponenti());
+        etichette.addView(etichettaStruttura);
+        LinearLayout.LayoutParams lpE = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lpE.leftMargin = px(8);
+        etichette.addView(etichettaTavolozza, lpE);
+        FrameLayout.LayoutParams lpEt = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.TOP | Gravity.START);
+        lpEt.setMargins(px(12), px(12), px(12), px(12));
+        centro.addView(etichette, lpEt);
+
         suggerimento = new TextView(this);
         suggerimento.setTextColor(TESTO);
         suggerimento.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
         suggerimento.setPadding(px(12), px(6), px(12), px(6));
         suggerimento.setBackground(arrotondato(Color.WHITE, BORDO, 16));
         suggerimento.setElevation(px(2));
+        suggerimento.setOnClickListener(v -> { suggerimento.removeCallbacks(nascondiSuggerimento); nascondiSuggerimento.run(); });
         FrameLayout.LayoutParams lpS = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
                 Gravity.BOTTOM | Gravity.START);
         lpS.setMargins(px(12), px(12), px(76), px(14));
@@ -273,13 +314,6 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         b.setElevation(px(4));
 
         b.addView(iconaBianca("", "Indietro", v -> finish()));
-        if (stretto) {
-            b.addView(iconaBianca("", "Struttura e tavolozza", v -> {
-                boolean apri = schermoIntero || pannelloSinistro.getVisibility() != View.VISIBLE;
-                impostaSchermoIntero(false);
-                vedi(pannelloSinistro, apri);
-            }));
-        }
 
         LinearLayout testi = verticale();
         titolo = new TextView(this);
@@ -319,8 +353,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         b.addView(modi);
         aggiornaModi();
 
-        b.addView(iconaBianca("\uf1c3", "Dichiarazione di conformità (Excel)", v -> esportaConformita()));
-        b.addView(iconaBianca("\uf02f", "Dichiarazione di conformità da stampare (PDF)", v -> stampaConformita()));
+        // Excel e stampa della conformità solo nel menu dei tre punti
         b.addView(iconaBianca("", "Altro", this::menu));
         return b;
     }
@@ -453,9 +486,8 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         modo = m;
         piantina.setModo(m);
         if (m == PiantinaView.POSA) {
-            // per posare serve la tavolozza
-            impostaSchermoIntero(false);
-            if (stretto) vedi(pannelloSinistro, true);
+            // per posare serve un elemento: senza, si apre Componenti
+            if (daPosare == null && !bloccato) apriComponenti();
         }
         aggiornaModi();
         aggiornaSuggerimento();
@@ -482,7 +514,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         String s;
         switch (modo) {
             case PiantinaView.POSA:
-                s = daPosare == null ? "Scegli un elemento nella tavolozza, poi tocca la piantina dove va"
+                s = daPosare == null ? "Scegli un elemento in Componenti, poi tocca la piantina dove va"
                         : "Tocca la piantina per posare: " + daPosare.nome;
                 break;
             case PiantinaView.SPOSTA:
@@ -491,13 +523,96 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
             case PiantinaView.COLLEGA:
                 s = "Tocca un elemento per vedere o aggiungere i collegamenti";
                 break;
-            case PiantinaView.PARETI:
-                s = "Parete: porta o finestra · quadretto: allarga o stringi la stanza";
+            case PiantinaView.DISEGNO:
+                s = "Tocca la piantina: spazio della stanza, porte, finestre e arredi · trascina gli arredi per spostarli";
                 break;
             default:
                 s = bloccato ? "Sola lettura: il documento scelto non è aperto" : "Tocca un elemento per vederne il dettaglio";
         }
         suggerimento.setText(s);
+        // si vede per 5 secondi, poi sparisce (si tocca per chiuderlo prima)
+        suggerimento.removeCallbacks(nascondiSuggerimento);
+        suggerimento.animate().cancel();
+        suggerimento.setAlpha(1f);
+        suggerimento.setVisibility(View.VISIBLE);
+        suggerimento.postDelayed(nascondiSuggerimento, 5000);
+        aggiornaEtichette();
+    }
+
+    /** Testi delle etichette: Struttura, Componenti (con l'elemento da posare); con il documento bloccato niente Componenti. */
+    private void aggiornaEtichette() {
+        if (etichettaStruttura == null) return;
+        testoEtichetta(etichettaStruttura, "\uf0e8", "Struttura");
+        testoEtichetta(etichettaTavolozza, "\uf1b3", daPosare == null ? "Componenti" : "Componenti · " + daPosare.nome);
+        etichettaTavolozza.setVisibility(bloccato ? View.GONE : View.VISIBLE);
+    }
+
+    private TextView etichetta(String glifo, String testo, View.OnClickListener l) {
+        TextView t = new TextView(this);
+        t.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        t.setTextColor(BLU);
+        t.setTypeface(Typeface.DEFAULT_BOLD);
+        t.setSingleLine(true);
+        t.setEllipsize(TextUtils.TruncateAt.END);
+        t.setMaxWidth(px(420));
+        t.setGravity(Gravity.CENTER_VERTICAL);
+        t.setPadding(px(14), px(9), px(16), px(9));
+        t.setBackground(arrotondato(Color.WHITE, BLU, 20));
+        t.setElevation(px(3));
+        t.setOnClickListener(l);
+        testoEtichetta(t, glifo, testo);
+        return t;
+    }
+
+    private void testoEtichetta(TextView t, String glifo, String testo) {
+        android.text.SpannableStringBuilder sb = new android.text.SpannableStringBuilder(glifo);
+        sb.setSpan(new CustomTypefaceSpan(fa), 0, sb.length(), 0);
+        sb.append("  ").append(testo);
+        t.setText(sb);
+        t.setContentDescription(testo);
+    }
+
+    /** Apre la struttura in una finestra a sinistra, sopra la piantina; si chiude toccando fuori. */
+    private void apriModale(View blocco) {
+        if (blocco == null || isFinishing()) return;
+        chiudiModale();
+        if (blocco.getParent() != null) ((ViewGroup) blocco.getParent()).removeView(blocco);
+        FrameLayout cornice = new FrameLayout(this);
+        cornice.addView(blocco, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        modale = new android.app.Dialog(this);
+        modale.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE);
+        modale.setContentView(cornice);
+        modale.setCanceledOnTouchOutside(true);
+        modale.setOnDismissListener(d -> {
+            if (blocco.getParent() != null) ((ViewGroup) blocco.getParent()).removeView(blocco);
+        });
+        android.view.Window w = modale.getWindow();
+        if (w != null) {
+            w.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(Color.TRANSPARENT));
+            android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
+            android.view.WindowManager.LayoutParams lp = w.getAttributes();
+            lp.width = Math.min(px(380), dm.widthPixels - px(24));
+            lp.height = Math.round(dm.heightPixels * 0.80f);
+            lp.gravity = Gravity.TOP | Gravity.START;
+            lp.x = px(12);
+            lp.y = px(110);
+            lp.dimAmount = 0.2f;
+            w.setAttributes(lp);
+            w.addFlags(android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        }
+        modale.show();
+    }
+
+    private void chiudiModale() {
+        if (modale != null && modale.isShowing()) modale.dismiss();
+        modale = null;
+    }
+
+    @Override
+    protected void onDestroy() {
+        chiudiModale();
+        if (suggerimento != null) suggerimento.removeCallbacks(nascondiSuggerimento);
+        super.onDestroy();
     }
 
     // ------------------------------------------------------------------ dati
@@ -522,29 +637,32 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
     }
 
     private void costruisciSinistra() {
-        int scroll = scrollSinistro.getScrollY();
-        int scrollTav = scrollTavolozza.getScrollY();
-        contenutoSinistro.removeAllViews();
-        for (DisegnoDati.Nodo n : DisegnoDati.struttura(this, cantiere)) {
-            contenutoSinistro.addView(rigaStruttura(n));
-        }
-        contenutoTavolozza.removeAllViews();
-        // documento bloccato: niente tavolozza, la struttura prende tutto il pannello
-        bloccoTavolozza.setVisibility(bloccato ? View.GONE : View.VISIBLE);
-        if (!bloccato) {
-            contenutoTavolozza.addView(rigaCategoria(0, "Preferiti", null));
-            if (categoriaAperta == 0) contenutoTavolozza.addView(tavolozzaFiltrata(0, "Preferiti"));
-            for (DisegnoDati.Categoria c : DisegnoDati.categorie(this)) {
-                contenutoTavolozza.addView(rigaCategoria(c.id, c.nome, SimboliDisegno.drawable(this, SimboliDisegno.categoriaElementi(c.id))));
-                if (categoriaAperta == c.id) contenutoTavolozza.addView(tavolozzaFiltrata(c.id, c.nome));
-            }
-        }
-        scrollSinistro.post(() -> scrollSinistro.scrollTo(0, scroll));
-        scrollTavolozza.post(() -> scrollTavolozza.scrollTo(0, scrollTav));
+        caricaStruttura();
+    }
+
+    /**
+     * Finestra unica a tutto schermo per scegliere il componente da posare (ricerca, filtro per categoria, griglia):
+     * SceltaComponenti, STUDIO_DESIGN_GRAFICA.md §17. Ricorda l'ultimo filtro usato.
+     */
+    private void apriComponenti() {
+        if (bloccato) return;
+        new SceltaComponenti(this, this::vociTavolozza).apri(categoriaAperta, daPosare == null ? 0 : daPosare.id, (v, filtro) -> {
+            daPosare = v;
+            categoriaAperta = filtro;
+            if (modo != PiantinaView.POSA) cambiaModo(PiantinaView.POSA);
+            aggiornaSuggerimento();
+        });
+    }
+
+    /** Rilegge la struttura nell'ordine scelto; la lista resta dov'era (stesso adapter). */
+    private void caricaStruttura() {
+        righeStruttura.clear();
+        righeStruttura.addAll(StrutturaCantiere.righe(this, cantiere));
+        adapterStruttura.notifyDataSetChanged();
     }
 
     /** Riquadro bianco con intestazione fissa e contenuto che scorre dentro (pannello di sinistra). */
-    private LinearLayout blocco(String titolo, ScrollView scorri) {
+    private LinearLayout blocco(String titolo, View scorri) {
         LinearLayout b = verticale();
         b.setBackground(arrotondato(Color.WHITE, BORDO, 12));
         b.setClipToOutline(true);
@@ -553,93 +671,9 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         b.addView(t);
         View riga = separatore();
         b.addView(riga, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, px(1)));
-        scorri.setFillViewport(false);
+        if (scorri instanceof ScrollView) ((ScrollView) scorri).setFillViewport(false);
         b.addView(scorri, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
         return b;
-    }
-
-    private View rigaStruttura(DisegnoDati.Nodo n) {
-        LinearLayout r = new LinearLayout(this);
-        r.setOrientation(LinearLayout.HORIZONTAL);
-        r.setGravity(Gravity.CENTER_VERTICAL);
-        TextView nome = new TextView(this);
-        nome.setSingleLine(true);
-        nome.setEllipsize(TextUtils.TruncateAt.END);
-        nome.setText(n.nome);
-        if (n.tipo == DisegnoDati.Nodo.UNITA) {
-            nome.setTextColor(TESTO2);
-            nome.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-            nome.setTypeface(Typeface.DEFAULT_BOLD);
-            r.setPadding(px(4), px(8), px(4), px(2));
-        } else if (n.tipo == DisegnoDati.Nodo.AREA) {
-            nome.setTextColor(TESTO2);
-            nome.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
-            r.setPadding(px(14), px(4), px(4), px(2));
-        } else {
-            boolean sel = n.id == locale;
-            nome.setTextColor(sel ? BLU : TESTO);
-            nome.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-            if (sel) nome.setTypeface(Typeface.DEFAULT_BOLD);
-            r.setPadding(px(24), px(9), px(8), px(9));
-            r.setBackground(sel ? arrotondato(BLU_CHIARO, 0, 8) : selezionabile());
-            r.setOnClickListener(v -> {
-                if (n.id == locale) return;
-                locale = n.id;
-                scelto = null;
-                piantina.adatta();
-                ricarica();
-                if (stretto) vedi(pannelloSinistro, false);
-            });
-        }
-        r.addView(nome, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        if (n.tipo == DisegnoDati.Nodo.LOCALE && n.elementi > 0) {
-            TextView c = new TextView(this);
-            c.setText(String.valueOf(n.elementi));
-            c.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-            c.setTextColor(TESTO2);
-            c.setPadding(px(8), px(1), px(8), px(1));
-            c.setBackground(arrotondato(0xFFECEFF1, 0, 10));
-            r.addView(c);
-        }
-        return r;
-    }
-
-    private View rigaCategoria(int id, String nome, Drawable simbolo) {
-        LinearLayout r = new LinearLayout(this);
-        r.setOrientation(LinearLayout.HORIZONTAL);
-        r.setGravity(Gravity.CENTER_VERTICAL);
-        r.setPadding(px(4), px(7), px(4), px(7));
-        r.setBackground(categoriaAperta == id ? arrotondato(BLU_CHIARO, 0, 8) : selezionabile());
-        if (simbolo != null) {
-            ImageView iv = new ImageView(this);
-            iv.setImageDrawable(simbolo);
-            r.addView(iv, new LinearLayout.LayoutParams(px(30), px(30)));
-        } else {
-            TextView st = new TextView(this);
-            st.setTypeface(fa);
-            st.setText("");
-            st.setTextColor(ARANCIO);
-            st.setGravity(Gravity.CENTER);
-            st.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-            r.addView(st, new LinearLayout.LayoutParams(px(30), px(30)));
-        }
-        TextView t = new TextView(this);
-        t.setText(nome);
-        t.setTextColor(TESTO);
-        t.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-        t.setPadding(px(10), 0, px(4), 0);
-        r.addView(t, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        TextView ch = new TextView(this);
-        ch.setTypeface(fa);
-        ch.setText(categoriaAperta == id ? "" : "");
-        ch.setTextColor(TESTO2);
-        ch.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-        r.addView(ch);
-        r.setOnClickListener(v -> {
-            categoriaAperta = categoriaAperta == id ? -1 : id;
-            costruisciSinistra();
-        });
-        return r;
     }
 
     private List<DisegnoDati.VoceTavolozza> vociTavolozza(int idCategoria) {
@@ -649,260 +683,6 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
             cacheTavolozza.put(idCategoria, voci);
         }
         return voci;
-    }
-
-    /**
-     * Categoria aperta della tavolozza: casella "Cerca…" con il pulsantino azzurro della lente, poi la griglia. La casella
-     * e il pulsante aprono la finestra di ricerca (cercaElementi): nel pannello la tastiera copriva la griglia.
-     */
-    private View tavolozzaFiltrata(int idCategoria, String nomeCategoria) {
-        LinearLayout box = verticale();
-        LinearLayout riga = new LinearLayout(this);
-        riga.setOrientation(LinearLayout.HORIZONTAL);
-        riga.setGravity(Gravity.CENTER_VERTICAL);
-        TextView casella = new TextView(this);
-        casella.setText("Cerca in " + nomeCategoria + "…");
-        casella.setTextColor(TESTO2);
-        casella.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        casella.setSingleLine(true);
-        casella.setEllipsize(TextUtils.TruncateAt.END);
-        casella.setBackground(arrotondato(Color.WHITE, BORDO, 8));
-        casella.setPadding(px(10), px(9), px(8), px(9));
-        casella.setOnClickListener(v -> cercaElementi(idCategoria, ""));
-        riga.addView(casella, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        TextView lente = new TextView(this);
-        lente.setTypeface(fa);
-        lente.setText("\uf002");
-        lente.setTextColor(Color.WHITE);
-        lente.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        lente.setGravity(Gravity.CENTER);
-        lente.setBackground(arrotondato(0xFF1E88E5, 0, 8));
-        lente.setContentDescription("Cerca un elemento");
-        lente.setOnClickListener(v -> cercaElementi(idCategoria, ""));
-        LinearLayout.LayoutParams lpL = new LinearLayout.LayoutParams(px(36), px(36));
-        lpL.setMargins(px(6), 0, 0, 0);
-        riga.addView(lente, lpL);
-        LinearLayout.LayoutParams lpR = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        lpR.setMargins(px(2), px(6), px(2), px(2));
-        box.addView(riga, lpR);
-        box.addView(griglia(idCategoria));
-        return box;
-    }
-
-    /**
-     * Finestra di ricerca degli elementi da posare: testo (tutte le parole, maiuscole indifferenti) e categoria (tutte,
-     * preferiti o una sola), risultati che si aggiornano scrivendo. Toccando un risultato lo si prende per posarlo.
-     */
-    private void cercaElementi(int idCategoriaIniziale, String testoIniziale) {
-        List<DisegnoDati.Categoria> categorie = DisegnoDati.categorie(this);
-        List<String> nomiCat = new ArrayList<>();
-        List<Integer> idCat = new ArrayList<>();
-        nomiCat.add("Tutte le categorie");
-        idCat.add(-1);
-        nomiCat.add("Preferiti");
-        idCat.add(0);
-        Map<Integer, String> nomePerId = new HashMap<>();
-        for (DisegnoDati.Categoria c : categorie) {
-            nomiCat.add(c.nome);
-            idCat.add(c.id);
-            nomePerId.put(c.id, c.nome);
-        }
-
-        LinearLayout box = verticale();
-        box.setPadding(px(20), px(8), px(20), 0);
-        LinearLayout riga = new LinearLayout(this);
-        riga.setOrientation(LinearLayout.HORIZONTAL);
-        riga.setGravity(Gravity.CENTER_VERTICAL);
-        EditText cerca = new EditText(this);
-        cerca.setHint("Nome dell'elemento");
-        cerca.setText(testoIniziale);
-        cerca.setSingleLine(true);
-        cerca.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        cerca.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);
-        riga.addView(cerca, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        TextView lente = new TextView(this);
-        lente.setTypeface(fa);
-        lente.setText("\uf002");
-        lente.setTextColor(Color.WHITE);
-        lente.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-        lente.setGravity(Gravity.CENTER);
-        lente.setBackground(arrotondato(0xFF1E88E5, 0, 8));
-        lente.setContentDescription("Cerca");
-        LinearLayout.LayoutParams lpL = new LinearLayout.LayoutParams(px(40), px(40));
-        lpL.setMargins(px(6), 0, 0, 0);
-        riga.addView(lente, lpL);
-        box.addView(riga);
-
-        android.widget.Spinner categoria = new android.widget.Spinner(this);
-        android.widget.ArrayAdapter<String> ad = new android.widget.ArrayAdapter<>(this, android.R.layout.simple_spinner_item, nomiCat);
-        ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        categoria.setAdapter(ad);
-        int pos = idCat.indexOf(idCategoriaIniziale);
-        categoria.setSelection(pos < 0 ? 0 : pos);
-        box.addView(categoria);
-
-        TextView conteggio = new TextView(this);
-        conteggio.setTextColor(TESTO2);
-        conteggio.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-        conteggio.setPadding(px(4), px(6), px(4), px(4));
-        box.addView(conteggio);
-
-        ScrollView scorri = new ScrollView(this);
-        LinearLayout risultati = verticale();
-        scorri.addView(risultati);
-        box.addView(scorri, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, px(300)));
-
-        androidx.appcompat.app.AlertDialog dlg = new MaterialAlertDialogBuilder(this)
-                .setTitle("Cerca un elemento da posare")
-                .setView(box)
-                .setNegativeButton("Chiudi", null)
-                .create();
-
-        Runnable aggiorna = () -> {
-            int idc = idCat.get(Math.max(0, categoria.getSelectedItemPosition()));
-            String filtro = cerca.getText().toString();
-            List<DisegnoDati.VoceTavolozza> trovati = new ArrayList<>();
-            if (idc >= 0) {
-                for (DisegnoDati.VoceTavolozza v : vociTavolozza(idc)) if (corrisponde(v.nome, filtro)) trovati.add(v);
-            } else {
-                for (DisegnoDati.Categoria c : categorie) {
-                    for (DisegnoDati.VoceTavolozza v : vociTavolozza(c.id)) if (corrisponde(v.nome, filtro)) trovati.add(v);
-                }
-                java.util.Collections.sort(trovati, (x, y) -> x.nome.compareToIgnoreCase(y.nome));
-            }
-            risultati.removeAllViews();
-            int max = 200;
-            conteggio.setText(trovati.isEmpty() ? "Nessun elemento trovato"
-                    : trovati.size() == 1 ? "1 elemento" : trovati.size() > max ? trovati.size() + " elementi, ne vedi " + max + ": scrivi di più"
-                    : trovati.size() + " elementi");
-            for (int i = 0; i < trovati.size() && i < max; i++) {
-                DisegnoDati.VoceTavolozza v = trovati.get(i);
-                LinearLayout r = new LinearLayout(this);
-                r.setOrientation(LinearLayout.HORIZONTAL);
-                r.setGravity(Gravity.CENTER_VERTICAL);
-                r.setPadding(px(4), px(6), px(4), px(6));
-                boolean sel = daPosare != null && daPosare.id == v.id;
-                r.setBackground(sel ? arrotondato(0xFFFFF3E0, ARANCIO, 8) : selezionabile());
-                ImageView iv = new ImageView(this);
-                iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                iv.setImageDrawable(SimboliDisegno.fotoOppureSimbolo(this, Elementi.PATH_ICONE, v.icona, SimboliDisegno.elemento(v.id)));
-                r.addView(iv, new LinearLayout.LayoutParams(px(40), px(40)));
-                LinearLayout testi = verticale();
-                testi.setPadding(px(12), 0, px(4), 0);
-                TextView n = new TextView(this);
-                n.setText(v.nome);
-                n.setTextColor(TESTO);
-                n.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-                testi.addView(n);
-                String nc = nomePerId.get(v.idCategoria);
-                if (nc != null) {
-                    TextView c = new TextView(this);
-                    c.setText(nc + (v.preferito ? " · preferito" : ""));
-                    c.setTextColor(TESTO2);
-                    c.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-                    testi.addView(c);
-                }
-                r.addView(testi, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-                r.setOnClickListener(x -> {
-                    daPosare = v;
-                    if (v.idCategoria > 0) categoriaAperta = v.idCategoria;
-                    if (modo != PiantinaView.POSA) cambiaModo(PiantinaView.POSA);
-                    nascondiTastiera(cerca);
-                    dlg.dismiss();
-                    costruisciSinistra();
-                    aggiornaSuggerimento();
-                });
-                risultati.addView(r);
-            }
-            scorri.scrollTo(0, 0);
-        };
-        cerca.addTextChangedListener(new android.text.TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence c, int a, int b, int d) { }
-            @Override public void onTextChanged(CharSequence c, int a, int b, int d) { }
-            @Override public void afterTextChanged(android.text.Editable e) { aggiorna.run(); }
-        });
-        cerca.setOnEditorActionListener((v, azione, ev) -> {
-            aggiorna.run();
-            nascondiTastiera(cerca);
-            return true;
-        });
-        lente.setOnClickListener(v -> {
-            aggiorna.run();
-            nascondiTastiera(cerca);
-        });
-        categoria.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(android.widget.AdapterView<?> p, View v, int i, long id) { aggiorna.run(); }
-            @Override public void onNothingSelected(android.widget.AdapterView<?> p) { }
-        });
-        if (dlg.getWindow() != null) {
-            dlg.getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-                    | android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-        }
-        dlg.show();
-        cerca.requestFocus();
-        aggiorna.run();
-    }
-
-    private void nascondiTastiera(View v) {
-        v.clearFocus();
-        android.view.inputmethod.InputMethodManager imm =
-                (android.view.inputmethod.InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm != null) imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-    }
-
-    private static boolean corrisponde(String nome, String filtro) {
-        if (filtro == null || filtro.trim().isEmpty()) return true;
-        String n = nome == null ? "" : nome.toLowerCase(Locale.ROOT);
-        for (String parola : filtro.toLowerCase(Locale.ROOT).trim().split("\\s+")) {
-            if (!n.contains(parola)) return false;
-        }
-        return true;
-    }
-
-    private View griglia(int idCategoria) {
-        List<DisegnoDati.VoceTavolozza> tutte = vociTavolozza(idCategoria);
-        List<DisegnoDati.VoceTavolozza> voci = tutte;
-        GridLayout g = new GridLayout(this);
-        g.setColumnCount(3);
-        g.setPadding(0, px(4), 0, px(8));
-        if (voci.isEmpty()) {
-            TextView t = new TextView(this);
-            t.setText(idCategoria == 0 ? "Nessun preferito" : "Nessun elemento");
-            t.setTextColor(TESTO2);
-            t.setPadding(px(8), px(4), px(8), px(4));
-            return t;
-        }
-        int larghezza = (px(stretto ? 230 : 260) - px(24)) / 3;
-        for (DisegnoDati.VoceTavolozza v : voci) {
-            LinearLayout c = verticale();
-            c.setGravity(Gravity.CENTER_HORIZONTAL);
-            c.setPadding(px(3), px(6), px(3), px(6));
-            boolean sel = daPosare != null && daPosare.id == v.id;
-            c.setBackground(sel ? arrotondato(0xFFFFF3E0, ARANCIO, 10) : selezionabile());
-            ImageView iv = new ImageView(this);
-            iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            iv.setImageDrawable(SimboliDisegno.fotoOppureSimbolo(this, Elementi.PATH_ICONE, v.icona, SimboliDisegno.elemento(v.id)));
-            c.addView(iv, new LinearLayout.LayoutParams(px(44), px(44)));
-            TextView t = new TextView(this);
-            t.setText(v.nome);
-            t.setTextColor(TESTO);
-            t.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
-            t.setGravity(Gravity.CENTER);
-            t.setMaxLines(2);
-            t.setEllipsize(TextUtils.TruncateAt.END);
-            t.setPadding(0, px(3), 0, 0);
-            c.addView(t, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            c.setOnClickListener(x -> {
-                daPosare = sel ? null : v;
-                if (daPosare != null && modo != PiantinaView.POSA) cambiaModo(PiantinaView.POSA);
-                costruisciSinistra();
-                aggiornaSuggerimento();
-            });
-            GridLayout.LayoutParams lp = new GridLayout.LayoutParams();
-            lp.width = larghezza;
-            g.addView(c, lp);
-        }
-        return g;
     }
 
     // ------------------------------------------------------------------ pannello destro
@@ -1026,7 +806,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         contenutoDestro.addView(intestazione("ELEMENTI", null));
         if (posati.isEmpty()) {
             TextView v = new TextView(this);
-            v.setText(bloccato ? "Nessun elemento" : "Nessun elemento: scegli Posa e un elemento della tavolozza");
+            v.setText(bloccato ? "Nessun elemento" : "Nessun elemento: scegli Posa e un elemento in Componenti");
             v.setTextColor(TESTO2);
             contenutoDestro.addView(v);
         }
@@ -1149,9 +929,8 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
     public void toccoVuoto(int x, int y) {
         if (modo == PiantinaView.POSA && !bloccato) {
             if (daPosare == null) {
-                Toast.makeText(this, "Scegli prima un elemento nella tavolozza", Toast.LENGTH_SHORT).show();
-                impostaSchermoIntero(false);
-                if (stretto) vedi(pannelloSinistro, true);
+                Toast.makeText(this, "Scegli prima un elemento in Componenti", Toast.LENGTH_SHORT).show();
+                apriComponenti();
                 return;
             }
             int id = DisegnoDati.posa(this, cantiere, locale, preventivo, daPosare.id, x, y);
@@ -1174,40 +953,71 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         seleziona(p);
     }
 
+    /**
+     * Modo Disegno (STUDIO_DESIGN_GRAFICA.md §18): ogni tocco apre la finestra SceltaDisegno con lo spazio della stanza
+     * (aggiungi o togli il quadretto) e gli elementi di disegno del server; fuori dalla stanza il quadretto si aggiunge
+     * subito, perché lì non c'è altro da fare.
+     */
     @Override
-    public void toccoParete(int cella, String lato, int perc, DisegnoDati.Apertura apertura) {
-        if (bloccato) return;
-        if (apertura != null) {
-            boolean porta = "P".equalsIgnoreCase(apertura.tipo);
-            String[] voci = {porta ? "Cambia in finestra" : "Cambia in porta", "Elimina " + (porta ? "la porta" : "la finestra")};
-            new MaterialAlertDialogBuilder(this)
-                    .setTitle(porta ? "Porta" : "Finestra")
-                    .setItems(voci, (d, i) -> {
-                        if (i == 0) {
-                            DisegnoDati.eliminaApertura(this, apertura.id);
-                            DisegnoDati.aggiungiApertura(this, locale, porta ? "F" : "P", apertura.cella, apertura.lato, apertura.perc);
-                        } else {
-                            DisegnoDati.eliminaApertura(this, apertura.id);
-                        }
-                        ricarica();
-                    })
-                    .show();
+    public void toccoDisegno(PiantinaView.PuntoDisegno p) {
+        if (bloccato || datiLocale == null) return;
+        if (p.esistente == null && p.cellaParete < 0 && p.cella >= 0 && !p.cellaPiena) {
+            cambiaQuadretto(p.cella, true);
             return;
         }
-        new MaterialAlertDialogBuilder(this)
-                .setTitle("Parete")
-                .setItems(new String[]{"Aggiungi una porta", "Aggiungi una finestra"}, (d, i) -> {
-                    DisegnoDati.aggiungiApertura(this, locale, i == 0 ? "P" : "F", cella, lato, perc);
-                    ricarica();
-                })
-                .show();
+        new SceltaDisegno(this).apri(p, datiLocale.n, new SceltaDisegno.Azioni() {
+            @Override
+            public void quadretto(int cella, boolean aggiungi) {
+                cambiaQuadretto(cella, aggiungi);
+            }
+
+            @Override
+            public void posa(DisegnoDati.ElementoDisegno e, PiantinaView.PuntoDisegno punto) {
+                if (e.parete()) {
+                    DisegnoDati.aggiungiApertura(DisegnoActivity.this, locale, e, punto.cellaParete, punto.lato,
+                            punto.perc(datiLocale.n, e.larghezza), 0, 0);
+                } else {
+                    DisegnoDati.aggiungiApertura(DisegnoActivity.this, locale, e, 0, null, 0, punto.posX, punto.posY);
+                }
+                ricarica();
+            }
+
+            @Override
+            public void cambia(DisegnoDati.Apertura a, DisegnoDati.ElementoDisegno e) {
+                a.elemento = e;
+                DisegnoDati.spostaApertura(DisegnoActivity.this, a);
+                ricarica();
+            }
+
+            @Override
+            public void ruota(DisegnoDati.Apertura a) {
+                a.rotazione = a.parete() ? (a.rotazione == 180 ? 0 : 180) : (a.rotazione + 90) % 360;
+                DisegnoDati.spostaApertura(DisegnoActivity.this, a);
+                ricarica();
+            }
+
+            @Override
+            public void elimina(DisegnoDati.Apertura a) {
+                DisegnoDati.eliminaApertura(DisegnoActivity.this, a.id);
+                ricarica();
+            }
+        });
     }
 
     @Override
-    public void toccoCella(int cella) {
-        if (bloccato || datiLocale == null) return;
+    public void spostatoDisegno(DisegnoDati.Apertura a) {
+        if (bloccato) {
+            ricarica();
+            return;
+        }
+        DisegnoDati.spostaApertura(this, a);
+        ricarica();
+    }
+
+    private void cambiaQuadretto(int cella, boolean aggiungi) {
+        if (datiLocale == null || cella < 0 || cella >= datiLocale.celle.length) return;
         boolean[] celle = datiLocale.celle.clone();
-        celle[cella] = !celle[cella];
+        celle[cella] = aggiungi;
         int pieni = 0;
         for (boolean c : celle) if (c) pieni++;
         if (pieni == 0) {

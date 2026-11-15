@@ -25,7 +25,9 @@ public final class SyncUtil {
     private static final String[] TABELLE_ELENCO_COMPLETO = { "unita_misura", "rapportini_dettaglio_tipi", "stati_documento",
             "stati_documento_transizioni", "modelli_stampa", "tipologie_modello", "ditte_modelli_stampa",
             // categorie del disegno gia' risolte per la ditta dal server (schema 46, STUDIO_DESIGN_GRAFICA.md §3.4)
-            "categorie_generali", "categorie_componenti" };
+            "categorie_generali", "categorie_componenti",
+            // elementi di disegno della piantina (schema 49, STUDIO_DESIGN_GRAFICA.md §18)
+            "elementi_disegno" };
 
     /** Tabelle locali con una colonna unita' di misura (chiave esterna verso unita_misura sul server). */
     private static final String[] TABELLE_CON_UNITA_MISURA = { "elementi", "componenti", "elementi_cantiere",
@@ -154,6 +156,7 @@ public final class SyncUtil {
         { "ditte_modelli_stampa",        "id" },
         { "ditte_articoli_assistenza",   "id" },
         { "assistenze",                  "id" },
+        { "elementi_disegno",            "id" },
         { "icone",                       "id" },
     };
 

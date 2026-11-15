@@ -41,7 +41,6 @@ import java.util.Locale;
 
 import com.ncfsistemi.econ.adapters.EconListViewAdapter;
 import com.ncfsistemi.econ.adapters.EconViewHolder;
-import com.ncfsistemi.econ.adapters.CantiereMenuAdapter;
 import com.ncfsistemi.econ.db.DbInterno;
 import com.ncfsistemi.econ.db.table.Anagrafica;
 import com.ncfsistemi.econ.db.table.Aree;
@@ -144,7 +143,7 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 	EconSplitPaneLayout split = null;
 
 	ListView lista = null;
-	CantiereMenuAdapter adapter = null;
+	com.ncfsistemi.econ.disegno.StrutturaCantiere.Adapter adapter = null;
 	ArrayList<Object> dati = null;
 
 	PreventivoPagerFragment fragmentPagerPreventivo = null;
@@ -185,10 +184,6 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 	/** Moduli della persona: preventivi/ordini (scelta del documento in alto) e gestione elettrica (GESTIONE_ELETTRICA.md). */
 	private boolean documenti = true;
 	private boolean elettrico = true;
-	/** Ordine della struttura (STUDIO_DESIGN_GRAFICA.md §11): aree per livello dal più basso, locali in ordine alfabetico. */
-	private static final String PREF_ORDINE_LIVELLI = "STRUTTURA_ORDINE_LIVELLI", PREF_LOCALI_ALFABETICI = "STRUTTURA_LOCALI_ALFABETICI";
-	private boolean ordinaLivelli = true, localiAlfabetici = true;
-	private com.google.android.material.button.MaterialButton bottoneLivelli, bottoneAlfabetico;
 	private boolean menuRidottoGestito = false;
 
 	@Override
@@ -298,24 +293,6 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 			return;
 		}
 
-		// unita', aree e locali: solo con la gestione elettrica (GESTIONE_ELETTRICA.md)
-		ArrayList<Object> unita = new ArrayList<Object>();
-		ArrayList<Object> aree = new ArrayList<Object>();
-		ArrayList<Object> locali = new ArrayList<Object>();
-		if (elettrico) {
-			ContentValues whereUnita = new ContentValues();
-			whereUnita.put(Unita.ID_CANTIERE, cantiere);
-			unita = db.eseguiSelect(new Unita(), whereUnita, new String[] { Unita.ID_UNITA + " desc" });
-			aree = new Aree().getAreeCantiere(db, cantiere);
-			if (ordinaLivelli) {
-				// dal livello piu' basso (scantinato) al piu' alto; a parita' di livello l'ordine di prima (piu' recenti in alto)
-				java.util.Collections.sort(aree, (x, y) -> Integer.compare(livello((ContentValues) x), livello((ContentValues) y)));
-			}
-			locali = localiAlfabetici ? new Locali().getLocaliCantiereOrdineAlfabetico(db, cantiere)
-					: db.eseguiSelect("select l.* from " + Locali.NOME_TABELLA + " l inner join " + Aree.NOME_TABELLA + " a on a." + Aree.ID_AREA
-							+ "=l." + Locali.ID_AREA + " inner join " + Unita.NOME_TABELLA + " u on u." + Unita.ID_UNITA + "=a." + Aree.ID_UNITA
-							+ " where u." + Unita.ID_CANTIERE + "=" + cantiere + " order by l." + Locali.ID_LOCALE, null);
-		}
 		db.close();
 
 		_mostraRigaPreventivo(false);
@@ -330,47 +307,29 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 		val.put("NOME", recCantiere.getAsString(Cantieri.NOME));
 		val.put("ID", cantiere);
 		dati.add(val);
-		// Itero le unit�
-		for (int i = 0; i < unita.size(); i++) {
-			ContentValues valUni = (ContentValues) unita.get(i);
-			int idUnita = valUni.getAsInteger(Unita.ID_UNITA);
-			ContentValues val_u = new ContentValues();
-			val_u.put("TIPO", UNITA);
-			val_u.put("NOME", valUni.getAsString(Unita.NOME));
-			val_u.put("ID", valUni.getAsInteger(Unita.ID_UNITA));
-			dati.add(val_u);
-
-			// Itero le aree
-			for (int j = 0; j < aree.size(); j++) {
-				ContentValues valArea = (ContentValues) aree.get(j);
-				int idUnitaArea = valArea.getAsInteger(Aree.ID_UNITA);
-				if (idUnita == idUnitaArea) {
-					int idArea = valArea.getAsInteger(Aree.ID_AREA);
-					ContentValues val_a = new ContentValues();
-					val_a.put("TIPO", AREA);
-					val_a.put("NOME", valArea.getAsString(Aree.NOME));
-					val_a.put("ID", valArea.getAsInteger(Aree.ID_AREA));
-					val_a.put("LIVELLO", livello(valArea));
-					dati.add(val_a);
-
-					// Itero i locali
-					for (int k = 0; k < locali.size(); k++) {
-						ContentValues valLocale = (ContentValues) locali.get(k);
-						int idAreaLocale = valLocale.getAsInteger(Locali.ID_AREA);
-						if (idAreaLocale == idArea) {
-							ContentValues val_l = new ContentValues();
-							val_l.put("TIPO", LOCALE);
-							val_l.put("NOME", valLocale.getAsString(Locali.NOME));
-							val_l.put("ID", valLocale.getAsInteger(Locali.ID_LOCALE));
-							dati.add(val_l);
-						}
-					}
-				}
-			}
+		// unita', aree e locali (solo con la struttura, GESTIONE_ELETTRICA.md): componente unico con il disegno
+		if (elettrico) {
+			dati.addAll(com.ncfsistemi.econ.disegno.StrutturaCantiere.righe(this, cantiere));
 		}
 
 		if (adapter == null) {
-			adapter = new CantiereMenuAdapter(this, dati);
+			adapter = new com.ncfsistemi.econ.disegno.StrutturaCantiere.Adapter(this, dati,
+					new com.ncfsistemi.econ.disegno.StrutturaCantiere.Selezione() {
+						@Override
+						public boolean selezionata(int posizione, ContentValues riga) {
+							return posizione == selezionato;
+						}
+
+						@Override
+						public boolean attiva(int posizione, ContentValues riga) {
+							return true;
+						}
+					});
+			// matita sull'area: nome e livello; si rilegge e, se l'area e' aperta a destra, anche il suo dettaglio
+			adapter.setDopoModificaArea(() -> {
+				riordinaMantenendoSelezione();
+				if (tipoElementoSelezionato == AREA) onItemClick(lista, null, selezionato, 0l);
+			});
 			lista.setAdapter(adapter);
 			lista.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
 			registerForContextMenu(lista);
@@ -382,51 +341,20 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 		System.out.println("Econ: CantiereSplitActivity creaMenu EXIT");
 	}
 
-	private static int livello(ContentValues area) {
-		Integer l = area.getAsInteger(Aree.LIVELLO);
-		return l == null ? 0 : l;
-	}
-
 	/**
-	 * Pulsanti in cima al menu laterale (solo con la struttura): "Per livello" ordina le aree dal livello piu' basso al piu'
-	 * alto, "A-Z" mette i locali di ogni area in ordine alfabetico (spenti: ordine di inserimento). Si ricordano.
+	 * In cima alla struttura i pulsanti "Per livello" e "Locali A-Z" del componente unico (StrutturaCantiere), solo con la
+	 * struttura; si ricordano e valgono anche nel disegno.
 	 */
 	private void creaOrdinamentoStruttura() {
-		if (!elettrico || !(lista.getParent() instanceof android.widget.FrameLayout)) return;
-		android.content.SharedPreferences pref = getSharedPreferences("ECON", MODE_PRIVATE);
-		ordinaLivelli = pref.getBoolean(PREF_ORDINE_LIVELLI, true);
-		localiAlfabetici = pref.getBoolean(PREF_LOCALI_ALFABETICI, true);
-		float dp = getResources().getDisplayMetrics().density;
-		LinearLayout barra = new LinearLayout(this);
-		barra.setOrientation(LinearLayout.HORIZONTAL);
-		barra.setGravity(Gravity.CENTER_VERTICAL);
-		barra.setPadding(Math.round(6 * dp), Math.round(4 * dp), Math.round(6 * dp), Math.round(4 * dp));
-		barra.setBackgroundColor(0xFFF4F6FA);
-		bottoneLivelli = bottoneOrdine("Per livello", com.ncfsistemi.econ.utils.FaIcone.AREA, "Aree dal livello piu' basso (scantinato) al piu' alto");
-		bottoneAlfabetico = bottoneOrdine("Locali A-Z", "\uf15d", "Locali di ogni area in ordine alfabetico");
-		LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-		lp.rightMargin = Math.round(4 * dp);
-		barra.addView(bottoneLivelli, lp);
-		barra.addView(bottoneAlfabetico, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-		bottoneLivelli.setOnClickListener(v -> {
-			ordinaLivelli = !ordinaLivelli;
-			pref.edit().putBoolean(PREF_ORDINE_LIVELLI, ordinaLivelli).apply();
-			aggiornaBottoniOrdine();
-			riordinaMantenendoSelezione();
-		});
-		bottoneAlfabetico.setOnClickListener(v -> {
-			localiAlfabetici = !localiAlfabetici;
-			pref.edit().putBoolean(PREF_LOCALI_ALFABETICI, localiAlfabetici).apply();
-			aggiornaBottoniOrdine();
-			riordinaMantenendoSelezione();
-		});
-		android.widget.FrameLayout pannello = (android.widget.FrameLayout) lista.getParent();
-		int alto = Math.round(48 * dp);
-		pannello.addView(barra, new android.widget.FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, alto, Gravity.TOP));
-		android.widget.FrameLayout.LayoutParams lpLista = (android.widget.FrameLayout.LayoutParams) lista.getLayoutParams();
-		lpLista.topMargin = alto;
-		lista.setLayoutParams(lpLista);
-		aggiornaBottoniOrdine();
+		com.ncfsistemi.econ.disegno.StrutturaCantiere.stileLista(lista);
+		ViewGroup posto = (ViewGroup) findViewById(R.id.barra_struttura);
+		if (posto == null) return;
+		if (!elettrico) {
+			posto.setVisibility(View.GONE);
+			findViewById(R.id.separatore_struttura).setVisibility(View.GONE);
+			return;
+		}
+		posto.addView(com.ncfsistemi.econ.disegno.StrutturaCantiere.barraOrdine(this, this::riordinaMantenendoSelezione));
 	}
 
 	/** Ricostruisce il menu col nuovo ordine e tiene selezionata la stessa riga (stesso tipo e id). */
@@ -442,35 +370,6 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 			}
 		}
 		if (adapter != null) adapter.notifyDataSetChanged();
-	}
-
-	private com.google.android.material.button.MaterialButton bottoneOrdine(String testo, String glifo, String suggerimento) {
-		com.google.android.material.button.MaterialButton b = new com.google.android.material.button.MaterialButton(this, null,
-				com.google.android.material.R.attr.materialButtonOutlinedStyle);
-		b.setText(testo);
-		b.setAllCaps(false);
-		b.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 13);
-		b.setSingleLine(true);
-		b.setInsetTop(0);
-		b.setInsetBottom(0);
-		b.setMinHeight(Math.round(38 * getResources().getDisplayMetrics().density));
-		b.setIcon(com.ncfsistemi.econ.utils.FaIcone.drawable(this, glifo, 16));
-		b.setIconPadding(Math.round(6 * getResources().getDisplayMetrics().density));
-		b.setContentDescription(suggerimento);
-		androidx.appcompat.widget.TooltipCompat.setTooltipText(b, suggerimento);
-		return b;
-	}
-
-	private void aggiornaBottoniOrdine() {
-		for (com.google.android.material.button.MaterialButton b : new com.google.android.material.button.MaterialButton[]{bottoneLivelli, bottoneAlfabetico}) {
-			if (b == null) continue;
-			boolean attivo = b == bottoneLivelli ? ordinaLivelli : localiAlfabetici;
-			int blu = 0xFF1565C0;
-			b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(attivo ? blu : 0xFFFFFFFF));
-			b.setTextColor(attivo ? 0xFFFFFFFF : blu);
-			b.setIconTint(android.content.res.ColorStateList.valueOf(attivo ? 0xFFFFFFFF : blu));
-			b.setStrokeColor(android.content.res.ColorStateList.valueOf(blu));
-		}
 	}
 
 	private void _mostraRigaPreventivo(boolean notifyDatSetChanged) {
@@ -797,7 +696,7 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 		super.onCreateContextMenu(menu, v, menuInfo);
 		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
 		ContentValues item = (ContentValues) lista.getItemAtPosition(info.position);
-		menu.setHeaderTitle(CantiereMenuAdapter.getTipoStringa(item, this) + ": " + item.getAsString("NOME"));
+		menu.setHeaderTitle(com.ncfsistemi.econ.disegno.StrutturaCantiere.tipoTesto(item, this) + ": " + item.getAsString("NOME"));
 		menu.add(Menu.NONE, 1, Menu.NONE, getString(R.string.modifica));
 		menu.add(Menu.NONE, 2, Menu.NONE, getString(R.string.elimina));
 		if (item.getAsInteger("TIPO") == LOCALE) {

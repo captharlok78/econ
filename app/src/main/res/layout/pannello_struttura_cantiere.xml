@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Struttura del cantiere nella scheda del cantiere (CantiereSplitActivity): componente unico con il pannello Struttura del
+    disegno (disegno/StrutturaCantiere). In cima i pulsanti "Per livello" / "Locali A-Z" (messi dal codice in
+    barra_struttura), sotto la lista @+id/lista con le righe di StrutturaCantiere.Adapter.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:id="@+id/barra_struttura"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/disegno_sfondo" />
+
+    <View
+        android:id="@+id/separatore_struttura"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/disegno_bordo" />
+
+    <ListView
+        android:id="@+id/lista"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>

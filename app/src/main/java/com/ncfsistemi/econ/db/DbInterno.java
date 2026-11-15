@@ -67,7 +67,7 @@ import com.ncfsistemi.econ.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECON.db";
 	public static final String DATABASE_NAME_ZIP = ".econ.db";
-	public static final int SCHEMA_VERSION = 48;
+	public static final int SCHEMA_VERSION = 49;
 
 	private Context cont = null;
 
@@ -148,6 +148,7 @@ public class DbInterno extends SQLiteOpenHelper {
 		creaTabelleAssistenze(db);
 		creaTabellaIcone(db);
 		creaTabellaMaterialiElementi(db);
+		creaTabellaElementiDisegno(db);
 
 		db.execSQL("VACUUM");
 
@@ -214,6 +215,7 @@ public class DbInterno extends SQLiteOpenHelper {
 		creaTabelleAssistenze(db);
 		creaTabellaIcone(db);
 		creaTabellaMaterialiElementi(db);
+		creaTabellaElementiDisegno(db);
 
 		/**
 		 * Inserimento dati di default
@@ -609,6 +611,7 @@ public class DbInterno extends SQLiteOpenHelper {
 		if (oldVersion<47){
 			if (oldVersion<newVersion){
 				creaTabellaMaterialiElementi(db);
+		creaTabellaElementiDisegno(db);
 			}
 		}
 		// Schema 48 (STUDIO_DESIGN_GRAFICA.md §11): livello (piano) delle aree. Sul server nasce a 0 per tutte: nessun
@@ -617,6 +620,26 @@ public class DbInterno extends SQLiteOpenHelper {
 			if (oldVersion<newVersion){
 				if (!getTableColumns(db, Aree.NOME_TABELLA).isEmpty() && !getTableColumns(db, Aree.NOME_TABELLA).contains(Aree.LIVELLO)) {
 					db.execSQL("ALTER TABLE " + Aree.NOME_TABELLA + " ADD COLUMN " + Aree.LIVELLO + " INTEGER DEFAULT 0");
+				}
+			}
+		}
+		// Schema 49 (STUDIO_DESIGN_GRAFICA.md §18): elementi di disegno dal server (catalogo sempre completo) e, su porte e
+		// finestre dei locali, elemento, centro degli elementi a pavimento e rotazione. Nessun download completo: il
+		// catalogo arriva sempre intero, le righe vecchie restano porte e finestre.
+		if (oldVersion<49){
+			if (oldVersion<newVersion){
+				creaTabellaElementiDisegno(db);
+				String t = LocaliPorteFinestre.NOME_TABELLA;
+				String[][] colonne = {
+						{LocaliPorteFinestre.ID_ELEMENTO_DISEGNO, "INTEGER DEFAULT 0"},
+						{LocaliPorteFinestre.POS_X, "INTEGER DEFAULT 0"},
+						{LocaliPorteFinestre.POS_Y, "INTEGER DEFAULT 0"},
+						{LocaliPorteFinestre.ROTAZIONE, "INTEGER DEFAULT 0"},
+				};
+				for (String[] c : colonne) {
+					if (!getTableColumns(db, t).isEmpty() && !getTableColumns(db, t).contains(c[0])) {
+						db.execSQL("ALTER TABLE " + t + " ADD COLUMN " + c[0] + " " + c[1]);
+					}
 				}
 			}
 		}
@@ -868,6 +891,11 @@ public class DbInterno extends SQLiteOpenHelper {
 		db.execSQL(new com.ncfsistemi.econ.db.table.ElementiCantiereMateriali().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
 		db.execSQL("CREATE INDEX IF NOT EXISTS idx_materiali_elemento ON " + com.ncfsistemi.econ.db.table.ElementiCantiereMateriali.NOME_TABELLA
 				+ "(" + com.ncfsistemi.econ.db.table.ElementiCantiereMateriali.ID_ELEMENTO_CANT + ")");
+	}
+
+	/** Elementi di disegno della piantina dal server (schema 49, STUDIO_DESIGN_GRAFICA.md §18). */
+	private static void creaTabellaElementiDisegno(SQLiteDatabase db) {
+		db.execSQL(new com.ncfsistemi.econ.db.table.ElementiDisegno().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
 	}
 
 	/** Icone del disegno scaricate dal server (schema 45, STUDIO_DESIGN.md §5.2). */

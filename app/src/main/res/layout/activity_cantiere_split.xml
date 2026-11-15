@@ -30,10 +30,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
         </FrameLayout>
-        <!-- Menu laterale: pannello standard (bianco, riga selezionata azzurra/grassetto) -->
+        <!-- Struttura del cantiere: componente unico con il disegno (disegno/StrutturaCantiere) -->
         <include
             android:id="@+id/sinistra"
-            layout="@layout/pannello_menu_laterale"
+            layout="@layout/pannello_struttura_cantiere"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 

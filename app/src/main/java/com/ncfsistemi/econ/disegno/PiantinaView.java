@@ -29,7 +29,7 @@ import java.util.Map;
  */
 public class PiantinaView extends View {
 
-    public static final int GUARDA = 0, POSA = 1, SPOSTA = 2, COLLEGA = 3, PARETI = 4;
+    public static final int GUARDA = 0, POSA = 1, SPOSTA = 2, COLLEGA = 3, DISEGNO = 4;
 
     public interface Ascoltatore {
         void toccoElemento(DisegnoDati.Posato p);
@@ -38,11 +38,33 @@ public class PiantinaView extends View {
 
         void spostato(DisegnoDati.Posato p, int x, int y);
 
-        /** Modo Pareti: tocco su un lato con parete (apertura = quella già presente lì, o null). */
-        void toccoParete(int cella, String lato, int perc, DisegnoDati.Apertura apertura);
+        /** Modo Disegno: tocco sulla piantina (STUDIO_DESIGN_GRAFICA.md §18). */
+        void toccoDisegno(PuntoDisegno p);
 
-        /** Modo Pareti: tocco al centro di un quadretto. */
-        void toccoCella(int cella);
+        /** Modo Disegno: elemento a pavimento trascinato (posX/posY già aggiornati). */
+        void spostatoDisegno(DisegnoDati.Apertura a);
+    }
+
+    /**
+     * Punto toccato nel modo Disegno: il quadretto sotto il dito (per aggiungere o togliere spazio), il muro più vicino
+     * (per gli elementi sul muro), il punto nella stanza (per quelli a pavimento) e l'elemento di disegno già lì.
+     */
+    public static final class PuntoDisegno {
+        /** Quadretto sotto il dito, -1 fuori dalla griglia. */
+        public int cella = -1;
+        public boolean cellaPiena;
+        /** Muro vicino: quadretto, lato (T, B, L, R) e punto sul lato (0..1); cellaParete -1 se non c'è un muro vicino. */
+        public int cellaParete = -1;
+        public String lato;
+        public float lungoLato;
+        /** Punto nella stanza, 0..200 (centro dell'elemento a pavimento). */
+        public int posX, posY;
+        public DisegnoDati.Apertura esistente;
+
+        /** Inizio dell'elemento sul lato (in % del lato del quadretto) perché il tocco ne cada al centro. */
+        public int perc(int n, int larghezza) {
+            return Math.round(Math.max(0f, Math.min(100f, lungoLato * 100f - larghezza * n / 2f)));
+        }
     }
 
     private static final int PAVIMENTO = Color.WHITE;
@@ -87,6 +109,7 @@ public class PiantinaView extends View {
     private float downX, downY;
     private boolean mosso, scalato, multiTocco;
     private DisegnoDati.Posato trascinato;
+    private DisegnoDati.Apertura trascinatoDisegno;
     private float trascDx, trascDy;
     private float ultimoX, ultimoY;
 
@@ -311,7 +334,7 @@ public class PiantinaView extends View {
         for (int r = 0; r < n; r++) {
             for (int k = 0; k < n; k++) {
                 if (!pieno(r, k)) {
-                    if (modo == PARETI) {
+                    if (modo == DISEGNO) {
                         // quadretti fuori dalla stanza tratteggiati: si toccano per aggiungerli
                         Paint pt = new Paint(pGriglia);
                         pt.setStyle(Paint.Style.STROKE);
@@ -339,8 +362,17 @@ public class PiantinaView extends View {
             }
         }
 
-        // porte e finestre
-        for (DisegnoDati.Apertura a : locale.aperture) disegnaApertura(canvas, a, x0, y0, c, L, spessore);
+        // elementi di disegno: prima quelli dentro la stanza, poi porte, finestre e gli altri sul muro (§18)
+        for (DisegnoDati.Apertura a : locale.aperture) {
+            if (a.parete()) continue;
+            float[] b = boxArredo(a);
+            if (a == trascinatoDisegno) {
+                b[0] += ultimoX - downX;
+                b[1] += ultimoY - downY;
+            }
+            disegnaArredo(canvas, a, b[0], b[1], b[2], b[3], spessore);
+        }
+        for (DisegnoDati.Apertura a : locale.aperture) if (a.parete()) disegnaApertura(canvas, a, x0, y0, c, L, spessore);
 
         // collegamenti (modo Collega)
         if (modo == COLLEGA) {
@@ -364,55 +396,43 @@ public class PiantinaView extends View {
         if (trascinato != null) disegnaElemento(canvas, trascinato, ultimoX + trascDx, ultimoY + trascDy, D * 1.15f);
     }
 
-    private void disegnaApertura(Canvas canvas, DisegnoDati.Apertura a, float x0, float y0, float c, float L, float spessore) {
+    /** Estremi sul muro (ax, ay, bx, by) e verso l'interno (nx, ny) di un elemento sul muro. */
+    private float[] estremiParete(DisegnoDati.Apertura a, float x0, float y0, float c, float L) {
         int r = a.cella / locale.n, k = a.cella % locale.n;
         float l = x0 + k * c, t = y0 + r * c;
-        boolean porta = "P".equalsIgnoreCase(a.tipo);
-        float lung = porta ? L / 7f : L / 6f;
+        float lung = L * larghezza(a) / 100f;
         float inizio = c * Math.max(0, a.perc) / 100f;
-        float ax, ay, bx, by;         // estremi sull'asse della parete
-        float nx = 0, ny = 0;         // verso l'interno della stanza
         switch (a.lato == null ? "T" : a.lato.toUpperCase()) {
-            case "B":
-                ax = l + inizio; ay = t + c; bx = ax + lung; by = ay; ny = -1;
-                break;
-            case "L":
-                ax = l; ay = t + inizio; bx = ax; by = ay + lung; nx = 1;
-                break;
-            case "R":
-                ax = l + c; ay = t + inizio; bx = ax; by = ay + lung; nx = -1;
-                break;
-            default:
-                ax = l + inizio; ay = t; bx = ax + lung; by = ay; ny = 1;
+            case "B": return new float[]{l + inizio, t + c, l + inizio + lung, t + c, 0, -1};
+            case "L": return new float[]{l, t + inizio, l, t + inizio + lung, 1, 0};
+            case "R": return new float[]{l + c, t + inizio, l + c, t + inizio + lung, -1, 0};
+            default: return new float[]{l + inizio, t, l + inizio + lung, t, 0, 1};
         }
-        // varco nella parete
-        Paint varco = new Paint(Paint.ANTI_ALIAS_FLAG);
-        varco.setColor(PAVIMENTO);
-        varco.setStrokeWidth(spessore + 2 * dp);
-        canvas.drawLine(ax, ay, bx, by, varco);
-        if (porta) {
-            pPorta.setStrokeWidth(Math.max(1.5f * dp, spessore / 2.5f));
-            // anta aperta verso l'interno e arco di apertura
-            float px = ax + nx * lung, py = ay + ny * lung;
-            canvas.drawLine(ax, ay, px, py, pPorta);
-            RectF ov = new RectF(ax - lung, ay - lung, ax + lung, ay + lung);
-            float da, sweep;
-            if (ny == 1) { da = 0; sweep = 90; }
-            else if (ny == -1) { da = 270; sweep = 90; }
-            else if (nx == 1) { da = 0; sweep = 90; }
-            else { da = 90; sweep = 90; }
-            Paint arco = new Paint(pPorta);
-            arco.setStrokeWidth(Math.max(1f, dp));
-            arco.setPathEffect(new DashPathEffect(new float[]{4 * dp, 3 * dp}, 0));
-            canvas.drawArc(ov, da, sweep, false, arco);
-        } else {
-            pFinestra.setStrokeWidth(Math.max(1.5f * dp, spessore / 3f));
-            float o = spessore / 2.2f;
-            float ox = ny != 0 ? 0 : o, oy = ny != 0 ? o : 0;
-            canvas.drawLine(ax - ox, ay - oy, bx - ox, by - oy, pFinestra);
-            canvas.drawLine(ax + ox, ay + oy, bx + ox, by + oy, pFinestra);
-            canvas.drawLine(ax, ay, bx, by, pFinestra);
+    }
+
+    private static int larghezza(DisegnoDati.Apertura a) {
+        return FormeDisegno.larghezza(a);
+    }
+
+    private void disegnaApertura(Canvas canvas, DisegnoDati.Apertura a, float x0, float y0, float c, float L, float spessore) {
+        float[] e = estremiParete(a, x0, y0, c, L);
+        FormeDisegno.parete(canvas, a, e[0], e[1], e[2], e[3], e[4], e[5], L, spessore, dp);
+    }
+
+    /** Centro e lati (cx, cy, w, h) in pixel di un elemento a pavimento, già girato. */
+    private float[] boxArredo(DisegnoDati.Apertura a) {
+        float L = lato();
+        float w = L * a.elemento.larghezza / 100f, h = L * a.elemento.profondita / 100f;
+        if (a.rotazione == 90 || a.rotazione == 270) {
+            float t = w;
+            w = h;
+            h = t;
         }
+        return new float[]{sinistra() + L * a.posX / 200f, alto() + L * a.posY / 200f, w, h};
+    }
+
+    private void disegnaArredo(Canvas canvas, DisegnoDati.Apertura a, float cx, float cy, float w, float h, float spessore) {
+        FormeDisegno.pavimento(canvas, a, cx, cy, w, h, lato(), spessore, dp);
     }
 
     private void disegnaElemento(Canvas canvas, DisegnoDati.Posato p, float cx, float cy, float D) {
@@ -484,6 +504,14 @@ public class PiantinaView extends View {
                 downY = ultimoY = e.getY();
                 mosso = scalato = multiTocco = false;
                 trascinato = null;
+                trascinatoDisegno = null;
+                if (modo == DISEGNO) {
+                    DisegnoDati.Apertura a = arredoIn(downX, downY);
+                    if (a != null) {
+                        trascinatoDisegno = a;
+                        getParent().requestDisallowInterceptTouchEvent(true);
+                    }
+                }
                 if (modo == SPOSTA) {
                     DisegnoDati.Posato p = elementoIn(downX, downY);
                     if (p != null) {
@@ -498,12 +526,13 @@ public class PiantinaView extends View {
             case MotionEvent.ACTION_POINTER_DOWN:
                 multiTocco = true;
                 trascinato = null;
+                trascinatoDisegno = null;
                 invalidate();
                 return true;
             case MotionEvent.ACTION_MOVE: {
                 float x = e.getX(), y = e.getY();
                 if (!mosso && (Math.abs(x - downX) > slop || Math.abs(y - downY) > slop)) mosso = true;
-                if (trascinato != null && !multiTocco) {
+                if ((trascinato != null || trascinatoDisegno != null) && !multiTocco) {
                     ultimoX = x;
                     ultimoY = y;
                     invalidate();
@@ -521,6 +550,16 @@ public class PiantinaView extends View {
                 return true;
             }
             case MotionEvent.ACTION_UP: {
+                DisegnoDati.Apertura td = trascinatoDisegno;
+                trascinatoDisegno = null;
+                if (td != null && mosso && !multiTocco) {
+                    float L = lato();
+                    td.posX = Math.round(Math.max(0, Math.min(200, td.posX + (e.getX() - downX) / L * 200f)));
+                    td.posY = Math.round(Math.max(0, Math.min(200, td.posY + (e.getY() - downY) / L * 200f)));
+                    invalidate();
+                    if (ascoltatore != null) ascoltatore.spostatoDisegno(td);
+                    return true;
+                }
                 DisegnoDati.Posato t = trascinato;
                 trascinato = null;
                 if (t != null) {
@@ -542,6 +581,7 @@ public class PiantinaView extends View {
             }
             case MotionEvent.ACTION_CANCEL:
                 trascinato = null;
+                trascinatoDisegno = null;
                 invalidate();
                 return true;
         }
@@ -550,8 +590,8 @@ public class PiantinaView extends View {
 
     private void tocco(float x, float y) {
         if (ascoltatore == null || locale == null) return;
-        if (modo == PARETI) {
-            toccoPareti(x, y);
+        if (modo == DISEGNO) {
+            toccoDisegno(x, y);
             return;
         }
         DisegnoDati.Posato p = elementoIn(x, y);
@@ -567,16 +607,23 @@ public class PiantinaView extends View {
         ascoltatore.toccoVuoto(aPosX(x), aPosY(y));
     }
 
-    private void toccoPareti(float x, float y) {
+    private void toccoDisegno(float x, float y) {
         int n = locale.n;
-        float c = lato() / n;
+        float L = lato(), c = L / n;
         float fx = (x - sinistra()) / c, fy = (y - alto()) / c;
         if (fx < -0.3f || fy < -0.3f || fx > n + 0.3f || fy > n + 0.3f) return;
+        PuntoDisegno p = new PuntoDisegno();
+        int k0 = (int) Math.floor(fx), r0 = (int) Math.floor(fy);
+        if (k0 >= 0 && r0 >= 0 && k0 < n && r0 < n) {
+            p.cella = r0 * n + k0;
+            p.cellaPiena = pieno(r0, k0);
+        }
+        p.posX = Math.round(Math.max(0, Math.min(200, (x - sinistra()) / L * 200f)));
+        p.posY = Math.round(Math.max(0, Math.min(200, (y - alto()) / L * 200f)));
+        p.esistente = arredoIn(x, y);
+        if (p.esistente == null) p.esistente = aperturaIn(x, y);
         // lato più vicino che ha una parete, entro un terzo di quadretto
-        float soglia = 0.28f;
-        int migliorCella = -1;
-        String migliorLato = null;
-        float migliorD = soglia, migliorPos = 0;
+        float soglia = 0.28f, migliorD = soglia;
         for (int r = Math.max(0, (int) fy - 1); r <= Math.min(n - 1, (int) fy + 1); r++) {
             for (int k = Math.max(0, (int) fx - 1); k <= Math.min(n - 1, (int) fx + 1); k++) {
                 if (!pieno(r, k)) continue;
@@ -594,27 +641,29 @@ public class PiantinaView extends View {
                     if (d < 0 || lungo < -0.05f || lungo > 1.05f) continue;
                     if (d < migliorD) {
                         migliorD = d;
-                        migliorCella = r * n + k;
-                        migliorLato = nomi[i];
-                        migliorPos = lungo;
+                        p.cellaParete = r * n + k;
+                        p.lato = nomi[i];
+                        p.lungoLato = Math.max(0f, Math.min(1f, lungo));
                     }
                 }
             }
         }
-        if (migliorCella >= 0) {
-            DisegnoDati.Apertura esistente = aperturaIn(x, y);
-            // il tocco cade al centro dell'apertura: l'inizio è mezza apertura prima
-            int perc = Math.round(Math.max(0f, Math.min(100f, migliorPos * 100f - 100f * n / 7f / 2f)));
-            ascoltatore.toccoParete(migliorCella, migliorLato, perc, esistente);
-            return;
+        if (p.cella < 0 && p.cellaParete < 0 && p.esistente == null) return;
+        ascoltatore.toccoDisegno(p);
+    }
+
+    /** Elemento a pavimento sotto il dito (l'ultimo disegnato, cioè quello sopra), con un margine per le dita. */
+    private DisegnoDati.Apertura arredoIn(float x, float y) {
+        if (locale == null) return null;
+        DisegnoDati.Apertura trovato = null;
+        float m = 6 * dp;
+        for (DisegnoDati.Apertura a : locale.aperture) {
+            if (a.parete()) continue;
+            float[] b = boxArredo(a);
+            float w = Math.max(b[2], 24 * dp), h = Math.max(b[3], 24 * dp);
+            if (Math.abs(x - b[0]) <= w / 2f + m && Math.abs(y - b[1]) <= h / 2f + m) trovato = a;
         }
-        DisegnoDati.Apertura esistente = aperturaIn(x, y);
-        if (esistente != null) {
-            ascoltatore.toccoParete(esistente.cella, esistente.lato, esistente.perc, esistente);
-            return;
-        }
-        int k = (int) Math.floor(fx), r = (int) Math.floor(fy);
-        if (k >= 0 && r >= 0 && k < n && r < n) ascoltatore.toccoCella(r * n + k);
+        return trovato;
     }
 
     private DisegnoDati.Apertura aperturaIn(float x, float y) {
@@ -622,9 +671,10 @@ public class PiantinaView extends View {
         float L = lato(), c = L / locale.n, x0 = sinistra(), y0 = alto();
         float tolleranza = Math.max(14 * dp, c * 0.2f);
         for (DisegnoDati.Apertura a : locale.aperture) {
+            if (!a.parete()) continue;
             int r = a.cella / locale.n, k = a.cella % locale.n;
             float l = x0 + k * c, t = y0 + r * c;
-            float lung = "P".equalsIgnoreCase(a.tipo) ? L / 7f : L / 6f;
+            float lung = L * larghezza(a) / 100f;
             float inizio = c * Math.max(0, a.perc) / 100f;
             RectF box;
             switch (a.lato == null ? "T" : a.lato.toUpperCase()) {

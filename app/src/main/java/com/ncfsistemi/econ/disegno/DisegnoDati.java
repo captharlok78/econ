@@ -15,6 +15,7 @@ import com.ncfsistemi.econ.db.table.ComponentiCantiere;
 import com.ncfsistemi.econ.db.table.ComposizioniCantiere;
 import com.ncfsistemi.econ.db.table.Elementi;
 import com.ncfsistemi.econ.db.table.ElementiCantiere;
+import com.ncfsistemi.econ.db.table.ElementiDisegno;
 import com.ncfsistemi.econ.db.table.Locali;
 import com.ncfsistemi.econ.db.table.LocaliPorteFinestre;
 import com.ncfsistemi.econ.db.table.Preventivi;
@@ -35,55 +36,7 @@ public final class DisegnoDati {
     private DisegnoDati() {
     }
 
-    // ------------------------------------------------------------------ struttura
-
-    /** Una riga dell'albero: unità, area o locale. */
-    public static final class Nodo {
-        public static final int UNITA = 0, AREA = 1, LOCALE = 2;
-        public final int tipo;
-        public final int id;
-        public final String nome;
-        public final int elementi;
-
-        Nodo(int tipo, int id, String nome, int elementi) {
-            this.tipo = tipo;
-            this.id = id;
-            this.nome = nome == null ? "" : nome;
-            this.elementi = elementi;
-        }
-    }
-
-    public static List<Nodo> struttura(Context ctx, int idCantiere) {
-        List<Nodo> out = new ArrayList<>();
-        DbInterno db = new DbInterno(ctx);
-        try {
-            ArrayList<Object> unita = db.eseguiSelect("select id_unita, nome from unita where id_cantiere=" + idCantiere
-                    + " order by id_unita desc", null);
-            for (Object ou : unita) {
-                ContentValues u = (ContentValues) ou;
-                int idUnita = u.getAsInteger("id_unita");
-                out.add(new Nodo(Nodo.UNITA, idUnita, u.getAsString("nome"), 0));
-                ArrayList<Object> aree = db.eseguiSelect("select id_area, nome from aree where id_unita=" + idUnita
-                        + " order by nome collate nocase", null);
-                for (Object oa : aree) {
-                    ContentValues a = (ContentValues) oa;
-                    int idArea = a.getAsInteger("id_area");
-                    out.add(new Nodo(Nodo.AREA, idArea, a.getAsString("nome"), 0));
-                    ArrayList<Object> locali = db.eseguiSelect("select l.id_locale, l.nome, (select count(*) from"
-                            + " elementi_cantiere e where e.id_locale=l.id_locale) as n from locali l where l.id_area="
-                            + idArea + " order by l.nome collate nocase", null);
-                    for (Object ol : locali) {
-                        ContentValues l = (ContentValues) ol;
-                        out.add(new Nodo(Nodo.LOCALE, l.getAsInteger("id_locale"), l.getAsString("nome"),
-                                l.getAsInteger("n")));
-                    }
-                }
-            }
-        } finally {
-            db.close();
-        }
-        return out;
-    }
+    // ------------------------------------------------------------------ struttura: vedi StrutturaCantiere (componente unico)
 
     /** "Cantiere › Unità › Area" del locale, per il sottotitolo. */
     public static String percorso(Context ctx, int idLocale) {
@@ -108,12 +61,104 @@ public final class DisegnoDati {
 
     // ------------------------------------------------------------------ locale
 
+    /**
+     * Elemento di disegno del catalogo del server (schema 49, STUDIO_DESIGN_GRAFICA.md §18): sul muro (PARETE) o dentro la
+     * stanza (PAVIMENTO), misure in centesimi del lato della piantina, forma = come si disegna (PiantinaView).
+     */
+    public static final class ElementoDisegno {
+        public int id;
+        public String codice = "";
+        public String nome = "";
+        public String gruppo = "";
+        public String posizione = ElementiDisegno.PAVIMENTO;
+        public String forma = "RETTANGOLO";
+        public int larghezza = 12;
+        public int profondita = 8;
+        public String sigla = "";
+        public String colore = "";
+        public boolean attivo = true;
+
+        public boolean parete() {
+            return ElementiDisegno.PARETE.equalsIgnoreCase(posizione);
+        }
+
+        /** Tipo della riga in locali_porte_finestre: P/F per le app vecchie, E a pavimento. */
+        String tipo() {
+            if (!parete()) return "E";
+            return "FINESTRA".equalsIgnoreCase(forma) || "PORTAFINESTRA".equalsIgnoreCase(forma) ? "F" : "P";
+        }
+
+        static ElementoDisegno predefinito(String tipo) {
+            ElementoDisegno e = new ElementoDisegno();
+            boolean finestra = "F".equalsIgnoreCase(tipo);
+            e.codice = finestra ? "FINESTRA" : "PORTA";
+            e.nome = finestra ? "Finestra" : "Porta";
+            e.gruppo = "Aperture";
+            e.posizione = ElementiDisegno.PARETE;
+            e.forma = e.codice;
+            e.larghezza = finestra ? 17 : 14;
+            e.profondita = finestra ? 3 : 14;
+            e.colore = finestra ? "#4aa3df" : "#8a6d3b";
+            return e;
+        }
+    }
+
+    /**
+     * Catalogo degli elementi di disegno (anche i non attivi, per riconoscere quelli già posati), per ordine. Prima della
+     * prima sincronizzazione con lo schema 49 è vuoto: restano porta e finestra.
+     */
+    public static List<ElementoDisegno> catalogoDisegno(Context ctx) {
+        List<ElementoDisegno> out = new ArrayList<>();
+        DbInterno db = new DbInterno(ctx);
+        try {
+            for (Object o : db.eseguiSelect("select * from " + ElementiDisegno.NOME_TABELLA + " order by "
+                    + ElementiDisegno.ORDINE + ", " + ElementiDisegno.NOME, null)) {
+                ContentValues r = (ContentValues) o;
+                ElementoDisegno e = new ElementoDisegno();
+                e.id = intero(r, ElementiDisegno.ID);
+                e.codice = testo(r, ElementiDisegno.CODICE);
+                e.nome = testo(r, ElementiDisegno.NOME);
+                e.gruppo = testo(r, ElementiDisegno.GRUPPO);
+                e.posizione = testo(r, ElementiDisegno.POSIZIONE);
+                e.forma = testo(r, ElementiDisegno.FORMA).toUpperCase();
+                e.larghezza = Math.max(2, intero(r, ElementiDisegno.LARGHEZZA));
+                e.profondita = Math.max(1, intero(r, ElementiDisegno.PROFONDITA));
+                e.sigla = testo(r, ElementiDisegno.SIGLA);
+                e.colore = testo(r, ElementiDisegno.COLORE);
+                e.attivo = r.get(ElementiDisegno.ATTIVO) == null || intero(r, ElementiDisegno.ATTIVO) != 0;
+                out.add(e);
+            }
+        } catch (Exception ignorata) {
+            // tabella non ancora creata/scaricata: si usano porta e finestra
+        } finally {
+            db.close();
+        }
+        if (out.isEmpty()) {
+            out.add(ElementoDisegno.predefinito("P"));
+            out.add(ElementoDisegno.predefinito("F"));
+        }
+        return out;
+    }
+
+    private static String testo(ContentValues v, String k) {
+        String s = v.getAsString(k);
+        return s == null ? "" : s.trim();
+    }
+
+    /** Porta, finestra o altro elemento di disegno posato nel locale (riga di locali_porte_finestre). */
     public static final class Apertura {
         public int id;
-        public String tipo;       // P porta, F finestra
+        public String tipo;       // P porta, F finestra (anche per le app vecchie), E a pavimento
         public int cella;
         public String lato;       // T, B, L, R
         public int perc;          // inizio dell'apertura sul lato della cella, in % del lato
+        public int posX, posY;    // centro degli elementi a pavimento, 0..200
+        public int rotazione;     // 0, 90, 180, 270
+        public ElementoDisegno elemento;
+
+        public boolean parete() {
+            return elemento == null || elemento.parete();
+        }
     }
 
     public static final class Locale {
@@ -150,6 +195,18 @@ public final class DisegnoDati {
             l.celle = new boolean[l.n * l.n];
             for (int i = 0; i < l.celle.length; i++) l.celle[i] = pianta.charAt(i) == '1';
 
+        } finally {
+            db.close();
+        }
+        // elementi di disegno: porte e finestre senza elemento (app vecchie) prendono quelli del catalogo con quel codice
+        java.util.Map<Integer, ElementoDisegno> perId = new java.util.HashMap<>();
+        java.util.Map<String, ElementoDisegno> perCodice = new java.util.HashMap<>();
+        for (ElementoDisegno e : catalogoDisegno(ctx)) {
+            if (e.id > 0) perId.put(e.id, e);
+            perCodice.put(e.codice, e);
+        }
+        db = new DbInterno(ctx);
+        try {
             ContentValues wp = new ContentValues();
             wp.put(LocaliPorteFinestre.ID_LOCALE, idLocale);
             for (Object o : db.eseguiSelect(new LocaliPorteFinestre(), wp, null)) {
@@ -160,7 +217,17 @@ public final class DisegnoDati {
                 a.cella = intero(p, LocaliPorteFinestre.CELLA);
                 a.lato = p.getAsString(LocaliPorteFinestre.POS_IN_CELLA);
                 a.perc = intero(p, LocaliPorteFinestre.POS_INIZIALE_PERC);
-                if (a.lato != null && a.cella >= 0 && a.cella < l.celle.length) l.aperture.add(a);
+                a.posX = intero(p, LocaliPorteFinestre.POS_X);
+                a.posY = intero(p, LocaliPorteFinestre.POS_Y);
+                a.rotazione = ((intero(p, LocaliPorteFinestre.ROTAZIONE) % 360) + 360) % 360;
+                a.elemento = perId.get(intero(p, LocaliPorteFinestre.ID_ELEMENTO_DISEGNO));
+                boolean pavimento = "E".equalsIgnoreCase(a.tipo);
+                if (a.elemento == null && !pavimento) {
+                    a.elemento = perCodice.get("F".equalsIgnoreCase(a.tipo) ? "FINESTRA" : "PORTA");
+                    if (a.elemento == null) a.elemento = ElementoDisegno.predefinito(a.tipo);
+                }
+                if (a.elemento == null || a.elemento.parete() == pavimento) continue; // catalogo cambiato: non si sa disegnare
+                if (pavimento || (a.lato != null && a.cella >= 0 && a.cella < l.celle.length)) l.aperture.add(a);
             }
         } finally {
             db.close();
@@ -168,30 +235,43 @@ public final class DisegnoDati {
         return l;
     }
 
-    public static void aggiungiApertura(Context ctx, int idLocale, String tipo, int cella, String lato, int perc) {
+    /** Posa un elemento di disegno: sul muro (cella, lato, perc) o dentro la stanza (posX, posY 0..200). */
+    public static void aggiungiApertura(Context ctx, int idLocale, ElementoDisegno e, int cella, String lato, int perc, int posX, int posY) {
         DbInterno db = new DbInterno(ctx);
         try {
             LocaliPorteFinestre tab = new LocaliPorteFinestre();
             ContentValues val = tab.getValoriLogInserimento(db);
             val.put(LocaliPorteFinestre.ID_LOCALE, idLocale);
-            val.put(LocaliPorteFinestre.TIPO, tipo);
-            val.put(LocaliPorteFinestre.CELLA, cella);
-            val.put(LocaliPorteFinestre.POS_IN_CELLA, lato);
-            val.put(LocaliPorteFinestre.POS_INIZIALE_PERC, perc);
+            val.put(LocaliPorteFinestre.TIPO, e.tipo());
+            val.put(LocaliPorteFinestre.ID_ELEMENTO_DISEGNO, e.id);
+            val.put(LocaliPorteFinestre.CELLA, e.parete() ? cella : 0);
+            val.put(LocaliPorteFinestre.POS_IN_CELLA, e.parete() ? lato : "T");
+            val.put(LocaliPorteFinestre.POS_INIZIALE_PERC, e.parete() ? perc : 0);
+            val.put(LocaliPorteFinestre.POS_X, e.parete() ? 0 : posX);
+            val.put(LocaliPorteFinestre.POS_Y, e.parete() ? 0 : posY);
+            val.put(LocaliPorteFinestre.ROTAZIONE, 0);
             tab.inserisciRecord(db, val);
         } finally {
             db.close();
         }
     }
 
+    /** Salva posizione, rotazione ed elemento di una riga già posata. */
     public static void spostaApertura(Context ctx, Apertura a) {
         DbInterno db = new DbInterno(ctx);
         try {
             LocaliPorteFinestre tab = new LocaliPorteFinestre();
             ContentValues val = tab.getValoriLogModifica(db);
+            if (a.elemento != null) {
+                val.put(LocaliPorteFinestre.TIPO, a.elemento.tipo());
+                val.put(LocaliPorteFinestre.ID_ELEMENTO_DISEGNO, a.elemento.id);
+            }
             val.put(LocaliPorteFinestre.CELLA, a.cella);
-            val.put(LocaliPorteFinestre.POS_IN_CELLA, a.lato);
+            val.put(LocaliPorteFinestre.POS_IN_CELLA, a.lato == null ? "T" : a.lato);
             val.put(LocaliPorteFinestre.POS_INIZIALE_PERC, a.perc);
+            val.put(LocaliPorteFinestre.POS_X, a.posX);
+            val.put(LocaliPorteFinestre.POS_Y, a.posY);
+            val.put(LocaliPorteFinestre.ROTAZIONE, a.rotazione);
             ContentValues where = new ContentValues();
             where.put(LocaliPorteFinestre.ID_PORTA_FINESTRA, a.id);
             tab.aggiornaRecord(db, val, where);
