@@ -325,10 +325,12 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 							return true;
 						}
 					});
-			// matita sull'area: nome e livello; si rilegge e, se l'area e' aperta a destra, anche il suo dettaglio
-			adapter.setDopoModificaArea(() -> {
+			// matita in modalita' modifica (unita', area, locale): si rilegge e si riapre il dettaglio a destra
+			adapter.setDopoModifica(() -> {
 				riordinaMantenendoSelezione();
-				if (tipoElementoSelezionato == AREA) onItemClick(lista, null, selezionato, 0l);
+				if (tipoElementoSelezionato == UNITA || tipoElementoSelezionato == AREA || tipoElementoSelezionato == LOCALE) {
+					onItemClick(lista, null, selezionato, 0l);
+				}
 			});
 			lista.setAdapter(adapter);
 			lista.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
@@ -354,7 +356,10 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 			findViewById(R.id.separatore_struttura).setVisibility(View.GONE);
 			return;
 		}
-		posto.addView(com.ncfsistemi.econ.disegno.StrutturaCantiere.barraOrdine(this, this::riordinaMantenendoSelezione));
+		android.widget.LinearLayout barra = com.ncfsistemi.econ.disegno.StrutturaCantiere.barraOrdine(this, this::riordinaMantenendoSelezione);
+		// a destra c'e' il triangolo che chiude il pannello: la matita resta fuori
+		barra.setPadding(barra.getPaddingLeft(), barra.getPaddingTop(), Math.round(26 * getResources().getDisplayMetrics().density), barra.getPaddingBottom());
+		posto.addView(barra);
 	}
 
 	/** Ricostruisce il menu col nuovo ordine e tiene selezionata la stessa riga (stesso tipo e id). */

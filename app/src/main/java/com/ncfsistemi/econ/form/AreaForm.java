@@ -38,19 +38,19 @@ public class AreaForm extends LivelloCantiereForm {
 		return true;
 	}
 
-	/** Livelli proposti: da -3 a 10 (STUDIO_DESIGN_GRAFICA.md §11). */
+	/** Livelli proposti: quelli attivi del catalogo del server (§20; senza catalogo da -3 a 10). */
 	public static String[][] vociLivello() {
-		String[][] voci = new String[14][];
-		for (int n = -3; n <= 10; n++) {
-			voci[n + 3] = new String[]{String.valueOf(n), n + " · " + nomeLivello(n)};
-		}
-		return voci;
+		return com.ncfsistemi.econ.utils.LivelliAree.voci(0);
 	}
 
-	/** -1 Scantinato, 0 Piano terra, 1 Piano 1... */
+	/** Livelli proposti più quello attuale dell'area (anche se disattivato). */
+	public static String[][] vociLivello(int attuale) {
+		return com.ncfsistemi.econ.utils.LivelliAree.voci(attuale);
+	}
+
+	/** Nome del livello dal catalogo: -1 Scantinato, 0 Piano terra, 1 Piano 1... */
 	public static String nomeLivello(int n) {
-		String s = com.ncfsistemi.econ.export.ConformitaXLS.nomeLivello(n);
-		return s.substring(0, 1).toUpperCase() + s.substring(1);
+		return com.ncfsistemi.econ.utils.LivelliAree.nome(n);
 	}
 
 	@Override

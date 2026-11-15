@@ -27,7 +27,9 @@ public final class SyncUtil {
             // categorie del disegno gia' risolte per la ditta dal server (schema 46, STUDIO_DESIGN_GRAFICA.md §3.4)
             "categorie_generali", "categorie_componenti",
             // elementi di disegno della piantina (schema 49, STUDIO_DESIGN_GRAFICA.md §18)
-            "elementi_disegno" };
+            "elementi_disegno",
+            // livelli (piani) delle aree (schema 50, §20)
+            "livelli_area" };
 
     /** Tabelle locali con una colonna unita' di misura (chiave esterna verso unita_misura sul server). */
     private static final String[] TABELLE_CON_UNITA_MISURA = { "elementi", "componenti", "elementi_cantiere",
@@ -157,6 +159,7 @@ public final class SyncUtil {
         { "ditte_articoli_assistenza",   "id" },
         { "assistenze",                  "id" },
         { "elementi_disegno",            "id" },
+        { "livelli_area",                "id" },
         { "icone",                       "id" },
     };
 

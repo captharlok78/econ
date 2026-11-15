@@ -413,10 +413,8 @@ public class ConformitaXLS {
     /** Nome di foglio valido e unico (max 31 caratteri, senza []:*?/\). */
     /** -1 scantinato, 0 piano terra, 1 piano 1... (come il portale, ConformitaExcel::nomeLivello). */
     public static String nomeLivello(int n) {
-        if (n < -1) return "interrato " + n;
-        if (n == -1) return "scantinato";
-        if (n == 0) return "piano terra";
-        return "piano " + n;
+        // dal catalogo dei livelli (§20), minuscolo come prima
+        return com.ncfsistemi.econ.utils.LivelliAree.nome(n).toLowerCase(java.util.Locale.ITALIAN);
     }
 
     private static String nomeFoglio(String nome, Set<String> usati) {

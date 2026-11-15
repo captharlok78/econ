@@ -241,8 +241,8 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         });
         struttura.addView(listaStruttura, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
         bloccoStruttura = blocco("STRUTTURA", struttura);
-        // matita sull'area: nome e livello (componente unico); si rilegge struttura e sottotitolo
-        adapterStruttura.setDopoModificaArea(this::ricarica);
+        // matita in modalità modifica (unità, area, locale): si rilegge struttura, titolo e sottotitolo
+        adapterStruttura.setDopoModifica(this::ricarica);
 
         // centro: piantina
         FrameLayout centro = new FrameLayout(this);

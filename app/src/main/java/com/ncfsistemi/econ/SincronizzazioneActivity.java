@@ -138,6 +138,8 @@ public class SincronizzazioneActivity extends AppCompatActivity {
         { "icone",                    "Icone" },
         // elementi di disegno della piantina (schema 49, STUDIO_DESIGN_GRAFICA.md §18)
         { "elementi_disegno",         "Elementi di disegno" },
+        // livelli (piani) delle aree (schema 50, STUDIO_DESIGN_GRAFICA.md §20)
+        { "livelli_area",             "Livelli delle aree" },
     };
 
     /** Tabelle scaricate dal server (senza la voce dei dati ditta, che non e' una tabella): utils.DatiLocali. */

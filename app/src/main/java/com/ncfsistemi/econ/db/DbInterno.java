@@ -67,7 +67,7 @@ import com.ncfsistemi.econ.utils.Sessione;
 public class DbInterno extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "ECON.db";
 	public static final String DATABASE_NAME_ZIP = ".econ.db";
-	public static final int SCHEMA_VERSION = 49;
+	public static final int SCHEMA_VERSION = 50;
 
 	private Context cont = null;
 
@@ -149,6 +149,7 @@ public class DbInterno extends SQLiteOpenHelper {
 		creaTabellaIcone(db);
 		creaTabellaMaterialiElementi(db);
 		creaTabellaElementiDisegno(db);
+		creaTabellaLivelliArea(db);
 
 		db.execSQL("VACUUM");
 
@@ -216,6 +217,7 @@ public class DbInterno extends SQLiteOpenHelper {
 		creaTabellaIcone(db);
 		creaTabellaMaterialiElementi(db);
 		creaTabellaElementiDisegno(db);
+		creaTabellaLivelliArea(db);
 
 		/**
 		 * Inserimento dati di default
@@ -643,6 +645,12 @@ public class DbInterno extends SQLiteOpenHelper {
 				}
 			}
 		}
+		// Schema 50 (STUDIO_DESIGN_GRAFICA.md §20): livelli (piani) delle aree dal server, catalogo sempre completo
+		if (oldVersion<50){
+			if (oldVersion<newVersion){
+				creaTabellaLivelliArea(db);
+			}
+		}
 		// Schema 39 (STUDIO_ASSISTENZE_TEMPO.md §10): assistenza a tempo, articoli in assistenza e assistenze (sola lettura),
 		// controlli segnati nei rapportini, mesi e testo sulle righe. Download completo una tantum per le assistenze gia' nate.
 		if (oldVersion<39){
@@ -891,6 +899,11 @@ public class DbInterno extends SQLiteOpenHelper {
 		db.execSQL(new com.ncfsistemi.econ.db.table.ElementiCantiereMateriali().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
 		db.execSQL("CREATE INDEX IF NOT EXISTS idx_materiali_elemento ON " + com.ncfsistemi.econ.db.table.ElementiCantiereMateriali.NOME_TABELLA
 				+ "(" + com.ncfsistemi.econ.db.table.ElementiCantiereMateriali.ID_ELEMENTO_CANT + ")");
+	}
+
+	/** Livelli (piani) delle aree dal server (schema 50, STUDIO_DESIGN_GRAFICA.md §20). */
+	private static void creaTabellaLivelliArea(SQLiteDatabase db) {
+		db.execSQL(new com.ncfsistemi.econ.db.table.LivelliArea().getSQL_create().replaceFirst("(?i)CREATE TABLE", "CREATE TABLE IF NOT EXISTS"));
 	}
 
 	/** Elementi di disegno della piantina dal server (schema 49, STUDIO_DESIGN_GRAFICA.md §18). */
