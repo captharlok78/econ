@@ -215,6 +215,10 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         // struttura: stesso componente della scheda del cantiere (ordine Per livello / Locali A-Z, livello a sinistra delle aree)
         LinearLayout struttura = verticale();
         struttura.addView(StrutturaCantiere.barraOrdine(this, this::caricaStruttura));
+        // "+ Unità  + Area  + Locale" nel pannello della struttura, come nella scheda del cantiere
+        LinearLayout nuovi = bloccato ? null : StrutturaCantiere.barraNuovi(this, cantiere,
+                () -> StrutturaCantiere.padriDi(this, com.ncfsistemi.econ.CantiereSplitActivity.LOCALE, locale), this::caricaStruttura);
+        if (nuovi != null) struttura.addView(nuovi);
         View sepStruttura = separatore();
         struttura.addView(sepStruttura, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, px(1)));
         listaStruttura = new android.widget.ListView(this);

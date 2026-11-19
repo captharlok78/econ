@@ -205,6 +205,7 @@ public class PopupRigaRapportino {
         // con la tastiera aperta la finestra si restringe e i pulsanti restano raggiungibili
         if (dialog.getWindow() != null) dialog.getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         dialog.show();
+        adattaAlloSchermo(ctx, vista, dialog);
         // il pulsante non chiude la finestra se i dati non sono validi
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -231,6 +232,63 @@ public class PopupRigaRapportino {
                 dbr.close();
             }
         });
+    }
+
+    // ── Finestra larga sui tablet ───────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Sui tablet la finestra si allarga (fino a 960dp) e i campi si mettono in meno righe, cosi' tutto sta senza
+     * scorrere: Costruttore | Linea | Articolo, Tipo | Operatore | Quantita' | Unita', Note | Costo | A costo.
+     * Sul telefono resta in colonna (due campi per riga). Ogni campo riempie la sua parte di riga.
+     */
+    public static void adattaAlloSchermo(Context ctx, View vista, AlertDialog dialog) {
+        android.util.DisplayMetrics dm = ctx.getResources().getDisplayMetrics();
+        float larghezzaDp = dm.widthPixels / dm.density;
+        if (larghezzaDp < 720 || dialog.getWindow() == null) return;
+        int larga = Math.round(Math.min(larghezzaDp * 0.9f, 960) * dm.density);
+        dialog.getWindow().setLayout(larga, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+
+        android.view.ViewGroup rigaListino = (android.view.ViewGroup) vista.findViewById(R.id.spinner_costruttore).getParent().getParent();
+        sposta(ctx, vista.findViewById(R.id.box_articolo), rigaListino, 2f);
+
+        android.view.ViewGroup rigaTipo = (android.view.ViewGroup) vista.findViewById(R.id.sezione_tipo).getParent();
+        android.view.ViewGroup rigaQuantita = (android.view.ViewGroup) vista.findViewById(R.id.box_quantita).getParent();
+        View unita = (View) vista.findViewById(R.id.spinner_unita).getParent();
+        sposta(ctx, vista.findViewById(R.id.box_quantita), rigaTipo, 1f);
+        sposta(ctx, unita, rigaTipo, 1f);
+        rigaQuantita.setVisibility(View.GONE);
+
+        android.view.ViewGroup rigaPrezzo = vista.findViewById(R.id.sezione_prezzo);
+        View note = vista.findViewById(R.id.box_note_riga);
+        if (rigaPrezzo.getVisibility() == View.VISIBLE) {
+            android.view.ViewGroup padre = (android.view.ViewGroup) note.getParent();
+            padre.removeView(note);
+            rigaPrezzo.addView(note, 0, parametri(ctx, note, 2f, false));
+            View costo = vista.findViewById(R.id.label_prezzo);
+            ((android.view.ViewGroup.MarginLayoutParams) costo.getLayoutParams()).setMarginStart(Math.round(10 * dm.density));
+        }
+    }
+
+    /** Porta il campo in fondo alla riga indicata con il peso dato (stessa distanza dall'alto, 10dp dal campo prima). */
+    private static void sposta(Context ctx, View campo, android.view.ViewGroup riga, float peso) {
+        android.view.ViewGroup padre = (android.view.ViewGroup) campo.getParent();
+        if (padre == riga) return;
+        padre.removeView(campo);
+        riga.addView(campo, parametri(ctx, campo, peso, true));
+    }
+
+    private static android.widget.LinearLayout.LayoutParams parametri(Context ctx, View campo, float peso, boolean margineInizio) {
+        android.widget.LinearLayout.LayoutParams lp = new android.widget.LinearLayout.LayoutParams(0,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT, peso);
+        if (campo.getLayoutParams() instanceof android.view.ViewGroup.MarginLayoutParams) {
+            android.view.ViewGroup.MarginLayoutParams vecchi = (android.view.ViewGroup.MarginLayoutParams) campo.getLayoutParams();
+            lp.topMargin = vecchi.topMargin;
+            lp.height = vecchi.height;
+        }
+        int dieci = Math.round(10 * ctx.getResources().getDisplayMetrics().density);
+        if (margineInizio) lp.setMarginStart(dieci);
+        else lp.setMarginEnd(0);
+        return lp;
     }
 
     // ── Manodopera: piu' utenti insieme ─────────────────────────────────────────────────────────────────────────

@@ -226,6 +226,154 @@ public final class StrutturaCantiere {
         }, dopo);
     }
 
+    // ------------------------------------------------------------------ nuovi (pulsanti nel pannello, al posto della barra in basso)
+
+    /** Proposta del padre per i nuovi: {id unità, id area} della riga scelta (0 = nessuna). */
+    public interface Proposta {
+        int[] padri();
+    }
+
+    /**
+     * Riga "+ Unità  + Area  + Locale" sotto la barra dell'ordine (scheda cantiere e disegno): crea unità, aree e locali
+     * in una finestra, senza aprire la maschera. Null se il ruolo non può inserire.
+     */
+    public static LinearLayout barraNuovi(Context ctx, int idCantiere, Proposta proposta, Runnable dopo) {
+        if (!com.ncfsistemi.econ.utils.FunzionalitaApp.puoInserire(ctx, new com.ncfsistemi.econ.db.table.Unita(), null)) return null;
+        float dp = ctx.getResources().getDisplayMetrics().density;
+        LinearLayout barra = new LinearLayout(ctx);
+        barra.setOrientation(LinearLayout.HORIZONTAL);
+        barra.setGravity(Gravity.CENTER_VERTICAL);
+        barra.setPadding(Math.round(8 * dp), 0, Math.round(8 * dp), Math.round(6 * dp));
+        String[][] voci = { { "Unità", FaIcone.UNITA, "Nuova unità del cantiere" }, { "Area", FaIcone.AREA, "Nuova area di un'unità" },
+                { "Locale", FaIcone.PIU, "Nuovo locale di un'area" } };
+        for (int i = 0; i < voci.length; i++) {
+            MaterialButton b = bottone(ctx, voci[i][0], FaIcone.PIU, voci[i][2]);
+            stato(b, false);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+            if (i > 0) lp.leftMargin = Math.round(6 * dp);
+            barra.addView(b, lp);
+            final int quale = i;
+            b.setOnClickListener(v -> {
+                int[] p = proposta == null ? new int[] { 0, 0 } : proposta.padri();
+                if (quale == 0) nuovaUnita(ctx, idCantiere, dopo);
+                else if (quale == 1) nuovaArea(ctx, idCantiere, p[0], dopo);
+                else nuovoLocale(ctx, idCantiere, p[1], dopo);
+            });
+        }
+        return barra;
+    }
+
+    /** Padri da proporre per la riga scelta (tipo e id di CantiereSplitActivity): {id unità, id area}. */
+    public static int[] padriDi(Context ctx, int tipo, int id) {
+        if (tipo == CantiereSplitActivity.UNITA) return new int[] { id, 0 };
+        if (tipo == CantiereSplitActivity.AREA) {
+            ContentValues a = record(ctx, "select id_unita from aree where id_area=" + id);
+            return new int[] { a == null ? 0 : intero(a, "id_unita"), id };
+        }
+        if (tipo == CantiereSplitActivity.LOCALE) {
+            ContentValues l = record(ctx, "select a.id_unita, l.id_area from locali l left join aree a on a.id_area=l.id_area where l.id_locale=" + id);
+            return l == null ? new int[] { 0, 0 } : new int[] { intero(l, "id_unita"), intero(l, "id_area") };
+        }
+        return new int[] { 0, 0 };
+    }
+
+    public static void nuovaUnita(Context ctx, int idCantiere, Runnable dopo) {
+        Campi c = new Campi(ctx);
+        com.google.android.material.textfield.TextInputEditText nome = c.testo("Nome dell'unità", "");
+        dialogo(ctx, "Nuova unità", c, () -> {
+            String n = testo(nome);
+            if (n.isEmpty()) return "Scrivi il nome dell'unità";
+            return inserisci(ctx, new com.ncfsistemi.econ.db.table.Unita(), new com.ncfsistemi.econ.db.table.Cantieri(),
+                    com.ncfsistemi.econ.db.table.Cantieri.ID_CANTIERE, idCantiere, val -> val.put(com.ncfsistemi.econ.db.table.Unita.NOME, n));
+        }, dopo);
+    }
+
+    public static void nuovaArea(Context ctx, int idCantiere, int idUnitaProposta, Runnable dopo) {
+        List<Integer> idUnita = new ArrayList<>();
+        List<String> nomiUnita = new ArrayList<>();
+        for (Object o : elenco(ctx, "select id_unita, nome from unita where id_cantiere=" + idCantiere + " order by nome collate nocase")) {
+            ContentValues u = (ContentValues) o;
+            idUnita.add(intero(u, "id_unita"));
+            nomiUnita.add(vuoto(u.getAsString("nome")));
+        }
+        if (idUnita.isEmpty()) {
+            com.ncfsistemi.econ.dialogo.EconDialogo.attenzione(ctx, "Nuova area", "Crea prima un'unità del cantiere: l'area sta dentro un'unità.").show();
+            return;
+        }
+        Campi c = new Campi(ctx);
+        com.google.android.material.textfield.TextInputEditText nome = c.testo("Nome dell'area", "");
+        String[][] voci = com.ncfsistemi.econ.form.AreaForm.vociLivello();
+        List<String> idLiv = new ArrayList<>(), testiLiv = new ArrayList<>();
+        for (String[] v : voci) {
+            idLiv.add(v[0]);
+            testiLiv.add(v[1]);
+        }
+        android.widget.Spinner livello = c.scelta("Livello (piano)", testiLiv, Math.max(0, idLiv.indexOf("0")));
+        android.widget.Spinner unita = c.scelta("Unità", nomiUnita, Math.max(0, idUnita.indexOf(idUnitaProposta)));
+        dialogo(ctx, "Nuova area", c, () -> {
+            String n = testo(nome);
+            if (n.isEmpty()) return "Scrivi il nome dell'area";
+            int liv = idLiv.isEmpty() ? 0 : Integer.parseInt(idLiv.get(Math.max(0, livello.getSelectedItemPosition())));
+            int u = idUnita.get(Math.max(0, unita.getSelectedItemPosition()));
+            return inserisci(ctx, new com.ncfsistemi.econ.db.table.Aree(), new com.ncfsistemi.econ.db.table.Unita(),
+                    com.ncfsistemi.econ.db.table.Unita.ID_UNITA, u, val -> {
+                        val.put(com.ncfsistemi.econ.db.table.Aree.NOME, n);
+                        val.put(com.ncfsistemi.econ.db.table.Aree.LIVELLO, liv);
+                    });
+        }, dopo);
+    }
+
+    public static void nuovoLocale(Context ctx, int idCantiere, int idAreaProposta, Runnable dopo) {
+        List<Integer> idAree = new ArrayList<>();
+        List<String> nomiAree = new ArrayList<>();
+        for (Object o : elenco(ctx, "select a.id_area, a.nome, a.livello, u.nome as unita from aree a join unita u on u.id_unita=a.id_unita"
+                + " where u.id_cantiere=" + idCantiere + " order by u.nome collate nocase, a.livello, a.nome collate nocase")) {
+            ContentValues a = (ContentValues) o;
+            idAree.add(intero(a, "id_area"));
+            nomiAree.add(vuoto(a.getAsString("unita")) + " › " + vuoto(a.getAsString("nome")) + "  (" + intero(a, "livello") + ")");
+        }
+        if (idAree.isEmpty()) {
+            com.ncfsistemi.econ.dialogo.EconDialogo.attenzione(ctx, "Nuovo locale", "Crea prima un'area: il locale sta dentro un'area.").show();
+            return;
+        }
+        Campi c = new Campi(ctx);
+        com.google.android.material.textfield.TextInputEditText nome = c.testo("Nome del locale", "");
+        android.widget.Spinner area = c.scelta("Area (unità › area, livello)", nomiAree, Math.max(0, idAree.indexOf(idAreaProposta)));
+        dialogo(ctx, "Nuovo locale", c, () -> {
+            String n = testo(nome);
+            if (n.isEmpty()) return "Scrivi il nome del locale";
+            int a = idAree.get(Math.max(0, area.getSelectedItemPosition()));
+            return inserisci(ctx, new com.ncfsistemi.econ.db.table.Locali(), new com.ncfsistemi.econ.db.table.Aree(),
+                    com.ncfsistemi.econ.db.table.Aree.ID_AREA, a, val -> val.put(com.ncfsistemi.econ.db.table.Locali.NOME, n));
+        }, dopo);
+    }
+
+    /**
+     * Nuovo record (id negativo, log di inserimento, va al server con la sync) sotto il padre: linea e placca proposte
+     * dal padre, come nella maschera. Null se tutto bene, altrimenti il motivo (con il messaggio del database).
+     */
+    private static String inserisci(Context ctx, com.ncfsistemi.econ.db.table.AbstractTable tab, com.ncfsistemi.econ.db.table.AbstractTable padre,
+                                    String colonnaPadre, int idPadre, java.util.function.Consumer<ContentValues> valori) {
+        DbInterno db = new DbInterno(ctx);
+        try {
+            ContentValues val = tab.getValoriLogInserimento(db);
+            val.put(colonnaPadre, idPadre);
+            ContentValues where = new ContentValues();
+            where.put(colonnaPadre, idPadre);
+            ContentValues p = db.getRecord(padre, where);
+            val.put("id_linea", p != null && p.getAsInteger("id_linea") != null ? p.getAsInteger("id_linea") : 0);
+            val.put("id_placca", p != null && p.getAsInteger("id_placca") != null ? p.getAsInteger("id_placca") : 0);
+            valori.accept(val);
+            if (tab.inserisciRecord(db, val) == -1) return "Non salvato: il database ha rifiutato il record.";
+            return null;
+        } catch (Exception e) {
+            android.util.Log.e("Econ", "StrutturaCantiere inserisci " + tab.getNomeTabella(), e);
+            return "Non salvato (" + tab.getNomeTabella() + "): " + e.getMessage();
+        } finally {
+            db.close();
+        }
+    }
+
     /** Campi della finestra di modifica, in colonna. */
     private static final class Campi {
         final Context ctx;
@@ -279,7 +427,7 @@ public final class StrutturaCantiere {
         d.setOnShowListener(x -> d.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener(b -> {
             String errore = salva.get();
             if (errore != null) {
-                android.widget.Toast.makeText(ctx, errore, android.widget.Toast.LENGTH_SHORT).show();
+                com.ncfsistemi.econ.dialogo.EconDialogo.attenzione(ctx, titolo, errore).show();
                 return;
             }
             d.dismiss();

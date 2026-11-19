@@ -67,6 +67,27 @@ public class GalleriaModaliActivity extends AppCompatActivity {
 			});
 		}
 
+		for (String cat : new String[] { "rigaman", "rigaart" }) {
+			voci.put(cat, () -> {
+				View v = View.inflate(this, com.ncfsistemi.econ.R.layout.dialog_riga_rapportino, null);
+				boolean art = cat.equals("rigaart");
+				v.findViewById(com.ncfsistemi.econ.R.id.sezione_articolo).setVisibility(art ? View.VISIBLE : View.GONE);
+				v.findViewById(com.ncfsistemi.econ.R.id.sezione_utente).setVisibility(art ? View.GONE : View.VISIBLE);
+				v.findViewById(com.ncfsistemi.econ.R.id.sezione_orari).setVisibility(View.GONE);
+				v.findViewById(com.ncfsistemi.econ.R.id.sezione_riga_ordine).setVisibility(View.GONE);
+				for (int sp : new int[] { com.ncfsistemi.econ.R.id.spinner_tipo, com.ncfsistemi.econ.R.id.spinner_utente, com.ncfsistemi.econ.R.id.spinner_unita,
+						com.ncfsistemi.econ.R.id.spinner_costruttore, com.ncfsistemi.econ.R.id.spinner_linea }) {
+					((android.widget.Spinner) v.findViewById(sp)).setAdapter(new android.widget.ArrayAdapter<>(this,
+							com.ncfsistemi.econ.R.layout.econ_tendina_valore, new String[] { "Voce di prova" }));
+				}
+				((com.google.android.material.textfield.TextInputLayout) v.findViewById(com.ncfsistemi.econ.R.id.label_prezzo)).setHint("Costo fisso");
+				androidx.appcompat.app.AlertDialog d = new EconDialogo.Builder(this).setTitle(art ? "Articolo" : "Manodopera").setView(v)
+						.setPositiveButton("Inserisci", null).setNegativeButton("Annulla", null).create();
+				d.show();
+				com.ncfsistemi.econ.views.PopupRigaRapportino.adattaAlloSchermo(this, v, d);
+			});
+		}
+
 		ScrollView sv = new ScrollView(this);
 		LinearLayout l = new LinearLayout(this);
 		l.setOrientation(LinearLayout.VERTICAL);

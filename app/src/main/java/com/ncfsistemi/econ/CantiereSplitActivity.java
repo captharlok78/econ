@@ -359,7 +359,20 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 		android.widget.LinearLayout barra = com.ncfsistemi.econ.disegno.StrutturaCantiere.barraOrdine(this, this::riordinaMantenendoSelezione);
 		// a destra c'e' il triangolo che chiude il pannello: la matita resta fuori
 		barra.setPadding(barra.getPaddingLeft(), barra.getPaddingTop(), Math.round(26 * getResources().getDisplayMetrics().density), barra.getPaddingBottom());
-		posto.addView(barra);
+		// sotto, "+ Unità  + Area  + Locale": al posto della barra grigia in basso (tolta il 19/11)
+		android.widget.LinearLayout colonna = new android.widget.LinearLayout(this);
+		colonna.setOrientation(android.widget.LinearLayout.VERTICAL);
+		colonna.addView(barra);
+		android.widget.LinearLayout nuovi = com.ncfsistemi.econ.disegno.StrutturaCantiere.barraNuovi(this, cantiere, () -> {
+			if (selezionato < 0 || selezionato >= dati.size()) return new int[] { 0, 0 };
+			ContentValues v = (ContentValues) dati.get(selezionato);
+			return com.ncfsistemi.econ.disegno.StrutturaCantiere.padriDi(this, v.getAsInteger("TIPO"), v.getAsInteger("ID"));
+		}, this::riordinaMantenendoSelezione);
+		if (nuovi != null) {
+			nuovi.setPadding(nuovi.getPaddingLeft(), 0, Math.round(26 * getResources().getDisplayMetrics().density), nuovi.getPaddingBottom());
+			colonna.addView(nuovi);
+		}
+		posto.addView(colonna);
 	}
 
 	/** Ricostruisce il menu col nuovo ordine e tiene selezionata la stessa riga (stesso tipo e id). */
@@ -826,13 +839,10 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 	 * ELETTRICO.CREA (GESTIONE_ELETTRICA.md).
 	 */
 	private void applicaGestioneElettrica() {
-		if (!elettrico) {
-			findViewById(R.id.nuovo_figlio).setVisibility(View.GONE);
-			return;
-		}
-		if (!com.ncfsistemi.econ.utils.FunzionalitaApp.puoInserire(this, new Unita(), null)) {
-			findViewById(R.id.button_nuovo_elem).setVisibility(View.GONE);
-		}
+		// "+ Nuova unita'/area/locale" ora nel pannello della struttura (StrutturaCantiere.barraNuovi): la barra in basso
+		// resta solo per le categorie della piantina classica
+		findViewById(R.id.button_nuovo_elem).setVisibility(View.GONE);
+		findViewById(R.id.nuovo_figlio).setVisibility(elettrico && menuinferiore.getVisibility() == View.VISIBLE ? View.VISIBLE : View.GONE);
 	}
 
 	private boolean haModulo(String modulo) {
@@ -1062,6 +1072,7 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 			} else {
 				menuinferiore.setVisibility(View.VISIBLE);
 			}
+			applicaGestioneElettrica();
 		}
 	}
 
@@ -1108,6 +1119,7 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 				impostaFragment(R.id.destra, fragmentPagerLocale);
 				findViewById(R.id.button_nuovo_elem).setVisibility(View.GONE);
 				menuinferiore.setVisibility(View.VISIBLE);
+				findViewById(R.id.nuovo_figlio).setVisibility(View.VISIBLE);
 				trovato = true;
 				break;
 			}

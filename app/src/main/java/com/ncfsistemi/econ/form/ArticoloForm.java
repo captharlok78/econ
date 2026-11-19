@@ -133,6 +133,11 @@ public class ArticoloForm extends DefinizioneForm {
 
 	@Override
 	public void controlla(Form f, boolean nuovo) {
+		// Generico e linea Generica letti qui, fuori dalla transazione del salvataggio: in primaDiSalvare una seconda
+		// connessione al database resterebbe bloccata ("database is locked", 19/11)
+		int g = generico();
+		String c = f.valore(Listini.ID_COSTRUTTORE);
+		genericaDi(c == null || c.isEmpty() || "0".equals(c) ? (g != 0 ? "" + g : null) : c);
 		if (!nuovo) return;
 		String parte = parteCodice(f.valore(Listini.CODICE_ARTICOLO));
 		if (parte.isEmpty()) return; // automatico
@@ -191,22 +196,31 @@ public class ArticoloForm extends DefinizioneForm {
 				codice -> f.imposta(colonna, codice)));
 	}
 
+	private Integer genericoLetto;
+	private final java.util.Map<String, Integer> genericheLette = new java.util.HashMap<>();
+
 	/** Id del costruttore Generico del catalogo generale, 0 se non c'e'. */
 	private int generico() {
+		if (genericoLetto != null) return genericoLetto;
 		DbInterno db = new DbInterno(ospite);
 		ContentValues r = db.getRecord("select " + Costruttori.ID_COSTRUTTORE + " from " + Costruttori.NOME_TABELLA + " where "
 				+ Costruttori.SIGLA_METEL + "='" + Costruttori.SIGLA_GENERICO + "' and coalesce(" + Costruttori.ID_DITTA + ",0)=0 limit 1");
 		db.close();
-		return r != null && r.getAsInteger(Costruttori.ID_COSTRUTTORE) != null ? r.getAsInteger(Costruttori.ID_COSTRUTTORE) : 0;
+		genericoLetto = r != null && r.getAsInteger(Costruttori.ID_COSTRUTTORE) != null ? r.getAsInteger(Costruttori.ID_COSTRUTTORE) : 0;
+		return genericoLetto;
 	}
 
 	/** Id della linea "Generica" del costruttore, 0 se non c'e'. */
 	private int genericaDi(String costruttore) {
+		if (costruttore == null) return 0;
+		if (genericheLette.containsKey(costruttore)) return genericheLette.get(costruttore);
 		DbInterno db = new DbInterno(ospite);
 		ContentValues r = db.getRecord("select " + Linee.ID_LINEA + " from " + Linee.NOME_TABELLA + " where " + Linee.ID_COSTRUTTORE + "="
 				+ Integer.parseInt(costruttore) + " and lower(" + Linee.NOME_LINEA + ")='" + Linee.NOME_GENERICA.toLowerCase() + "' limit 1");
 		db.close();
-		return r != null && r.getAsInteger(Linee.ID_LINEA) != null ? r.getAsInteger(Linee.ID_LINEA) : 0;
+		int id = r != null && r.getAsInteger(Linee.ID_LINEA) != null ? r.getAsInteger(Linee.ID_LINEA) : 0;
+		genericheLette.put(costruttore, id);
+		return id;
 	}
 
 	/** Costruttori da proporre: collegati alla ditta (schema 41) e quelli che hanno gia' articoli sul dispositivo. */

@@ -67,13 +67,18 @@ public abstract class LivelloCantiereForm extends DefinizioneForm {
 		return FunzionalitaApp.haModulo(contesto, FunzionalitaApp.ELETTRICO);
 	}
 
+	/** Padre letto all'apertura: al salvataggio il database e' in transazione e una seconda connessione resterebbe bloccata. */
+	private ContentValues padreLetto;
+
 	/** Linea e placca del padre (per proporle nel nuovo, o copiarle senza Elettro). */
 	private ContentValues padre() {
+		if (padreLetto != null) return padreLetto;
 		DbInterno db = new DbInterno(ospite);
 		ContentValues where = new ContentValues();
 		where.put(colonnaPadre(), ospite.getIntent().getIntExtra(colonnaPadre(), 0));
 		ContentValues padre = db.getRecord(tabellaPadre(), where);
 		db.close();
+		padreLetto = padre;
 		return padre;
 	}
 
@@ -83,8 +88,10 @@ public abstract class LivelloCantiereForm extends DefinizioneForm {
 
 	@Override
 	public void dopoCaricamento(Form f, ContentValues record, boolean nuovo) {
-		if (!nuovo || !elettro()) return;
+		if (!nuovo) return;
+		// letto qui, fuori dalla transazione del salvataggio ("database is locked" 19/11)
 		ContentValues padre = padre();
+		if (!elettro()) return;
 		if (padre != null) {
 			f.imposta(ID_LINEA, padre.getAsString(ID_LINEA));
 			f.imposta(ID_PLACCA, padre.getAsString(ID_PLACCA));
