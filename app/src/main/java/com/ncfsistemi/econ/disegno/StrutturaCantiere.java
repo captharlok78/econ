@@ -261,7 +261,7 @@ public final class StrutturaCantiere {
             et.setPadding(0, Math.round(14 * dp), 0, Math.round(4 * dp));
             v.addView(et);
             android.widget.Spinner sp = new android.widget.Spinner(ctx);
-            sp.setAdapter(new android.widget.ArrayAdapter<>(ctx, android.R.layout.simple_spinner_dropdown_item, voci));
+            sp.setAdapter(new android.widget.ArrayAdapter<>(ctx, R.layout.econ_tendina_valore, voci));
             if (selezione >= 0) sp.setSelection(selezione);
             v.addView(sp, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Math.round(48 * dp)));
             return sp;

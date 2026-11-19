@@ -1080,8 +1080,8 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
             if (proposta != null && String.valueOf((int) proposta[1]).equals(u[0])) sel = i;
             else if (proposta == null && "PZ".equalsIgnoreCase(u[1])) sel = i;
         }
-        android.widget.ArrayAdapter<String> ad = new android.widget.ArrayAdapter<>(this, android.R.layout.simple_spinner_item, nomi);
-        ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        android.widget.ArrayAdapter<String> ad = new android.widget.ArrayAdapter<>(this, R.layout.econ_tendina_valore, nomi);
+        ad.setDropDownViewResource(R.layout.econ_tendina_voce);
         sp.setAdapter(ad);
         sp.setSelection(sel);
         LinearLayout.LayoutParams lpU = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.3f);

@@ -191,7 +191,7 @@ public class PopupRigaRapportino {
         preparaRigaOrdine(db);
 
         vista.findViewById(R.id.sezione_prezzo).setVisibility(contesto.vedePrezzi ? View.VISIBLE : View.GONE);
-        ((TextView) vista.findViewById(R.id.label_prezzo)).setText(isMateriale() ? R.string.costo_acquisto
+        ((com.google.android.material.textfield.TextInputLayout) vista.findViewById(R.id.label_prezzo)).setHint(isMateriale() ? R.string.costo_acquisto
                 : isViaggio() ? R.string.costo_trasferta : R.string.costo_fisso);
         db.close();
 
@@ -242,7 +242,7 @@ public class PopupRigaRapportino {
         spinnerUtente.setVisibility(View.GONE);
         final TextView campo = vista.findViewById(R.id.text_utenti);
         campo.setVisibility(View.VISIBLE);
-        ((TextView) ((android.view.ViewGroup) vista.findViewById(R.id.sezione_utente)).getChildAt(0)).setText(R.string.utenti);
+        ((TextView) vista.findViewById(R.id.etichetta_utente)).setText(R.string.utenti);
         mostraUtentiScelti(campo);
         campo.setOnClickListener(v -> {
             final String[] nomi = new String[vociUtenti.size()];
@@ -288,13 +288,11 @@ public class PopupRigaRapportino {
                     java.util.Calendar c = java.util.Calendar.getInstance();
                     hm = new int[] { c.get(java.util.Calendar.HOUR_OF_DAY), c.get(java.util.Calendar.MINUTE) };
                 }
-                new TimePickerDialog(ctx, new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int ore, int minuti) {
-                        campo.setText(String.format(Locale.ITALY, "%02d:%02d", ore, minuti));
-                        calcolaDurata();
-                    }
-                }, hm[0], hm[1], true).show();
+                com.ncfsistemi.econ.dialogo.EconDialogo.ora(ctx, campo == editOraInizio ? "Ora di partenza" : "Ora di arrivo", hm[0], hm[1],
+                        (ore, minuti) -> {
+                            campo.setText(String.format(Locale.ITALY, "%02d:%02d", ore, minuti));
+                            calcolaDurata();
+                        });
             }
         };
         View.OnLongClickListener svuota = new View.OnLongClickListener() {
@@ -368,12 +366,15 @@ public class PopupRigaRapportino {
         // barcode: legge il codice, trova l'articolo e chiede conferma prima di metterlo nella riga
         View pulsanteBarcode = vista.findViewById(R.id.buttonLeggiBarcode);
         com.ncfsistemi.econ.utils.LettoreBarcode.collega((android.app.Activity) ctx, pulsanteBarcode, this::articoloDaBarcode);
-        if (pulsanteBarcode instanceof android.widget.Button) ((android.widget.Button) pulsanteBarcode).setText("Barcode");
+        // solo icona (accanto alle linguette), il nome nel suggerimento
+        androidx.appcompat.widget.TooltipCompat.setTooltipText(pulsanteBarcode, "Leggi il barcode");
         vista.findViewById(R.id.button_tab_listino).setOnClickListener(v -> mostraTab(false));
         vista.findViewById(R.id.button_tab_nuovo_articolo).setOnClickListener(v -> mostraTab(true));
         // la riga di un articolo gia' scelto si modifica dal listino: la tab del nuovo articolo e' per le righe nuove
         vista.findViewById(R.id.button_tab_nuovo_articolo).setVisibility(nuova ? View.VISIBLE : View.GONE);
         if (nuova) preparaNuovoArticolo(db);
+        linguetta(vista.findViewById(R.id.button_tab_listino), true);
+        linguetta(vista.findViewById(R.id.button_tab_nuovo_articolo), false);
 
         List<CampoRicerca.Voce> costruttori = new ArrayList<CampoRicerca.Voce>();
         costruttori.add(new CampoRicerca.Voce(0, ctx.getString(R.string.tutti), new ContentValues()));
@@ -633,14 +634,19 @@ public class PopupRigaRapportino {
         tabNuovoArticolo = nuovo;
         vista.findViewById(R.id.pannello_listino).setVisibility(nuovo ? View.GONE : View.VISIBLE);
         vista.findViewById(R.id.pannello_nuovo_articolo).setVisibility(nuovo ? View.VISIBLE : View.GONE);
-        android.widget.Button listino = vista.findViewById(R.id.button_tab_listino);
-        android.widget.Button nuovoArt = vista.findViewById(R.id.button_tab_nuovo_articolo);
-        int blu = android.graphics.Color.parseColor("#1565C0"), grigio = android.graphics.Color.parseColor("#E0E0E0");
-        listino.setBackgroundTintList(android.content.res.ColorStateList.valueOf(nuovo ? grigio : blu));
-        listino.setTextColor(nuovo ? blu : android.graphics.Color.WHITE);
-        nuovoArt.setBackgroundTintList(android.content.res.ColorStateList.valueOf(nuovo ? blu : grigio));
-        nuovoArt.setTextColor(nuovo ? android.graphics.Color.WHITE : blu);
+        // linguette a segmenti: quella scelta azzurra col bordo blu, l'altra bianca col bordo grigio (STUDIO_MODALI_APP.md)
+        linguetta(vista.findViewById(R.id.button_tab_listino), !nuovo);
+        linguetta(vista.findViewById(R.id.button_tab_nuovo_articolo), nuovo);
         if (nuovo) vista.findViewById(R.id.edit_nuovo_descrizione).requestFocus();
+    }
+
+    private void linguetta(com.google.android.material.button.MaterialButton b, boolean scelta) {
+        int blu = androidx.core.content.ContextCompat.getColor(ctx, R.color.econ_primario);
+        b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(scelta ? 0xFFD6E4F7 : android.graphics.Color.WHITE));
+        b.setTextColor(scelta ? 0xFF0D3C78 : androidx.core.content.ContextCompat.getColor(ctx, R.color.econ_testo_secondario));
+        b.setStrokeColor(android.content.res.ColorStateList.valueOf(scelta ? blu
+                : androidx.core.content.ContextCompat.getColor(ctx, R.color.econ_bordo_campo)));
+        b.setStrokeWidth(Math.round((scelta ? 2 : 1) * ctx.getResources().getDisplayMetrics().density));
     }
 
     // ── Nuovo articolo della ditta (GESTIONE_RAPPORTINI.md §14) ────────────────────────────────────────────────
@@ -658,7 +664,7 @@ public class PopupRigaRapportino {
         spinnerNuovoSettore = vista.findViewById(R.id.spinner_nuovo_settore);
         spinnerNuovoCostruttore = vista.findViewById(R.id.spinner_nuovo_costruttore);
         spinnerNuovaLinea = vista.findViewById(R.id.spinner_nuovo_linea);
-        ((TextView) vista.findViewById(R.id.text_nuovo_prefisso)).setText(Listini.prefissoDitta());
+        ((com.google.android.material.textfield.TextInputLayout) vista.findViewById(R.id.box_nuovo_codice)).setPrefixText(Listini.prefissoDitta());
         vista.findViewById(R.id.sezione_nuovo_prezzo_vendita).setVisibility(contesto.vedePrezzi ? View.VISIBLE : View.INVISIBLE);
 
         // settore proposto: quello con piu' articoli nel listino della ditta (i suoi settori), altrimenti il primo
@@ -1035,7 +1041,7 @@ public class PopupRigaRapportino {
 
     /** Riempie lo spinner e seleziona l'id indicato, altrimenti la voce con quel codice di unita' di misura, altrimenti la prima. */
     private void imposta(Spinner spinner, final List<CampoRicerca.Voce> voci, int id, String codiceUnita) {
-        ArrayAdapter<CampoRicerca.Voce> adapter = new ArrayAdapter<CampoRicerca.Voce>(ctx, android.R.layout.simple_spinner_item, voci) {
+        ArrayAdapter<CampoRicerca.Voce> adapter = new ArrayAdapter<CampoRicerca.Voce>(ctx, R.layout.econ_tendina_valore, voci) {
             @Override
             public View getView(int position, View convertView, android.view.ViewGroup parent) {
                 return etichetta(super.getView(position, convertView, parent), position);
@@ -1052,7 +1058,7 @@ public class PopupRigaRapportino {
                 return v;
             }
         };
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(R.layout.econ_tendina_voce);
         spinner.setAdapter(adapter);
         int pos = trova(voci, id);
         if (pos < 0 && codiceUnita != null) {

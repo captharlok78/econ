@@ -1169,8 +1169,8 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
             scelte.setOrientation(android.widget.LinearLayout.HORIZONTAL);
             scelte.setGravity(Gravity.CENTER_VERTICAL);
             android.widget.Spinner esito = new android.widget.Spinner(this);
-            android.widget.ArrayAdapter<String> ad = new android.widget.ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, esiti);
-            ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            android.widget.ArrayAdapter<String> ad = new android.widget.ArrayAdapter<String>(this, R.layout.econ_tendina_valore, esiti);
+            ad.setDropDownViewResource(R.layout.econ_tendina_voce);
             esito.setAdapter(ad);
             int posizione = 0;
             for (int i = 0; i < com.ncfsistemi.econ.db.table.AssistenzeControlli.ESITI.length; i++) {

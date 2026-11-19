@@ -217,7 +217,7 @@ public class CampoRicerca extends AutoCompleteTextView {
         };
 
         Adattatore(Context context) {
-            super(context, android.R.layout.simple_dropdown_item_1line, new ArrayList<Voce>());
+            super(context, com.ncfsistemi.econ.R.layout.econ_tendina_voce, new ArrayList<Voce>());
         }
 
         @Override

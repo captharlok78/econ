@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Voce dell'elenco aperto di una tendina o dei suggerimenti di una ricerca: alta da dito, fino a 3 righe -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/text1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:ellipsize="end"
+    android:gravity="center_vertical"
+    android:maxLines="3"
+    android:minHeight="48dp"
+    android:paddingStart="16dp"
+    android:paddingTop="10dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="10dp"
+    android:textColor="@color/econ_testo"
+    android:textSize="15sp" />

@@ -483,7 +483,7 @@ public class MenuActivity extends EconActivity {
         titolo.setGravity(android.view.Gravity.CENTER);
         titolo.setTextSize(17);
         titolo.setTypeface(null, android.graphics.Typeface.BOLD);
-        titolo.setTextColor(0xFF0D47A1);
+        titolo.setTextColor(androidx.core.content.ContextCompat.getColor(this, R.color.econ_testo));
         testata.addView(prec);
         testata.addView(titolo, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
         testata.addView(succ);

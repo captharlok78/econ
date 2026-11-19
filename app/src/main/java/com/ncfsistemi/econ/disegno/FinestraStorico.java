@@ -162,22 +162,13 @@ public final class FinestraStorico {
     }
 
     private void scegliDate() {
-        Calendar c = Calendar.getInstance();
-        new DatePickerDialog(act, (v1, y1, m1, g1) -> {
-            String primo = String.format(Locale.ITALIAN, "%04d-%02d-%02d", y1, m1 + 1, g1);
-            new DatePickerDialog(act, (v2, y2, m2, g2) -> {
-                dal = primo;
-                al = String.format(Locale.ITALIAN, "%04d-%02d-%02d", y2, m2 + 1, g2);
-                if (al.compareTo(dal) < 0) {
-                    String t = dal;
-                    dal = al;
-                    al = t;
-                }
-                periodo = null;
-                pulsanteDate.setText(data(dal) + " – " + data(al));
-                carica();
-            }, y1, m1, g1).show();
-        }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)).show();
+        com.ncfsistemi.econ.dialogo.EconDialogo.periodo(act, "Periodo dello storico", (d1, d2) -> {
+            dal = String.format(Locale.ITALIAN, "%04d-%02d-%02d", d1[0], d1[1] + 1, d1[2]);
+            al = String.format(Locale.ITALIAN, "%04d-%02d-%02d", d2[0], d2[1] + 1, d2[2]);
+            periodo = null;
+            pulsanteDate.setText(data(dal) + " – " + data(al));
+            carica();
+        });
     }
 
     private void carica() {

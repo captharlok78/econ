@@ -26,7 +26,9 @@ public class EconCalendario extends RelativeLayout implements EconSpecialView {
 		@Override
 		public void onClick(View v) {
 			
-			spinner.datapicker.show();
+			// calendario Material 3 come i campi data del template (STUDIO_MODALI_APP.md)
+			com.ncfsistemi.econ.dialogo.EconDialogo.data(spinner.getContext(), null, spinner.anno, spinner.mese, spinner.giorno,
+					(a, m, g) -> spinner.mDateSetListener.onDateSet(null, a, m, g));
 		}
 
 	}
@@ -129,7 +131,6 @@ public class EconCalendario extends RelativeLayout implements EconSpecialView {
 		mese = c.get(Calendar.MONTH);
 	    giorno  = c.get(Calendar.DAY_OF_MONTH);
 	    aggiornaCampoData();
-	    datapicker.updateDate(anno, mese, giorno);
 	}
 
 	public int getAnno() {

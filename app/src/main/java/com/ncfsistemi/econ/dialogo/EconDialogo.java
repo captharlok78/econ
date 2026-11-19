@@ -210,6 +210,86 @@ public final class EconDialogo {
 		return campo.getEditText() == null ? "" : campo.getEditText().getText().toString();
 	}
 
+	// ── data e ora (selettori Material 3, al posto di DatePickerDialog/TimePickerDialog) ───────────────────────────────
+
+	public interface DataScelta {
+		/** mese da 0 (come Calendar). */
+		void scelta(int anno, int mese0, int giorno);
+	}
+
+	public interface PeriodoScelto {
+		void scelto(int[] dal, int[] al);
+	}
+
+	public interface OraScelta {
+		void scelta(int ore, int minuti);
+	}
+
+	private static androidx.fragment.app.FragmentActivity activity(Context ctx) {
+		while (ctx instanceof android.content.ContextWrapper) {
+			if (ctx instanceof androidx.fragment.app.FragmentActivity) return (androidx.fragment.app.FragmentActivity) ctx;
+			ctx = ((android.content.ContextWrapper) ctx).getBaseContext();
+		}
+		return null;
+	}
+
+	private static long utc(int anno, int mese0, int giorno) {
+		java.util.Calendar c = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+		c.clear();
+		c.set(anno, mese0, giorno);
+		return c.getTimeInMillis();
+	}
+
+	private static int[] daUtc(long millis) {
+		java.util.Calendar c = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+		c.setTimeInMillis(millis);
+		return new int[] { c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH), c.get(java.util.Calendar.DAY_OF_MONTH) };
+	}
+
+	/** Calendario per scegliere un giorno (come i campi data del template form). */
+	public static void data(Context ctx, CharSequence titolo, int anno, int mese0, int giorno, DataScelta fatto) {
+		androidx.fragment.app.FragmentActivity a = activity(ctx);
+		if (a == null) {
+			new android.app.DatePickerDialog(ctx, (v, y, m, g) -> fatto.scelta(y, m, g), anno, mese0, giorno).show();
+			return;
+		}
+		com.google.android.material.datepicker.MaterialDatePicker<Long> p = com.google.android.material.datepicker.MaterialDatePicker.Builder
+				.datePicker().setTitleText(titolo == null ? "Scegli il giorno" : titolo).setSelection(utc(anno, mese0, giorno)).build();
+		p.addOnPositiveButtonClickListener(millis -> {
+			int[] d = daUtc(millis);
+			fatto.scelta(d[0], d[1], d[2]);
+		});
+		p.show(a.getSupportFragmentManager(), "econ_data");
+	}
+
+	/** Calendario per scegliere un periodo (dal … al). */
+	public static void periodo(Context ctx, CharSequence titolo, PeriodoScelto fatto) {
+		androidx.fragment.app.FragmentActivity a = activity(ctx);
+		if (a == null) return;
+		com.google.android.material.datepicker.MaterialDatePicker<androidx.core.util.Pair<Long, Long>> p =
+				com.google.android.material.datepicker.MaterialDatePicker.Builder.dateRangePicker()
+						.setTitleText(titolo == null ? "Scegli il periodo" : titolo).build();
+		p.addOnPositiveButtonClickListener(sel -> {
+			if (sel == null || sel.first == null) return;
+			fatto.scelto(daUtc(sel.first), daUtc(sel.second == null ? sel.first : sel.second));
+		});
+		p.show(a.getSupportFragmentManager(), "econ_periodo");
+	}
+
+	/** Orologio a 24 ore per scegliere un orario. */
+	public static void ora(Context ctx, CharSequence titolo, int ore, int minuti, OraScelta fatto) {
+		androidx.fragment.app.FragmentActivity a = activity(ctx);
+		if (a == null) {
+			new android.app.TimePickerDialog(ctx, (v, h, m) -> fatto.scelta(h, m), ore, minuti, true).show();
+			return;
+		}
+		com.google.android.material.timepicker.MaterialTimePicker p = new com.google.android.material.timepicker.MaterialTimePicker.Builder()
+				.setTimeFormat(com.google.android.material.timepicker.TimeFormat.CLOCK_24H).setHour(ore).setMinute(minuti)
+				.setTitleText(titolo == null ? "Scegli l'ora" : titolo).build();
+		p.addOnPositiveButtonClickListener(v -> fatto.scelta(p.getHour(), p.getMinute()));
+		p.show(a.getSupportFragmentManager(), "econ_ora");
+	}
+
 	// ── finestre grandi ──────────────────────────────────────────────────────────────────────────────────────────────
 
 	/**

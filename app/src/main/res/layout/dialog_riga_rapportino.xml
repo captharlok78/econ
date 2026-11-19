@@ -2,8 +2,10 @@
 <!--
     Finestra di una riga del rapportino (GESTIONE_RAPPORTINI.md §12.2): la stessa per Manodopera, Viaggio e Articolo;
     PopupRigaRapportino mostra solo le parti che servono alla categoria del tipo.
+    Stile dei modali (STUDIO_MODALI_APP.md): campi bordati con l'etichetta nel bordo, tendine con lo stesso aspetto.
 -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -11,9 +13,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/margine">
+        android:paddingStart="24dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="8dp">
 
-        <!-- Articolo: Barcode (legge e cerca l'articolo) | tab Listino | tab Nuovo articolo (§14) -->
         <LinearLayout
             android:id="@+id/sezione_articolo"
             android:layout_width="match_parent"
@@ -22,39 +26,38 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <!-- pulsante barcode comune (pulsante_leggi_barcode), largo come gli altri due -->
+                <!-- pulsante barcode comune (pulsante_leggi_barcode): legge e cerca l'articolo -->
                 <include
                     layout="@layout/pulsante_leggi_barcode"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="1dp" />
+                    android:layout_width="56dp"
+                    android:layout_height="48dp" />
 
                 <com.google.android.material.button.MaterialButton
-                    style="@style/Econ.Pulsante"
                     android:id="@+id/button_tab_listino"
+                    style="@style/Econ.Pulsante.Secondario"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
-                    android:layout_marginEnd="1dp"
-                    android:backgroundTint="#1565C0"
+                    android:layout_marginStart="8dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
                     android:text="@string/listino" />
-
                 <com.google.android.material.button.MaterialButton
-                    style="@style/Econ.Pulsante"
                     android:id="@+id/button_tab_nuovo_articolo"
+                    style="@style/Econ.Pulsante.Secondario"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
-                    android:layout_marginStart="1dp"
-                    android:backgroundTint="#E0E0E0"
+                    android:layout_marginStart="8dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
                     android:text="@string/nuovo_articolo" />
             </LinearLayout>
-
-            <!-- tab Listino: articolo del catalogo (filtro costruttore e linea, ricerca da 3 lettere) -->
             <LinearLayout
                 android:id="@+id/pannello_listino"
                 android:layout_width="match_parent"
@@ -64,66 +67,85 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
+                    android:baselineAligned="false"
+                    android:gravity="bottom"
                     android:orientation="horizontal">
 
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            style="@style/TestoIntestazione"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/costruttore" />
-
-                        <Spinner
-                            android:id="@+id/spinner_costruttore"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="@dimen/margine"
-                        android:orientation="vertical">
-
-                        <TextView
-                            style="@style/TestoIntestazione"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/linea" />
-
-                        <Spinner
-                            android:id="@+id/spinner_linea"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
+                <!-- tendina con l'etichetta nel bordo, come i campi del template -->
+                <FrameLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
-                    android:text="@string/articolo" />
+                    android:layout_weight="1"
+                    android:layout_marginTop="5dp">
 
-                <com.ncfsistemi.econ.views.CampoRicerca
-                    android:id="@+id/campo_articolo"
+                    <Spinner
+                        android:id="@+id/spinner_costruttore"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="7dp"
+                        android:background="@drawable/econ_scelta_bordata"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="36dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|start"
+                        android:layout_marginStart="10dp"
+                        android:background="#FFFFFF"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp"
+                        android:text="@string/costruttore"
+                        android:textColor="@color/econ_testo_secondario"
+                        android:textSize="12sp" />
+                </FrameLayout>
+                <!-- tendina con l'etichetta nel bordo, come i campi del template -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="5dp">
+
+                    <Spinner
+                        android:id="@+id/spinner_linea"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="7dp"
+                        android:background="@drawable/econ_scelta_bordata"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="36dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|start"
+                        android:layout_marginStart="10dp"
+                        android:background="#FFFFFF"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp"
+                        android:text="@string/linea"
+                        android:textColor="@color/econ_testo_secondario"
+                        android:textSize="12sp" />
+                </FrameLayout>
+                </LinearLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/box_articolo"
+                    style="@style/Econ.Campo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/cerca_3_lettere" />
-            </LinearLayout>
+                    android:layout_marginTop="12dp"
+                    android:hint="@string/articolo"
+                    app:placeholderText="@string/cerca_3_lettere">
 
-            <!--
-              tab Nuovo articolo (GESTIONE_RAPPORTINI.md §14): visibile solo alla ditta che lo crea. Settore, costruttore
-              e linea con un valore proposto e il "+" per aggiungerne uno; codice (se vuoto lo genera l'app), barcode, prezzo di
-              vendita, descrizione, foto. Utente (chi compila), quantita', unita' di misura, costo e note sono quelli della riga.
-            -->
+                    <com.ncfsistemi.econ.views.CampoRicerca
+                        android:id="@+id/campo_articolo"
+                        style="@style/Econ.CampoTesto"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textNoSuggestions" android:completionThreshold="3" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
             <LinearLayout
                 android:id="@+id/pannello_nuovo_articolo"
                 android:layout_width="match_parent"
@@ -134,216 +156,220 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
+                    android:baselineAligned="false"
+                    android:gravity="bottom"
                     android:orientation="horizontal">
 
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            style="@style/TestoIntestazione"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Settore" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <Spinner
-                                android:id="@+id/spinner_nuovo_settore"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1" />
-
-                            <!-- "+" a icona (FaIcone, PopupRigaRapportino): aggiunge una voce della ditta -->
-                            <TextView
-                                android:id="@+id/button_piu_settore"
-                                android:layout_width="44dp"
-                                android:layout_height="44dp" />
-                        </LinearLayout>
-                    </LinearLayout>
+                <!-- tendina con l'etichetta nel bordo, come i campi del template -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginTop="5dp">
 
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="@dimen/margine"
-                        android:orientation="vertical">
+                        android:layout_marginTop="7dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <Spinner
+                            android:id="@+id/spinner_nuovo_settore"
+                            android:layout_width="0dp"
+                            android:layout_height="56dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/econ_scelta_bordata"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="36dp" />
 
                         <TextView
-                            style="@style/TestoIntestazione"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Costruttore" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <Spinner
-                                android:id="@+id/spinner_nuovo_costruttore"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1" />
-
-                            <!-- "+" a icona (FaIcone, PopupRigaRapportino): aggiunge una voce della ditta -->
-                            <TextView
-                                android:id="@+id/button_piu_costruttore"
-                                android:layout_width="44dp"
-                                android:layout_height="44dp" />
-                        </LinearLayout>
+                            android:id="@+id/button_piu_settore"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:layout_marginStart="4dp" />
                     </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|start"
+                        android:layout_marginStart="10dp"
+                        android:background="#FFFFFF"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp"
+                        android:text="Settore"
+                        android:textColor="@color/econ_testo_secondario"
+                        android:textSize="12sp" />
+                </FrameLayout>
+                <!-- tendina con l'etichetta nel bordo, come i campi del template -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="5dp">
 
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="@dimen/margine"
-                        android:orientation="vertical">
+                        android:layout_marginTop="7dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <Spinner
+                            android:id="@+id/spinner_nuovo_costruttore"
+                            android:layout_width="0dp"
+                            android:layout_height="56dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/econ_scelta_bordata"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="36dp" />
 
                         <TextView
-                            style="@style/TestoIntestazione"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Linea" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <Spinner
-                                android:id="@+id/spinner_nuovo_linea"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1" />
-
-                            <!-- "+" a icona (FaIcone, PopupRigaRapportino): aggiunge una voce della ditta -->
-                            <TextView
-                                android:id="@+id/button_piu_linea"
-                                android:layout_width="44dp"
-                                android:layout_height="44dp" />
-                        </LinearLayout>
+                            android:id="@+id/button_piu_costruttore"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:layout_marginStart="4dp" />
                     </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|start"
+                        android:layout_marginStart="10dp"
+                        android:background="#FFFFFF"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp"
+                        android:text="Costruttore"
+                        android:textColor="@color/econ_testo_secondario"
+                        android:textSize="12sp" />
+                </FrameLayout>
+                <!-- tendina con l'etichetta nel bordo, come i campi del template -->
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="5dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="7dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <Spinner
+                            android:id="@+id/spinner_nuovo_linea"
+                            android:layout_width="0dp"
+                            android:layout_height="56dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/econ_scelta_bordata"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="36dp" />
+
+                        <TextView
+                            android:id="@+id/button_piu_linea"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:layout_marginStart="4dp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|start"
+                        android:layout_marginStart="10dp"
+                        android:background="#FFFFFF"
+                        android:paddingStart="4dp"
+                        android:paddingEnd="4dp"
+                        android:text="Linea"
+                        android:textColor="@color/econ_testo_secondario"
+                        android:textSize="12sp" />
+                </FrameLayout>
                 </LinearLayout>
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
+                    android:baselineAligned="false"
+                    android:gravity="bottom"
                     android:orientation="horizontal">
 
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            style="@style/TestoIntestazione"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Codice articolo" />
-
-                        <!-- prefisso della ditta fisso (STUDIO_CODICE_ARTICOLO_DITTA.md §9), si scrive il resto -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:id="@+id/text_nuovo_prefisso"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textStyle="bold" />
-
-                            <EditText
-                                android:id="@+id/edit_nuovo_codice"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:hint="Automatico"
-                                android:inputType="textCapCharacters|textNoSuggestions"
-                                android:maxLength="50" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="@dimen/margine"
-                        android:orientation="vertical">
-
-                        <TextView
-                            style="@style/TestoIntestazione"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Barcode" />
-
-                        <EditText
-                            android:id="@+id/edit_nuovo_barcode"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Facoltativo"
-                            android:inputType="textNoSuggestions"
-                            android:maxLength="50" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/sezione_nuovo_prezzo_vendita"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="@dimen/margine"
-                        android:orientation="vertical">
-
-                        <TextView
-                            style="@style/TestoIntestazione"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Prezzo di vendita €" />
-
-                        <EditText
-                            android:id="@+id/edit_nuovo_prezzo_vendita"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Facoltativo"
-                            android:inputType="numberDecimal" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/box_nuovo_codice"
+                    style="@style/Econ.Campo"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
-                    android:text="Descrizione *" />
+                    android:layout_weight="1"
+                    android:layout_marginTop="12dp"
+                    android:hint="Codice articolo"
+                    app:placeholderText="Automatico">
 
-                <EditText
-                    android:id="@+id/edit_nuovo_descrizione"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edit_nuovo_codice"
+                        style="@style/Econ.CampoTesto"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapCharacters|textNoSuggestions" android:maxLength="50" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/box_nuovo_barcode"
+                    style="@style/Econ.Campo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="12dp"
+                    android:hint="Barcode"
+                    app:placeholderText="Facoltativo">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edit_nuovo_barcode"
+                        style="@style/Econ.CampoTesto"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textNoSuggestions" android:maxLength="50" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/sezione_nuovo_prezzo_vendita"
+                    style="@style/Econ.Campo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="12dp"
+                    android:hint="Prezzo di vendita €"
+                    app:placeholderText="Facoltativo">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edit_nuovo_prezzo_vendita"
+                        style="@style/Econ.CampoTesto"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal" />
+                </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/box_nuovo_descrizione"
+                    style="@style/Econ.Campo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Es. Cavo FG16OR16 3x2,5 mm²"
-                    android:inputType="textCapSentences|textMultiLine"
-                    android:maxLength="255"
-                    android:maxLines="3" />
+                    android:layout_marginTop="12dp"
+                    android:hint="Descrizione *"
+                    app:placeholderText="Es. Cavo FG16OR16 3x2,5 mm²">
 
-                <!-- foto dell'articolo (base64 sull'articolo) -->
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edit_nuovo_descrizione"
+                        style="@style/Econ.CampoTesto"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapSentences|textMultiLine" android:maxLength="255" android:maxLines="3" />
+                </com.google.android.material.textfield.TextInputLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
+                    android:layout_marginTop="12dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -351,301 +377,331 @@
                         android:id="@+id/img_nuovo_foto"
                         android:layout_width="96dp"
                         android:layout_height="72dp"
-                        android:background="#ECEFF1"
+                        android:background="@drawable/econ_campo_bordato"
                         android:contentDescription="Foto dell'articolo"
                         android:scaleType="centerCrop" />
 
                     <com.google.android.material.button.MaterialButton
-                        style="@style/Econ.Pulsante.Secondario"
                         android:id="@+id/button_nuovo_foto"
+                        style="@style/Econ.Pulsante.Secondario"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/margine"
+                        android:layout_marginStart="12dp"
                         android:text="Scatta foto" />
 
-                    <!-- immagine gia' sul tablet (galleria, download dal web): JPEG, PNG, WebP -->
                     <com.google.android.material.button.MaterialButton
-                        style="@style/Econ.Pulsante.Secondario"
                         android:id="@+id/button_scegli_immagine"
+                        style="@style/Econ.Pulsante.Secondario"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/margine"
+                        android:layout_marginStart="8dp"
                         android:text="Scegli immagine" />
 
                     <com.google.android.material.button.MaterialButton
-                        style="@style/Econ.Pulsante.Secondario"
                         android:id="@+id/button_togli_foto"
+                        style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/margine"
+                        android:layout_marginStart="4dp"
                         android:text="Togli"
                         android:visibility="gone" />
                 </LinearLayout>
 
-                <CheckBox
+                <com.google.android.material.checkbox.MaterialCheckBox
                     android:id="@+id/check_nuovo_listino_ditta"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/margine"
+                    android:layout_marginTop="4dp"
                     android:checked="true"
                     android:text="Aggiungi al mio listino" />
             </LinearLayout>
         </LinearLayout>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margine"
+            android:baselineAligned="false"
+            android:gravity="bottom"
             android:orientation="horizontal">
 
-            <LinearLayout
-                android:id="@+id/sezione_tipo"
-                android:layout_width="0dp"
+        <!-- tendina con l'etichetta nel bordo, come i campi del template -->
+        <FrameLayout
+            android:id="@+id/sezione_tipo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="5dp">
+
+            <Spinner
+                android:id="@+id/spinner_tipo"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="7dp"
+                android:background="@drawable/econ_scelta_bordata"
+                android:paddingStart="4dp"
+                android:paddingEnd="36dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:layout_gravity="top|start"
+                android:layout_marginStart="10dp"
+                android:background="#FFFFFF"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:text="@string/tipo"
+                android:textColor="@color/econ_testo_secondario"
+                android:textSize="12sp" />
+        </FrameLayout>
+        <!-- tendina con l'etichetta nel bordo, come i campi del template -->
+        <FrameLayout
+            android:id="@+id/sezione_utente"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="5dp">
 
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tipo" />
+            <Spinner
+                android:id="@+id/spinner_utente"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="7dp"
+                android:background="@drawable/econ_scelta_bordata"
+                android:paddingStart="4dp"
+                android:paddingEnd="36dp" />
 
-                <Spinner
-                    android:id="@+id/spinner_tipo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/sezione_utente"
-                android:layout_width="0dp"
+            <!-- piu' utenti (manodopera): nomi scelti, toccando si apre l'elenco a spunta -->
+            <TextView
+                android:id="@+id/text_utenti"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="@dimen/margine"
-                android:orientation="vertical">
+                android:layout_marginTop="7dp"
+                android:background="@drawable/econ_campo_bordato"
+                android:gravity="center_vertical"
+                android:minHeight="56dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textColor="@color/econ_testo"
+                android:textSize="16sp"
+                android:visibility="gone" />
 
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/utente" />
-
-                <Spinner
-                    android:id="@+id/spinner_utente"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-                <!-- Manodopera nuova: piu' utenti insieme (una riga uguale per ognuno), scelti da un elenco a spunta -->
-                <TextView
-                    android:id="@+id/text_utenti"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="48dp"
-                    android:gravity="center_vertical"
-                    android:background="?android:attr/editTextBackground"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:visibility="gone" />
-            </LinearLayout>
+            <TextView
+                android:id="@+id/etichetta_utente"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|start"
+                android:layout_marginStart="10dp"
+                android:background="#FFFFFF"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:text="@string/utente"
+                android:textColor="@color/econ_testo_secondario"
+                android:textSize="12sp" />
+        </FrameLayout>
         </LinearLayout>
-
-        <!-- Viaggio: partenza e arrivo calcolano la durata; oppure la durata si scrive a mano -->
         <LinearLayout
             android:id="@+id/sezione_orari"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margine"
+            android:baselineAligned="false"
+            android:gravity="bottom"
             android:orientation="horizontal">
 
-            <LinearLayout
-                android:layout_width="0dp"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/box_ora_inizio"
+            style="@style/Econ.Campo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="12dp"
+            android:hint="@string/ora_partenza"
+            app:placeholderText="--:--">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_ora_inizio"
+                style="@style/Econ.CampoTesto"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:inputType="none" android:focusable="false" android:cursorVisible="false" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/box_ora_fine"
+            style="@style/Econ.Campo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="12dp"
+            android:hint="@string/ora_arrivo"
+            app:placeholderText="--:--">
 
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ora_partenza" />
-
-                <EditText
-                    android:id="@+id/edit_ora_inizio"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:focusable="false"
-                    android:hint="--:--" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_ora_fine"
+                style="@style/Econ.CampoTesto"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="@dimen/margine"
-                android:orientation="vertical">
-
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/ora_arrivo" />
-
-                <EditText
-                    android:id="@+id/edit_ora_fine"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:focusable="false"
-                    android:hint="--:--" />
-            </LinearLayout>
+                android:inputType="none" android:focusable="false" android:cursorVisible="false" />
+        </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margine"
+            android:baselineAligned="false"
+            android:gravity="bottom"
             android:orientation="horizontal">
 
-            <LinearLayout
-                android:layout_width="0dp"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/box_quantita"
+            style="@style/Econ.Campo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="12dp"
+            android:hint="@string/quantita">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_quantita"
+                style="@style/Econ.CampoTesto"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:inputType="numberDecimal" android:selectAllOnFocus="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <!-- tendina con l'etichetta nel bordo, come i campi del template -->
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="5dp">
 
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/quantita" />
+            <Spinner
+                android:id="@+id/spinner_unita"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="7dp"
+                android:background="@drawable/econ_scelta_bordata"
+                android:paddingStart="4dp"
+                android:paddingEnd="36dp" />
 
-                <EditText
-                    android:id="@+id/edit_quantita"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="numberDecimal"
-                    android:selectAllOnFocus="true" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="@dimen/margine"
-                android:orientation="vertical">
-
-                <TextView
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/unita_misura" />
-
-                <Spinner
-                    android:id="@+id/spinner_unita"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
+                android:layout_gravity="top|start"
+                android:layout_marginStart="10dp"
+                android:background="#FFFFFF"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:text="@string/unita_misura"
+                android:textColor="@color/econ_testo_secondario"
+                android:textSize="12sp" />
+        </FrameLayout>
         </LinearLayout>
-
-        <LinearLayout
+        <!-- tendina con l'etichetta nel bordo, come i campi del template -->
+        <FrameLayout
             android:id="@+id/sezione_riga_ordine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margine"
-            android:orientation="vertical">
-
-            <TextView
-                style="@style/TestoIntestazione"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/riga_ordine" />
+            android:layout_marginTop="5dp">
 
             <Spinner
                 android:id="@+id/spinner_riga_ordine"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
+                android:layout_height="56dp"
+                android:layout_marginTop="7dp"
+                android:background="@drawable/econ_scelta_bordata"
+                android:paddingStart="4dp"
+                android:paddingEnd="36dp" />
 
-        <TextView
-            style="@style/TestoIntestazione"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margine"
-            android:text="@string/note" />
-
-        <EditText
-            android:id="@+id/edit_note_riga"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|start"
+                android:layout_marginStart="10dp"
+                android:background="#FFFFFF"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:text="@string/riga_ordine"
+                android:textColor="@color/econ_testo_secondario"
+                android:textSize="12sp" />
+        </FrameLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/box_note_riga"
+            style="@style/Econ.Campo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textCapSentences|textMultiLine"
-            android:maxLength="255" />
+            android:layout_marginTop="12dp"
+            android:hint="@string/note">
 
-        <!-- Assistenza a tempo (STUDIO_ASSISTENZE_TEMPO.md §10): solo per gli articoli in assistenza della ditta -->
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_note_riga"
+                style="@style/Econ.CampoTesto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textCapSentences|textMultiLine" android:maxLength="255" />
+        </com.google.android.material.textfield.TextInputLayout>
         <LinearLayout
             android:id="@+id/sezione_assistenza"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margine"
             android:orientation="vertical"
             android:visibility="gone">
 
-            <TextView
-                style="@style/TestoIntestazione"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/assistenza_tra_mesi" />
-
-            <EditText
-                android:id="@+id/edit_mesi_assistenza"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/box_mesi_assistenza"
+                style="@style/Econ.Campo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number"
-                android:maxLength="3"
-                android:selectAllOnFocus="true" />
+                android:layout_marginTop="12dp"
+                android:hint="@string/assistenza_tra_mesi">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edit_mesi_assistenza"
+                    style="@style/Econ.CampoTesto"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number" android:maxLength="3" android:selectAllOnFocus="true" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
                 android:id="@+id/text_assistenza"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="4dp"
                 android:textColor="?attr/colorPrimary"
                 android:textSize="13sp" />
         </LinearLayout>
-
-        <!-- Prezzo e "a costo": solo amministratore, coordinatori, unico operatore della ditta -->
         <LinearLayout
             android:id="@+id/sezione_prezzo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margine"
-            android:gravity="bottom"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <LinearLayout
-                android:layout_width="0dp"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/label_prezzo"
+            style="@style/Econ.Campo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="12dp"
+            android:hint="@string/costo_fisso">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_prezzo"
+                style="@style/Econ.CampoTesto"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/label_prezzo"
-                    style="@style/TestoIntestazione"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/costo_fisso" />
-
-                <EditText
-                    android:id="@+id/edit_prezzo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="numberDecimal"
-                    android:selectAllOnFocus="true" />
-            </LinearLayout>
-
-            <CheckBox
-                android:id="@+id/check_a_costo"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="@dimen/margine"
-                android:text="@string/a_costo" />
+                android:inputType="numberDecimal" android:selectAllOnFocus="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/check_a_costo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            android:text="@string/a_costo" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

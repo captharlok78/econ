@@ -794,8 +794,8 @@ public class CalendarioActivity extends AppCompatActivity {
 
     private Spinner spinnerTipologie(List<GiustificativiLocali.Tipologia> tipi, int scelta) {
         Spinner sp = new Spinner(this);
-        ArrayAdapter<GiustificativiLocali.Tipologia> a = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, tipi);
-        a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<GiustificativiLocali.Tipologia> a = new ArrayAdapter<>(this, R.layout.econ_tendina_valore, tipi);
+        a.setDropDownViewResource(R.layout.econ_tendina_voce);
         sp.setAdapter(a);
         if (scelta < tipi.size()) sp.setSelection(scelta);
         return sp;
@@ -831,8 +831,8 @@ public class CalendarioActivity extends AppCompatActivity {
 
     private void scegliData(long giorno, SceltaGiorno dopo) {
         int g = (int) giorno;
-        new android.app.DatePickerDialog(this, (view, anno, mese0, giornoMese) -> dopo.scelto(anno * 10000L + (mese0 + 1) * 100L + giornoMese),
-                g / 10000, (g / 100) % 100 - 1, g % 100).show();
+        com.ncfsistemi.econ.dialogo.EconDialogo.data(this, null, g / 10000, (g / 100) % 100 - 1, g % 100,
+                (anno, mese0, giornoMese) -> dopo.scelto(anno * 10000L + (mese0 + 1) * 100L + giornoMese));
     }
 
     private static Double numero(EditText e) {
