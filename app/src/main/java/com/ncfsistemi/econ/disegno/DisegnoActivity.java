@@ -812,9 +812,12 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
             contenutoDestro.addView(salva, lpSalva);
         }
 
-        sezione("COMPOSIZIONE", d.composizione, d.configurabile ? "Nessun componente: tocca Componi" : "—");
-        sezione("COLLEGAMENTI", d.collegamenti, "Nessun collegamento");
-        sezione("RELAZIONI", d.relazioni, "Nessuna relazione");
+        // composizione, collegamenti e relazioni sono della gestione elettrica (§22)
+        if (conElettro) {
+            sezione("COMPOSIZIONE", d.composizione, d.configurabile ? "Nessun componente: tocca Componi" : "—");
+            sezione("COLLEGAMENTI", d.collegamenti, "Nessun collegamento");
+            sezione("RELAZIONI", d.relazioni, "Nessuna relazione");
+        }
 
         // azioni
         LinearLayout az = new LinearLayout(this);

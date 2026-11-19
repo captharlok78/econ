@@ -62,9 +62,8 @@ public class LocalePagerFragment extends EconFragment {
 
 		@Override
 		public int getCount() {
-			// Show 3 total pages.
-
-			return 3;
+			// la terza linguetta (associazioni fra punti comandati e punti di comando) solo con Elettro (§22)
+			return com.ncfsistemi.econ.utils.FunzionalitaApp.haModulo(getActivity(), com.ncfsistemi.econ.utils.FunzionalitaApp.ELETTRICO) ? 3 : 2;
 
 		}
 

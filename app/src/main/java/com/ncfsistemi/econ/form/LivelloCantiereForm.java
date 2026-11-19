@@ -55,9 +55,26 @@ public abstract class LivelloCantiereForm extends DefinizioneForm {
 		Sezione s = f.sezione(icona(), titolo)
 				.testo(NOME, titolo).max(50);
 		campiAggiuntivi(s);
-		s.scelta(ID_LINEA, contesto.getString(R.string.linea_standard), new Linee()).metaRiga().nuovaRiga()
-				.scelta(ID_PLACCA, contesto.getString(R.string.placca_standard), new Placche()).collegataA(ID_LINEA).metaRiga()
-				.note(NOTE, "Note").max(255);
+		// linea e placca standard solo con la gestione elettrica (come il cantiere); senza, restano quelle del padre
+		if (elettro()) {
+			s.scelta(ID_LINEA, contesto.getString(R.string.linea_standard), new Linee()).metaRiga().nuovaRiga()
+					.scelta(ID_PLACCA, contesto.getString(R.string.placca_standard), new Placche()).collegataA(ID_LINEA).metaRiga();
+		}
+		s.note(NOTE, "Note").max(255);
+	}
+
+	private boolean elettro() {
+		return FunzionalitaApp.haModulo(contesto, FunzionalitaApp.ELETTRICO);
+	}
+
+	/** Linea e placca del padre (per proporle nel nuovo, o copiarle senza Elettro). */
+	private ContentValues padre() {
+		DbInterno db = new DbInterno(ospite);
+		ContentValues where = new ContentValues();
+		where.put(colonnaPadre(), ospite.getIntent().getIntExtra(colonnaPadre(), 0));
+		ContentValues padre = db.getRecord(tabellaPadre(), where);
+		db.close();
+		return padre;
 	}
 
 	/** Campi del solo livello (es. il piano dell'area), dopo il nome. */
@@ -66,12 +83,8 @@ public abstract class LivelloCantiereForm extends DefinizioneForm {
 
 	@Override
 	public void dopoCaricamento(Form f, ContentValues record, boolean nuovo) {
-		if (!nuovo) return;
-		DbInterno db = new DbInterno(ospite);
-		ContentValues where = new ContentValues();
-		where.put(colonnaPadre(), ospite.getIntent().getIntExtra(colonnaPadre(), 0));
-		ContentValues padre = db.getRecord(tabellaPadre(), where);
-		db.close();
+		if (!nuovo || !elettro()) return;
+		ContentValues padre = padre();
 		if (padre != null) {
 			f.imposta(ID_LINEA, padre.getAsString(ID_LINEA));
 			f.imposta(ID_PLACCA, padre.getAsString(ID_PLACCA));
@@ -80,7 +93,7 @@ public abstract class LivelloCantiereForm extends DefinizioneForm {
 
 	@Override
 	public String messaggioConferma(Form f, boolean nuovo) {
-		if (nuovo) return null;
+		if (nuovo || !elettro()) return null;
 		String prima = ospite.getRecord().getAsString(ID_LINEA);
 		String ora = f.valore(ID_LINEA);
 		if (prima == null || prima.isEmpty()) prima = "0";
@@ -91,5 +104,11 @@ public abstract class LivelloCantiereForm extends DefinizioneForm {
 	@Override
 	public void primaDiSalvare(ContentValues val, boolean nuovo) {
 		if (nuovo) val.put(colonnaPadre(), ospite.getIntent().getIntExtra(colonnaPadre(), 0));
+		if (nuovo && !elettro()) {
+			// senza i campi a video: linea e placca del padre, come si proporrebbero con Elettro
+			ContentValues padre = padre();
+			val.put(ID_LINEA, padre != null && padre.getAsInteger(ID_LINEA) != null ? padre.getAsInteger(ID_LINEA) : 0);
+			val.put(ID_PLACCA, padre != null && padre.getAsInteger(ID_PLACCA) != null ? padre.getAsInteger(ID_PLACCA) : 0);
+		}
 	}
 }

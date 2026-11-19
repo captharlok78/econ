@@ -52,8 +52,15 @@ public class CantiereElettricoFragment extends EconFragment {
 			});
 		}
 		SezioneStandard.imposta(v.findViewById(R.id.sezione_associazioni), FaIcone.COLLEGAMENTI, getString(R.string.relazioni_logiche));
+		// associazioni fra punti comandati e punti di comando: gestione elettrica, con il solo Design non si vedono
+		// (STUDIO_DESIGN_GRAFICA.md §22)
+		boolean elettro = FunzionalitaApp.haModulo(getActivity(), FunzionalitaApp.ELETTRICO);
+		if (!elettro) {
+			v.findViewById(R.id.sezione_associazioni).setVisibility(View.GONE);
+			v.findViewById(R.id.contenitore_associazioni).setVisibility(View.GONE);
+		}
 
-		if (savedInstanceState == null) {
+		if (savedInstanceState == null && elettro) {
 			RelazioniListaFragment relazioni = new RelazioniListaFragment();
 			Bundle params = new Bundle(getArguments());
 			params.putString("DA_CANTIERE", "SI");

@@ -78,6 +78,12 @@ public class ElementoDettaglioActivity extends EconActivity implements OnClickLi
         relazioniLogiche = new ArrayList<Object>();
         lista_relazioni_logiche = (LinearLayout) findViewById(R.id.lista_relazioni_logiche);
         lista_relazioni = (LinearLayout) findViewById(R.id.lista_relazioni);
+        // punti di comando / punti comandati: gestione elettrica, con il solo Design non si vedono (STUDIO_DESIGN_GRAFICA.md §22)
+        if (!com.ncfsistemi.econ.utils.FunzionalitaApp.haModulo(this, com.ncfsistemi.econ.utils.FunzionalitaApp.ELETTRICO)) {
+            findViewById(R.id.textView_relazioni).setVisibility(View.GONE);
+            lista_relazioni_logiche.setVisibility(View.GONE);
+            buttonrelazioni.setVisibility(View.GONE);
+        }
         nota = (TextView) findViewById(R.id.nota);
         idPreventivoSelezionato = getIntent().getIntExtra("ID_PREVENTIVO_SELEZIONATO",0);
         System.out.println("Econ: ElementoDettaglioActivity onCreate EXIT");
