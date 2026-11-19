@@ -154,23 +154,18 @@ public class ConfigurazioneGenActivity extends EconActivity {
 	 */
 	public void testMercury(View v) {
 		// Chiede email e password in un dialog
-		androidx.appcompat.app.AlertDialog.Builder builder = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this);
-		builder.setTitle("Test Mercury API");
-
-		android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
-		layout.setOrientation(android.widget.LinearLayout.VERTICAL);
-		int pad = (int)(16 * getResources().getDisplayMetrics().density);
-		layout.setPadding(pad, pad, pad, pad);
-
-		final EditText inputEmail = new EditText(this);
-		inputEmail.setHint("Email");
-		inputEmail.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-		layout.addView(inputEmail);
-
-		final EditText inputPassword = new EditText(this);
-		inputPassword.setHint("Password");
-		inputPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-		layout.addView(inputPassword);
+		com.ncfsistemi.econ.dialogo.EconDialogo.Builder builder = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this);
+		builder.icona(com.ncfsistemi.econ.utils.FaIcone.SINCRONIZZA, com.ncfsistemi.econ.dialogo.EconDialogo.Tono.INFO);
+		builder.setTitle("Prova del server");
+		android.widget.LinearLayout layout = com.ncfsistemi.econ.dialogo.EconDialogo.corpo(this);
+		layout.addView(com.ncfsistemi.econ.dialogo.EconDialogo.nota(this, "Accesso e scarico dei dati con un account."));
+		com.google.android.material.textfield.TextInputLayout cEmail = com.ncfsistemi.econ.dialogo.EconDialogo.campo(this, "Email",
+				android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+		com.google.android.material.textfield.TextInputLayout cPassword = com.ncfsistemi.econ.dialogo.EconDialogo.password(this, "Password");
+		layout.addView(cEmail);
+		layout.addView(cPassword);
+		final EditText inputEmail = cEmail.getEditText();
+		final EditText inputPassword = cPassword.getEditText();
 
 		builder.setView(layout);
 		builder.setPositiveButton("Test", (dialog, which) -> {
@@ -365,10 +360,7 @@ public class ConfigurazioneGenActivity extends EconActivity {
 		if (!url.endsWith("/")) url = url + "/";
 		final String finalUrl = url;
 
-		final android.app.ProgressDialog pd = new android.app.ProgressDialog(this);
-		pd.setMessage("Connessione a " + finalUrl + "...");
-		pd.setCancelable(false);
-		pd.show();
+		final com.ncfsistemi.econ.dialogo.EconDialogo.Attesa pd = com.ncfsistemi.econ.dialogo.EconDialogo.attesa(this, "Connessione a " + finalUrl + "…");
 
 		OkHttpClient client = new OkHttpClient.Builder()
 			.connectTimeout(5, TimeUnit.SECONDS)
@@ -441,11 +433,8 @@ public class ConfigurazioneGenActivity extends EconActivity {
 		final Queue<NsdServiceInfo> daRisolvere = new ConcurrentLinkedQueue<>();
 		final boolean[] risolvizioneInCorso = {false};
 
-		final android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(this);
-		progressDialog.setMessage("Ricerca server Mercury sulla rete...");
-		progressDialog.setProgressStyle(android.app.ProgressDialog.STYLE_SPINNER);
-		progressDialog.setCancelable(true);
-		progressDialog.show();
+		final com.ncfsistemi.econ.dialogo.EconDialogo.Attesa progressDialog = com.ncfsistemi.econ.dialogo.EconDialogo
+				.attesa(this, "Ricerca dei server Mercury sulla rete…").annullabile(null);
 
 		final NsdManager nsdMgr = (NsdManager) getSystemService(NSD_SERVICE);
 		final Handler uiHandler = new Handler(Looper.getMainLooper());
@@ -467,10 +456,8 @@ public class ConfigurazioneGenActivity extends EconActivity {
 				android.widget.Toast.makeText(ConfigurazioneGenActivity.this, "Server trovato: " + urls.get(0), android.widget.Toast.LENGTH_SHORT).show();
 			} else {
 				String[] urlsArr = urls.toArray(new String[0]);
-				new com.google.android.material.dialog.MaterialAlertDialogBuilder(ConfigurazioneGenActivity.this)
-					.setTitle("Seleziona server Mercury")
-					.setItems(urlsArr, (d, which) -> setText(R.id.editTextUrlServer, urlsArr[which]))
-					.show();
+				com.ncfsistemi.econ.dialogo.EconDialogo.scelta(ConfigurazioneGenActivity.this, "Scegli il server",
+					urlsArr, (d, which) -> setText(R.id.editTextUrlServer, urlsArr[which]));
 			}
 		};
 

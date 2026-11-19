@@ -8,7 +8,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:paddingStart="24dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="8dp">
 
     <!-- Primo blocco: logo della ditta (se c'e') a sinistra, dati dell'account e della ditta a destra -->
     <LinearLayout
@@ -47,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:textSize="14sp"
-                android:textColor="#666666"
+                android:textColor="@color/econ_testo_secondario"
                 android:text="…" />
         </LinearLayout>
     </LinearLayout>
@@ -57,14 +60,14 @@
         android:layout_height="1dp"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="12dp"
-        android:background="#DDDDDD" />
+        android:background="@color/econ_divisore" />
 
     <TextView
         android:id="@+id/tvProfiloVersioni"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="11sp"
-        android:textColor="#666666"
+        android:textColor="@color/econ_testo_secondario"
         android:text="…" />
 
     <View
@@ -72,7 +75,7 @@
         android:layout_height="1dp"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="12dp"
-        android:background="#DDDDDD" />
+        android:background="@color/econ_divisore" />
 
     <!-- "Licenza" e, accanto in blu, il pacchetto acquistato (es. Econ Mini) -->
     <LinearLayout
@@ -112,7 +115,7 @@
         android:layout_height="1dp"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="12dp"
-        android:background="#DDDDDD" />
+        android:background="@color/econ_divisore" />
 
     <TextView
         android:layout_width="match_parent"

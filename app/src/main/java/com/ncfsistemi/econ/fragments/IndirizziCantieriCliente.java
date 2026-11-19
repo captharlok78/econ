@@ -185,10 +185,8 @@ public class IndirizziCantieriCliente {
 						carica();
 					}
 				}));
-		new com.google.android.material.dialog.MaterialAlertDialogBuilder(activity)
-				.setTitle(ClientiIndirizzi.completo(v))
-				.setItems(voci.toArray(new String[0]), (d, i) -> azioni.get(i).run())
-				.show();
+		com.ncfsistemi.econ.dialogo.EconDialogo.scelta(activity, ClientiIndirizzi.completo(v),
+                voci.toArray(new String[0]), (d, i) -> azioni.get(i).run());
 	}
 
 	// ── griglia comune alle due tabelle ──

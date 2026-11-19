@@ -72,6 +72,14 @@ public final class FaIcone {
 	public static final String CONFERMA = "\uf00c";     // check: pulsante Salva
 	public static final String RAPPORTINO = "\uf46d";  // clipboard-list: rapportino
 	public static final String INFO = "\uf05a";
+	// testata dei modali (dialogo/EconDialogo)
+	public static final String ATTENZIONE = "\uf071"; // exclamation-triangle
+	public static final String DOMANDA = "\uf059";    // question-circle
+	public static final String FATTO = "\uf058";      // check-circle
+	public static final String ERRORE = "\uf06a";     // exclamation-circle
+	public static final String CHIUDI = "\uf00d";     // times: chiude una finestra
+	public static final String CHIAVE = "\uf084";     // key: password
+	public static final String SINCRONIZZA = "\uf2f1"; // sync-alt
 	public static final String VIAGGIO = "\uf1b9";    // car: riga di viaggio del rapportino
 	public static final String APRI = "\uf078";       // chevron-down: sezione a fisarmonica chiusa
 	public static final String CHIUDI_SEZIONE = "\uf077"; // chevron-up: sezione a fisarmonica aperta        // info-circle: avviso su un campo che non si modifica (template form)

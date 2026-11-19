@@ -120,7 +120,7 @@ public class StartActivity extends EconActivity {
                 if (msg.length() > 0) msg.append("\n\n");
                 msg.append("• ").append(p.testo);
             }
-            AlertDialog.Builder b = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            AlertDialog.Builder b = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
                     .setTitle(esito.bloccato() ? "Il dispositivo non può usare iEcon" : "Controllo del dispositivo")
                     .setMessage(msg.toString())
                     .setCancelable(false);

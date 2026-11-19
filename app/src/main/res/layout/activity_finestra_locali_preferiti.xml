@@ -1,7 +1,18 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Finestra a tutta pagina: barra blu comune (finestra_testata, STUDIO_MODALI_APP.md) e contenuto sullo sfondo dell'app -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_econ_popup"
+    android:background="@color/econ_sfondo"
+    android:orientation="vertical">
+
+    <include layout="@layout/finestra_testata" />
+
+<FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1"
+    
     android:padding="@dimen/margine" >
 
     <RelativeLayout
@@ -12,6 +23,7 @@
        
         <ImageButton
             android:id="@+id/imageButton_chiudi"
+            android:visibility="gone"
             style="@style/bottoneLista"
             android:layout_alignParentRight="true"
             android:onClick="chiudi"
@@ -28,9 +40,9 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:textAllCaps="true"
+            android:textAllCaps="false"
             android:text="@string/locali_preferiti"
-            style="@style/TestoIntestazioneNoPadding" />
+            style="@style/Econ.Dialogo.TitoloTestata" />
 
         <EditText
             android:id="@+id/editText_filtra"
@@ -65,3 +77,4 @@
     </RelativeLayout>
 
 </FrameLayout>
+</LinearLayout>

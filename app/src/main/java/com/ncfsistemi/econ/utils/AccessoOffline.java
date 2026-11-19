@@ -67,7 +67,7 @@ public final class AccessoOffline {
             testo.append("\n\nIl tablet non ha un blocco schermo: impostane uno (PIN, sequenza o impronta), "
                     + "perché i dati della ditta sono sul dispositivo.");
         }
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(a)
+        new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(a)
                 .setTitle("Modalità offline")
                 .setMessage(testo)
                 .setPositiveButton("Ho capito", null)

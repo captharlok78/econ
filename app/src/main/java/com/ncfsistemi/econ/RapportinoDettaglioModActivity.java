@@ -1328,7 +1328,7 @@ public class RapportinoDettaglioModActivity extends EconDettaglioActivity {
         img.setBackgroundColor(android.graphics.Color.WHITE);
         int p = Math.round(16 * getResources().getDisplayMetrics().density);
         img.setPadding(p, p, p, p);
-        androidx.appcompat.app.AlertDialog.Builder b = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+        androidx.appcompat.app.AlertDialog.Builder b = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
                 .setTitle(testoFirma())
                 .setView(img)
                 .setNegativeButton("Chiudi", null);

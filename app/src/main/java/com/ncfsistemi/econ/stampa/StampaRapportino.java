@@ -64,9 +64,8 @@ public final class StampaRapportino {
         for (int i = 0; i < nomi.length; i++) {
             nomi[i] = RigheRapportino.testo(modelli.get(i), ModelliStampa.NOME) + (i == 0 ? " (proposto)" : "");
         }
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(activity).setTitle("Modello di stampa")
-                .setItems(nomi, (d, i) -> stampa(activity, idRapportino, modelli.get(i)))
-                .setNegativeButton("Annulla", null).show();
+        com.ncfsistemi.econ.dialogo.EconDialogo.scelta(activity, "Modello di stampa",
+                nomi, (d, i) -> stampa(activity, idRapportino, modelli.get(i)));
     }
 
     private static void stampa(Activity activity, int idRapportino, ContentValues modello) {

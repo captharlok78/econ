@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Solo nelle build di debug: galleria dei modali (STUDIO_MODALI_APP.md), si apre con
+     adb shell am start -n com.ncfsistemi.econ/.dialogo.GalleriaModaliActivity [-e mostra <nome>] -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity
+            android:name=".dialogo.GalleriaModaliActivity"
+            android:exported="true"
+            android:theme="@style/AppTheme" />
+    </application>
+</manifest>

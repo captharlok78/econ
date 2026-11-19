@@ -54,10 +54,86 @@
         <item name="windowActionBar">false</item>
     </style>
 
+    <!--
+        Modali dell'app (STUDIO_MODALI_APP.md): unico stile per tutti i dialoghi, usato da dialogo/EconDialogo.Builder.
+        Cornice bianca con angoli 20dp, testata disegnata da EconDialogo (icona in un cerchio colorato + titolo),
+        azione principale piena, Annulla e terzo pulsante a testo; eliminazioni col pulsante rosso (.Distruttivo).
+    -->
     <style name="ThemeOverlay.Econ.Dialogo" parent="ThemeOverlay.Material3.MaterialAlertDialog">
         <item name="colorPrimary">@color/econ_primario</item>
         <item name="colorSurface">#FFFFFF</item>
         <item name="colorSurfaceContainerHigh">#FFFFFF</item>
+        <item name="alertDialogStyle">@style/Econ.Dialogo.Cornice</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/Econ.Dialogo.Titolo</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/Econ.Dialogo.Testo</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Econ.Dialogo.Principale</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Econ.Dialogo.Secondario</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Econ.Dialogo.Secondario</item>
+        <item name="android:textColorAlertDialogListItem">@color/econ_testo</item>
+    </style>
+
+    <!-- Conferma di un'eliminazione: stesso dialogo, azione principale rossa -->
+    <style name="ThemeOverlay.Econ.Dialogo.Distruttivo">
+        <item name="buttonBarPositiveButtonStyle">@style/Econ.Dialogo.Principale.Distruttivo</item>
+    </style>
+
+    <style name="Econ.Dialogo.Cornice" parent="MaterialAlertDialog.Material3">
+        <item name="shapeAppearance">@style/Econ.Dialogo.Forma</item>
+        <item name="shapeAppearanceOverlay">@null</item>
+    </style>
+
+    <style name="Econ.Dialogo.Forma" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">20dp</item>
+    </style>
+
+    <style name="Econ.Dialogo.Titolo" parent="MaterialAlertDialog.Material3.Title.Text">
+        <item name="android:textSize">19sp</item>
+        <item name="android:textColor">@color/econ_testo</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Econ.Dialogo.Testo" parent="MaterialAlertDialog.Material3.Body.Text">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/econ_testo_corpo</item>
+        <item name="android:lineSpacingExtra">3dp</item>
+    </style>
+
+    <style name="Econ.Dialogo.Principale" parent="Widget.Material3.Button">
+        <item name="android:minHeight">44dp</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">20dp</item>
+    </style>
+
+    <style name="Econ.Dialogo.Principale.Distruttivo">
+        <item name="backgroundTint">@color/econ_errore</item>
+    </style>
+
+    <style name="Econ.Dialogo.Secondario" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:minHeight">44dp</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/econ_testo_secondario</item>
+    </style>
+
+    <!-- Testata dei modali (layout dialogo_testata.xml) e delle finestre grandi (finestra_testata.xml) -->
+    <style name="Econ.Dialogo.TitoloTestata" parent="">
+        <item name="android:textSize">19sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/econ_testo</item>
+    </style>
+
+    <style name="Econ.Dialogo.Sottotitolo" parent="">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/econ_testo_secondario</item>
+    </style>
+
+    <!-- Etichetta sopra un gruppo di campi nei modali (al posto di TestoIntestazione azzurro) -->
+    <style name="Econ.Dialogo.Etichetta" parent="">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/econ_testo_secondario</item>
     </style>
 
     <!-- Form del template (package form): campi bordati Material 3 -->

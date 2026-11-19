@@ -1,72 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Placca da aggiungere al preventivo (stile dei modali, STUDIO_MODALI_APP.md) -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/campi"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="@dimen/altezza_campo"
     android:orientation="vertical"
-    android:padding="@dimen/margine" >
+    android:paddingStart="24dp"
+    android:paddingTop="4dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="8dp">
 
     <LinearLayout
         android:id="@+id/linearLinea"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical" >
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/textView_linea"
-            style="@style/TestoIntestazione"
-            android:layout_width="wrap_content"
+            style="@style/Econ.Dialogo.Etichetta"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="4dp"
             android:text="@string/linea" />
 
         <com.ncfsistemi.econ.views.EconSpinner
             android:id="@+id/econSpinnerLinea"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-        </com.ncfsistemi.econ.views.EconSpinner>
+            android:layout_height="wrap_content" />
     </LinearLayout>
-
     <LinearLayout
         android:id="@+id/linearPlacca"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical" >
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/textView_placca"
-            style="@style/TestoIntestazione"
-            android:layout_width="wrap_content"
+            style="@style/Econ.Dialogo.Etichetta"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="4dp"
             android:text="@string/placca" />
 
-       <com.ncfsistemi.econ.views.EconSpinner
+        <com.ncfsistemi.econ.views.EconSpinner
             android:id="@+id/econSpinnerPlacca"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
-        </com.ncfsistemi.econ.views.EconSpinner>
+            android:layout_height="wrap_content" />
     </LinearLayout>
-
     <LinearLayout
         android:id="@+id/linearModuli"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical" >
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:gravity="bottom"
+        android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/textView_moduli"
-            style="@style/TestoIntestazione"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/numero_moduli" />
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/campo_moduli"
+        style="@style/Econ.Campo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginTop="12dp"
+        android:hint="@string/numero_moduli">
 
-        <EditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editText_moduli"
-            android:layout_width="wrap_content"
+            style="@style/Econ.CampoTesto"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="3"
-            android:inputType="number"
-            android:maxLength="2"
-            android:maxLines="1" />
+            android:inputType="number" android:maxLength="3" />
+    </com.google.android.material.textfield.TextInputLayout>
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_weight="1" />
     </LinearLayout>
-
 </LinearLayout>

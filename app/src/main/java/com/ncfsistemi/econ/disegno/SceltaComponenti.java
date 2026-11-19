@@ -272,7 +272,7 @@ public final class SceltaComponenti {
             return true;
         });
 
-        dlg = new Dialog(act, android.R.style.Theme_DeviceDefault_Light_NoActionBar);
+        dlg = new Dialog(act, R.style.AppTheme); // tema dell'app: campi e pulsanti come nel resto (STUDIO_MODALI_APP.md)
         dlg.setContentView(root);
         if (dlg.getWindow() != null) {
             dlg.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);

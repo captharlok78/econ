@@ -1,50 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Avviso con quantita' e Non mostrare piu' (stile dei modali, STUDIO_MODALI_APP.md) -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linear_dialog_check"
     android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:layout_height="wrap_content" >
+    android:paddingStart="24dp"
+    android:paddingTop="4dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="8dp">
 
-<RelativeLayout
-
-    android:layout_marginLeft="@dimen/margine"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-    <TextView
-
-        android:text="@string/quantita"
-        android:id="@+id/txtQta"
-        style="@style/TestoNeroPiccolo"
-        android:layout_centerVertical="true"
-        android:layout_alignParentLeft="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <EditText
-        android:layout_toRightOf="@+id/txtQta"
-        android:id="@+id/editText_qta"
-        android:ems="3"
-        android:maxLength="3"
-        android:gravity="right"
-        android:inputType="number"
-        android:text="1"
-
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <TextView
-        style="@style/TestoPiccolo"
-        android:id="@+id/txtGiaPresenti"
-        android:layout_toRightOf="@+id/editText_qta"
-        android:layout_width="wrap_content"
-        android:text=" (Già presenti in questo locale:)"
-        android:layout_centerVertical="true"
-        android:layout_height="wrap_content" />
-</RelativeLayout>
-
-    <CheckBox
-        android:layout_marginTop="@dimen/margine"
-        android:id="@+id/checkbox_ricorda"
-style="@style/TestoNeroPiccolo"
-        android:text="@string/non_mostrare_piu"
-        android:layout_width="fill_parent"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/campo_qta"
+        style="@style/Econ.Campo"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-         />
+        android:layout_marginTop="12dp"
+        android:hint="@string/quantita">
 
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText_qta"
+            style="@style/Econ.CampoTesto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number" android:text="1" android:maxLength="3" android:selectAllOnFocus="true" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/txtGiaPresenti"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:lineSpacingExtra="2dp"
+        android:text=""
+        android:textColor="@color/econ_testo_secondario"
+        android:textSize="14sp" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/checkbox_ricorda"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/non_mostrare_piu"
+        android:textColor="@color/econ_testo_corpo" />
 </LinearLayout>

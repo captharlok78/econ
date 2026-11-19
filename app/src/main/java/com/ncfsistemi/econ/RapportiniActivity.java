@@ -109,7 +109,7 @@ public class RapportiniActivity extends EconListaStandardActivity {
 
             @Override
             protected void onPreExecute() {
-                AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(RapportiniActivity.this);
+                AlertDialog.Builder ab = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(RapportiniActivity.this);
                 ab.setMessage(getString(R.string.messaggio_creazione_report));
                 di = ab.create();
                 di.show();

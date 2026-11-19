@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Testata di tutti i modali (dialogo/EconDialogo): icona in un cerchio del colore del tono (facoltativa), titolo, sottotitolo -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="24dp"
+    android:paddingTop="22dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="6dp">
+
+    <TextView
+        android:id="@+id/dialogo_icona"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="14dp"
+        android:gravity="center"
+        android:importantForAccessibility="no"
+        android:textSize="18sp"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/dialogo_immagine"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="14dp"
+        android:importantForAccessibility="no"
+        android:scaleType="fitCenter"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/dialogo_titolo"
+            style="@style/Econ.Dialogo.TitoloTestata"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:accessibilityHeading="true" />
+
+        <TextView
+            android:id="@+id/dialogo_sottotitolo"
+            style="@style/Econ.Dialogo.Sottotitolo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>

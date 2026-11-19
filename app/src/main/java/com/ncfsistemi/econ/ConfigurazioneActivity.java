@@ -391,7 +391,7 @@ public class ConfigurazioneActivity extends EconActivity implements OnChildClick
 				{
 					final EditText input = new EditText(ConfigurazioneActivity.this);
 						input.setHint("vuoto = nome default");
-					AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ConfigurazioneActivity.this);
+					AlertDialog.Builder ab = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(ConfigurazioneActivity.this);
 					ab.setTitle(getString(R.string.nome_backup));
 					ab.setIcon(android.R.drawable.ic_dialog_info);
 					ab.setView(input);

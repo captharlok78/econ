@@ -920,7 +920,7 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 	public void mostraSelezionePreventivi() {
 		System.out.println("Econ: CantiereSplitActivity mostraSelezionePreventivi ENTER");
 		AlertDialog di = null;
-		AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this);
+		AlertDialog.Builder ab = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this);
 		ab.setTitle(getString(R.string.title_activity_preventivi));
 		final ListView listaPreventivi = new ListView(this);
 		listaPreventivi.setBackgroundColor(getResources().getColor(android.R.color.transparent));
@@ -1087,7 +1087,7 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 		}
 		split.collapse();
 		if (inizio == 0) {
-			AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this);
+			AlertDialog.Builder ab = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this);
 			ab.setMessage("Creazione immagini piantine...");
 			di = ab.create();
 			di.show();
@@ -1129,7 +1129,7 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 			AlertDialog di = null;
 			@Override
 			protected void onPreExecute() {
-				AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(CantiereSplitActivity.this);
+				AlertDialog.Builder ab = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(CantiereSplitActivity.this);
 				ab.setMessage(CantiereSplitActivity.this.getResources().getString(R.string.messaggio_creazione_report));
 				di = ab.create();
 				di.show();
@@ -1178,7 +1178,7 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
             AlertDialog di = null;
             @Override
             protected void onPreExecute() {
-                AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(CantiereSplitActivity.this);
+                AlertDialog.Builder ab = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(CantiereSplitActivity.this);
                 ab.setMessage(CantiereSplitActivity.this.getResources().getString(R.string.messaggio_creazione_report));
                 di = ab.create();
                 di.show();
@@ -1227,10 +1227,10 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 	public void cercaElemento() {
 
 		final View campi = View.inflate(this, R.layout.dialog_note_layout, null);
-		campi.findViewById(R.id.textView_note).setVisibility(View.INVISIBLE);
+		((com.google.android.material.textfield.TextInputLayout) campi.findViewById(R.id.campo_nota)).setHint("Numero dell'elemento");
 		final EditText campoNota = (EditText) campi.findViewById(R.id.editText_nota);
 		campoNota.setInputType(InputType.TYPE_CLASS_NUMBER);
-		campoNota.setEms(5);
+		campoNota.setMinLines(1);
 
 		Utility.mostraDialogPersonalizzato("Cerca elemento per numero",this,campi,"Ok","Annulla", new DialogInterface.OnClickListener() {
 			@Override

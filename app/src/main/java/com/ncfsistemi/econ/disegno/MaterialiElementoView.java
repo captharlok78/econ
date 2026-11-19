@@ -200,7 +200,7 @@ public class MaterialiElementoView extends LinearLayout {
             cestino.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
             cestino.setTextColor(colore(R.color.disegno_testo2));
             cestino.setContentDescription("Togli il materiale");
-            cestino.setOnClickListener(v -> new MaterialAlertDialogBuilder(getContext())
+            cestino.setOnClickListener(v -> new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(getContext())
                     .setTitle("Togli il materiale")
                     .setMessage(nome.getText())
                     .setPositiveButton("Togli", (d, w) -> {
@@ -261,7 +261,7 @@ public class MaterialiElementoView extends LinearLayout {
             qta.selectAll();
         });
 
-        AlertDialog d = new MaterialAlertDialogBuilder(ctx)
+        AlertDialog d = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(ctx)
                 .setTitle("Aggiungi materiale")
                 .setView(corpo)
                 .setPositiveButton("Aggiungi", null)
@@ -312,7 +312,7 @@ public class MaterialiElementoView extends LinearLayout {
         corpo.addView(nota);
 
         String nome = testo(m, ElementiCantiereMateriali.CODICE_ARTICOLO) + " " + testo(m, ElementiCantiereMateriali.DESCRIZIONE);
-        AlertDialog d = new MaterialAlertDialogBuilder(ctx)
+        AlertDialog d = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(ctx)
                 .setTitle(nome.trim())
                 .setView(corpo)
                 .setPositiveButton(R.string.salva, null)

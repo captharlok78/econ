@@ -206,17 +206,17 @@ public final class QuantitaComponenti {
                                       final int minimo, final Runnable dopo) {
         final boolean cantiere = idElementoCant != 0;
         View campi = View.inflate(act, R.layout.dialog_qtacomponente_layout, null);
-        TextView etichetta = (TextView) campi.findViewById(R.id.textView_qta);
+        com.google.android.material.textfield.TextInputLayout etichetta = campi.findViewById(R.id.campo_qta);
         final EditText qta = (EditText) campi.findViewById(R.id.editText_qta);
         TextView info = (TextView) campi.findViewById(R.id.textView_componenti);
         String um = riga.getAsString(ComponentiCantiere.UNITA_MISURA);
-        etichetta.setText(act.getString(R.string.quantita) + " " + (um == null ? "" : um.trim()));
+        etichetta.setHint(act.getString(R.string.quantita) + " " + (um == null ? "" : um.trim()));
         qta.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         final int attuale = quantita(riga);
         qta.setText(String.valueOf(attuale));
         info.setText("Ogni pezzo resta una riga nel documento: qui li vedi insieme. Pezzi adesso: " + attuale);
         String nome = cantiere ? riga.getAsString(ComponentiCantiere.NOME_COMPONENTE_CANT) : riga.getAsString(Componenti.NOME_COMPONENTE);
-        Utility.mostraDialogPersonalizzato(nome == null ? "" : nome.toUpperCase(Locale.getDefault()), act, campi,
+        Utility.mostraDialogPersonalizzato(nome == null ? "" : nome, act, campi,
                 act.getString(R.string.conferma), act.getString(R.string.annulla), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

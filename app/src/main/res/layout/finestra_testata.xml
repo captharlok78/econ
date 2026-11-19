@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Testata delle finestre grandi (finestre grandi e activity-finestra, come la barra blu delle pagine): titolo, sottotitolo, X per chiudere, azioni a destra -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/finestra_testata"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/econ_primario"
+    android:elevation="4dp"
+    android:gravity="center_vertical"
+    android:minHeight="60dp"
+    android:orientation="horizontal"
+    android:paddingStart="8dp"
+    android:paddingEnd="12dp">
+
+    <TextView
+        android:id="@+id/finestra_chiudi"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Chiudi"
+        android:gravity="center"
+        android:textSize="20sp" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/finestra_titolo"
+            style="@style/Econ.Dialogo.TitoloTestata"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:accessibilityHeading="true"
+            android:textColor="#FFFFFF"
+            android:ellipsize="end"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/finestra_sottotitolo"
+            style="@style/Econ.Dialogo.Sottotitolo"
+            android:layout_width="match_parent"
+            android:textColor="#DCE7F7"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/finestra_azioni"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal" />
+</LinearLayout>

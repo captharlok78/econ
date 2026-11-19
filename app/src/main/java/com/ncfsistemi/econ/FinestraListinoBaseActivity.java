@@ -28,6 +28,12 @@ import com.ncfsistemi.econ.views.EconItemMenu;
 
 public class FinestraListinoBaseActivity extends FinestraElementiActivity {
 
+    @Override
+    protected String titoloFinestra() {
+        return "Listino";
+    }
+
+
     boolean elemento = false;
     boolean componente = false;
 
@@ -154,7 +160,7 @@ public class FinestraListinoBaseActivity extends FinestraElementiActivity {
             Utility.mostraDialog(getString(R.string.attenzione),getString(R.string.messaggio_composizoni_mancanti),this,"OK");
         } else {
             View campi = View.inflate(this, R.layout.dialog_qtaelemento_layout, null);
-            final TextView etichetta = (TextView) campi.findViewById(R.id.textView_qta);
+            final com.google.android.material.textfield.TextInputLayout etichetta = campi.findViewById(R.id.campo_qta);
             final EditText qta = (EditText) campi.findViewById(R.id.editText_qta);
             final TextView composizioneTxt = (TextView) campi.findViewById(R.id.textView_composizione);
             if (composizioni.size() == 0) {
@@ -267,7 +273,7 @@ public class FinestraListinoBaseActivity extends FinestraElementiActivity {
             qta.setText("1");
             if (elemento) {
 
-                etichetta.setText(getString(R.string.quantita) + " " + val.getAsString(Elementi.UNITA_MISURA).trim());
+                etichetta.setHint(getString(R.string.quantita) + " " + val.getAsString(Elementi.UNITA_MISURA).trim());
 
                 Utility.mostraDialogPersonalizzato(
                         val.getAsString(Elementi.NOME_ELEMENTO).toUpperCase(Locale.getDefault()),
@@ -277,7 +283,7 @@ public class FinestraListinoBaseActivity extends FinestraElementiActivity {
 
             if (componente) {
 
-                etichetta.setText(getString(R.string.quantita) + " " + val.getAsString(Componenti.UNITA_MISURA).trim());
+                etichetta.setHint(getString(R.string.quantita) + " " + val.getAsString(Componenti.UNITA_MISURA).trim());
 
                 Utility.mostraDialogPersonalizzato(
                         val.getAsString(Componenti.NOME_COMPONENTE).toUpperCase(Locale.getDefault()),
@@ -298,8 +304,8 @@ public class FinestraListinoBaseActivity extends FinestraElementiActivity {
         catComp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                catComp.setTextColor(getResources().getColor(android.R.color.holo_blue_dark));
-                catGen.setTextColor(getResources().getColor(android.R.color.darker_gray));
+                catComp.setTextColor(getResources().getColor(R.color.econ_primario));
+                catGen.setTextColor(getResources().getColor(R.color.econ_testo_secondario));
                 elementiOComponenti = EconItemMenu.CATEGORIA_COMPONENTI;
                 creaMenuCategorie();
             }
@@ -308,8 +314,8 @@ public class FinestraListinoBaseActivity extends FinestraElementiActivity {
         catGen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                catComp.setTextColor(getResources().getColor(android.R.color.darker_gray));
-                catGen.setTextColor(getResources().getColor(android.R.color.holo_blue_dark));
+                catComp.setTextColor(getResources().getColor(R.color.econ_testo_secondario));
+                catGen.setTextColor(getResources().getColor(R.color.econ_primario));
                 elementiOComponenti = EconItemMenu.CATEGORIA_ELEMENTI;
                 creaMenuCategorie();
             }

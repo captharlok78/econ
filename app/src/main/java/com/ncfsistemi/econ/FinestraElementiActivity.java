@@ -158,6 +158,10 @@ public class FinestraElementiActivity extends EconActivity implements OnClickLis
 
         buttonChiudi = (ImageButton) findViewById(R.id.imageButton_chiudi);
         buttonChiudi.setOnClickListener(this);
+        // barra blu comune delle finestre (STUDIO_MODALI_APP.md): la X fa quello che faceva il vecchio pulsante
+        com.ncfsistemi.econ.dialogo.EconDialogo.impostaTestataFinestra(findViewById(R.id.finestra_testata), titoloFinestra(),
+                getDescrizioneCantiere(), buttonChiudi::performClick);
+        com.ncfsistemi.econ.dialogo.Stile.contenuto(findViewById(R.id.contenitore));
 
         setVisualizzazioneCategorie();
         System.out.println("Econ: FinestraElementiActivity onCreate EXIT");
@@ -280,6 +284,11 @@ public class FinestraElementiActivity extends EconActivity implements OnClickLis
 
         }
         System.out.println("Econ: FinestraElementiActivity creaMenuCategorie EXIT");
+    }
+
+    /** Titolo nella barra blu. */
+    protected String titoloFinestra() {
+        return "Elementi";
     }
 
     @Override
@@ -416,7 +425,7 @@ public class FinestraElementiActivity extends EconActivity implements OnClickLis
                     }
                 };
 
-                AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this);
+                AlertDialog.Builder ab = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this);
                 ab.setMessage(messaggio);
                 ab.setView(checkView);
                 ab.setTitle(getString(R.string.conferma_aggiunta_elemento));

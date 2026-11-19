@@ -223,7 +223,7 @@ public final class RapportinoDalDisegno {
         }
         ScrollView sv = new ScrollView(act);
         sv.addView(lista);
-        new MaterialAlertDialogBuilder(act)
+        new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(act)
                 .setTitle("Rapportino dal disegno (" + oggetti.size() + ")")
                 .setView(sv)
                 .setPositiveButton("Prepara il rapportino", (dlg, w) -> {

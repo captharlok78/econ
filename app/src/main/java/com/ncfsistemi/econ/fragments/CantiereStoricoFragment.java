@@ -246,11 +246,8 @@ public class CantiereStoricoFragment extends EconFragment {
 			voci[i] = data(m.getAsLong(Rapportini.DATA_RAPPORTINO)) + "  ·  " + numero(m) + "  ·  " + quantita(decimale(m, RapportiniDettaglio.QUANTITA))
 					+ " " + g.um + (nota.isEmpty() ? "" : "  ·  " + nota);
 		}
-		new com.google.android.material.dialog.MaterialAlertDialogBuilder(getActivity())
-				.setTitle((g.codice.isEmpty() ? "" : g.codice + " ") + g.descrizione)
-				.setItems(voci, (d, i) -> apriRapportino(g.movimenti.get(i).getAsInteger("id_rapportino")))
-				.setNegativeButton(R.string.annulla, null)
-				.show();
+		com.ncfsistemi.econ.dialogo.EconDialogo.scelta(getActivity(), (g.codice.isEmpty() ? "" : g.codice + " ") + g.descrizione,
+                voci, (d, i) -> apriRapportino(g.movimenti.get(i).getAsInteger("id_rapportino")));
 	}
 
 	private void apriRapportino(int id) {

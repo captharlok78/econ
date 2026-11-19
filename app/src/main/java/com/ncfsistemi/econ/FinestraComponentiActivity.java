@@ -116,6 +116,9 @@ public class FinestraComponentiActivity extends EconActivity implements OnClickL
 
 
 		titolo = (TextView) findViewById(R.id.textViewTitolo);
+		// barra blu comune delle finestre (STUDIO_MODALI_APP.md)
+		com.ncfsistemi.econ.dialogo.EconDialogo.impostaTestataFinestra(findViewById(R.id.finestra_testata), "Componenti", null, () -> chiudi(null));
+		com.ncfsistemi.econ.dialogo.Stile.contenuto(findViewById(R.id.contenitore));
 
 		scroll_tab = (HorizontalScrollView) findViewById(R.id.scroll_categorie);
 		categorie = (LinearLayout) findViewById(R.id.categorie);
@@ -252,7 +255,7 @@ public class FinestraComponentiActivity extends EconActivity implements OnClickL
 
 			if (composizioneLibera) {
 				View campi = View.inflate(this, R.layout.dialog_qtacomponente_layout, null);
-				final TextView etichetta = (TextView) campi.findViewById(R.id.textView_qta);
+				final com.google.android.material.textfield.TextInputLayout etichetta = campi.findViewById(R.id.campo_qta);
 				final EditText qta = (EditText) campi.findViewById(R.id.editText_qta);
 				final TextView componentiTxt = (TextView) campi.findViewById(R.id.textView_componenti);
 				DbInterno db = new DbInterno(this);
@@ -284,7 +287,7 @@ public class FinestraComponentiActivity extends EconActivity implements OnClickL
 						: "Nella composizione si vedono in una riga sola, con la quantità.");
 				qta.setText("1");
 
-				etichetta.setText(getString(R.string.quantita) + " " + val.getAsString(Componenti.UNITA_MISURA).trim());
+				etichetta.setHint(getString(R.string.quantita) + " " + val.getAsString(Componenti.UNITA_MISURA).trim());
 
 				Utility.mostraDialogPersonalizzato(
 						val.getAsString(Componenti.NOME_COMPONENTE).toUpperCase(Locale.getDefault()),

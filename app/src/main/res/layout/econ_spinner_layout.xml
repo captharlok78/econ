@@ -1,36 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <RelativeLayout
-        android:id="@+id/econ_spinner"
-        xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Scelta da tabella (EconSpinner) in tutta l'app: bordata come i campi del template form e dei modali -->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/econ_spinner"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/econ_campo_bordato"
+    android:minHeight="46dp">
+
+    <TextView
+        android:id="@+id/textView1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="40dp"
-        android:background="@drawable/bg_input_outline"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@+id/button1"
+        android:background="@android:color/transparent"
+        android:clickable="true"
+        android:ellipsize="end"
+        android:paddingStart="12dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:singleLine="true"
+        android:text=""
+        android:textColor="@color/econ_testo"
+        android:textSize="16sp" />
 
-         >
-
-        <TextView
-            android:id="@+id/textView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_toLeftOf="@+id/button1"
-            android:ellipsize="marquee"
-            android:singleLine="true"
-            android:background="@android:color/transparent"
-            android:text=""
-            android:textColor="@android:color/black"
-            android:clickable="true" />
-
-        <ImageButton
-            android:id="@+id/button1"
-            android:layout_width="@dimen/altezza_campo"
-            android:layout_height="@dimen/altezza_campo"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:src="@drawable/freccia_giu"
-            android:scaleType="fitXY"
-            android:background="@android:color/transparent" />
-
-    </RelativeLayout>
+    <ImageButton
+        android:id="@+id/button1"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="2dp"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Scegli"
+        android:scaleType="center"
+        android:src="@drawable/ic_econ_tendina" />
+</RelativeLayout>

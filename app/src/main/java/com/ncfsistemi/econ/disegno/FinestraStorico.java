@@ -108,7 +108,7 @@ public final class FinestraStorico {
         lp.topMargin = px(8);
         root.addView(sv, lp);
 
-        new MaterialAlertDialogBuilder(act).setTitle(titolo).setView(root).setPositiveButton("Chiudi", null).show();
+        new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(act).setTitle(titolo).setView(root).setPositiveButton("Chiudi", null).show();
         carica();
     }
 

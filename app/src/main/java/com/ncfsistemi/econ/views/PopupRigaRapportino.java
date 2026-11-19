@@ -196,7 +196,7 @@ public class PopupRigaRapportino {
         db.close();
 
         int titolo = isMateriale() ? R.string.articolo : isViaggio() ? R.string.tipo_viaggio : R.string.manodopera;
-        final AlertDialog dialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx)
+        final AlertDialog dialog = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(ctx)
                 .setTitle(titolo)
                 .setView(vista)
                 .setPositiveButton(nuova ? R.string.inserisci : R.string.salva, null)
@@ -211,7 +211,7 @@ public class PopupRigaRapportino {
             public void onClick(View v) {
                 String errore = compila();
                 if (errore != null) {
-                    Toast.makeText(ctx, errore, Toast.LENGTH_LONG).show();
+                    com.ncfsistemi.econ.dialogo.EconDialogo.attenzione(ctx, "Controlla la riga", errore).show();
                     return;
                 }
                 dialog.dismiss();
@@ -251,7 +251,7 @@ public class PopupRigaRapportino {
                 nomi[i] = vociUtenti.get(i).testo;
                 spunte[i] = utentiScelti.contains(vociUtenti.get(i).id);
             }
-            new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx)
+            new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(ctx)
                     .setTitle(R.string.scegli_utenti)
                     .setMultiChoiceItems(nomi, spunte, (d, i, spuntato) -> spunte[i] = spuntato)
                     .setPositiveButton(android.R.string.ok, (d, w) -> {
@@ -479,7 +479,7 @@ public class PopupRigaRapportino {
         db.close();
         if (trovati.isEmpty()) {
             // nessun articolo: si associa a uno esistente (diventa il barcode della ditta) o si crea l'articolo (STUDIO_BARCODE_ARTICOLI.md §4.1)
-            new androidx.appcompat.app.AlertDialog.Builder(ctx)
+            new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(ctx)
                     .setTitle("Barcode " + codice)
                     .setMessage("Nessun articolo con questo barcode.\n\nAssocia: cerca l'articolo nel Listino, il barcode diventa quello della tua azienda.\nNuovo articolo: lo crei con questo barcode.")
                     .setPositiveButton("Associa a un articolo", (d, w) -> {
@@ -498,7 +498,7 @@ public class PopupRigaRapportino {
         }
         if (trovati.size() == 1) {
             CampoRicerca.Voce voce = trovati.get(0);
-            new androidx.appcompat.app.AlertDialog.Builder(ctx)
+            new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(ctx)
                     .setTitle("Articolo trovato")
                     .setMessage(voce.testo + "\n\nBarcode " + codice + "\n\nLo uso in questa riga?")
                     .setPositiveButton("Usa articolo", (d, w) -> usaArticolo(voce))
@@ -508,11 +508,8 @@ public class PopupRigaRapportino {
         }
         String[] testi = new String[trovati.size()];
         for (int i = 0; i < testi.length; i++) testi[i] = trovati.get(i).testo;
-        new androidx.appcompat.app.AlertDialog.Builder(ctx)
-                .setTitle("Barcode " + codice + ": " + trovati.size() + " articoli")
-                .setItems(testi, (d, i) -> usaArticolo(trovati.get(i)))
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+        com.ncfsistemi.econ.dialogo.EconDialogo.scelta(ctx, "Barcode " + codice + ": " + trovati.size() + " articoli",
+                testi, (d, i) -> usaArticolo(trovati.get(i)));
     }
 
     /** Barcode letto e non trovato, in attesa che si scelga l'articolo a cui associarlo (null = nessuno). */
@@ -521,7 +518,7 @@ public class PopupRigaRapportino {
     /** Chiede conferma e scrive il barcode come barcode della ditta dell'articolo scelto (si invia con la sincronizzazione). */
     private void chiediAssociazione(CampoRicerca.Voce voce, String barcode) {
         String attuale = RigheRapportino.testo(voce.dati, Listini.BARCODE);
-        new androidx.appcompat.app.AlertDialog.Builder(ctx)
+        new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(ctx)
                 .setTitle("Associa il barcode " + barcode)
                 .setMessage(voce.testo + (attuale.isEmpty() ? "" : "\n\nAl posto del barcode della tua azienda " + attuale + ".")
                         + "\n\nAssocio il barcode a questo articolo?")
@@ -800,11 +797,7 @@ public class PopupRigaRapportino {
             nome.setHint("Nome");
             nome.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
             nome.setFilters(new android.text.InputFilter[] { new android.text.InputFilter.LengthFilter(50) });
-            int p = Math.round(20 * ctx.getResources().getDisplayMetrics().density);
-            android.widget.FrameLayout cornice = new android.widget.FrameLayout(ctx);
-            cornice.setPadding(p, p / 2, p, 0);
-            cornice.addView(nome);
-            new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx).setTitle(titolo).setView(cornice)
+            new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(ctx).setTitle(titolo).setView(nome)
                     .setPositiveButton(R.string.inserisci, (d, w) -> {
                         String n = nome.getText().toString().trim();
                         if (!n.isEmpty()) crea.accept(n);

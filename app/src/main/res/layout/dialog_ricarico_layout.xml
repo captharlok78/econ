@@ -1,22 +1,28 @@
-<LinearLayout 
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ricarico del preventivo (stile dei modali, STUDIO_MODALI_APP.md) -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/linear_0"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="@dimen/altezza_campo"
     android:orientation="vertical"
-    android:padding="@dimen/margine"
-   >
+    android:paddingStart="24dp"
+    android:paddingTop="4dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="8dp">
 
-    <EditText
-        android:id="@+id/editText1"
-        android:layout_width="wrap_content"
-       
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/campo_ricarico"
+        style="@style/Econ.Campo"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="5"
-        android:inputType="numberSigned" >
+        android:layout_marginTop="12dp"
+        android:hint="Ricarico %">
 
-        <requestFocus />
-    </EditText>
-
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText1"
+            style="@style/Econ.CampoTesto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberSigned" android:maxLength="4" android:selectAllOnFocus="true" />
+    </com.google.android.material.textfield.TextInputLayout>
 </LinearLayout>

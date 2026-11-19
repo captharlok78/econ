@@ -587,7 +587,7 @@ public abstract class EconActivity extends AppCompatActivity {
                 Toast.makeText(this, "Di nuovo collegato al server.", Toast.LENGTH_LONG).show();
                 return;
             }
-            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
                     .setTitle("Di nuovo collegato al server")
                     .setMessage("Hai " + nonInviate + (nonInviate == 1 ? " modifica fatta" : " modifiche fatte")
                             + " senza collegamento. Inviarle adesso? Dopo l'invio si scaricano anche gli aggiornamenti.")
@@ -698,16 +698,18 @@ public abstract class EconActivity extends AppCompatActivity {
         android.content.SharedPreferences pref = getSharedPreferences(Utility.APP_NAME, Context.MODE_PRIVATE);
         String urlAttuale = pref.getString("URL", "");
 
-        android.widget.EditText editUrl = new android.widget.EditText(this);
+        android.widget.LinearLayout corpo = com.ncfsistemi.econ.dialogo.EconDialogo.corpo(this);
+        com.google.android.material.textfield.TextInputLayout campoUrl = com.ncfsistemi.econ.dialogo.EconDialogo.campo(this,
+                "Indirizzo del server", android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_URI);
+        campoUrl.setPlaceholderText("https://www.mercurycloud.net/");
+        corpo.addView(campoUrl);
+        android.widget.EditText editUrl = campoUrl.getEditText();
         editUrl.setText(urlAttuale);
-        editUrl.setHint("http://192.168.x.x:8000/");
-        editUrl.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_URI);
-        editUrl.setSingleLine(true);
-        editUrl.setPadding(48, 24, 48, 24);
 
-        AlertDialog.Builder builder = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this);
-        builder.setTitle("Impostazioni server Mercury");
-        builder.setView(editUrl);
+        com.ncfsistemi.econ.dialogo.EconDialogo.Builder builder = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this);
+        builder.icona(com.ncfsistemi.econ.utils.FaIcone.IMPOSTAZIONI, com.ncfsistemi.econ.dialogo.EconDialogo.Tono.INFO);
+        builder.setTitle("Server");
+        builder.setView(corpo);
         builder.setPositiveButton("Salva", (dialog, which) -> {
             String nuovoUrl = editUrl.getText().toString().trim();
             if (!nuovoUrl.isEmpty() && !nuovoUrl.endsWith("/")) nuovoUrl = nuovoUrl + "/";
@@ -965,7 +967,7 @@ public abstract class EconActivity extends AppCompatActivity {
             // TODO Auto-generated method stub
             super.onPreExecute();
             if (isMostraAttesa()) {
-                AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(EconActivity.this);
+                AlertDialog.Builder ab = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(EconActivity.this);
                 ab.setMessage(EconActivity.this.getResources().getString(R.string.messaggio_caricamento_in_corso));
                 di = ab.create();
                 di.show();

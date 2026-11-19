@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tendina (Spinner) dei modali: stesso bordo dei campi, freccia a destra -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/econ_campo_bordato" />
+    <item android:drawable="@drawable/ic_econ_tendina" android:gravity="end|center_vertical" android:right="10dp" android:width="20dp" android:height="20dp" />
+</layer-list>

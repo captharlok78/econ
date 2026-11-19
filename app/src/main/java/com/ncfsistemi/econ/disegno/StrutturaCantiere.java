@@ -270,7 +270,7 @@ public final class StrutturaCantiere {
 
     /** Conferma: salva() torna null se tutto bene, altrimenti il messaggio (e la finestra resta aperta). */
     private static void dialogo(Context ctx, String titolo, Campi c, java.util.function.Supplier<String> salva, Runnable dopo) {
-        androidx.appcompat.app.AlertDialog d = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx)
+        androidx.appcompat.app.AlertDialog d = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(ctx)
                 .setTitle(titolo)
                 .setView(c.v)
                 .setNegativeButton(R.string.annulla, null)

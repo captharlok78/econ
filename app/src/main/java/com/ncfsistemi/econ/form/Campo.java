@@ -520,7 +520,7 @@ public class Campo {
 		testo.setTextColor(androidx.core.content.ContextCompat.getColor(ctx, com.ncfsistemi.econ.R.color.econ_testo_secondario));
 		box.setBoxBackgroundColor(androidx.core.content.ContextCompat.getColor(ctx, com.ncfsistemi.econ.R.color.econ_campo_bloccato));
 		if (avviso == null) return;
-		View.OnClickListener mostra = v -> new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx)
+		View.OnClickListener mostra = v -> new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(ctx)
 				.setTitle(etichetta).setMessage(avviso).setPositiveButton(android.R.string.ok, null).show();
 		box.setEndIconMode(TextInputLayout.END_ICON_CUSTOM);
 		box.setEndIconDrawable(com.ncfsistemi.econ.utils.FaIcone.drawable(ctx, com.ncfsistemi.econ.utils.FaIcone.INFO, 18));

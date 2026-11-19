@@ -1,25 +1,28 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Titolo di una riga del preventivo (stile dei modali, STUDIO_MODALI_APP.md) -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/campi"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="@dimen/margine" >
+    android:orientation="vertical"
+    android:paddingStart="24dp"
+    android:paddingTop="4dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="8dp">
 
-    <EditText
-        android:id="@+id/editText_titolo"
-        android:layout_width="wrap_content"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/campo_titolo"
+        style="@style/Econ.Campo"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:background="@android:color/transparent"
-       	android:textSize="@dimen/testo_immagine_grande"
-       	android:textColor="@android:color/holo_blue_dark"
-       	android:maxLines="5"
-       	android:maxLength="255"
-      	android:text="titolo"
-        >
+        android:layout_marginTop="12dp"
+        android:hint="Titolo">
 
-        <requestFocus />
-    </EditText>
-  
-</RelativeLayout>
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText_titolo"
+            style="@style/Econ.CampoTesto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapSentences" />
+    </com.google.android.material.textfield.TextInputLayout>
+</LinearLayout>

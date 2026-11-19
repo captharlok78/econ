@@ -1,7 +1,6 @@
 package com.ncfsistemi.econ;
 
 import androidx.appcompat.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -309,7 +308,7 @@ public class LoginActivity extends EconActivity {
                 + "contatta l'assistenza:\n\n" + com.ncfsistemi.econ.utils.Editore.nome(this)
                 + "\n" + com.ncfsistemi.econ.utils.Editore.emailAssistenza(this)
                 + (telefono.isEmpty() ? "" : "\n" + telefono);
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+        new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
                 .setTitle("Registrati")
                 .setMessage(testo)
                 .setPositiveButton("Scrivi", (d, w) -> com.ncfsistemi.econ.utils.Editore.scriviAssistenza(this, "Richiesta di accesso a iEcon", ""))
@@ -327,18 +326,21 @@ public class LoginActivity extends EconActivity {
             return;
         }
 
-        EditText etEmail = new EditText(this);
-        etEmail.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-        etEmail.setHint("Email");
+        LinearLayout corpo = com.ncfsistemi.econ.dialogo.EconDialogo.corpo(this);
+        com.google.android.material.textfield.TextInputLayout campoEmail = com.ncfsistemi.econ.dialogo.EconDialogo.campo(this, "Email",
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        corpo.addView(campoEmail);
+        EditText etEmail = campoEmail.getEditText();
         String emailSalvata = pref.getString("MERCURY_EMAIL", "");
         if (!emailSalvata.isEmpty()) {
             etEmail.setText(emailSalvata);
         }
 
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                .setTitle("Recupero password Mercury")
-                .setMessage("Inserisci la tua email: riceverai per email un codice valido un'ora.")
-                .setView(etEmail)
+        new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
+                .icona(com.ncfsistemi.econ.utils.FaIcone.CHIAVE, com.ncfsistemi.econ.dialogo.EconDialogo.Tono.INFO)
+                .setTitle("Password dimenticata")
+                .setMessage("Scrivi la tua email: ti mandiamo un codice valido un'ora.")
+                .setView(corpo)
                 .setPositiveButton("Richiedi codice", (dialog, which) -> {
                     String email = etEmail.getText().toString().trim();
                     if (email.isEmpty()) {
@@ -352,10 +354,7 @@ public class LoginActivity extends EconActivity {
     }
 
     private void inviaRichiestaResetPassword(String email) {
-        ProgressDialog progress = new ProgressDialog(this);
-        progress.setMessage("Richiesta in corso...");
-        progress.setCancelable(false);
-        progress.show();
+        com.ncfsistemi.econ.dialogo.EconDialogo.Attesa progress = com.ncfsistemi.econ.dialogo.EconDialogo.attesa(this, "Richiesta in corso…");
 
         MercuryApiService api = MercuryApiClient.getInstance(this).getService();
         api.forgotPassword(new MercuryApiService.ForgotPasswordRequest(email))
@@ -363,7 +362,7 @@ public class LoginActivity extends EconActivity {
                     @Override
                     public void onResponse(Call<MercuryApiService.ForgotPasswordResponse> call,
                                            retrofit2.Response<MercuryApiService.ForgotPasswordResponse> response) {
-                        progress.dismiss();
+                        progress.chiudi();
                         if (isFinishing() || isDestroyed()) return;
                         if (response.isSuccessful() && response.body() != null) {
                             // Il server non dice se l'email esiste e non restituisce il codice: arriva per email
@@ -376,7 +375,7 @@ public class LoginActivity extends EconActivity {
 
                     @Override
                     public void onFailure(Call<MercuryApiService.ForgotPasswordResponse> call, Throwable t) {
-                        progress.dismiss();
+                        progress.chiudi();
                         if (isFinishing() || isDestroyed()) return;
                         Utility.mostraDialog("Errore di rete", t.getMessage(), LoginActivity.this, "OK");
                     }
@@ -384,34 +383,23 @@ public class LoginActivity extends EconActivity {
     }
 
     private void mostraDialogNuovaPassword(String email) {
-        int dp16 = (int) (16 * getResources().getDisplayMetrics().density);
+        LinearLayout layout = com.ncfsistemi.econ.dialogo.EconDialogo.corpo(this);
+        layout.addView(com.ncfsistemi.econ.dialogo.EconDialogo.nota(this, "Se " + email + " è l'email di un account, ti abbiamo inviato "
+                + "un codice (valido 1 ora). Controlla anche la posta indesiderata."));
+        com.google.android.material.textfield.TextInputLayout campoCodice = com.ncfsistemi.econ.dialogo.EconDialogo.campo(this, "Codice",
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+        com.google.android.material.textfield.TextInputLayout campoNuova = com.ncfsistemi.econ.dialogo.EconDialogo.password(this,
+                "Nuova password (almeno " + com.ncfsistemi.econ.utils.CambioPassword.LUNGHEZZA_MINIMA + " caratteri)");
+        com.google.android.material.textfield.TextInputLayout campoConferma = com.ncfsistemi.econ.dialogo.EconDialogo.password(this, "Conferma password");
+        layout.addView(campoCodice);
+        layout.addView(campoNuova);
+        layout.addView(campoConferma);
+        EditText etCodice = campoCodice.getEditText();
+        EditText etNuovaPassword = campoNuova.getEditText();
+        EditText etConfermaPassword = campoConferma.getEditText();
 
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(dp16, dp16, dp16, dp16);
-
-        TextView tvCodice = new TextView(this);
-        tvCodice.setText("Se " + email + " è l'email di un account, ti abbiamo inviato un codice (valido 1 ora). "
-                + "Controlla anche la posta indesiderata.");
-        tvCodice.setPadding(0, 0, 0, dp16);
-        layout.addView(tvCodice);
-
-        EditText etCodice = new EditText(this);
-        etCodice.setHint("Codice");
-        etCodice.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
-        layout.addView(etCodice);
-
-        EditText etNuovaPassword = new EditText(this);
-        etNuovaPassword.setHint("Nuova password");
-        etNuovaPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        layout.addView(etNuovaPassword);
-
-        EditText etConfermaPassword = new EditText(this);
-        etConfermaPassword.setHint("Conferma password");
-        etConfermaPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        layout.addView(etConfermaPassword);
-
-        AlertDialog dialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+        AlertDialog dialog = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
+                .icona(com.ncfsistemi.econ.utils.FaIcone.CHIAVE, com.ncfsistemi.econ.dialogo.EconDialogo.Tono.INFO)
                 .setTitle("Imposta nuova password")
                 .setView(layout)
                 .setPositiveButton("Conferma", null)
@@ -426,17 +414,20 @@ public class LoginActivity extends EconActivity {
             String nuovaPassword = etNuovaPassword.getText().toString();
             String confermaPassword = etConfermaPassword.getText().toString();
 
+            campoCodice.setError(null);
+            campoNuova.setError(null);
+            campoConferma.setError(null);
             if (codice.isEmpty()) {
-                etCodice.setError("Inserisci il codice");
+                campoCodice.setError("Inserisci il codice");
                 return;
             }
             if (nuovaPassword.length() < com.ncfsistemi.econ.utils.CambioPassword.LUNGHEZZA_MINIMA) {
-                etNuovaPassword.setError("La password deve essere di almeno "
+                campoNuova.setError("La password deve essere di almeno "
                         + com.ncfsistemi.econ.utils.CambioPassword.LUNGHEZZA_MINIMA + " caratteri");
                 return;
             }
             if (!nuovaPassword.equals(confermaPassword)) {
-                etConfermaPassword.setError("Le password non coincidono");
+                campoConferma.setError("Le password non coincidono");
                 return;
             }
 

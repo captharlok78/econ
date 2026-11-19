@@ -42,6 +42,10 @@ public class FinestraLocaliPreferitiActivity extends EconActivity implements OnI
 		super.onCreate(savedInstanceState);
         setVisualizzazionePopup();
 		setContentView(R.layout.activity_finestra_locali_preferiti);
+		// barra blu comune delle finestre (STUDIO_MODALI_APP.md)
+		com.ncfsistemi.econ.dialogo.EconDialogo.impostaTestataFinestra(findViewById(R.id.finestra_testata), getString(R.string.locali_preferiti),
+				null, () -> chiudi(null));
+		com.ncfsistemi.econ.dialogo.Stile.contenuto(findViewById(R.id.contenitore));
 
 
 		idPreventivoSelezionato = getIntent().getIntExtra(Preventivi.ID_PREVENTIVO, 0);

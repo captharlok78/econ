@@ -3,7 +3,6 @@ package com.ncfsistemi.econ.utils;
 import androidx.appcompat.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
@@ -336,31 +335,25 @@ public class Utility {
 
 	}
 
+	// ── modali: tutti su EconDialogo (STUDIO_MODALI_APP.md §4), le firme restano quelle di sempre ──────────────────────
+
+	/** Avviso con un solo pulsante; il tono dell'icona viene dal titolo (Errore, Attenzione, altrimenti informazione). */
 	public static final void mostraDialog(String titolo, String messaggio, Context ctx, String testoOK) {
-		AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx);
-		ab.setMessage(messaggio);
-		ab.setTitle(titolo);
-		ab.setIcon(android.R.drawable.ic_dialog_alert);
-		ab.setPositiveButton(testoOK, new OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface arg0, int arg1) {
-				// TODO Auto-generated method stub
-				arg0.cancel();
-			}
-		});
-
-		AlertDialog di = ab.create();
-		di.show();
+		String t = titolo == null ? "" : titolo.toLowerCase(java.util.Locale.ITALY);
+		com.ncfsistemi.econ.dialogo.EconDialogo.Builder ab;
+		if (t.contains("errore") || t.contains("impossibile") || t.contains("fallit")) {
+			ab = com.ncfsistemi.econ.dialogo.EconDialogo.errore(ctx, titolo, messaggio);
+		} else if (t.contains("attenzione") || t.contains("avviso") || t.contains("verifica")) {
+			ab = com.ncfsistemi.econ.dialogo.EconDialogo.attenzione(ctx, titolo, messaggio);
+		} else {
+			ab = com.ncfsistemi.econ.dialogo.EconDialogo.avviso(ctx, titolo, messaggio);
+		}
+		ab.setPositiveButton(testoOK, (d, w) -> d.cancel());
+		ab.show();
 	}
 
 	/**
-	 * Mostra un popup di selezione di oggetti semplici (stringhe)
-	 * 
-	 * @param titolo
-	 * @param items
-	 * @param ctx
-	 * @param listener
+	 * Mostra un popup di selezione di oggetti semplici (stringhe): foglio dal basso sullo smartphone, dialogo sul tablet.
 	 */
 	public static final void mostraSelezioneDialog(String titolo, CharSequence[] items, Context ctx, OnClickListener listener) {
 		mostraSelezioneDialog(titolo, items, ctx, listener, true);
@@ -368,80 +361,45 @@ public class Utility {
 
 	public static final void mostraSelezioneDialog(String titolo, CharSequence[] items, Context ctx, OnClickListener listener,
 			boolean cancellabile) {
-		AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx);
-		ab.setTitle(titolo);
-		ab.setItems(items, listener);
-		ab.setIcon(android.R.drawable.ic_dialog_info);
-		AlertDialog di = ab.create();
-		di.show();
-		di.setCancelable(cancellabile);
-		di.setCanceledOnTouchOutside(cancellabile);
+		com.ncfsistemi.econ.dialogo.EconDialogo.scelta(ctx, titolo, items, listener, cancellabile);
 	}
 
+	/** Domanda con due pulsanti (stesso ascoltatore); se l'azione e' un'eliminazione il pulsante e' rosso. */
 	public static void mostraConfermaDialog(String titolo, String messaggio, Context ctx, String testoOK, String testoNO,
 			OnClickListener listener) {
-
-		AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx);
-		ab.setMessage(messaggio);
-		ab.setTitle(titolo);
-		ab.setIcon(android.R.drawable.ic_dialog_alert);
+		String ok = testoOK == null ? "" : testoOK.toLowerCase(java.util.Locale.ITALY);
+		com.ncfsistemi.econ.dialogo.EconDialogo.Builder ab = ok.contains("elimin") || ok.contains("cancell")
+				? com.ncfsistemi.econ.dialogo.EconDialogo.eliminazione(ctx, titolo, messaggio)
+				: com.ncfsistemi.econ.dialogo.EconDialogo.conferma(ctx, titolo, messaggio);
 		ab.setPositiveButton(testoOK, listener);
 		ab.setNegativeButton(testoNO, listener);
-
-		AlertDialog di = ab.create();
-
-		di.show();
-
+		ab.show();
 	}
 
-
-    public static final void mostraSelezioneMultiplaDialog(String titolo, CharSequence[] items, final boolean[] selezionati, Context ctx,
-                                                           String testoOK, String testoNO,OnClickListener listener) {
-        AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx);
-        ab.setTitle(titolo);
-        ab.setMultiChoiceItems(items, selezionati, new DialogInterface.OnMultiChoiceClickListener() {
-			@Override
-			public void onClick(DialogInterface dialogInterface, int i, boolean b) {
-				selezionati[i] = b;
-			}
-		});
-        ab.setIcon(android.R.drawable.ic_dialog_info);
-        ab.setPositiveButton(testoOK, listener);
-        ab.setNegativeButton(testoNO, listener);
-        AlertDialog di = ab.create();
-        di.show();
-
-
-    }
+	public static final void mostraSelezioneMultiplaDialog(String titolo, CharSequence[] items, final boolean[] selezionati, Context ctx,
+			String testoOK, String testoNO, OnClickListener listener) {
+		com.ncfsistemi.econ.dialogo.EconDialogo.Builder ab = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(ctx);
+		ab.setTitle(titolo);
+		ab.setMultiChoiceItems(items, selezionati, (d, i, b) -> selezionati[i] = b);
+		ab.setPositiveButton(testoOK, listener);
+		ab.setNegativeButton(testoNO, listener);
+		ab.show();
+	}
 
 	public static void mostraConfermaCancellazioneDialog(Context ctx, OnClickListener listener) {
-
-		AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx);
-		ab.setMessage(ctx.getResources().getString(R.string.conferma_cancellazione));
-		ab.setTitle(ctx.getResources().getString(R.string.attenzione));
-		ab.setIcon(android.R.drawable.ic_dialog_alert);
-		ab.setPositiveButton(ctx.getResources().getString(R.string.conferma), listener);
-		ab.setNegativeButton(ctx.getResources().getString(R.string.annulla), listener);
-
-		AlertDialog di = ab.create();
-
-		di.show();
-
+		com.ncfsistemi.econ.dialogo.EconDialogo.eliminazione(ctx, ctx.getResources().getString(R.string.attenzione),
+						ctx.getResources().getString(R.string.conferma_cancellazione))
+				.setPositiveButton(ctx.getResources().getString(R.string.elimina), listener)
+				.setNegativeButton(ctx.getResources().getString(R.string.annulla), listener)
+				.show();
 	}
 
 	public static void mostraConfermaSalvataggioDialog(Context ctx, OnClickListener listener) {
-
-		AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx);
-		ab.setMessage(ctx.getResources().getString(R.string.conferma_salvataggio));
-		ab.setTitle(ctx.getResources().getString(R.string.attenzione));
-		ab.setIcon(android.R.drawable.ic_dialog_alert);
-		ab.setPositiveButton(ctx.getResources().getString(R.string.conferma), listener);
-		ab.setNegativeButton(ctx.getResources().getString(R.string.annulla), listener);
-
-		AlertDialog di = ab.create();
-
-		di.show();
-
+		com.ncfsistemi.econ.dialogo.EconDialogo.conferma(ctx, ctx.getResources().getString(R.string.attenzione),
+						ctx.getResources().getString(R.string.conferma_salvataggio))
+				.setPositiveButton(ctx.getResources().getString(R.string.conferma), listener)
+				.setNegativeButton(ctx.getResources().getString(R.string.annulla), listener)
+				.show();
 	}
 
 	public static AlertDialog mostraDialogPersonalizzato(String titolo, Context ctx, View viewPersonalizzata, String testoOK,
@@ -454,31 +412,38 @@ public class Utility {
 		return mostraDialogPersonalizzato(titolo, icona, ctx, viewPersonalizzata, null, testoOK, testoNO, listener);
 	}
 
+	/** Dialogo con una vista propria; la tastiera si apre da sola solo se c'e' qualcosa da scrivere. */
 	public static AlertDialog mostraDialogPersonalizzato(String titolo, BitmapDrawable icona, Context ctx, View viewPersonalizzata,
 			View viewPersonalizzataTitolo, String testoOK, String testoNO, OnClickListener listener) {
-		AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx);
-
-		ab.setPositiveButton(testoOK, listener);
-		ab.setNegativeButton(testoNO, listener);
-
+		com.ncfsistemi.econ.dialogo.EconDialogo.Builder ab = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(ctx);
+		if (testoOK != null) ab.setPositiveButton(testoOK, listener);
+		if (testoNO != null) ab.setNegativeButton(testoNO, listener);
 		ab.setView(viewPersonalizzata);
-
 		if (viewPersonalizzataTitolo == null) {
 			ab.setTitle(titolo);
 		} else {
 			ab.setCustomTitle(viewPersonalizzataTitolo);
 		}
-
-		if (icona != null) {
-			ab.setIcon(icona);
-		}
-
+		if (icona != null) ab.setIcon(icona);
 		AlertDialog di = ab.create();
-
+		if (di.getWindow() != null) {
+			di.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+					| (contieneCampo(viewPersonalizzata) ? WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE
+							: WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN));
+		}
 		di.show();
-
-		di.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 		return di;
+	}
+
+	private static boolean contieneCampo(View v) {
+		if (v instanceof android.widget.EditText) return v.isEnabled() && v.getVisibility() == View.VISIBLE;
+		if (v instanceof android.view.ViewGroup) {
+			android.view.ViewGroup g = (android.view.ViewGroup) v;
+			for (int i = 0; i < g.getChildCount(); i++) {
+				if (contieneCampo(g.getChildAt(i))) return true;
+			}
+		}
+		return false;
 	}
 
 	public static void playSound(final Context ctx, int suono) {

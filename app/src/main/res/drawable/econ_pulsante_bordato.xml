@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pulsanti vecchi (Button) dentro i modali, portati allo stile dei pulsanti bordati Material 3 (dialogo/Stile) -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="20dp" />
+            <solid android:color="#D6E4F7" />
+            <stroke android:width="1dp" android:color="@color/econ_primario" />
+        </shape>
+    </item>
+    <item android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <corners android:radius="20dp" />
+            <solid android:color="#FFFFFF" />
+            <stroke android:width="1dp" android:color="@color/econ_divisore" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="20dp" />
+            <solid android:color="#FFFFFF" />
+            <stroke android:width="1dp" android:color="@color/econ_bordo_campo" />
+        </shape>
+    </item>
+</selector>

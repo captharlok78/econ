@@ -62,7 +62,7 @@ public class ImpostazioniActivity extends AppCompatActivity {
             String v = PreferenzeDispositivo.leggi(this, chiave, predefinito);
             int scelto = 0;
             for (int i = 0; i < valori.length; i++) if (valori[i].equals(v)) scelto = i;
-            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
                     .setTitle(titolo)
                     .setSingleChoiceItems(etichette, scelto, (d, i) -> {
                         PreferenzeDispositivo.salva(this, chiave, valori[i]);

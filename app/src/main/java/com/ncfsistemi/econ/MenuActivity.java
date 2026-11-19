@@ -502,7 +502,7 @@ public class MenuActivity extends EconActivity {
         succ.setOnClickListener(x -> { spostamento[0]++; disegna.run(); });
         disegna.run();
 
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+        new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
                 .setView(contenuto)
                 .setPositiveButton("Chiudi", null)
                 .show();
@@ -574,7 +574,7 @@ public class MenuActivity extends EconActivity {
         }
         android.widget.ScrollView scroll = new android.widget.ScrollView(this);
         scroll.addView(elenco);
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+        new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
                 .setTitle("I tuoi cantieri di oggi")
                 .setView(scroll)
                 .setPositiveButton("Chiudi", null)
@@ -670,7 +670,8 @@ public class MenuActivity extends EconActivity {
         tvPassword.setText("Verifica in corso...");
 
         // Cambia password in basso a sinistra (pulsante neutro), Chiudi a destra; il neutro non chiude il riquadro
-        AlertDialog finestra = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+        AlertDialog finestra = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
+                .icona(com.ncfsistemi.econ.utils.FaIcone.CLIENTE, com.ncfsistemi.econ.dialogo.EconDialogo.Tono.INFO)
                 .setTitle("Account")
                 .setView(contenuto)
                 .setNeutralButton("Cambia password", null)
@@ -863,25 +864,22 @@ public class MenuActivity extends EconActivity {
      */
     private void apriCambioPassword(TextView tvPassword) {
         if (com.ncfsistemi.econ.utils.AccessoOffline.richiedeServer(this, "Cambia password")) return;
-        int dp16 = (int) (16 * getResources().getDisplayMetrics().density);
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(dp16, dp16, dp16, 0);
+        LinearLayout layout = com.ncfsistemi.econ.dialogo.EconDialogo.corpo(this);
+        layout.addView(com.ncfsistemi.econ.dialogo.EconDialogo.nota(this, "La nuova password vale per l'app e per il portale web."));
+        com.google.android.material.textfield.TextInputLayout cAttuale = com.ncfsistemi.econ.dialogo.EconDialogo.password(this, "Password attuale");
+        com.google.android.material.textfield.TextInputLayout cNuova = com.ncfsistemi.econ.dialogo.EconDialogo.password(this,
+                "Nuova password (almeno " + com.ncfsistemi.econ.utils.CambioPassword.LUNGHEZZA_MINIMA + " caratteri)");
+        com.google.android.material.textfield.TextInputLayout cConferma = com.ncfsistemi.econ.dialogo.EconDialogo.password(this, "Conferma nuova password");
+        layout.addView(cAttuale);
+        layout.addView(cNuova);
+        layout.addView(cConferma);
+        android.widget.EditText etAttuale = cAttuale.getEditText();
+        android.widget.EditText etNuova = cNuova.getEditText();
+        android.widget.EditText etConferma = cConferma.getEditText();
 
-        android.widget.EditText etAttuale = campoPassword("Password attuale");
-        android.widget.EditText etNuova = campoPassword("Nuova password (almeno " + com.ncfsistemi.econ.utils.CambioPassword.LUNGHEZZA_MINIMA + " caratteri)");
-        android.widget.EditText etConferma = campoPassword("Conferma nuova password");
-        layout.addView(etAttuale);
-        layout.addView(etNuova);
-        layout.addView(etConferma);
-        // occhio per vedere quello che si scrive, come nel login
-        com.ncfsistemi.econ.utils.OcchioPassword.aggiungi(etAttuale);
-        com.ncfsistemi.econ.utils.OcchioPassword.aggiungi(etNuova);
-        com.ncfsistemi.econ.utils.OcchioPassword.aggiungi(etConferma);
-
-        AlertDialog dialog = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+        AlertDialog dialog = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
+                .icona(com.ncfsistemi.econ.utils.FaIcone.CHIAVE, com.ncfsistemi.econ.dialogo.EconDialogo.Tono.INFO)
                 .setTitle("Cambia password")
-                .setMessage("La nuova password vale per l'app e per il portale web.")
                 .setView(layout)
                 .setPositiveButton("Conferma", null)
                 .setNegativeButton("Annulla", null)
@@ -917,10 +915,4 @@ public class MenuActivity extends EconActivity {
         });
     }
 
-    private android.widget.EditText campoPassword(String hint) {
-        android.widget.EditText et = new android.widget.EditText(this);
-        et.setHint(hint);
-        et.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        return et;
-    }
 }

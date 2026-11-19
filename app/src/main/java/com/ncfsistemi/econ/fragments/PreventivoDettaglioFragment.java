@@ -918,7 +918,7 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 			AlertDialog di = null;
 			@Override
 			protected void onPreExecute() {
-				AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(getActivity());
+				AlertDialog.Builder ab = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(getActivity());
 				ab.setMessage(getActivity().getResources().getString(R.string.messaggio_creazione_report));
 				di = ab.create();
 				di.show();
@@ -973,7 +973,7 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 			AlertDialog di = null;
 			@Override
 			protected void onPreExecute() {
-				AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(getActivity());
+				AlertDialog.Builder ab = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(getActivity());
 				ab.setMessage(getActivity().getResources().getString(R.string.messaggio_creazione_report));
 				di = ab.create();
 				di.show();
@@ -1029,7 +1029,7 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 			AlertDialog di = null;
 			@Override
 			protected void onPreExecute() {
-				AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(getActivity());
+				AlertDialog.Builder ab = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(getActivity());
 				ab.setMessage(getActivity().getResources().getString(R.string.messaggio_creazione_report));
 				di = ab.create();
 				di.show();

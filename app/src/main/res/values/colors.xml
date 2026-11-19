@@ -11,4 +11,11 @@
     <color name="econ_sfondo">#F4F6FA</color>
     <color name="econ_testo_secondario">#5F6B7A</color>
     <color name="econ_campo_bloccato">#EEF1F5</color>
+    <!-- modali (dialogo/EconDialogo, STUDIO_MODALI_APP.md): testo, bordi dei campi, toni delle icone in testata -->
+    <color name="econ_testo">#1A2433</color>
+    <color name="econ_testo_corpo">#3D4756</color>
+    <color name="econ_bordo_campo">#9AA4B2</color>
+    <color name="econ_divisore">#E3E7ED</color>
+    <color name="econ_attenzione">#E65100</color>
+    <color name="econ_ok">#2E7D32</color>
 </resources>

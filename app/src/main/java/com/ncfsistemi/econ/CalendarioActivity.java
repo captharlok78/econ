@@ -502,7 +502,7 @@ public class CalendarioActivity extends AppCompatActivity {
 
         ScrollView scorri = new ScrollView(this);
         scorri.addView(corpo);
-        AlertDialog.Builder b = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+        AlertDialog.Builder b = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
                 .setTitle(maiuscola(nomeGiornoEsteso(giorno)))
                 .setView(scorri)
                 .setNegativeButton("Chiudi", null);
@@ -633,14 +633,14 @@ public class CalendarioActivity extends AppCompatActivity {
     private void mostraAvvisi() {
         String avvisi = GiustificativiLocali.prendiAvvisi(this);
         if (avvisi.isEmpty()) return;
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Giustificativi").setMessage(avvisi).setPositiveButton("OK", null).show();
+        new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this).setTitle("Giustificativi").setMessage(avvisi).setPositiveButton("OK", null).show();
     }
 
     /** Nuova richiesta: tipologia, dal / al, ore al giorno (vuoto = orario della ditta), note. */
     private void nuovoGiustificativo(long giorno) {
         List<GiustificativiLocali.Tipologia> tipi = GiustificativiLocali.tipologie(this);
         if (tipi.isEmpty()) {
-            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle("Giustificativi")
+            new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this).setTitle("Giustificativi")
                     .setMessage("Le tipologie (ferie, permessi…) non sono ancora sul dispositivo: fai una sincronizzazione con la rete attiva.")
                     .setPositiveButton("OK", null).show();
             return;
@@ -690,7 +690,7 @@ public class CalendarioActivity extends AppCompatActivity {
         corpo.addView(note);
         corpo.addView(nota("Più giorni: se ne crea uno per ogni giorno lavorativo. La richiesta parte da sola appena c'è rete; il coordinatore o l'amministratore la approva dal portale."));
 
-        AlertDialog d = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+        AlertDialog d = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
                 .setTitle("Chiedi un giustificativo")
                 .setView(scorri(corpo))
                 .setPositiveButton("Chiedi", null)
@@ -725,7 +725,7 @@ public class CalendarioActivity extends AppCompatActivity {
         t.setPadding(0, 0, 0, dp(8));
         corpo.addView(t);
 
-        AlertDialog.Builder b = new com.google.android.material.dialog.MaterialAlertDialogBuilder(this).setTitle(v.tipologia.descrizione).setNegativeButton("Chiudi", null);
+        AlertDialog.Builder b = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this).setTitle(v.tipologia.descrizione).setNegativeButton("Chiudi", null);
         if (!v.modificabile()) {
             corpo.addView(testo(CalendarioPersonale.ore(minuti(v.ore)) + (v.note.isEmpty() ? "" : " · " + v.note), 14, GRIGIO, false));
             if (v.eliminabile()) b.setNeutralButton("Togli", (d, w) -> togliGiustificativo(v));
@@ -762,7 +762,7 @@ public class CalendarioActivity extends AppCompatActivity {
     }
 
     private void togliGiustificativo(GiustificativiLocali.Voce v) {
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+        new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
                 .setTitle("Togli il giustificativo")
                 .setMessage(v.tipologia.descrizione + " di " + nomeGiornoEsteso(v.giorno) + "?")
                 .setPositiveButton("Togli", (d, w) -> {
@@ -803,8 +803,9 @@ public class CalendarioActivity extends AppCompatActivity {
 
     private TextView campoData() {
         TextView tv = testo("", 15, TESTO, false);
-        tv.setBackgroundResource(R.drawable.bg_input_outline);
-        tv.setPadding(dp(10), dp(10), dp(10), dp(10));
+        tv.setBackgroundResource(R.drawable.econ_campo_bordato);
+        tv.setPadding(dp(12), dp(12), dp(12), dp(12));
+        tv.setMinHeight(dp(46));
         return tv;
     }
 

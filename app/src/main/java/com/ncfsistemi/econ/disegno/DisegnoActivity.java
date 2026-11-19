@@ -408,7 +408,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
                     FinestraStorico.cantiere(this, cantiere);
                     return true;
                 case 4:
-                    new MaterialAlertDialogBuilder(this)
+                    new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
                             .setTitle("Disegno classico")
                             .setMessage("Da ora i locali si aprono con il disegno classico. Per tornare a questa schermata usa"
                                     + " \"Disegno nuovo\" nel menu del locale.")
@@ -439,7 +439,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
      * componenti e collegamenti; stesso file del portale). Le piantine si disegnano qui, il file in background.
      */
     private void esportaConformita() {
-        androidx.appcompat.app.AlertDialog attesa = new MaterialAlertDialogBuilder(this)
+        androidx.appcompat.app.AlertDialog attesa = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
                 .setMessage("Creo l'Excel per la dichiarazione di conformità…").setCancelable(false).create();
         attesa.show();
         // un giro sul thread della UI per far comparire la finestra prima di disegnare le piantine
@@ -970,17 +970,15 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         if (DisegnoDati.serveCopia(this, p, preventivo)) {
             String[] opzioni = {getString(R.string.copia_elemento_su_preventivo_corrente_senza_conteggiare),
                     getString(R.string.apri_elemento_solo_in_visualizzazione)};
-            new MaterialAlertDialogBuilder(this)
-                    .setTitle(R.string.modifiche_non_permesse_preventivo)
-                    .setItems(opzioni, (d, i) -> {
+            com.ncfsistemi.econ.dialogo.EconDialogo.scelta(this, getString(R.string.modifiche_non_permesse_preventivo),
+                opzioni, (d, i) -> {
                         if (i == 0) {
                             DisegnoDati.copiaNelPreventivo(this, p, preventivo);
                             ricarica();
                         } else {
                             DisegnoDati.apri(this, p, preventivo, true);
                         }
-                    })
-                    .show();
+                    });
         } else {
             DisegnoDati.apri(this, p, preventivo, bloccato);
         }
@@ -999,7 +997,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
     }
 
     private void elimina(DisegnoDati.Posato p) {
-        new MaterialAlertDialogBuilder(this)
+        new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
                 .setTitle("Elimina elemento")
                 .setMessage("Eliminare " + p.numero + ". " + p.nome + " con la sua composizione e i suoi collegamenti?")
                 .setPositiveButton("Elimina", (d, w) -> {
@@ -1090,7 +1088,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         lpU.leftMargin = px(12);
         riga.addView(sp, lpU);
         corpo.addView(riga);
-        androidx.appcompat.app.AlertDialog d = new MaterialAlertDialogBuilder(this)
+        androidx.appcompat.app.AlertDialog d = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(this)
                 .setTitle(nome)
                 .setView(corpo)
                 .setPositiveButton("Posa", null)

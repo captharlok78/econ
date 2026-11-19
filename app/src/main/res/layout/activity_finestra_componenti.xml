@@ -1,7 +1,18 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Finestra a tutta pagina: barra blu comune (finestra_testata, STUDIO_MODALI_APP.md) e contenuto sullo sfondo dell'app -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_econ_popup"
+    android:background="@color/econ_sfondo"
+    android:orientation="vertical">
+
+    <include layout="@layout/finestra_testata" />
+
+<FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1"
+    
     android:padding="@dimen/margine" >
 
     <RelativeLayout
@@ -10,12 +21,12 @@
         android:layout_height="wrap_content" >
         <TextView
             android:layout_width="wrap_content"
-            style="@style/TestoIntestazione"
+            style="@style/Econ.Dialogo.Etichetta"
             android:layout_height="wrap_content"
             android:layout_above="@+id/scroll_categorie"
             android:text="@string/categorie_componenti"
             android:layout_centerHorizontal="true"
-            android:textAllCaps="true"
+            android:textAllCaps="false"
             android:id="@+id/textView2" />
         <HorizontalScrollView
             android:id="@+id/scroll_categorie"
@@ -24,7 +35,7 @@
             android:layout_height="@dimen/altezza_menu_categorie"
             android:layout_alignParentBottom="true"
             android:scrollbars="none"
-            android:background="#cceeeded"
+            android:background="#FFFFFF"
             >
 
             <LinearLayout
@@ -44,6 +55,7 @@
         </HorizontalScrollView>
          <ImageButton
             android:id="@+id/imageButton_chiudi"
+            android:visibility="gone"
             style="@style/bottoneLista"
             android:layout_alignParentRight="true"
             android:onClick="chiudi"
@@ -57,9 +69,9 @@
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:textAllCaps="true"
+            android:textAllCaps="false"
             android:text="CATEGORIA"
-            style="@style/TestoIntestazioneNoPadding" />
+            style="@style/Econ.Dialogo.TitoloTestata" />
         <androidx.viewpager.widget.ViewPager
             android:layout_above="@+id/textView2"
             android:layout_below="@id/imageButton_chiudi"
@@ -75,3 +87,4 @@
     </RelativeLayout>
 
 </FrameLayout>
+</LinearLayout>

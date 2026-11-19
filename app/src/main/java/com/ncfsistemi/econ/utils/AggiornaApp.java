@@ -3,7 +3,6 @@ package com.ncfsistemi.econ.utils;
 import android.app.Activity;
 import androidx.appcompat.app.AlertDialog;
 import android.app.PendingIntent;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageInstaller;
 import android.net.Uri;
@@ -73,7 +72,7 @@ public final class AggiornaApp {
         if (agg.obbligatorio) msg.append("\n\nL'aggiornamento è obbligatorio: senza non si può usare l'app.");
         msg.append("\n\nI dati sul dispositivo restano.");
 
-        AlertDialog.Builder b = new com.google.android.material.dialog.MaterialAlertDialogBuilder(activity)
+        AlertDialog.Builder b = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(activity)
                 .setTitle(agg.obbligatorio ? "Aggiornamento obbligatorio" : "Aggiornamento disponibile")
                 .setMessage(msg.toString())
                 .setCancelable(false)
@@ -95,7 +94,7 @@ public final class AggiornaApp {
 
     private void avvia() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !activity.getPackageManager().canRequestPackageInstalls()) {
-            new com.google.android.material.dialog.MaterialAlertDialogBuilder(activity)
+            new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(activity)
                     .setTitle("Permesso necessario")
                     .setMessage("Per aggiornarsi iEcon deve poter installare app: nella pagina che si apre attiva "
                             + "\"Consenti da questa fonte\", poi torna indietro.")
@@ -117,13 +116,9 @@ public final class AggiornaApp {
 
     @SuppressWarnings("deprecation")
     private void scarica() {
-        ProgressDialog pd = new ProgressDialog(activity);
-        pd.setTitle("Aggiornamento");
-        pd.setMessage("Scaricamento di iEcon " + agg.versione + "...");
-        pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        pd.setMax(100);
-        pd.setCancelable(false);
-        pd.show();
+        com.ncfsistemi.econ.dialogo.EconDialogo.Attesa pd = com.ncfsistemi.econ.dialogo.EconDialogo.attesa(activity,
+                "Scaricamento di iEcon " + agg.versione + "…");
+        pd.avanzamento(0);
         Handler main = new Handler(Looper.getMainLooper());
 
         new Thread(() -> {
@@ -153,7 +148,7 @@ public final class AggiornaApp {
     }
 
     private void fallito(String errore) {
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(activity)
+        new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(activity)
                 .setTitle("Aggiornamento non riuscito")
                 .setMessage(errore)
                 .setCancelable(false)

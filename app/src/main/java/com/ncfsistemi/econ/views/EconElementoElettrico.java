@@ -830,7 +830,7 @@ public class EconElementoElettrico extends AbstractEconElemento {
 	 * campi.findViewById(R.id.textViewMessaggio).setVisibility(View.VISIBLE); } else {
 	 * campi.findViewById(R.id.textViewMessaggio).setVisibility(View.GONE); }
 	 * 
-	 * AlertDialog.Builder ab = new com.google.android.material.dialog.MaterialAlertDialogBuilder(getContext());
+	 * AlertDialog.Builder ab = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(getContext());
 	 * 
 	 * ab.setPositiveButton(getContext().getString(R.string.conferma), listener);
 	 * ab.setNegativeButton(getContext().getString(R.string.annulla), listener);
