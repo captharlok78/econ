@@ -195,7 +195,7 @@ public class PopupRigaRapportino {
                 : isViaggio() ? R.string.costo_trasferta : R.string.costo_fisso);
         db.close();
 
-        int titolo = isMateriale() ? R.string.articolo : isViaggio() ? R.string.tipo_viaggio : R.string.manodopera;
+        int titolo = isMateriale() ? R.string.articolo : isViaggio() ? R.string.tipo_viaggio : R.string.tipo_lavoro; // come il pulsante "Lavoro"
         final AlertDialog dialog = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(ctx)
                 .setTitle(titolo)
                 .setView(vista)
@@ -244,7 +244,10 @@ public class PopupRigaRapportino {
     public static void adattaAlloSchermo(Context ctx, View vista, AlertDialog dialog) {
         android.util.DisplayMetrics dm = ctx.getResources().getDisplayMetrics();
         float larghezzaDp = dm.widthPixels / dm.density;
-        if (larghezzaDp < 720 || dialog.getWindow() == null) return;
+        if (larghezzaDp < 720 || dialog.getWindow() == null) {
+            allineaCampi(vista);
+            return;
+        }
         int larga = Math.round(Math.min(larghezzaDp * 0.9f, 960) * dm.density);
         dialog.getWindow().setLayout(larga, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 
@@ -267,6 +270,102 @@ public class PopupRigaRapportino {
             View costo = vista.findViewById(R.id.label_prezzo);
             ((android.view.ViewGroup.MarginLayoutParams) costo.getLayoutParams()).setMarginStart(Math.round(10 * dm.density));
         }
+        allineaCampi(vista);
+    }
+
+    /**
+     * Tutti i campi della finestra alti uguali e allineati, con qualsiasi dimensione dei caratteri del dispositivo: i
+     * campi di testo (TextInputLayout) crescono col carattere, le tendine erano fisse a 56dp. A finestra aperta si
+     * misura il riquadro di un campo di testo e tendine, "Operatori" e "A costo" prendono la stessa altezza e la stessa
+     * distanza dall'alto; l'etichetta resta sempre nel bordo (come nelle tendine); in ogni riga il primo campo visibile
+     * non ha margine a sinistra.
+     */
+    public static void allineaCampi(View radice) {
+        List<View> tutte = new ArrayList<>();
+        raccogli(radice, tutte);
+        for (View v : tutte) {
+            if (v instanceof com.google.android.material.textfield.TextInputLayout) {
+                ((com.google.android.material.textfield.TextInputLayout) v).setExpandedHintEnabled(false);
+            }
+        }
+        radice.post(() -> {
+            com.google.android.material.textfield.TextInputLayout rif = null;
+            for (View v : tutte) {
+                if (v instanceof com.google.android.material.textfield.TextInputLayout && v.isShown() && v.getHeight() > 0
+                        && ((com.google.android.material.textfield.TextInputLayout) v).getEditText() != null) {
+                    rif = (com.google.android.material.textfield.TextInputLayout) v;
+                    break;
+                }
+            }
+            if (rif == null) return;
+            EditText e = rif.getEditText();
+            android.graphics.Rect r = new android.graphics.Rect(0, 0, e.getWidth(), e.getHeight());
+            rif.offsetDescendantRectToMyCoords(e, r);
+            int alto = r.top, altezza = r.height();
+            int margine = ((android.view.ViewGroup.MarginLayoutParams) rif.getLayoutParams()).topMargin;
+            int dieci = Math.round(10 * radice.getResources().getDisplayMetrics().density);
+            for (View v : tutte) {
+                if (v instanceof android.widget.Spinner || v.getId() == R.id.text_utenti) {
+                    // riquadro = figlio diretto della cornice (FrameLayout) con l'etichetta
+                    View riquadro = v;
+                    while (riquadro.getParent() instanceof View && !(riquadro.getParent() instanceof android.widget.FrameLayout)) {
+                        riquadro = (View) riquadro.getParent();
+                    }
+                    if (!(riquadro.getParent() instanceof android.widget.FrameLayout)) continue;
+                    android.widget.FrameLayout cornice = (android.widget.FrameLayout) riquadro.getParent();
+                    v.getLayoutParams().height = altezza;
+                    if (v.getId() == R.id.text_utenti) v.setMinimumHeight(altezza);
+                    ((android.view.ViewGroup.MarginLayoutParams) riquadro.getLayoutParams()).topMargin = alto;
+                    ((android.view.ViewGroup.MarginLayoutParams) cornice.getLayoutParams()).topMargin = margine;
+                    for (int i = 0; i < cornice.getChildCount(); i++) {
+                        View et = cornice.getChildAt(i);
+                        if (et == riquadro || et.getId() == R.id.text_utenti || !(et instanceof TextView) || et instanceof android.widget.Spinner) continue;
+                        ((android.view.ViewGroup.MarginLayoutParams) et.getLayoutParams()).topMargin = Math.max(0, alto - et.getHeight() / 2);
+                        et.requestLayout();
+                    }
+                    v.requestLayout();
+                    riquadro.requestLayout();
+                    cornice.requestLayout();
+                } else if (v.getId() == R.id.riquadro_a_costo) {
+                    android.view.ViewGroup.MarginLayoutParams lp = (android.view.ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                    lp.height = altezza;
+                    lp.topMargin = margine + alto;
+                    v.requestLayout();
+                }
+                // righe di campi affiancati: 10dp tra un campo e l'altro, niente prima del primo visibile
+                if (v instanceof android.widget.LinearLayout && ((android.widget.LinearLayout) v).getOrientation() == android.widget.LinearLayout.HORIZONTAL
+                        && ((android.widget.LinearLayout) v).getChildCount() > 1 && contieneCampi((android.view.ViewGroup) v)) {
+                    android.view.ViewGroup riga = (android.view.ViewGroup) v;
+                    boolean primo = true;
+                    for (int i = 0; i < riga.getChildCount(); i++) {
+                        View c = riga.getChildAt(i);
+                        if (c.getVisibility() == View.GONE || !(c.getLayoutParams() instanceof android.view.ViewGroup.MarginLayoutParams)) continue;
+                        ((android.view.ViewGroup.MarginLayoutParams) c.getLayoutParams()).setMarginStart(primo ? 0 : dieci);
+                        primo = false;
+                        c.requestLayout();
+                    }
+                }
+            }
+            radice.requestLayout();
+        });
+    }
+
+    private static void raccogli(View v, List<View> tutte) {
+        tutte.add(v);
+        if (v instanceof android.view.ViewGroup && !(v instanceof com.google.android.material.textfield.TextInputLayout)
+                && !(v instanceof android.widget.Spinner)) {
+            android.view.ViewGroup g = (android.view.ViewGroup) v;
+            for (int i = 0; i < g.getChildCount(); i++) raccogli(g.getChildAt(i), tutte);
+        }
+    }
+
+    /** Riga di campi (TextInputLayout o cornici delle tendine), non la riga dei pulsanti o della foto. */
+    private static boolean contieneCampi(android.view.ViewGroup riga) {
+        for (int i = 0; i < riga.getChildCount(); i++) {
+            View c = riga.getChildAt(i);
+            if (c instanceof com.google.android.material.textfield.TextInputLayout || c instanceof android.widget.FrameLayout) return true;
+        }
+        return false;
     }
 
     /** Porta il campo in fondo alla riga indicata con il peso dato (stessa distanza dall'alto, 10dp dal campo prima). */

@@ -76,7 +76,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginTop="10dp">
+                    android:layout_marginTop="8dp">
 
                     <Spinner
                         android:id="@+id/spinner_costruttore"
@@ -105,7 +105,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="10dp"
-                    android:layout_marginTop="10dp">
+                    android:layout_marginTop="8dp">
 
                     <Spinner
                         android:id="@+id/spinner_linea"
@@ -134,7 +134,7 @@
                     style="@style/Econ.Campo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="8dp"
                     android:hint="@string/articolo"
                     app:placeholderText="@string/cerca_3_lettere">
 
@@ -165,7 +165,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginTop="10dp">
+                    android:layout_marginTop="8dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -208,7 +208,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="10dp"
-                    android:layout_marginTop="10dp">
+                    android:layout_marginTop="8dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -251,7 +251,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="10dp"
-                    android:layout_marginTop="10dp">
+                    android:layout_marginTop="8dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -302,7 +302,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="8dp"
                     android:hint="Codice articolo"
                     app:placeholderText="Automatico">
 
@@ -320,7 +320,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="10dp"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="8dp"
                     android:hint="Barcode"
                     app:placeholderText="Facoltativo">
 
@@ -338,7 +338,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="10dp"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="8dp"
                     android:hint="Prezzo di vendita €"
                     app:placeholderText="Facoltativo">
 
@@ -355,7 +355,7 @@
                     style="@style/Econ.Campo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="8dp"
                     android:hint="Descrizione *"
                     app:placeholderText="Es. Cavo FG16OR16 3x2,5 mm²">
 
@@ -369,7 +369,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="8dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -429,7 +429,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="8dp">
 
             <Spinner
                 android:id="@+id/spinner_tipo"
@@ -459,7 +459,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="8dp">
 
             <Spinner
                 android:id="@+id/spinner_utente"
@@ -513,7 +513,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:hint="@string/ora_partenza"
             app:placeholderText="--:--">
 
@@ -531,7 +531,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:hint="@string/ora_arrivo"
             app:placeholderText="--:--">
 
@@ -556,7 +556,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:hint="@string/quantita">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -572,7 +572,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="8dp">
 
             <Spinner
                 android:id="@+id/spinner_unita"
@@ -601,7 +601,7 @@
             android:id="@+id/sezione_riga_ordine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="8dp">
 
             <Spinner
                 android:id="@+id/spinner_riga_ordine"
@@ -629,7 +629,7 @@
             style="@style/Econ.Campo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:hint="@string/note">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -651,7 +651,7 @@
                 style="@style/Econ.Campo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="8dp"
                 android:hint="@string/assistenza_tra_mesi">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -685,7 +685,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:hint="@string/costo_fisso">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -697,6 +697,7 @@
         </com.google.android.material.textfield.TextInputLayout>
         <!-- "A costo" in un riquadro alto come i campi, cosi' la riga e' uniforme -->
         <FrameLayout
+            android:id="@+id/riquadro_a_costo"
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_weight="1"
