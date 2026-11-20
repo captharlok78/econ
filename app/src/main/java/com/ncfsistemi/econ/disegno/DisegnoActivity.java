@@ -214,11 +214,9 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
         // intestazione fissa e scorre dentro il proprio riquadro
         // struttura: stesso componente della scheda del cantiere (ordine Per livello / Locali A-Z, livello a sinistra delle aree)
         LinearLayout struttura = verticale();
-        struttura.addView(StrutturaCantiere.barraOrdine(this, this::caricaStruttura));
-        // "+ Unità  + Area  + Locale" nel pannello della struttura, come nella scheda del cantiere
-        LinearLayout nuovi = bloccato ? null : StrutturaCantiere.barraNuovi(this, cantiere,
-                () -> StrutturaCantiere.padriDi(this, com.ncfsistemi.econ.CantiereSplitActivity.LOCALE, locale), this::caricaStruttura);
-        if (nuovi != null) struttura.addView(nuovi);
+        // una sola barra a icone: ordine, "+" (nuova unità/area/locale), matita, schermo intero
+        struttura.addView(StrutturaCantiere.barra(this, this::caricaStruttura, bloccato ? 0 : cantiere,
+                () -> StrutturaCantiere.padriDi(this, com.ncfsistemi.econ.CantiereSplitActivity.LOCALE, locale), this::strutturaSchermoIntero));
         View sepStruttura = separatore();
         struttura.addView(sepStruttura, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, px(1)));
         listaStruttura = new android.widget.ListView(this);
@@ -237,16 +235,7 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
             }
         });
         listaStruttura.setAdapter(adapterStruttura);
-        listaStruttura.setOnItemClickListener((parent, view, pos, id) -> {
-            android.content.ContentValues r = (android.content.ContentValues) righeStruttura.get(pos);
-            int idLocale = r.getAsInteger(StrutturaCantiere.ID);
-            if (idLocale == locale) return;
-            locale = idLocale;
-            scelto = null;
-            piantina.adatta();
-            ricarica();
-            chiudiModale();
-        });
+        listaStruttura.setOnItemClickListener((parent, view, pos, id) -> sceltoLocale(pos));
         struttura.addView(listaStruttura, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
         bloccoStruttura = blocco("STRUTTURA", struttura);
         // matita in modalità modifica (unità, area, locale): si rilegge struttura, titolo e sottotitolo
@@ -675,6 +664,39 @@ public class DisegnoActivity extends AppCompatActivity implements PiantinaView.A
             if (modo != PiantinaView.POSA) cambiaModo(PiantinaView.POSA);
             aggiornaSuggerimento();
         });
+    }
+
+    /** Locale toccato nella struttura (pannello o schermo intero): si apre nella piantina. */
+    private void sceltoLocale(int pos) {
+        android.content.ContentValues r = (android.content.ContentValues) righeStruttura.get(pos);
+        int idLocale = r.getAsInteger(StrutturaCantiere.ID);
+        if (idLocale == locale) {
+            chiudiModale();
+            return;
+        }
+        locale = idLocale;
+        scelto = null;
+        piantina.adatta();
+        ricarica();
+        chiudiModale();
+    }
+
+    /** Struttura a tutto schermo: si sceglie il locale come nel pannello. */
+    private void strutturaSchermoIntero() {
+        chiudiModale();
+        StrutturaCantiere.schermoIntero(this, "Struttura del cantiere", null, righeStruttura, new StrutturaCantiere.Selezione() {
+            @Override
+            public boolean selezionata(int posizione, android.content.ContentValues riga) {
+                return riga.getAsInteger(StrutturaCantiere.TIPO) == com.ncfsistemi.econ.CantiereSplitActivity.LOCALE
+                        && riga.getAsInteger(StrutturaCantiere.ID) == locale;
+            }
+
+            @Override
+            public boolean attiva(int posizione, android.content.ContentValues riga) {
+                return riga.getAsInteger(StrutturaCantiere.TIPO) == com.ncfsistemi.econ.CantiereSplitActivity.LOCALE;
+            }
+        }, this::caricaStruttura, bloccato ? 0 : cantiere,
+                () -> StrutturaCantiere.padriDi(this, com.ncfsistemi.econ.CantiereSplitActivity.LOCALE, locale), this::ricarica, this::sceltoLocale);
     }
 
     /** Rilegge la struttura nell'ordine scelto; la lista resta dov'era (stesso adapter). */

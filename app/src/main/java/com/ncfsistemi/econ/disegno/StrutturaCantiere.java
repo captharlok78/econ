@@ -33,7 +33,7 @@ import com.ncfsistemi.econ.utils.FaIcone;
  * (CantiereSplitActivity) e per il pannello Struttura del disegno (DisegnoActivity). Doc STUDIO_DESIGN_GRAFICA.md §15.
  * <ul>
  *     <li>{@link #righe}: legge unità, aree (con livello) e locali (con il numero di elementi) nell'ordine scelto;</li>
- *     <li>{@link #barraOrdine}: i due pulsanti "Per livello" e "Locali A-Z", ricordati e uguali nelle due maschere;</li>
+ *     <li>{@link #barra}: barra a icone (Per livello, Locali A-Z, "+" nuovo, matita, schermo intero), uguale nelle due maschere;</li>
  *     <li>{@link Adapter}: le righe nella grafica del disegno, con il livello del piano a sinistra delle aree.</li>
  * </ul>
  * Le righe sono ContentValues con TIPO (costanti di CantiereSplitActivity), NOME, ID, e LIVELLO (aree) / N_ELEMENTI (locali).
@@ -226,41 +226,82 @@ public final class StrutturaCantiere {
         }, dopo);
     }
 
-    // ------------------------------------------------------------------ nuovi (pulsanti nel pannello, al posto della barra in basso)
+    // ------------------------------------------------------------------ nuovi: un solo "+" che apre la scelta
 
     /** Proposta del padre per i nuovi: {id unità, id area} della riga scelta (0 = nessuna). */
     public interface Proposta {
         int[] padri();
     }
 
+    /** Il ruolo può inserire unità, aree e locali. */
+    public static boolean puoInserire(Context ctx) {
+        return com.ncfsistemi.econ.utils.FunzionalitaApp.puoInserire(ctx, new com.ncfsistemi.econ.db.table.Unita(), null);
+    }
+
     /**
-     * Riga "+ Unità  + Area  + Locale" sotto la barra dell'ordine (scheda cantiere e disegno): crea unità, aree e locali
-     * in una finestra, senza aprire la maschera. Null se il ruolo non può inserire.
+     * Finestra del "+": tre riquadri grandi con l'icona (Unità, Area, Locale); toccandone uno si apre l'inserimento,
+     * con unità/area proposte dalla riga scelta.
      */
-    public static LinearLayout barraNuovi(Context ctx, int idCantiere, Proposta proposta, Runnable dopo) {
-        if (!com.ncfsistemi.econ.utils.FunzionalitaApp.puoInserire(ctx, new com.ncfsistemi.econ.db.table.Unita(), null)) return null;
+    public static void nuovo(Context ctx, int idCantiere, Proposta proposta, Runnable dopo) {
         float dp = ctx.getResources().getDisplayMetrics().density;
-        LinearLayout barra = new LinearLayout(ctx);
-        barra.setOrientation(LinearLayout.HORIZONTAL);
-        barra.setGravity(Gravity.CENTER_VERTICAL);
-        barra.setPadding(Math.round(8 * dp), 0, Math.round(8 * dp), Math.round(6 * dp));
-        String[][] voci = { { "Unità", FaIcone.UNITA, "Nuova unità del cantiere" }, { "Area", FaIcone.AREA, "Nuova area di un'unità" },
-                { "Locale", FaIcone.PIU, "Nuovo locale di un'area" } };
+        LinearLayout riga = new LinearLayout(ctx);
+        riga.setOrientation(LinearLayout.HORIZONTAL);
+        riga.setPadding(Math.round(16 * dp), Math.round(8 * dp), Math.round(16 * dp), Math.round(4 * dp));
+        String[][] voci = { { FaIcone.UNITA, "Unità", "del cantiere" }, { FaIcone.AREA, "Area", "di un'unità" },
+                { FaIcone.LOCALE, "Locale", "di un'area" } };
+        androidx.appcompat.app.AlertDialog[] d = new androidx.appcompat.app.AlertDialog[1];
         for (int i = 0; i < voci.length; i++) {
-            MaterialButton b = bottone(ctx, voci[i][0], FaIcone.PIU, voci[i][2]);
-            stato(b, false);
+            LinearLayout t = new LinearLayout(ctx);
+            t.setOrientation(LinearLayout.VERTICAL);
+            t.setGravity(Gravity.CENTER);
+            t.setPadding(Math.round(6 * dp), Math.round(14 * dp), Math.round(6 * dp), Math.round(12 * dp));
+            GradientDrawable fondo = new GradientDrawable();
+            fondo.setColor(Color.WHITE);
+            fondo.setStroke(Math.round(1.5f * dp), 0xFFBBDEFB);
+            fondo.setCornerRadius(14 * dp);
+            t.setBackground(new android.graphics.drawable.RippleDrawable(ColorStateList.valueOf(BLU_CHIARO), fondo, null));
+            TextView ic = new TextView(ctx);
+            FaIcone.applica(ic, voci[i][0], null);
+            ic.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
+            ic.setTextColor(BLU);
+            ic.setGravity(Gravity.CENTER);
+            GradientDrawable cerchio = new GradientDrawable();
+            cerchio.setShape(GradientDrawable.OVAL);
+            cerchio.setColor(BLU_CHIARO);
+            ic.setBackground(cerchio);
+            t.addView(ic, new LinearLayout.LayoutParams(Math.round(56 * dp), Math.round(56 * dp)));
+            TextView nome = new TextView(ctx);
+            nome.setText(voci[i][1]);
+            nome.setTextColor(TESTO);
+            nome.setTypeface(Typeface.DEFAULT_BOLD);
+            nome.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+            nome.setGravity(Gravity.CENTER);
+            nome.setPadding(0, Math.round(8 * dp), 0, 0);
+            t.addView(nome);
+            TextView sotto = new TextView(ctx);
+            sotto.setText(voci[i][2]);
+            sotto.setTextColor(TESTO2);
+            sotto.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+            sotto.setGravity(Gravity.CENTER);
+            t.addView(sotto);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-            if (i > 0) lp.leftMargin = Math.round(6 * dp);
-            barra.addView(b, lp);
+            if (i > 0) lp.leftMargin = Math.round(10 * dp);
+            riga.addView(t, lp);
             final int quale = i;
-            b.setOnClickListener(v -> {
+            t.setOnClickListener(v -> {
+                if (d[0] != null) d[0].dismiss();
                 int[] p = proposta == null ? new int[] { 0, 0 } : proposta.padri();
                 if (quale == 0) nuovaUnita(ctx, idCantiere, dopo);
                 else if (quale == 1) nuovaArea(ctx, idCantiere, p[0], dopo);
                 else nuovoLocale(ctx, idCantiere, p[1], dopo);
             });
         }
-        return barra;
+        d[0] = new com.ncfsistemi.econ.dialogo.EconDialogo.Builder(ctx)
+                .setTitle("Aggiungi alla struttura")
+                .setView(riga)
+                .setNegativeButton(R.string.annulla, null)
+                .create();
+        d[0].show();
     }
 
     /** Padri da proporre per la riga scelta (tipo e id di CantiereSplitActivity): {id unità, id area}. */
@@ -498,46 +539,64 @@ public final class StrutturaCantiere {
         return "";
     }
 
-    // ------------------------------------------------------------------ barra dell'ordine
+    // ------------------------------------------------------------------ barra dei comandi
 
     /**
-     * I due pulsanti in cima alla struttura: "Per livello" (aree dal piano più basso) e "Locali A-Z". Si ricordano e
-     * valgono per scheda cantiere e disegno; al cambio chiama {@code cambiato} (che rilegge le righe).
+     * Barra in cima alla struttura (scheda cantiere, disegno, schermo intero), solo icone: a sinistra l'ordine "Per
+     * livello" e "Locali A-Z" (si ricordano, valgono ovunque), a destra "+" (nuova unità/area/locale, se il ruolo può
+     * inserire e {@code idCantiere} > 0), matita (modalità modifica) e "schermo intero" (se {@code ingrandisci} non è
+     * null). {@code cambiato} rilegge le righe dopo ogni cambio.
      */
-    public static LinearLayout barraOrdine(Context ctx, Runnable cambiato) {
+    public static LinearLayout barra(Context ctx, Runnable cambiato, int idCantiere, Proposta proposta, Runnable ingrandisci) {
         float dp = ctx.getResources().getDisplayMetrics().density;
         LinearLayout barra = new LinearLayout(ctx);
         barra.setOrientation(LinearLayout.HORIZONTAL);
         barra.setGravity(Gravity.CENTER_VERTICAL);
         barra.setPadding(Math.round(8 * dp), Math.round(6 * dp), Math.round(8 * dp), Math.round(6 * dp));
-        MaterialButton livelli = bottone(ctx, "Per livello", FaIcone.AREA, "Aree dal piano più basso (scantinato) al più alto");
-        MaterialButton az = bottone(ctx, "Locali A-Z", "", "Locali di ogni area in ordine alfabetico");
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        lp.rightMargin = Math.round(6 * dp);
-        barra.addView(livelli, lp);
-        barra.addView(az, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        MaterialButton livelli = icona(ctx, FaIcone.AREA, "Aree per livello, dal piano più basso (scantinato) al più alto");
+        MaterialButton az = icona(ctx, ORDINE_AZ, "Locali di ogni area in ordine alfabetico");
+        barra.addView(livelli, quadrato(ctx, false));
+        barra.addView(az, quadrato(ctx, true));
+        barra.addView(new View(ctx), new LinearLayout.LayoutParams(0, 1, 1f));
+        if (idCantiere > 0 && puoInserire(ctx)) {
+            MaterialButton piu = icona(ctx, FaIcone.PIU, "Aggiungi unità, area o locale");
+            barra.addView(piu, quadrato(ctx, true));
+            stato(piu, true);
+            piu.setOnClickListener(v -> nuovo(ctx, idCantiere, proposta, cambiato));
+        }
+        MaterialButton matita = null;
         if (puoModificare(ctx)) {
             // matita: modalità modifica (nomi, livelli, unità e aree collegate) su tutte le righe
-            MaterialButton matita = bottone(ctx, "", FaIcone.MODIFICA, "Modifica nomi, livelli e collegamenti della struttura");
-            matita.setIconPadding(0);
-            matita.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START);
-            matita.setPadding(0, 0, 0, 0);
-            LinearLayout.LayoutParams lpm = new LinearLayout.LayoutParams(Math.round(44 * dp), ViewGroup.LayoutParams.WRAP_CONTENT);
-            lpm.leftMargin = Math.round(6 * dp);
-            barra.addView(matita, lpm);
-            stato(matita, inModifica);
-            matita.setOnClickListener(v -> {
+            MaterialButton m = icona(ctx, FaIcone.MODIFICA, "Modifica nomi, livelli e collegamenti della struttura");
+            matita = m;
+            barra.addView(m, quadrato(ctx, true));
+            m.setOnClickListener(v -> {
                 inModifica = !inModifica;
-                stato(matita, inModifica);
+                stato(m, inModifica);
                 if (inModifica) {
                     android.widget.Toast.makeText(ctx, "Tocca la matita su unità, area o locale per modificarli", android.widget.Toast.LENGTH_SHORT).show();
                 }
                 cambiato.run();
             });
         }
+        if (ingrandisci != null) {
+            MaterialButton grande = icona(ctx, SCHERMO_INTERO, "Struttura a tutto schermo");
+            stato(grande, false);
+            barra.addView(grande, quadrato(ctx, true));
+            grande.setOnClickListener(v -> ingrandisci.run());
+        }
         SharedPreferences pref = ctx.getSharedPreferences(PREF, Context.MODE_PRIVATE);
-        stato(livelli, perLivello(ctx));
-        stato(az, localiAZ(ctx));
+        final MaterialButton mat = matita;
+        Runnable stati = () -> {
+            stato(livelli, perLivello(ctx));
+            stato(az, localiAZ(ctx));
+            if (mat != null) stato(mat, inModifica);
+        };
+        stati.run();
+        // tornando dallo schermo intero (o da un'altra barra) i pulsanti riprendono lo stato comune
+        barra.getViewTreeObserver().addOnWindowFocusChangeListener(focus -> {
+            if (focus) stati.run();
+        });
         livelli.setOnClickListener(v -> {
             boolean nuovo = !perLivello(ctx);
             pref.edit().putBoolean(PREF_ORDINE_LIVELLI, nuovo).apply();
@@ -551,6 +610,90 @@ public final class StrutturaCantiere {
             cambiato.run();
         });
         return barra;
+    }
+
+    private static final String ORDINE_AZ = "\uf15d";      // sort-alpha-down
+    private static final String SCHERMO_INTERO = "\uf065"; // expand
+
+    private static MaterialButton icona(Context ctx, String glifo, String suggerimento) {
+        MaterialButton b = bottone(ctx, "", glifo, suggerimento);
+        float dp = ctx.getResources().getDisplayMetrics().density;
+        b.setIcon(FaIcone.drawable(ctx, glifo, 18));
+        b.setIconPadding(0);
+        b.setIconGravity(MaterialButton.ICON_GRAVITY_TEXT_START);
+        b.setPadding(0, 0, 0, 0);
+        b.setMinWidth(0);
+        b.setMinimumWidth(0);
+        b.setMinHeight(Math.round(40 * dp));
+        b.setMinimumHeight(Math.round(40 * dp));
+        b.setCornerRadius(Math.round(12 * dp));
+        return b;
+    }
+
+    private static LinearLayout.LayoutParams quadrato(Context ctx, boolean spazioPrima) {
+        float dp = ctx.getResources().getDisplayMetrics().density;
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(Math.round(44 * dp), Math.round(40 * dp));
+        if (spazioPrima) lp.leftMargin = Math.round(6 * dp);
+        return lp;
+    }
+
+    // ------------------------------------------------------------------ schermo intero
+
+    /**
+     * La struttura in una finestra a tutto schermo (barra blu con la X, stessa barra dei comandi senza "schermo
+     * intero", stesse righe): toccando una riga attiva si chiude e la maschera fa quello che fa nel pannello
+     * ({@code scelta} con la posizione). {@code dati} è la stessa lista del pannello (riletta da {@code cambiato}).
+     */
+    public static void schermoIntero(Context ctx, CharSequence titolo, CharSequence sottotitolo, List<Object> dati, Selezione selezione,
+            Runnable cambiato, int idCantiere, Proposta proposta, Runnable dopoModifica, java.util.function.IntConsumer scelta) {
+        float dp = ctx.getResources().getDisplayMetrics().density;
+        android.app.Dialog dlg = new android.app.Dialog(ctx, R.style.AppTheme);
+        LinearLayout root = new LinearLayout(ctx);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundColor(SFONDO);
+        root.addView(com.ncfsistemi.econ.dialogo.EconDialogo.testataFinestra(ctx, titolo, sottotitolo, dlg::dismiss));
+        ListView lista = new ListView(ctx);
+        Adapter adapter = new Adapter(ctx, dati, selezione);
+        Runnable rilegge = () -> {
+            cambiato.run();
+            adapter.notifyDataSetChanged();
+        };
+        LinearLayout barra = barra(ctx, rilegge, idCantiere, proposta, null);
+        barra.setBackgroundColor(Color.WHITE);
+        barra.setPadding(Math.round(12 * dp), Math.round(8 * dp), Math.round(12 * dp), Math.round(8 * dp));
+        root.addView(barra);
+        View sep = new View(ctx);
+        sep.setBackgroundColor(0xFFE0E4EA);
+        root.addView(sep, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Math.round(dp)));
+        stileLista(lista);
+        lista.setPadding(Math.round(12 * dp), Math.round(6 * dp), Math.round(12 * dp), Math.round(16 * dp));
+        if (dopoModifica != null) {
+            adapter.setDopoModifica(() -> {
+                dopoModifica.run();
+                adapter.notifyDataSetChanged();
+            });
+        }
+        lista.setAdapter(adapter);
+        lista.setOnItemClickListener((parent, view, pos, id) -> {
+            if (!selezione.attiva(pos, (ContentValues) dati.get(pos))) return;
+            dlg.dismiss();
+            scelta.accept(pos);
+        });
+        root.addView(lista, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        dlg.setContentView(root);
+        if (dlg.getWindow() != null) {
+            dlg.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            dlg.getWindow().setStatusBarColor(BLU);
+        }
+        dlg.show();
+        // la riga scelta si vede subito
+        for (int i = 0; i < dati.size(); i++) {
+            if (selezione.selezionata(i, (ContentValues) dati.get(i))) {
+                final int pos = i;
+                lista.post(() -> lista.setSelection(Math.max(0, pos - 3)));
+                break;
+            }
+        }
     }
 
     private static MaterialButton bottone(Context ctx, String testo, String glifo, String suggerimento) {

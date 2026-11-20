@@ -88,6 +88,15 @@ public class GalleriaModaliActivity extends AppCompatActivity {
 			});
 		}
 
+		// struttura del cantiere: pannello finto (barra a icone, "+", schermo intero) senza dati veri
+		voci.put("struttura", this::strutturaFinta);
+		voci.put("strutturanuovo", () -> com.ncfsistemi.econ.disegno.StrutturaCantiere.nuovo(this, 1, null, null));
+		voci.put("strutturagrande", () -> {
+			java.util.List<Object> d = righeFinte();
+			com.ncfsistemi.econ.disegno.StrutturaCantiere.schermoIntero(this, "Struttura del cantiere", "Villa Rossi", d, selezioneFinta(),
+					() -> { }, 1, null, null, pos -> { });
+		});
+
 		ScrollView sv = new ScrollView(this);
 		LinearLayout l = new LinearLayout(this);
 		l.setOrientation(LinearLayout.VERTICAL);
@@ -102,5 +111,58 @@ public class GalleriaModaliActivity extends AppCompatActivity {
 		setContentView(sv);
 		String mostra = getIntent().getStringExtra("mostra");
 		if (mostra != null && voci.containsKey(mostra)) sv.post(() -> voci.get(mostra).run());
+	}
+
+	private java.util.List<Object> righeFinte() {
+		java.util.List<Object> d = new java.util.ArrayList<>();
+		d.add(com.ncfsistemi.econ.disegno.StrutturaCantiere.riga(com.ncfsistemi.econ.CantiereSplitActivity.CANTIERE, 1, "Villa Rossi"));
+		d.add(com.ncfsistemi.econ.disegno.StrutturaCantiere.riga(com.ncfsistemi.econ.CantiereSplitActivity.UNITA, 1, "Abitazione"));
+		String[][] aree = { { "Piano terra", "0" }, { "Primo piano", "1" } };
+		int id = 1;
+		for (String[] a : aree) {
+			android.content.ContentValues r = com.ncfsistemi.econ.disegno.StrutturaCantiere.riga(com.ncfsistemi.econ.CantiereSplitActivity.AREA, id, a[0]);
+			r.put(com.ncfsistemi.econ.disegno.StrutturaCantiere.LIVELLO, Integer.parseInt(a[1]));
+			d.add(r);
+			for (String loc : new String[] { "Cucina", "Soggiorno", "Bagno", "Camera" }) {
+				android.content.ContentValues l = com.ncfsistemi.econ.disegno.StrutturaCantiere.riga(com.ncfsistemi.econ.CantiereSplitActivity.LOCALE, id * 10 + d.size(), loc);
+				l.put(com.ncfsistemi.econ.disegno.StrutturaCantiere.N_ELEMENTI, d.size() % 4);
+				d.add(l);
+			}
+			id++;
+		}
+		return d;
+	}
+
+	private com.ncfsistemi.econ.disegno.StrutturaCantiere.Selezione selezioneFinta() {
+		return new com.ncfsistemi.econ.disegno.StrutturaCantiere.Selezione() {
+			@Override
+			public boolean selezionata(int posizione, android.content.ContentValues riga) {
+				return posizione == 4;
+			}
+
+			@Override
+			public boolean attiva(int posizione, android.content.ContentValues riga) {
+				return true;
+			}
+		};
+	}
+
+	/** Pannello della struttura largo come nella scheda cantiere, con righe di esempio. */
+	private void strutturaFinta() {
+		java.util.List<Object> d = righeFinte();
+		LinearLayout pannello = new LinearLayout(this);
+		pannello.setOrientation(LinearLayout.VERTICAL);
+		pannello.setBackgroundColor(0xFFF4F6FA);
+		android.widget.ListView lista = new android.widget.ListView(this);
+		com.ncfsistemi.econ.disegno.StrutturaCantiere.Adapter a = new com.ncfsistemi.econ.disegno.StrutturaCantiere.Adapter(this, d, selezioneFinta());
+		pannello.addView(com.ncfsistemi.econ.disegno.StrutturaCantiere.barra(this, a::notifyDataSetChanged, 1, null,
+				() -> com.ncfsistemi.econ.disegno.StrutturaCantiere.schermoIntero(this, "Struttura del cantiere", "Villa Rossi", d, selezioneFinta(),
+						a::notifyDataSetChanged, 1, null, null, pos -> { })));
+		com.ncfsistemi.econ.disegno.StrutturaCantiere.stileLista(lista);
+		lista.setAdapter(a);
+		pannello.addView(lista, new LinearLayout.LayoutParams(-1, 0, 1f));
+		LinearLayout riga = new LinearLayout(this);
+		riga.addView(pannello, new LinearLayout.LayoutParams(Math.round(300 * getResources().getDisplayMetrics().density), -1));
+		setContentView(riga);
 	}
 }

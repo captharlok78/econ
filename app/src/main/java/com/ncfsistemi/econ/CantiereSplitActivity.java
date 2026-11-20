@@ -356,23 +356,40 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 			findViewById(R.id.separatore_struttura).setVisibility(View.GONE);
 			return;
 		}
-		android.widget.LinearLayout barra = com.ncfsistemi.econ.disegno.StrutturaCantiere.barraOrdine(this, this::riordinaMantenendoSelezione);
-		// a destra c'e' il triangolo che chiude il pannello: la matita resta fuori
+		// una sola barra a icone: ordine, "+" (nuova unita'/area/locale), matita, schermo intero
+		android.widget.LinearLayout barra = com.ncfsistemi.econ.disegno.StrutturaCantiere.barra(this, this::riordinaMantenendoSelezione,
+				cantiere, this::padriProposti, this::strutturaSchermoIntero);
+		// a destra c'e' il triangolo che chiude il pannello: i pulsanti restano fuori
 		barra.setPadding(barra.getPaddingLeft(), barra.getPaddingTop(), Math.round(26 * getResources().getDisplayMetrics().density), barra.getPaddingBottom());
-		// sotto, "+ Unità  + Area  + Locale": al posto della barra grigia in basso (tolta il 19/11)
-		android.widget.LinearLayout colonna = new android.widget.LinearLayout(this);
-		colonna.setOrientation(android.widget.LinearLayout.VERTICAL);
-		colonna.addView(barra);
-		android.widget.LinearLayout nuovi = com.ncfsistemi.econ.disegno.StrutturaCantiere.barraNuovi(this, cantiere, () -> {
-			if (selezionato < 0 || selezionato >= dati.size()) return new int[] { 0, 0 };
-			ContentValues v = (ContentValues) dati.get(selezionato);
-			return com.ncfsistemi.econ.disegno.StrutturaCantiere.padriDi(this, v.getAsInteger("TIPO"), v.getAsInteger("ID"));
-		}, this::riordinaMantenendoSelezione);
-		if (nuovi != null) {
-			nuovi.setPadding(nuovi.getPaddingLeft(), 0, Math.round(26 * getResources().getDisplayMetrics().density), nuovi.getPaddingBottom());
-			colonna.addView(nuovi);
-		}
-		posto.addView(colonna);
+		posto.addView(barra);
+	}
+
+	/** Unita'/area da proporre per i nuovi: quelle della riga scelta. */
+	private int[] padriProposti() {
+		if (selezionato < 0 || selezionato >= dati.size()) return new int[] { 0, 0 };
+		ContentValues v = (ContentValues) dati.get(selezionato);
+		return com.ncfsistemi.econ.disegno.StrutturaCantiere.padriDi(this, v.getAsInteger("TIPO"), v.getAsInteger("ID"));
+	}
+
+	/** Struttura a tutto schermo: la riga toccata si apre a destra come nel pannello. */
+	private void strutturaSchermoIntero() {
+		com.ncfsistemi.econ.disegno.StrutturaCantiere.schermoIntero(this, "Struttura del cantiere", titoloCantiere == null ? null : titoloCantiere.trim(),
+				dati, new com.ncfsistemi.econ.disegno.StrutturaCantiere.Selezione() {
+					@Override
+					public boolean selezionata(int posizione, ContentValues riga) {
+						return posizione == selezionato;
+					}
+
+					@Override
+					public boolean attiva(int posizione, ContentValues riga) {
+						return true;
+					}
+				}, this::riordinaMantenendoSelezione, cantiere, this::padriProposti, () -> {
+					riordinaMantenendoSelezione();
+					if (tipoElementoSelezionato == UNITA || tipoElementoSelezionato == AREA || tipoElementoSelezionato == LOCALE) {
+						onItemClick(lista, null, selezionato, 0l);
+					}
+				}, pos -> onItemClick(lista, null, pos, 0l));
 	}
 
 	/** Ricostruisce il menu col nuovo ordine e tiene selezionata la stessa riga (stesso tipo e id). */
@@ -839,7 +856,7 @@ public class CantiereSplitActivity extends EconActivity implements OnItemClickLi
 	 * ELETTRICO.CREA (GESTIONE_ELETTRICA.md).
 	 */
 	private void applicaGestioneElettrica() {
-		// "+ Nuova unita'/area/locale" ora nel pannello della struttura (StrutturaCantiere.barraNuovi): la barra in basso
+		// "+ Nuova unita'/area/locale" ora nel pannello della struttura ("+" di StrutturaCantiere.barra): la barra in basso
 		// resta solo per le categorie della piantina classica
 		findViewById(R.id.button_nuovo_elem).setVisibility(View.GONE);
 		findViewById(R.id.nuovo_figlio).setVisibility(elettrico && menuinferiore.getVisibility() == View.VISIBLE ? View.VISIBLE : View.GONE);
