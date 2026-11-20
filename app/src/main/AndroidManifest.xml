@@ -170,6 +170,11 @@
             android:configChanges="orientation|screenSize"
             android:label="@string/ordini"></activity>
         <activity
+            android:name=".DocumentoActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/preventivi"></activity>
+        <activity
             android:name=".PreventiviDettaglioModActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize"

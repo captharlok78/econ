@@ -102,12 +102,18 @@ public class PreventiviDettaglioAdapter extends DettaglioTabellaAdapter {
 			colonne = new ArrayList<ColonnaDettaglio>();
 			colonne.add(ColonnaDettaglio.icona(COL_TIPO, "", 44));
 			colonne.add(ColonnaDettaglio.testo(COL_DESCRIZIONE, getString(R.string.descrizione), 1f));
-			colonne.add(ColonnaDettaglio.testoFisso(COL_CODICE, getString(R.string.codice), 110, Gravity.START));
-			colonne.add(ColonnaDettaglio.testoFisso(COL_PRZ_ACQ, senzaEuro(R.string.prezzo_acquisto), 84, Gravity.END));
-			colonne.add(ColonnaDettaglio.testoFisso(COL_PRZ_LIS, senzaEuro(R.string.prezzo_listino), 84, Gravity.END));
+			// smartphone: descrizione, quantita' e importo; codice, prezzi e unita' si vedono aprendo la riga
+			boolean stretto = context.getResources().getConfiguration().screenWidthDp < 600;
+			if (!stretto) {
+				colonne.add(ColonnaDettaglio.testoFisso(COL_CODICE, getString(R.string.codice), 110, Gravity.START));
+				colonne.add(ColonnaDettaglio.testoFisso(COL_PRZ_ACQ, senzaEuro(R.string.prezzo_acquisto), 84, Gravity.END));
+				colonne.add(ColonnaDettaglio.testoFisso(COL_PRZ_LIS, senzaEuro(R.string.prezzo_listino), 84, Gravity.END));
+			}
 			colonne.add(ColonnaDettaglio.custom(COL_QTA, getString(R.string.qta), 130));
-			colonne.add(ColonnaDettaglio.testoFisso(COL_UDM, getString(R.string.um_breve), 56, Gravity.CENTER));
-			colonne.add(ColonnaDettaglio.testoFisso(COL_PREZZO, senzaEuro(R.string.prezzo), 76, Gravity.END));
+			if (!stretto) {
+				colonne.add(ColonnaDettaglio.testoFisso(COL_UDM, getString(R.string.um_breve), 56, Gravity.CENTER));
+				colonne.add(ColonnaDettaglio.testoFisso(COL_PREZZO, senzaEuro(R.string.prezzo), 76, Gravity.END));
+			}
 			colonne.add(ColonnaDettaglio.testoFisso(COL_IMPORTO, senzaEuro(R.string.importo), 84, Gravity.END));
 			if (fragmnent != null && Preventivi.TIPO_ORDINE.equals(fragmnent.getTipoPreventivoOrdine())) {
 				colonne.add(ColonnaDettaglio.testoFisso(COL_RAPPORTINI, getString(R.string.rapportini), 100, Gravity.END));
@@ -551,8 +557,12 @@ public class PreventiviDettaglioAdapter extends DettaglioTabellaAdapter {
 	}
 
 	protected void apriPopupModifica(int position, String campo) {
-		// TODO Auto-generated method stub
 		ContentValues val = (ContentValues) dati.get(position);
+		// articolo del listino e lavoro: la stessa finestra della riga nuova (come nel rapportino, §6.5)
+		if (!fragmnent.isModificheBloccate() && com.ncfsistemi.econ.utils.RigheDocumento.conFinestraComune(val)) {
+			fragmnent.modificaRigaComune(val);
+			return;
+		}
 		PopupModificaRigaPreventivo popup = new PopupModificaRigaPreventivo(this, context, val, position);
 		popup.impostaFocus(campo);
 		popup.setModificheBloccate(fragmnent.isModificheBloccate());

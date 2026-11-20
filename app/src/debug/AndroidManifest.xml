@@ -7,5 +7,14 @@
             android:name=".dialogo.GalleriaModaliActivity"
             android:exported="true"
             android:theme="@style/AppTheme" />
+        <!-- scheda del documento senza login, sui dati finti dell'emulatore -->
+        <activity
+            android:name=".prova.DocumentoProvaActivity"
+            android:exported="true"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".prova.PreventiviProvaActivity"
+            android:exported="true"
+            android:theme="@style/AppTheme" />
     </application>
 </manifest>

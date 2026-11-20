@@ -1,166 +1,189 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Righe di preventivo e ordine (STUDIO_PREVENTIVI_ORDINI.md §6.5) con la grafica delle righe del rapportino: pulsanti
+    "+ Articolo / + Lavoro / + Placca / + Nota" (Placca solo con Elettro), azioni a icona (associa codici, esporta), barra
+    "modifiche da salvare" quando si cambiano quantita' o prezzi nella tabella, tabella standard con i gruppi per locale e
+    i totali in fondo. Lo usano la scheda del documento (DocumentoActivity) e la scheda del cantiere (CantiereSplitActivity).
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/content"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-   <RelativeLayout
+    <LinearLayout
         android:id="@+id/tasti_prev_dett"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-       android:background="#FFFFFF"
-        android:layout_alignParentTop="true"
-        
-         >
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-        <HorizontalScrollView
-            android:id="@+id/scroll_tasti_prev_dett"
+        <LinearLayout
+            android:id="@+id/pulsanti_righe"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_articolo"
+                style="@style/Econ.Pulsante.Tenue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:text="@string/aggiungi_articolo" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_lavoro"
+                style="@style/Econ.Pulsante.Tenue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:text="@string/aggiungi_manodopera" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_placca"
+                style="@style/Econ.Pulsante.Tenue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_weight="1"
+                android:text="@string/riga_placca" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_nota"
+                style="@style/Econ.Pulsante.Tenue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                android:text="@string/aggiungi_nota" />
+        </LinearLayout>
+
+        <!-- azioni a icona (FaIcone.azione): associa codici (Elettro), esporta -->
+        <LinearLayout
+            android:id="@+id/azioni_righe_documento"
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/altezza_campo_doppia"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true" >
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" />
+    </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/linear_tasti_prev_dett"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:background="@android:color/transparent"
-                android:divider="@drawable/divider_tab"
-                android:gravity="center_vertical"
-                
-                android:showDividers="middle" >
+    <!-- quantita'/prezzi cambiati nella tabella e non ancora salvati -->
+    <LinearLayout
+        android:id="@+id/barra_modifiche"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/bg_card_filtri"
+        android:backgroundTint="#FFF8E1"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingEnd="6dp"
+        android:visibility="gone">
 
-               
-                <ImageButton
-                    android:id="@+id/button_nuovo"
-                    style="@style/bottoneListaGrande"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:layout_marginLeft="@dimen/margine"
-                    android:layout_marginRight="@dimen/margine"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:scaleType="fitCenter"
-                    android:padding="12dp"
-                    android:src="@drawable/ic_azione_nuovo"
-                  
-                     />
-                 <ImageButton
-                    android:id="@+id/button_associa"
-                    style="@style/bottoneListaGrande"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:layout_marginLeft="@dimen/margine"
-                    android:layout_marginRight="@dimen/margine"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:scaleType="fitCenter"
-                    android:padding="12dp"
-                    android:src="@drawable/ic_azione_associa"
-                  
-                     />
-                <ImageButton
-                    android:id="@+id/button_esporta"
-                    style="@style/bottoneListaGrande"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:layout_marginLeft="@dimen/margine"
-                    android:layout_marginRight="@dimen/margine"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:scaleType="fitCenter"
-                    android:padding="12dp"
-                    android:src="@drawable/ic_azione_condividi"
-                  
-                     />
- 				<ImageButton
-                    android:id="@+id/button_salva_prev"
-                    style="@style/bottoneListaGrande"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:layout_marginLeft="@dimen/margine"
-                    android:layout_marginRight="@dimen/margine"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:scaleType="fitCenter"
-                    android:padding="12dp"
-                    android:src="@drawable/ic_azione_salva"
-                  
-                     />
-                <ImageButton
-                    android:id="@+id/button_ricalcola"
-                    style="@style/bottoneListaGrande"
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:layout_marginLeft="@dimen/margine"
-                    android:layout_marginRight="@dimen/margine"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:scaleType="fitCenter"
-                    android:padding="12dp"
-                    android:src="@drawable/ic_azione_ricalcola"
+        <TextView
+            android:id="@+id/textViewModificati"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Righe modificate, non ancora salvate"
+            android:textColor="#8D6E00"
+            android:textSize="14sp" />
 
-                    />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_salva_prev"
+            style="@style/Econ.Pulsante"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/salva"
+            app:icon="@drawable/ic_form_salva"
+            app:iconGravity="textStart" />
+    </LinearLayout>
 
- 				<TextView
- 				    android:id="@+id/textViewModificati"
- 				    android:layout_width="wrap_content"
- 				    android:layout_height="wrap_content"
- 				    android:text="@string/in_modifica"
- 				    android:textAllCaps="true"
- 				    android:padding="@dimen/margine"
- 				    android:textSize="@dimen/testo_immagine"
- 				    android:textColor="@android:color/holo_red_light" />
-                
-            </LinearLayout>
-        </HorizontalScrollView>
-
-      
-    </RelativeLayout>
-
-   
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
         <!-- Tabella standard: testata fissa + lista (dettaglio_tabella_standard.xml) -->
         <include
             android:id="@+id/tabella_dettaglio"
             layout="@layout/dettaglio_tabella_standard"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@+id/relative_totale"
-            android:layout_below="@+id/tasti_prev_dett" />
+            android:layout_height="match_parent" />
 
-        <LinearLayout 
-    android:id="@+id/LinearLayout_titolocorrente"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-   android:layout_below="@+id/tasti_prev_dett"
-   android:layout_centerHorizontal="true"
-    android:background="@drawable/bg_titolo_arrotondato"
-    android:orientation="horizontal"
-    android:paddingLeft="@dimen/margine"
-    android:paddingRight="@dimen/margine"
-    android:layout_marginTop="52dp"
-    >
-
-   
-
-        <TextView
-            android:id="@+id/localecorrente"
-            style="@style/Testo"
+        <!-- locale delle righe in vista mentre si scorre -->
+        <LinearLayout
+            android:id="@+id/LinearLayout_titolocorrente"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-          android:gravity="center_horizontal"
-            android:maxLines="2"
-            android:text="Locale"
-            android:textAllCaps="true"
-            android:textColor="#212121" />
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="44dp"
+            android:background="@drawable/bg_titolo_arrotondato"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp">
 
-       
-    
+            <TextView
+                android:id="@+id/localecorrente"
+                style="@style/Testo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:maxLines="2"
+                android:textColor="#212121" />
+        </LinearLayout>
+    </FrameLayout>
 
-</LinearLayout>
-        
-        
-        <!-- Totali statici in fondo -->
-        <include
-            android:id="@+id/relative_totale"
-            layout="@layout/barra_totali_standard"
-            android:layout_width="match_parent"
+    <!-- totali in fondo, sempre visibili -->
+    <LinearLayout
+        android:id="@+id/relative_totale"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#F4F6FA"
+        android:gravity="center_vertical|end"
+        android:orientation="horizontal"
+        android:paddingStart="14dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/textViewTotaleImponibile"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true" />
-    
-</RelativeLayout>
+            android:textColor="@color/econ_testo_secondario"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textViewTotaleIva"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="18dp"
+            android:textColor="@color/econ_testo_secondario"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/textViewTotaleImporto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="18dp"
+            android:textColor="#1565C0"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>

@@ -68,7 +68,17 @@ public class PopupRigaRapportino {
         public int idCantiere;
         public int idOrdine;
         public long data;
+        /**
+         * Riga di preventivo o ordine (STUDIO_PREVENTIVI_ORDINI.md §6.5): stessa finestra e stesso barcode, ma niente
+         * operatore, riga d'ordine e assistenza; prezzo di vendita con sconto (articolo), voce di manodopera e operatori
+         * (lavoro). La riga torna con le chiavi di RapportiniDettaglio piu' SCONTO e NUM_OPERATORI, senza completa().
+         */
+        public boolean documento;
     }
+
+    /** Chiavi in piu' della riga in modo documento. */
+    public static final String SCONTO = PreventiviDettaglio.SCONTO;
+    public static final String NUM_OPERATORI = PreventiviDettaglio.NUM_OPERATORI;
 
     private final Context ctx;
     private final String categoria;
@@ -112,14 +122,30 @@ public class PopupRigaRapportino {
 
     public void apri() {
         DbInterno db = new DbInterno(ctx);
-        List<CampoRicerca.Voce> tipi = voci(db, "select * from " + RapportiniDettaglioTipi.NOME_TABELLA + " where "
-                + RapportiniDettaglioTipi.CATEGORIA + "='" + categoria + "' order by " + RapportiniDettaglioTipi.ORDINE,
-                RapportiniDettaglioTipi.ID, RapportiniDettaglioTipi.DESCRIZIONE);
+        List<CampoRicerca.Voce> tipi;
+        if (contesto.documento && isMateriale()) {
+            tipi = new ArrayList<CampoRicerca.Voce>();
+            tipi.add(new CampoRicerca.Voce(0, "", new ContentValues()));
+        } else if (contesto.documento) {
+            // lavoro del preventivo: le voci di manodopera della ditta (tariffa e operatori proposti)
+            tipi = voci(db, "select * from " + com.ncfsistemi.econ.db.table.Manodopera.NOME_TABELLA + " order by "
+                    + com.ncfsistemi.econ.db.table.Manodopera.NOME, com.ncfsistemi.econ.db.table.Manodopera.ID_MANODOPERA,
+                    com.ncfsistemi.econ.db.table.Manodopera.NOME);
+        } else {
+            tipi = voci(db, "select * from " + RapportiniDettaglioTipi.NOME_TABELLA + " where "
+                    + RapportiniDettaglioTipi.CATEGORIA + "='" + categoria + "' order by " + RapportiniDettaglioTipi.ORDINE,
+                    RapportiniDettaglioTipi.ID, RapportiniDettaglioTipi.DESCRIZIONE);
+        }
         List<CampoRicerca.Voce> unita = voci(db, "select * from " + UnitaMisura.NOME_TABELLA + " where coalesce(" + UnitaMisura.ID + ",0)>0"
                 + (isMateriale() ? "" : " and coalesce(" + UnitaMisura.MINUTI_PER_UNITA + ",0)>0") + " order by " + UnitaMisura.UNITA_MISURA,
                 UnitaMisura.ID, null);
         if (tipi.isEmpty() || unita.isEmpty()) {
             db.close();
+            if (contesto.documento && !isMateriale() && !unita.isEmpty()) {
+                com.ncfsistemi.econ.dialogo.EconDialogo.attenzione(ctx, "Manodopera",
+                        "Non ci sono voci di manodopera sul dispositivo: si creano dal portale (Catalogo › Manodopera), poi sincronizza.").show();
+                return;
+            }
             Toast.makeText(ctx, R.string.tipi_riga_non_scaricati, Toast.LENGTH_LONG).show();
             return;
         }
@@ -145,26 +171,32 @@ public class PopupRigaRapportino {
 
         // tipo: tendina solo se ce n'e' piu' d'uno (il materiale ne ha uno solo, MA)
         imposta(spinnerTipo, tipi, RigheRapportino.intero(riga, RapportiniDettaglio.ID_TIPO), null);
-        vista.findViewById(R.id.sezione_tipo).setVisibility(tipi.size() > 1 ? View.VISIBLE : View.GONE);
+        vista.findViewById(R.id.sezione_tipo).setVisibility(contesto.documento ? (isMateriale() ? View.GONE : View.VISIBLE)
+                : tipi.size() > 1 ? View.VISIBLE : View.GONE);
+        if (contesto.documento) {
+            ((TextView) vista.findViewById(R.id.etichetta_tipo)).setText(R.string.manodopera);
+            preparaDocumento();
+        }
 
         // utente: chi puo' scegliere l'utente lo sceglie, gli altri sono fissi su se stessi; per il materiale e' facoltativo
         List<CampoRicerca.Voce> utenti = new ArrayList<CampoRicerca.Voce>();
-        if (isMateriale()) utenti.add(new CampoRicerca.Voce(0, ctx.getString(R.string.nessuno), new ContentValues()));
-        for (ContentValues ut : RegoleRapportino.operatoriSelezionabili(db, contesto.utente, contesto.idCantiere, contesto.data)) {
+        if (isMateriale() || contesto.documento) utenti.add(new CampoRicerca.Voce(0, ctx.getString(R.string.nessuno), new ContentValues()));
+        for (ContentValues ut : contesto.documento ? new ArrayList<ContentValues>()
+                : RegoleRapportino.operatoriSelezionabili(db, contesto.utente, contesto.idCantiere, contesto.data)) {
             if (contesto.soloSeStesso && RigheRapportino.intero(ut, Utenti.ID_UTENTE_DITTA) != contesto.utente.idUtenteDitta) continue;
             utenti.add(new CampoRicerca.Voce(RigheRapportino.intero(ut, Utenti.ID_UTENTE_DITTA), RegoleRapportino.nome(ut)
                     + (RigheRapportino.intero(ut, RegoleRapportino.PIANIFICATO) == 1 ? " (" + ctx.getString(R.string.pianificato) + ")" : ""), ut));
         }
         // articolo: l'utente e' chi compila (nascosto, §14); una riga esistente tiene il suo
-        int idUtente = nuova ? contesto.utente.idUtenteDitta : RigheRapportino.intero(riga, RapportiniDettaglio.ID_UTENTE_MANODOPERA);
+        int idUtente = contesto.documento ? 0 : nuova ? contesto.utente.idUtenteDitta : RigheRapportino.intero(riga, RapportiniDettaglio.ID_UTENTE_MANODOPERA);
         if (idUtente > 0 && trova(utenti, idUtente) < 0) { // utente della riga non piu' sceglibile: resta com'e'
             String nome = RegoleRapportino.nomeOperatore(db, idUtente);
             utenti.add(new CampoRicerca.Voce(idUtente, nome.isEmpty() ? "#" + idUtente : nome, new ContentValues()));
         }
         imposta(spinnerUtente, utenti, idUtente, null);
         spinnerUtente.setEnabled(utenti.size() > 1);
-        if (isMateriale()) vista.findViewById(R.id.sezione_utente).setVisibility(View.GONE);
-        piuUtenti = nuova && RapportiniDettaglioTipi.CATEGORIA_LAVORO.equals(categoria) && utenti.size() > 1;
+        if (isMateriale() || contesto.documento) vista.findViewById(R.id.sezione_utente).setVisibility(View.GONE);
+        piuUtenti = nuova && !contesto.documento && RapportiniDettaglioTipi.CATEGORIA_LAVORO.equals(categoria) && utenti.size() > 1;
         if (piuUtenti) preparaPiuUtenti(utenti, idUtente);
 
         // unita' di misura: di tempo per lavoro e viaggio (default ore / minuti), tutte per il materiale (default pezzo)
@@ -180,6 +212,10 @@ public class PopupRigaRapportino {
             Double prezzo = riga.getAsDouble(RapportiniDettaglio.PREZZO);
             editPrezzo.setText(prezzo != null && prezzo != 0 ? formatta(prezzo) : "");
             checkACosto.setChecked(RigheRapportino.intero(riga, RapportiniDettaglio.A_COSTO) == 1);
+            double sconto = RigheRapportino.decimale(riga, SCONTO);
+            ((EditText) vista.findViewById(R.id.edit_sconto)).setText(sconto > 0 ? formatta(sconto) : "");
+            int operatori = RigheRapportino.intero(riga, NUM_OPERATORI);
+            ((EditText) vista.findViewById(R.id.edit_num_operatori)).setText(operatori > 0 ? String.valueOf(operatori) : "");
         }
 
         vista.findViewById(R.id.sezione_orari).setVisibility(isViaggio() ? View.VISIBLE : View.GONE);
@@ -191,8 +227,12 @@ public class PopupRigaRapportino {
         preparaRigaOrdine(db);
 
         vista.findViewById(R.id.sezione_prezzo).setVisibility(contesto.vedePrezzi ? View.VISIBLE : View.GONE);
-        ((com.google.android.material.textfield.TextInputLayout) vista.findViewById(R.id.label_prezzo)).setHint(isMateriale() ? R.string.costo_acquisto
-                : isViaggio() ? R.string.costo_trasferta : R.string.costo_fisso);
+        if (contesto.documento) {
+            ((com.google.android.material.textfield.TextInputLayout) vista.findViewById(R.id.label_prezzo)).setHint(isMateriale() ? "Prezzo di vendita" : "Prezzo orario");
+        } else {
+            ((com.google.android.material.textfield.TextInputLayout) vista.findViewById(R.id.label_prezzo)).setHint(isMateriale() ? R.string.costo_acquisto
+                    : isViaggio() ? R.string.costo_trasferta : R.string.costo_fisso);
+        }
         db.close();
 
         int titolo = isMateriale() ? R.string.articolo : isViaggio() ? R.string.tipo_viaggio : R.string.tipo_lavoro; // come il pulsante "Lavoro"
@@ -711,6 +751,8 @@ public class PopupRigaRapportino {
     private void proponiPrezzo(CampoRicerca.Voce voce) {
         if (!contesto.vedePrezzi || voce == null || voce.dati == null || !editPrezzo.getText().toString().trim().isEmpty()) return;
         double prezzo = numero(RigheRapportino.testo(voce.dati, Listini.PRZ_VENDITA));
+        // documento: senza prezzo di vendita calcolato vale il listino (lo sconto al cliente si scrive a parte)
+        if (prezzo <= 0 && contesto.documento) prezzo = numero(RigheRapportino.testo(voce.dati, Listini.PRZ_LISTINO));
         if (prezzo > 0) editPrezzo.setText(formatta(prezzo));
     }
 
@@ -719,6 +761,10 @@ public class PopupRigaRapportino {
      * Articolo nuovo o cambiato: si propongono i suoi mesi; riga esistente con lo stesso articolo: restano quelli della riga.
      */
     private void aggiornaAssistenza(int idListino, boolean articoloCambiato) {
+        if (contesto.documento) { // nei documenti l'assistenza a tempo non c'e'
+            vista.findViewById(R.id.sezione_assistenza).setVisibility(View.GONE);
+            return;
+        }
         DbInterno db = new DbInterno(ctx);
         mesiArticolo = AssistenzeLocali.mesiArticolo(ctx, db, idListino);
         db.close();
@@ -1120,7 +1166,11 @@ public class PopupRigaRapportino {
         v.put(Listini.ID_DITTA, com.ncfsistemi.econ.utils.Sessione.getDittaSelezionata());
         v.put(Listini.NEL_LISTINO, ((CheckBox) vista.findViewById(R.id.check_nuovo_listino_ditta)).isChecked() ? 1 : 0);
         v.put(Listini.FOTO, fotoBase64 != null ? fotoBase64 : "");
-        if (contesto.vedePrezzi) {
+        if (contesto.vedePrezzi && contesto.documento) {
+            // nel documento il prezzo della riga e' quello di vendita: il costo dell'articolo resta da scrivere
+            double vendita = numero(testoCampo(R.id.edit_nuovo_prezzo_vendita));
+            v.put(Listini.PRZ_LISTINO, vendita > 0 ? vendita : numero(editPrezzo.getText().toString()));
+        } else if (contesto.vedePrezzi) {
             v.put(Listini.PRZ_LISTINO, numero(testoCampo(R.id.edit_nuovo_prezzo_vendita)));
             v.put(Listini.PRZ_ULTIMO_ACQUISTO, numero(editPrezzo.getText().toString()));
         }
@@ -1138,6 +1188,7 @@ public class PopupRigaRapportino {
         if (quantita <= 0) return ctx.getString(R.string.quantita_obbligatoria);
         int idUnita = idScelto(spinnerUnita);
         if (idUnita <= 0) return ctx.getString(R.string.unita_obbligatoria);
+        if (contesto.documento) return compilaDocumento(quantita, idUnita);
         int idUtente = piuUtenti ? (utentiScelti.isEmpty() ? 0 : utentiScelti.get(0)) : idScelto(spinnerUtente);
         if (RapportiniDettaglioTipi.CATEGORIA_LAVORO.equals(categoria) && idUtente <= 0) return ctx.getString(R.string.utente_obbligatorio);
         int idListino;
@@ -1181,6 +1232,64 @@ public class PopupRigaRapportino {
         DbInterno db = new DbInterno(ctx);
         RigheRapportino.completa(db, riga);
         db.close();
+        return null;
+    }
+
+    // ── Riga di preventivo / ordine ───────────────────────────────────────────────────────────────────────────
+
+    /** Modo documento: niente "A costo", sconto per l'articolo, operatori per il lavoro; scelta la manodopera propone tariffa e operatori. */
+    private void preparaDocumento() {
+        vista.findViewById(R.id.riquadro_a_costo).setVisibility(View.GONE);
+        vista.findViewById(R.id.label_sconto).setVisibility(isMateriale() ? View.VISIBLE : View.GONE);
+        vista.findViewById(R.id.label_operatori).setVisibility(isMateriale() ? View.GONE : View.VISIBLE);
+        if (isMateriale()) return;
+        spinnerTipo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            private boolean primo = !nuova; // riga esistente: alla prima selezione restano i suoi valori
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (primo) {
+                    primo = false;
+                    return;
+                }
+                ContentValues m = ((CampoRicerca.Voce) parent.getItemAtPosition(position)).dati;
+                double tariffa = RigheRapportino.decimale(m, com.ncfsistemi.econ.db.table.Manodopera.COSTO_ORARIO);
+                if (tariffa > 0) editPrezzo.setText(formatta(tariffa));
+                int operatori = RigheRapportino.intero(m, com.ncfsistemi.econ.db.table.Manodopera.NUM_OPERATORI_DEFAULT);
+                ((EditText) vista.findViewById(R.id.edit_num_operatori)).setText(String.valueOf(Math.max(1, operatori)));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+    }
+
+    private String compilaDocumento(double quantita, int idUnita) {
+        int idListino = 0;
+        if (isMateriale()) {
+            if (tabNuovoArticolo) {
+                String errore = controllaNuovoArticolo();
+                if (errore != null) return errore;
+                idListino = creaNuovoArticolo();
+            } else {
+                idListino = campoArticolo.getIdScelto();
+            }
+            if (idListino == 0) return ctx.getString(R.string.articolo_obbligatorio);
+        } else if (idScelto(spinnerTipo) <= 0) {
+            return "Scegli la voce di manodopera.";
+        }
+        double sconto = numero(((EditText) vista.findViewById(R.id.edit_sconto)).getText().toString());
+        if (sconto < 0 || sconto > 100) return "Lo sconto va da 0 a 100.";
+        int operatori = (int) numero(((EditText) vista.findViewById(R.id.edit_num_operatori)).getText().toString());
+        riga.put(RapportiniDettaglio.ID_TIPO, isMateriale() ? 0 : idScelto(spinnerTipo));
+        riga.put(RapportiniDettaglio.QUANTITA, quantita);
+        riga.put(RapportiniDettaglio.ID_UNITA_MISURA, idUnita);
+        riga.put(RapportiniDettaglio.ID_LISTINO, idListino);
+        riga.put(RapportiniDettaglio.NOTE, editNote.getText().toString().trim());
+        riga.put(RapportiniDettaglio.PREZZO, numero(editPrezzo.getText().toString()));
+        riga.put(SCONTO, isMateriale() ? sconto : 0);
+        riga.put(NUM_OPERATORI, isMateriale() ? 0 : Math.max(1, operatori));
         return null;
     }
 

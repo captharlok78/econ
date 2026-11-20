@@ -480,6 +480,8 @@
     <string name="nuovo_rapportino">Nuovo rapportino</string>
     <string name="aggiungi_manodopera">+ Lavoro</string>
     <string name="aggiungi_viaggio">+ Viaggio</string>
+    <string name="riga_placca">+ Placca</string>
+    <string name="aggiungi_nota">+ Nota</string>
     <string name="aggiungi_articolo">+ Articolo</string>
     <string name="firma">Firma</string>
     <string name="invia_mail">Invia mail</string>

@@ -262,13 +262,13 @@ public class Utility {
 	}
 
 	public static String formatPrezzo(float prezzo) {
-		NumberFormat format = NumberFormat.getCurrencyInstance();
+		NumberFormat format = NumberFormat.getCurrencyInstance(java.util.Locale.ITALY); // sempre euro, anche su dispositivi in un'altra lingua
 
 		return format.format(prezzo);
 	}
 
 	public static String formatPrezzo(double prezzo) {
-		NumberFormat format = NumberFormat.getCurrencyInstance();
+		NumberFormat format = NumberFormat.getCurrencyInstance(java.util.Locale.ITALY); // sempre euro, anche su dispositivi in un'altra lingua
 
 		return format.format(prezzo);
 	}

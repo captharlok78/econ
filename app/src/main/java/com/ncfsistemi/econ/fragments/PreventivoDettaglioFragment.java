@@ -86,13 +86,11 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 	private PreventiviDettaglioAdapter adapter = null;
 
 	private ArrayList<Object> dati = null;
-	private ImageButton buttonSalva = null;
-	private ImageButton buttonEsporta = null;
-	private ImageButton buttonNuovo = null;
-	private ImageButton buttonAssocia = null;
-	private ImageButton buttonRicalcola = null;
-
-	private TextView righeInModifica = null;
+	private View buttonSalva = null;
+	/** Barra "righe modificate, non ancora salvate" con il pulsante Salva. */
+	private View barraModifiche = null;
+	private View pulsantiRighe = null;
+	private android.widget.LinearLayout azioniDocumento = null;
 	private TextView textViewTotaleImponibile = null;
 	private TextView textViewTotaleIVA = null;
 	private TextView textViewTotaleImporto = null;
@@ -137,24 +135,44 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 
 		descrizioneLocale = (TextView) linearTitolo.findViewById(R.id.localecorrente);
 
-		buttonNuovo = (ImageButton) v.findViewById(R.id.button_nuovo);
-		buttonNuovo.setOnClickListener(this);
-		buttonAssocia = (ImageButton) v.findViewById(R.id.button_associa);
-		buttonAssocia.setOnClickListener(this);
+		// nuove righe come nel rapportino (STUDIO_PREVENTIVI_ORDINI.md §6.5); placca, elementi e codici solo con Elettro
+		boolean elettrico = com.ncfsistemi.econ.utils.FunzionalitaApp.haModulo(getActivity(), com.ncfsistemi.econ.utils.FunzionalitaApp.ELETTRICO);
+		pulsantiRighe = v.findViewById(R.id.pulsanti_righe);
+		v.findViewById(R.id.button_articolo).setOnClickListener(x -> nuovaRigaComune(com.ncfsistemi.econ.db.table.RapportiniDettaglioTipi.CATEGORIA_MATERIALE));
+		v.findViewById(R.id.button_lavoro).setOnClickListener(x -> nuovaRigaComune(com.ncfsistemi.econ.db.table.RapportiniDettaglioTipi.CATEGORIA_LAVORO));
+		v.findViewById(R.id.button_placca).setOnClickListener(x -> nuovaPlacca());
+		v.findViewById(R.id.button_placca).setVisibility(elettrico ? View.VISIBLE : View.GONE);
+		v.findViewById(R.id.button_nota).setOnClickListener(x -> nuovaNota());
+		com.ncfsistemi.econ.views.BarraPulsanti.inUnaRiga((android.widget.LinearLayout) pulsantiRighe);
+		if (getResources().getConfiguration().screenWidthDp < 600) {
+			// smartphone: i quattro pulsanti su tutta la riga, le azioni a icona sotto a destra
+			android.widget.LinearLayout tasti = v.findViewById(R.id.tasti_prev_dett);
+			tasti.setOrientation(android.widget.LinearLayout.VERTICAL);
+			tasti.setGravity(android.view.Gravity.END);
+			pulsantiRighe.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+			// colonne ridotte (adapter): la tabella sta nello schermo senza scorrere in orizzontale
+			((ViewGroup) v.findViewById(R.id.tabella_dettaglio)).getChildAt(0).setMinimumWidth(0);
+			for (int i = 0; i < ((ViewGroup) pulsantiRighe).getChildCount(); i++) {
+				View b = ((ViewGroup) pulsantiRighe).getChildAt(i);
+				b.setPadding(0, b.getPaddingTop(), 0, b.getPaddingBottom());
+				((com.google.android.material.button.MaterialButton) b).setMinWidth(0);
+				((com.google.android.material.button.MaterialButton) b).setMinimumWidth(0);
+			}
+		}
+		azioniDocumento = v.findViewById(R.id.azioni_righe_documento);
+		if (elettrico) {
+			azioniDocumento.addView(com.ncfsistemi.econ.utils.FaIcone.azione(getActivity(), com.ncfsistemi.econ.utils.FaIcone.IMPIANTO,
+					"Elementi e componenti", x -> nuovoElementoCantiere()));
+			azioniDocumento.addView(com.ncfsistemi.econ.utils.FaIcone.azione(getActivity(), com.ncfsistemi.econ.utils.FaIcone.CODICE,
+					"Associa i codici degli articoli", x -> associaCodici()));
+		}
+		azioniDocumento.addView(com.ncfsistemi.econ.utils.FaIcone.azione(getActivity(), com.ncfsistemi.econ.utils.FaIcone.XLS,
+				"Esporta e importa", x -> esporta()));
 
-		buttonSalva = (ImageButton) v.findViewById(R.id.button_salva_prev);
+		buttonSalva = v.findViewById(R.id.button_salva_prev);
 		buttonSalva.setOnClickListener(this);
-
-		buttonEsporta = (ImageButton) v.findViewById(R.id.button_esporta);
-		buttonEsporta.setOnClickListener(this);
-
-		buttonRicalcola = (ImageButton) v.findViewById(R.id.button_ricalcola);
-		buttonRicalcola.setOnClickListener(this);
-
-		// buttonSalva.setVisibility(View.GONE);
-
-		righeInModifica = (TextView) v.findViewById(R.id.textViewModificati);
-		righeInModifica.setVisibility(View.GONE);
+		barraModifiche = v.findViewById(R.id.barra_modifiche);
+		barraModifiche.setVisibility(View.GONE);
 
 		textViewTotaleImponibile = (TextView) v.findViewById(R.id.textViewTotaleImponibile);
 		textViewTotaleIVA = (TextView) v.findViewById(R.id.textViewTotaleIva);
@@ -175,17 +193,10 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 
 		ricerca();
 
-		if (isModificheBloccate()) {
-			buttonSalva.setVisibility(View.GONE);
-			buttonAssocia.setVisibility(View.GONE);
-			buttonNuovo.setVisibility(View.GONE);
-			buttonRicalcola.setVisibility(View.GONE);
-		} else {
-			buttonSalva.setVisibility(View.VISIBLE);
-			buttonAssocia.setVisibility(View.VISIBLE);
-			buttonNuovo.setVisibility(View.VISIBLE);
-			buttonRicalcola.setVisibility(View.GONE);
-			//buttonRicalcola.setVisibility(View.VISIBLE);
+		// documento non piu' modificabile: niente nuove righe ne' associazioni, resta l'esportazione
+		pulsantiRighe.setVisibility(isModificheBloccate() ? View.GONE : View.VISIBLE);
+		for (int i = 0; i < azioniDocumento.getChildCount() - 1; i++) {
+			azioniDocumento.getChildAt(i).setVisibility(isModificheBloccate() ? View.GONE : View.VISIBLE);
 		}
 	}
 
@@ -633,6 +644,8 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 		}
 
 		ricalcolaTotali();
+		// scheda del documento: conteggio delle righe nel titolo della sezione
+		if (getActivity() instanceof com.ncfsistemi.econ.DocumentoActivity) ((com.ncfsistemi.econ.DocumentoActivity) getActivity()).righeCambiate();
 
 		System.out.println("Econ: PreventivoDettaglioFragment ricerca EXIT");
 	}
@@ -643,15 +656,22 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 
-		if (v.getId() == R.id.button_nuovo) {
-			nuovaRiga();
-		}
+		if (v.getId() == R.id.button_salva_prev) {
+			Utility.mostraConfermaSalvataggioDialog(getEconActivity(), new DialogInterface.OnClickListener() {
 
-		if (v.getId() == R.id.button_associa) {
-			associaCodici();
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					if (which == DialogInterface.BUTTON_POSITIVE) {
+						salvaModifiche();
+					}
+				}
+			});
 		}
+	}
 
-		if (v.getId() == R.id.button_esporta) {
+	/** Esporta (materiale, documento, scatole, consuntivo) e importa i prezzi da Excel. */
+	private void esporta() {
+		{
 			String[] opzioni = null;
 			// if (tipoPreventivoOrdine.equals(Preventivi.TIPO_ORDINE)) {
 			opzioni = new String[6];
@@ -765,31 +785,6 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 
 		}
 
-		if (v.getId() == R.id.button_salva_prev) {
-			Utility.mostraConfermaSalvataggioDialog(getEconActivity(), new DialogInterface.OnClickListener() {
-
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					// TODO Auto-generated method stub
-					if (which == DialogInterface.BUTTON_POSITIVE) {
-						salvaModifiche();
-					}
-
-				}
-			});
-
-		}
-
-		if (v.getId() == R.id.button_ricalcola){
-			Utility.mostraConfermaDialog(getString(R.string.attenzione), getString(R.string.conferma_ricalcolo_preventivo_ordine), getEconActivity(), getString(R.string.conferma), getString(R.string.annulla), new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialogInterface, int which) {
-					if (which == DialogInterface.BUTTON_POSITIVE) {
-
-					}
-				}
-			});
-		}
 	}
 
 	protected void importaPrezziDaXLS() {
@@ -895,12 +890,7 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 							if (errore.equals("")) {
 								// faccio il clear prima della ricerca per pulire i flag delle righe in modifca
 								dati.clear();
-								if (righeInModifica.getAnimation() != null) {
-									righeInModifica.getAnimation().cancel();
-								}
-
-								righeInModifica.setVisibility(View.GONE);
-								buttonSalva.setBackgroundResource(R.drawable.bg_bottone_rotondo);
+								barraModifiche.setVisibility(View.GONE);
 								ricerca();
 							} else {
 								Toast.makeText(getEconActivity(), errore, Toast.LENGTH_LONG).show();
@@ -1073,31 +1063,52 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 		task.execute();
     }
 
-	private void nuovaRiga() {
-		// TODO Auto-generated method stub
-		String[] items = new String[4];
-		items[0] = getString(R.string.materiale);
-		items[1] = getString(R.string.placca);
-		items[2] = getString(R.string.manodopera);
-		items[3] = getString(R.string.nota);
+	/**
+	 * Articolo (listino o barcode) o lavoro con la finestra della riga del rapportino in modo documento
+	 * (STUDIO_PREVENTIVI_ORDINI.md §6.5); la riga si scrive subito nel documento.
+	 */
+	private void nuovaRigaComune(String categoria) {
+		apriFinestraComune(categoria, null);
+	}
 
-		Utility.mostraSelezioneDialog(getString(R.string.nuova_riga_prev), items, getActivity(), new DialogInterface.OnClickListener() {
+	/** Modifica di una riga articolo/lavoro con la stessa finestra (dall'adapter). */
+	public void modificaRigaComune(ContentValues pd) {
+		apriFinestraComune(null, pd);
+	}
 
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				// TODO Auto-generated method stub
-				if (which == 0) {
-					Intent intent = new Intent(getActivity(), FinestraListinoBaseActivity.class);
+	private void apriFinestraComune(String categoria, final ContentValues pd) {
+		if (pd == null && isModificheBloccate()) {
+			Utility.mostraDialog(getString(R.string.attenzione), getString(R.string.modifiche_non_permesse), getActivity(), "OK");
+			return;
+		}
+		ContentValues riga = null;
+		final int idRiga = pd == null ? 0 : pd.getAsInteger(PreventiviDettaglio.ID_PREVENTIVO_DETTAGLIO);
+		if (pd != null) {
+			DbInterno db = new DbInterno(getActivity());
+			riga = com.ncfsistemi.econ.utils.RigheDocumento.perFinestra(db, pd);
+			db.close();
+		}
+		new com.ncfsistemi.econ.views.PopupRigaRapportino(getActivity(), categoria, riga,
+				com.ncfsistemi.econ.utils.RigheDocumento.contesto(idCantiere), r -> {
+					if (isModificheBloccate()) return;
+					if (adapter != null && idRiga != 0) adapter.getRigheInModifica().remove(idRiga);
+					DbInterno db = new DbInterno(getActivity());
+					com.ncfsistemi.econ.utils.RigheDocumento.salva(db, idPreventivo, idRiga, r);
+					db.close();
+					ricerca();
+				}).apri();
+	}
 
-					intent.putExtra(Cantieri.ID_CANTIERE, idCantiere);
-					intent.putExtra(Preventivi.ID_PREVENTIVO, idPreventivo);
+	/** Elementi e componenti del catalogo elettrico fuori dai locali (Elettro), come prima con "Materiale". */
+	private void nuovoElementoCantiere() {
+		Intent intent = new Intent(getActivity(), FinestraListinoBaseActivity.class);
+		intent.putExtra(Cantieri.ID_CANTIERE, idCantiere);
+		intent.putExtra(Preventivi.ID_PREVENTIVO, idPreventivo);
+		intent.putExtra("DESC_PREVENTIVO", getArguments() != null ? getArguments().getString("DESC_PREVENTIVO") : "");
+		startActivity(intent);
+	}
 
-					intent.putExtra("DESC_PREVENTIVO", getArguments().getString("DESC_PREVENTIVO"));
-
-					startActivity(intent);
-				}
-
-				if (which == 1) {
+	private void nuovaPlacca() {
 					DbInterno db = new DbInterno(getEconActivity());
 					Preventivi tabPrev = new Preventivi();
 
@@ -1107,40 +1118,10 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 					PopupAggiungiPlaccaPreventivo popPlacca = new PopupAggiungiPlaccaPreventivo(getEconActivity(), valCant, idPreventivo,
 							PreventivoDettaglioFragment.this);
 					popPlacca.apriPopup();
-				}
+				
+	}
 
-				if (which == 2) {
-					View campi = View.inflate(getEconActivity(), R.layout.dialog_sel_manodopera_layout, null);
-					final EconSpinner spinnerManodopera = (EconSpinner) campi.findViewById(R.id.econSpinner_manodopera);
-					spinnerManodopera.setTabella(new Manodopera());
-					DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							// TODO Auto-generated method stub
-							if (which == DialogInterface.BUTTON_POSITIVE) {
-								String idManodopera = spinnerManodopera.getValue();
-								if (!idManodopera.trim().equals("")) {
-									DbInterno db = new DbInterno(getEconActivity());
-									ContentValues whereManodopera = new ContentValues();
-									whereManodopera.put(Manodopera.ID_MANODOPERA, idManodopera);
-									ContentValues valMano = db.getRecord(new Manodopera(), whereManodopera);
-
-									PreventiviDettaglio pd = new PreventiviDettaglio();
-									pd.aggiornaRigaMaterialePreventivo(db, idPreventivo, valMano, 1, PreventiviDettaglio.MANOPERA, false);
-									db.close();
-									ricerca();
-								}
-							}
-						}
-					};
-
-					Utility.mostraDialogPersonalizzato(getString(R.string.seleziona_manodopera), getEconActivity(), campi,
-							getString(R.string.conferma), getString(R.string.annulla), listener);
-
-				}
-
-				if (which == 3) {
+	private void nuovaNota() {
 					View campi = View.inflate(getEconActivity(), R.layout.dialog_nota_preventivo_layout, null);
 					final EditText campoNota = (EditText) campi.findViewById(R.id.editText_nota);
 					final EditText campoImporto = (EditText) campi.findViewById(R.id.editText_importo);
@@ -1168,9 +1149,7 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 					};
 					Utility.mostraDialogPersonalizzato(getString(R.string.nuova_riga_prev), getEconActivity(), campi,
 							getString(R.string.conferma), getString(R.string.annulla), listener);
-				}
-			}
-		});
+				
 	}
 
 	private void salvaModifiche() {
@@ -1217,12 +1196,8 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 		if (errore.equals("")) {
 			// faccio il clear prima della ricerca per pulire i flag delle righe in modifca
 			dati.clear();
-			if (righeInModifica.getAnimation() != null) {
-				righeInModifica.getAnimation().cancel();
-			}
 
-			righeInModifica.setVisibility(View.GONE);
-			buttonSalva.setBackgroundResource(R.drawable.bg_bottone_rotondo);
+			barraModifiche.setVisibility(View.GONE);
 			ricerca();
 		} else {
 			Toast.makeText(getEconActivity(), errore, Toast.LENGTH_LONG).show();
@@ -1231,21 +1206,8 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 	}
 
 	public void setInModifica() {
-		// TODO Auto-generated method stub
-
 		ricalcolaTotali();
-		righeInModifica.setVisibility(View.VISIBLE);
-		AlphaAnimation animation = new AlphaAnimation(1, 0);
-		animation.setDuration(200);
-		animation.setStartOffset(300);
-		animation.setFillAfter(true);
-
-		animation.setRepeatCount(Animation.INFINITE);
-		animation.setRepeatMode(Animation.REVERSE);
-
-		righeInModifica.startAnimation(animation);
-		buttonSalva.setBackgroundResource(R.drawable.bg_bottone_rotondo_rosso);
-
+		barraModifiche.setVisibility(View.VISIBLE);
 	}
 
 	public boolean isRigaLocale(int position) {
@@ -1268,9 +1230,9 @@ public class PreventivoDettaglioFragment extends EconFragment implements OnClick
 			totaleIva = mappaTotali.get("IVA");
 			totaleImporto = mappaTotali.get("IMPORTO");
 
-			textViewTotaleImponibile.setText(getString(R.string.tot_imponibile) + " " + Utility.formatPrezzo(totaleImponibile));
-			textViewTotaleIVA.setText(getString(R.string.tot_iva) + " " + Utility.formatPrezzo(totaleIva));
-			textViewTotaleImporto.setText(getString(R.string.tot_importo) + " " + Utility.formatPrezzo(totaleImporto));
+			textViewTotaleImponibile.setText("Imponibile " + Utility.formatPrezzo(totaleImponibile));
+			textViewTotaleIVA.setText("IVA " + Utility.formatPrezzo(totaleIva));
+			textViewTotaleImporto.setText("Totale " + Utility.formatPrezzo(totaleImporto));
 
 		}
 	}

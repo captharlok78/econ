@@ -32,6 +32,7 @@ import com.ncfsistemi.econ.db.table.Anagrafica;
 import com.ncfsistemi.econ.db.table.Cantieri;
 import com.ncfsistemi.econ.db.table.ElementiCantiere;
 import com.ncfsistemi.econ.db.table.Preventivi;
+import com.ncfsistemi.econ.db.table.PreventiviDettaglio;
 import com.ncfsistemi.econ.lista.EconListaStandardController;
 import com.ncfsistemi.econ.lista.EconListaStandardDefinition;
 import com.ncfsistemi.econ.lista.EconListaStandardFragment;
@@ -215,62 +216,7 @@ public class PreventiviListaFragment extends EconListaStandardFragment {
     }
 
     public void trasformaInOrdine(final ContentValues val) {
-        Utility.mostraConfermaDialog(getString(R.string.attenzione), getString(R.string.messaggio_trasformazione_preventivi),
-                getActivity(), getString(R.string.conferma), getString(R.string.annulla), (dialog, which) -> {
-                    if (which == DialogInterface.BUTTON_POSITIVE) {
-                        ArrayList<Object> elementiModificatiCantiere = _getElementiModificatiCantiere(val.getAsInteger(Preventivi.ID_PREVENTIVO));
-                        if (elementiModificatiCantiere.size() > 0) {
-                            StringBuilder messaggio = new StringBuilder("I seguenti elementi del cantiere verranno sostituiti se confermi la "
-                                    + "trasformazione del preventivo in ordine. Se gli elementi appartenevano ad un ordine aperto, saranno "
-                                    + "tolti dall'ordine e conteggiati nel nuovo ordine derivante dal preventivo trasformato:\n");
-                            for (Object o : elementiModificatiCantiere) {
-                                ContentValues valMod = (ContentValues) o;
-                                messaggio.append(valMod.getAsString(ElementiCantiere.NUMERO_IDENTIFICATIVO)).append(" - ")
-                                        .append(valMod.getAsString(ElementiCantiere.NOME_ELEMENTO_CANT)).append("\n");
-                            }
-                            Utility.mostraConfermaDialog(getString(R.string.attenzione), messaggio.toString(), getActivity(), "Ok",
-                                    getString(R.string.annulla), (dialogInterface, i) -> {
-                                        if (i == DialogInterface.BUTTON_POSITIVE) {
-                                            _eseguiTrasformazione(val);
-                                        }
-                                    });
-                        } else {
-                            _eseguiTrasformazione(val);
-                        }
-                    }
-                });
-    }
-
-    private void _eseguiTrasformazione(ContentValues val) {
-        // l'ordine nasce dal preventivo: serve ORDINI.CREA del pacchetto (il server lo rifiuterebbe)
-        if (!com.ncfsistemi.econ.utils.FunzionalitaApp.ha(getActivity(), com.ncfsistemi.econ.utils.FunzionalitaApp.codice(
-                com.ncfsistemi.econ.utils.FunzionalitaApp.ORDINI, com.ncfsistemi.econ.utils.FunzionalitaApp.CREA))) {
-            com.ncfsistemi.econ.utils.Utility.mostraDialog("Non consentito",
-                    "La tua licenza non consente questo inserimento per il tuo ruolo. Chiedi all'amministratore della ditta.",
-                    getActivity(), "OK");
-            return;
-        }
-        DbInterno db = new DbInterno(getActivity());
-        try {
-            db.getReadableDatabase().beginTransaction();
-            new Preventivi().trasformaPreventivoInOrdine(db, val.getAsInteger(Preventivi.ID_PREVENTIVO));
-            db.getReadableDatabase().setTransactionSuccessful();
-        } catch (Exception e) {
-            Toast.makeText(getActivity(), Log.getStackTraceString(e), Toast.LENGTH_LONG).show();
-        } finally {
-            db.getReadableDatabase().endTransaction();
-            db.close();
-            ricaricaSeAttiva();
-        }
-    }
-
-    private ArrayList<Object> _getElementiModificatiCantiere(int idPreventivo) {
-        DbInterno db = new DbInterno(getActivity());
-        ArrayList<Object> modificati = db.eseguiSelect(
-                "Select * from elementi_cantiere where id_preventivo=" + idPreventivo
-                        + " and id_elemento_cant_origine is not null and id_elemento_cant_origine<>0 order by numero_identificativo", null);
-        db.close();
-        return modificati;
+        com.ncfsistemi.econ.utils.AzioniDocumento.trasformaInOrdine(getActivity(), val, this::ricaricaSeAttiva);
     }
 
     /** Query, adapter e azione di click riga specifiche del modulo Preventivi/Ordini. */
@@ -281,7 +227,12 @@ public class PreventiviListaFragment extends EconListaStandardFragment {
         // ambiguita' col resto della select se in futuro servisse ordinare per nome cantiere).
         private static final String SELECT = Preventivi.NOME_TABELLA + ".*, "
                 + Anagrafica.NOME_TABELLA + "." + Anagrafica.RAGIONE_SOCIALE + ", "
-                + Cantieri.NOME_TABELLA + "." + Cantieri.NOME;
+                + Cantieri.NOME_TABELLA + "." + Cantieri.NOME + ", "
+                // totale imponibile del documento (qta x prezzo netto, x operatori per la manodopera), come getImportoRiga()
+                + "(select round(coalesce(sum(d." + PreventiviDettaglio.QUANTITA + " * d." + PreventiviDettaglio.PREZZO
+                + " * (case when d." + PreventiviDettaglio.TIPO + "='" + PreventiviDettaglio.MANOPERA + "' and d." + PreventiviDettaglio.NUM_OPERATORI
+                + " > 0 then d." + PreventiviDettaglio.NUM_OPERATORI + " else 1 end)), 0), 2) from " + PreventiviDettaglio.NOME_TABELLA
+                + " d where d." + PreventiviDettaglio.ID_PREVENTIVO + "=" + Preventivi.NOME_TABELLA + "." + Preventivi.ID_PREVENTIVO + ") as totale_documento";
 
         @Override
         public QueryPagina costruisciQuery(String testoFiltroNonUsato, boolean ordinaPerRecenti) {
@@ -329,24 +280,50 @@ public class PreventiviListaFragment extends EconListaStandardFragment {
             return new QueryPagina(SELECT, fromJoin, where, args);
         }
 
+        /** Tabella come i rapportini (STUDIO_PREVENTIVI_ORDINI.md §6.5): stato a icona, numero, data, cliente, cantiere, titolo, totale. */
         @Override
-        public boolean isTabellare() {
-            return false;
+        public java.util.List<com.ncfsistemi.econ.lista.ColonnaLista> getColonne() {
+            String prev = Preventivi.NOME_TABELLA + ".";
+            return java.util.Arrays.asList(
+                    com.ncfsistemi.econ.lista.ColonnaLista.icona(Preventivi.STATO, "Stato", 7, com.ncfsistemi.econ.utils.FaIcone.STATO,
+                            riga -> coloreStato(riga.getAsString(Preventivi.STATO)), prev + Preventivi.STATO),
+                    new com.ncfsistemi.econ.lista.ColonnaLista(Preventivi.NUMERO, "N.", 10, false,
+                            riga -> riga.getAsString(Preventivi.NUMERO) + "/" + riga.getAsString(Preventivi.ANNO),
+                            "(" + prev + Preventivi.ANNO + "*1000000+" + prev + Preventivi.NUMERO + ")"),
+                    new com.ncfsistemi.econ.lista.ColonnaLista(Preventivi.DATA, "Data", 12, false,
+                            riga -> riga.getAsLong(Preventivi.DATA) != null ? Utility.numberToDataShort(riga.getAsLong(Preventivi.DATA)) : "", prev + Preventivi.DATA),
+                    new com.ncfsistemi.econ.lista.ColonnaLista(Anagrafica.RAGIONE_SOCIALE, "Cliente", 20, true, null,
+                            Anagrafica.NOME_TABELLA + "." + Anagrafica.RAGIONE_SOCIALE),
+                    new com.ncfsistemi.econ.lista.ColonnaLista(Cantieri.NOME, "Cantiere", 18, false, null, Cantieri.NOME_TABELLA + "." + Cantieri.NOME),
+                    new com.ncfsistemi.econ.lista.ColonnaLista(Preventivi.TITOLO, "Descrizione", 20, false, null, prev + Preventivi.TITOLO),
+                    com.ncfsistemi.econ.lista.ColonnaLista.importo("totale_documento", "Imponibile", 11, "totale_documento"));
         }
 
         @Override
-        public EconListViewAdapter creaAdapterPersonalizzato(android.content.Context context, ArrayList<Object> dati) {
-            PreventiviAdapter adapter = new PreventiviAdapter(context, dati, R.layout.list_item_preventivo);
-            adapter.setPreventiviFragment(PreventiviListaFragment.this);
-            return adapter;
+        public AzioneRiga getAzioneRiga(EconListaStandardController.Host host) {
+            return new AzioneRiga() {
+                @Override
+                public String glifo() {
+                    return com.ncfsistemi.econ.utils.FaIcone.AZIONI;
+                }
+
+                @Override
+                public String tooltip() {
+                    return getString(R.string.opzioni);
+                }
+
+                @Override
+                public void onClick(ContentValues riga) {
+                    com.ncfsistemi.econ.utils.AzioniDocumento.menu((EconActivity) getActivity(), riga, PreventiviListaFragment.this::ricerca);
+                }
+            };
         }
 
+        /** Scheda del documento (testata e righe con la grafica del rapportino). */
         @Override
         public void onRigaClick(EconListaStandardController.Host host, ContentValues riga) {
-            Intent intent = new Intent(host.getContext(), CantiereSplitActivity.class);
-            intent.putExtra(Cantieri.ID_CANTIERE, riga.getAsInteger(Preventivi.ID_CANTIERE));
+            Intent intent = new Intent(host.getContext(), com.ncfsistemi.econ.DocumentoActivity.class);
             intent.putExtra(Preventivi.ID_PREVENTIVO, riga.getAsInteger(Preventivi.ID_PREVENTIVO));
-            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             host.startActivity(intent);
         }
 
@@ -384,5 +361,13 @@ public class PreventiviListaFragment extends EconListaStandardFragment {
             intent.putExtra(Preventivi.TIPO, getTipo());
             ((EconActivity) host.getContext()).apriFinestraInserimento(intent, 1, new Preventivi());
         }
+    }
+
+    /** Colore dello stato del documento (come il badge della scheda). */
+    static int coloreStato(String stato) {
+        if (Preventivi.STATO_APERTO.equals(stato)) return 0xFF1565C0;
+        if (Preventivi.STATO_ACCETTATO.equals(stato)) return 0xFF2E7D32;
+        if (Preventivi.STATO_RIFIUTATO.equals(stato)) return 0xFFC62828;
+        return 0xFF607D8B;
     }
 }

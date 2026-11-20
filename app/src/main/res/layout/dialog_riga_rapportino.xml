@@ -448,6 +448,7 @@
                 android:background="#FFFFFF"
                 android:paddingStart="4dp"
                 android:paddingEnd="4dp"
+                android:id="@+id/etichetta_tipo"
                 android:text="@string/tipo"
                 android:textColor="@color/econ_testo_secondario"
                 android:textSize="12sp" />
@@ -714,6 +715,43 @@
                 android:textColor="@color/econ_testo"
                 android:textSize="16sp" />
         </FrameLayout>
+        <!-- solo nelle righe di preventivo/ordine (PopupRigaRapportino in modo documento): sconto dell'articolo, operatori del lavoro -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/label_sconto"
+            style="@style/Econ.Campo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="8dp"
+            android:hint="Sconto %"
+            android:visibility="gone">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_sconto"
+                style="@style/Econ.CampoTesto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" android:selectAllOnFocus="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/label_operatori"
+            style="@style/Econ.Campo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="8dp"
+            android:hint="@string/operatori"
+            android:visibility="gone">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_num_operatori"
+                style="@style/Econ.CampoTesto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" android:selectAllOnFocus="true" />
+        </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

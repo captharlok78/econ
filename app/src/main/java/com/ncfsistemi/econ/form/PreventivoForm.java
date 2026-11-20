@@ -57,6 +57,15 @@ public class PreventivoForm extends DefinizioneForm {
 		return titolo == null || titolo.isEmpty() ? "N. " + numero : "N. " + numero + " · " + titolo;
 	}
 
+	/** Id del documento appena creato (0 in modifica): la form, chiudendosi, apre la sua scheda per le righe. */
+	public long idCreato = 0;
+
+	@Override
+	public long inserisci(DbInterno db, AbstractTable tabella, ContentValues val) {
+		idCreato = tabella.inserisciRecord(db, val);
+		return idCreato;
+	}
+
 	@Override
 	public String moduloFunzionalita() {
 		return FunzionalitaApp.moduloPreventivo(tipo());
